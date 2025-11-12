@@ -62,9 +62,6 @@ STRIPE_WEBHOOK_SECRET="whsec_*************************"
 NEXT_PUBLIC_BASE_URL="http://localhost:3000"
 
 
-⚠️ Never commit this file to GitHub.
-It's already ignored in .gitignore.
-
 4️⃣ Run database migrations
 npx prisma migrate dev
 

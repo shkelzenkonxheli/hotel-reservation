@@ -19,7 +19,6 @@ This system allows customers to book rooms online securely and provides admins w
   - 🟩 `available`
   - 🟥 `booked`
   - 🟨 `needs_cleaning`
-  - 🟧 `booked_needs_cleaning` (new upcoming reservation but not yet cleaned)
 - Filter and search by room type, status, or date
 - Option to mark rooms as cleaned directly in the dashboard
 

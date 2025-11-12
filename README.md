@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🏨 Hotel Reservation System
 
-## Getting Started
+A full-stack hotel and apartment reservation platform built with **Next.js**, **PostgreSQL**, and **Stripe**.  
+This system allows customers to book rooms online securely and provides admins with a powerful dashboard to manage rooms, reservations, and cleaning status.
 
-First, run the development server:
+---
+
+## 🚀 Features
+
+### 💳 Booking & Payments
+
+- Secure online payments using **Stripe Checkout**
+- Real-time room availability check
+- Automatic reservation confirmation after payment
+
+### 🏠 Room Management
+
+- Dynamic room statuses:
+  - 🟩 `available`
+  - 🟥 `booked`
+  - 🟨 `needs_cleaning`
+  - 🟧 `booked_needs_cleaning` (new upcoming reservation but not yet cleaned)
+- Filter and search by room type, status, or date
+- Option to mark rooms as cleaned directly in the dashboard
+
+### 👤 User System
+
+- Authentication using cookies (via `/api/me`)
+- Each user can see their own reservations
+- Admin access for managing all rooms and reservations
+
+---
+
+## 🧩 Tech Stack
+
+| Layer                | Technology                                                     |
+| -------------------- | -------------------------------------------------------------- |
+| **Frontend**         | Next.js 14 (App Router), React, Material UI (MUI), TailwindCSS |
+| **Backend**          | Next.js API Routes                                             |
+| **Database**         | PostgreSQL with Prisma ORM                                     |
+| **Payments**         | Stripe                                                         |
+| **State Management** | React Context API                                              |
+
+---
+
+## ⚙️ Installation & Setup
+
+### 1️⃣ Clone the repository
 
 ```bash
+git clone https://github.com/shkelzenkonxheli/hotel-reservation.git
+cd hotel-reservation
+2️⃣ Install dependencies
+npm install
+
+3️⃣ Setup environment variables
+
+Create a .env file in the project root:
+
+DATABASE_URL="postgresql://user:password@localhost:5432/hotel"
+STRIPE_SECRET_KEY="sk_test_*************************"
+STRIPE_WEBHOOK_SECRET="whsec_*************************"
+NEXT_PUBLIC_BASE_URL="http://localhost:3000"
+
+
+⚠️ Never commit this file to GitHub.
+It's already ignored in .gitignore.
+
+4️⃣ Run database migrations
+npx prisma migrate dev
+
+5️⃣ Start the development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+6️⃣ Listen to Stripe webhooks (optional, for local testing)
+stripe listen --forward-to localhost:3000/api/stripe-webhook
+
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

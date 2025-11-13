@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useSession, signIn } from "next-auth/react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Box,
@@ -11,39 +12,36 @@ import {
   TextField,
   Typography,
   Alert,
+  Divider,
 } from "@mui/material";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { data: session } = useSession();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e) => {
+  useEffect(() => {
+    if (session) router.replace("/");
+  }, [session, router]);
+
+  const handleLoginCredentials = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
 
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+    const res = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
 
-      if (res.ok) {
-        window.dispatchEvent(new Event("userChanged"));
-        router.push("/");
-      } else {
-        const data = await res.json();
-        setError(data.message || "Invalid email or password");
-      }
-    } catch (err) {
-      setError("Something went wrong. Try again later.");
-    } finally {
-      setLoading(false);
-    }
+    if (res.error) setError("Invalid email or password");
+    else router.push("/");
+
+    setLoading(false);
   };
 
   return (
@@ -54,22 +52,23 @@ export default function LoginPage() {
       minHeight="100vh"
       sx={{
         background:
-          "linear-gradient(135deg, #dbeafe 0%, #eff6ff 50%, #ffffff 100%)",
+          "linear-gradient(135deg, #e0e7ff 0%, #f8fafc 50%, #ffffff 100%)",
+        padding: 2,
       }}
     >
       <Card
         sx={{
           width: "100%",
-          maxWidth: 400,
+          maxWidth: 420,
           borderRadius: 3,
-          boxShadow: 4,
+          boxShadow: 6,
         }}
       >
-        <CardContent sx={{ p: 5 }}>
+        <CardContent sx={{ p: 4 }}>
           <Typography
             variant="h5"
-            fontWeight="bold"
             align="center"
+            fontWeight="bold"
             color="primary"
             gutterBottom
           >
@@ -77,28 +76,27 @@ export default function LoginPage() {
           </Typography>
           <Typography
             variant="body2"
-            align="center"
             color="text.secondary"
+            align="center"
             mb={3}
           >
-            Please sign in to continue
+            Sign in to access your account
           </Typography>
 
-          <Box component="form" onSubmit={handleSubmit}>
+          {/* Form - Credentials Login */}
+          <form onSubmit={handleLoginCredentials}>
             <TextField
               label="Email"
-              type="email"
-              variant="outlined"
               fullWidth
               required
               margin="normal"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
+
             <TextField
               label="Password"
               type="password"
-              variant="outlined"
               fullWidth
               required
               margin="normal"
@@ -107,24 +105,23 @@ export default function LoginPage() {
             />
 
             {error && (
-              <Alert severity="error" sx={{ mt: 2 }}>
+              <Alert severity="error" sx={{ mt: 1 }}>
                 {error}
               </Alert>
             )}
 
             <Button
-              type="submit"
-              variant="contained"
-              color="primary"
               fullWidth
-              disabled={loading}
+              variant="contained"
               sx={{
                 mt: 3,
                 py: 1.3,
-                borderRadius: 2,
-                fontWeight: "bold",
+                fontSize: "1rem",
                 textTransform: "none",
+                borderRadius: 2,
               }}
+              type="submit"
+              disabled={loading}
             >
               {loading ? (
                 <CircularProgress size={26} color="inherit" />
@@ -132,7 +129,25 @@ export default function LoginPage() {
                 "Login"
               )}
             </Button>
-          </Box>
+          </form>
+
+          {/* Divider */}
+          <Divider sx={{ my: 3 }}>OR</Divider>
+
+          {/* Google Login */}
+          <Button
+            fullWidth
+            variant="outlined"
+            sx={{
+              py: 1.2,
+              textTransform: "none",
+              fontWeight: "bold",
+              borderRadius: 2,
+            }}
+            onClick={() => signIn("google")}
+          >
+            Continue with Google
+          </Button>
 
           <Typography
             variant="body2"
@@ -144,7 +159,7 @@ export default function LoginPage() {
             <Typography
               component="span"
               color="primary"
-              sx={{ cursor: "pointer" }}
+              sx={{ cursor: "pointer", fontWeight: "bold" }}
               onClick={() => router.push("/register")}
             >
               Register

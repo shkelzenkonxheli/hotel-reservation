@@ -4,7 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "./components/Header";
 import { BookingProvider } from "@/context/BookingContext";
-
+import { SessionProvider } from "next-auth/react";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 
 const geistSans = Geist({
@@ -39,9 +39,11 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 text-gray-900`}
       >
         <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <Header />
-          <BookingProvider>{children}</BookingProvider>
+          <SessionProvider>
+            <CssBaseline />
+            <Header />
+            <BookingProvider>{children}</BookingProvider>
+          </SessionProvider>
         </ThemeProvider>
       </body>
     </html>

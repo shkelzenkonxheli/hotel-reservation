@@ -1,7 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+
+import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
+import { useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -21,59 +22,17 @@ import LoginIcon from "@mui/icons-material/Login";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 
 export default function Header() {
-  const [user, setUser] = useState(null);
+  const { data: session } = useSession();
+  const user = session?.user;
   const [anchorEl, setAnchorEl] = useState(null);
-  const router = useRouter();
 
-  useEffect(() => {
-    fetchUser();
-  }, []);
-
-  async function fetchUser() {
-    try {
-      const res = await fetch("/api/me", {
-        method: "GET",
-        credentials: "include",
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setUser(data.user);
-      } else {
-        setUser(null);
-      }
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      setUser(null);
-    }
-  }
-  useEffect(() => {
-    const handleUserChange = async () => {
-      await fetchUser();
-    };
-
-    window.addEventListener("userChanged", handleUserChange);
-
-    return () => window.removeEventListener("userChanged", handleUserChange);
-  }, []);
-
-  const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    await fetchUser();
-    router.push("/");
-  };
-
-  // Për mobile menu
   const handleMenuOpen = (e) => setAnchorEl(e.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
 
   return (
-    <AppBar
-      position="sticky"
-      color="primary"
-      sx={{ backgroundColor: "#1f2937" }}
-    >
+    <AppBar position="sticky" sx={{ backgroundColor: "#1f2937" }}>
       <Toolbar className="flex justify-between">
-        {/* Logo / Title */}
+        {/* Logo */}
         <Typography
           variant="h6"
           component={Link}
@@ -82,7 +41,6 @@ export default function Header() {
             textDecoration: "none",
             color: "white",
             fontWeight: "bold",
-            "&:hover": { color: "#93c5fd" },
           }}
         >
           🏨 Hotel Management
@@ -94,16 +52,12 @@ export default function Header() {
             component={Link}
             href="/"
             startIcon={<HomeIcon />}
-            sx={{ color: "white", "&:hover": { color: "#93c5fd" } }}
+            sx={{ color: "white" }}
           >
             Home
           </Button>
 
-          <Button
-            component={Link}
-            href="/contact"
-            sx={{ color: "white", "&:hover": { color: "#93c5fd" } }}
-          >
+          <Button component={Link} href="/contact" sx={{ color: "white" }}>
             Contact
           </Button>
 
@@ -113,7 +67,7 @@ export default function Header() {
                 component={Link}
                 href="/login"
                 startIcon={<LoginIcon />}
-                sx={{ color: "white", "&:hover": { color: "#93c5fd" } }}
+                sx={{ color: "white" }}
               >
                 Login
               </Button>
@@ -121,7 +75,7 @@ export default function Header() {
                 component={Link}
                 href="/register"
                 startIcon={<PersonAddIcon />}
-                sx={{ color: "white", "&:hover": { color: "#93c5fd" } }}
+                sx={{ color: "white" }}
               >
                 Register
               </Button>
@@ -135,7 +89,7 @@ export default function Header() {
                   component={Link}
                   href="/dashboard"
                   startIcon={<DashboardIcon />}
-                  sx={{ color: "white", "&:hover": { color: "#93c5fd" } }}
+                  sx={{ color: "white" }}
                 >
                   Dashboard
                 </Button>
@@ -146,19 +100,16 @@ export default function Header() {
                   component={Link}
                   href="/reservations"
                   startIcon={<BookOnlineIcon />}
-                  sx={{ color: "white", "&:hover": { color: "#93c5fd" } }}
+                  sx={{ color: "white" }}
                 >
                   Reservations
                 </Button>
               )}
 
               <Button
-                onClick={handleLogout}
+                onClick={() => signOut({ callbackUrl: "/" })}
                 startIcon={<LogoutIcon />}
-                sx={{
-                  color: "white",
-                  "&:hover": { color: "#f87171" },
-                }}
+                sx={{ color: "white" }}
               >
                 Logout
               </Button>
@@ -181,17 +132,11 @@ export default function Header() {
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
-          PaperProps={{
-            sx: {
-              backgroundColor: "#1f2937",
-              color: "white",
-              minWidth: "180px",
-            },
-          }}
         >
           <MenuItem component={Link} href="/" onClick={handleMenuClose}>
             Home
           </MenuItem>
+
           <MenuItem component={Link} href="/contact" onClick={handleMenuClose}>
             Contact
           </MenuItem>

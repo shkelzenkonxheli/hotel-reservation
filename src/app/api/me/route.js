@@ -1,14 +1,17 @@
-import { NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/route";
+import prisma from "@/lib/prisma";
 
-export async function GET(req) {
-  const token = req.cookies.get("token")?.value;
-  if (!token) return NextResponse.json({ user: null }, { status: 401 });
+export async function GET() {
+  const session = await getServerSession(authOptions);
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    return NextResponse.json({ user: decoded });
-  } catch {
-    return NextResponse.json({ user: null }, { status: 401 });
+  if (!session) {
+    return Response.json({ user: null }, { status: 401 });
   }
+
+  const user = await prisma.users.findUnique({
+    where: { email: session.user.email },
+  });
+
+  return Response.json({ user });
 }

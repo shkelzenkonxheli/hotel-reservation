@@ -17,16 +17,34 @@ import {
 
 export default function LoginPage() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
   useEffect(() => {
-    if (session) router.replace("/");
-  }, [session, router]);
+    if (status === "authenticated") {
+      router.replace("/");
+    }
+  }, [status, router]);
+
+  if (status === "loading") {
+    return (
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        minHeight="100vh"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (status === "authenticated") {
+    return null; // ose loading spinner
+  }
 
   const handleLoginCredentials = async (e) => {
     e.preventDefault();
@@ -144,7 +162,11 @@ export default function LoginPage() {
               fontWeight: "bold",
               borderRadius: 2,
             }}
-            onClick={() => signIn("google")}
+            onClick={() =>
+              signIn("google", {
+                callbackUrl: "/",
+              })
+            }
           >
             Continue with Google
           </Button>

@@ -5,7 +5,6 @@ let prisma;
 if (process.env.NODE_ENV === "production") {
   prisma = new PrismaClient();
 } else {
-  // në development, përdor global për hot reload
   if (!global.prisma) {
     global.prisma = new PrismaClient();
   }

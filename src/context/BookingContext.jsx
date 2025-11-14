@@ -6,7 +6,6 @@ const BookingContext = createContext();
 export function BookingProvider({ children }) {
   const [booking, setBookingState] = useState(null);
 
-  // Ngarko nga localStorage kur hapet faqja
   useEffect(() => {
     const saved = localStorage.getItem("booking");
     if (saved) setBookingState(JSON.parse(saved));

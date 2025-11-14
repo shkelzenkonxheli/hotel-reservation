@@ -14,12 +14,14 @@ export async function POST(req) {
       phone,
       address,
       guests,
+      roomId,
     } = await req.json();
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       customer_email: userEmail,
       metadata: {
+        roomId: roomId.toString(),
         roomName,
         totalPrice,
         type,
@@ -28,7 +30,7 @@ export async function POST(req) {
         fullname,
         phone,
         address,
-        guests,
+        guests: guests.toString(),
       },
       line_items: [
         {

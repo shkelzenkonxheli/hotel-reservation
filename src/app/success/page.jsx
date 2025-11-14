@@ -27,7 +27,6 @@ export default function SuccessPage() {
 
         const userData = await res.json();
 
-        // Merr rezervimin më të fundit të përdoruesit
         const resv = await fetch(
           `/api/reservation?latest=true&userId=${userData.user.id}`
         );

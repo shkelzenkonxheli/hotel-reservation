@@ -11,18 +11,16 @@ export default function ReservationsPage() {
   useEffect(() => {
     async function fetchUserAndReservations() {
       try {
-        // 1️⃣ merr user-in nga cookie përmes /api/me
         const resUser = await fetch("/api/me", { credentials: "include" });
 
         if (!resUser.ok) {
-          router.push("/login"); // nëse nuk është loguar
+          router.push("/login");
           return;
         }
 
         const userData = await resUser.json();
         setUser(userData.user);
 
-        // 2️⃣ thirr API për rezervimet e atij user-i
         const response = await fetch(
           `/api/reservation?user_id=${userData.user.id}`,
           {

@@ -13,7 +13,18 @@ import {
   Typography,
   Alert,
   Divider,
+  IconButton,
 } from "@mui/material";
+import { InputAdornment } from "@mui/material";
+import {
+  Email,
+  EmailOutlined,
+  Google,
+  PasswordOutlined,
+} from "@mui/icons-material";
+import { VisibilityOff } from "@mui/icons-material";
+import { Visibility } from "@mui/icons-material";
+import { LockOutlined } from "@mui/icons-material";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -23,6 +34,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   useEffect(() => {
     if (status === "authenticated") {
       router.replace("/");
@@ -110,16 +122,37 @@ export default function LoginPage() {
               margin="normal"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <EmailOutlined />
+                  </InputAdornment>
+                ),
+              }}
             />
 
             <TextField
               label="Password"
-              type="password"
               fullWidth
               required
               margin="normal"
+              type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockOutlined />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowPassword(!showPassword)}>
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
 
             {error && (
@@ -153,9 +186,11 @@ export default function LoginPage() {
           <Divider sx={{ my: 3 }}>OR</Divider>
 
           {/* Google Login */}
+
           <Button
             fullWidth
             variant="outlined"
+            startIcon={<Google />}
             sx={{
               py: 1.2,
               textTransform: "none",

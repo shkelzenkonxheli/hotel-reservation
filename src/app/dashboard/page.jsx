@@ -43,6 +43,9 @@ export default function Dashboard() {
 
     if (!session?.user) {
       router.push("/login");
+    } else if (session?.user?.role === "client") {
+      alert("You dont have premission to access dashboard");
+      router.push("/");
     }
   }, [status, session, router]);
 

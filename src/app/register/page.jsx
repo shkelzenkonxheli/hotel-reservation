@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useSession, signIn } from "next-auth/react";
 import {
   Box,
   Card,
@@ -11,7 +12,18 @@ import {
   Typography,
   Alert,
   CircularProgress,
+  Divider,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
+import {
+  AccountCircle,
+  EmailOutlined,
+  Google,
+  LockOutlined,
+  Visibility,
+  VisibilityOff,
+} from "@mui/icons-material";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -21,12 +33,38 @@ export default function RegisterPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { data: status } = useSession();
+  const [showPassword, setShowPassword] = useState(false);
+
+  const validateForm = () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address.");
+      return false;
+    }
+
+    const strongPassword = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+    if (!strongPassword.test(password)) {
+      setError(
+        "Password must be at least 8 characters long, include one uppercase letter and one number."
+      );
+      return false;
+    }
+
+    return true; // ➜ Shumë e rëndësishme
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     setMessage("");
+    if (!validateForm()) {
+      setLoading(false);
+      return;
+    }
 
     try {
       const res = await fetch("/api/auth/register", {
@@ -77,7 +115,7 @@ export default function RegisterPage() {
             color="primary"
             gutterBottom
           >
-            Create an Account ✨
+            Create an Account
           </Typography>
           <Typography
             variant="body2"
@@ -97,6 +135,13 @@ export default function RegisterPage() {
               margin="normal"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <AccountCircle />
+                  </InputAdornment>
+                ),
+              }}
             />
             <TextField
               label="Email"
@@ -107,16 +152,37 @@ export default function RegisterPage() {
               margin="normal"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <EmailOutlined />
+                  </InputAdornment>
+                ),
+              }}
             />
             <TextField
               label="Password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               fullWidth
               required
               variant="outlined"
               margin="normal"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockOutlined />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowPassword(!showPassword)}>
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
 
             {error && (
@@ -168,6 +234,25 @@ export default function RegisterPage() {
               Login
             </Typography>
           </Typography>
+          <Divider sx={{ my: 2 }}>Or</Divider>
+          <Button
+            fullWidth
+            variant="outlined"
+            startIcon={<Google />}
+            sx={{
+              py: 1.2,
+              textTransform: "none",
+              borderRadius: 2,
+              fontWeight: "bold",
+            }}
+            onClick={() =>
+              signIn("google", {
+                callbackUrl: "/",
+              })
+            }
+          >
+            Login with Google
+          </Button>
         </CardContent>
       </Card>
     </Box>

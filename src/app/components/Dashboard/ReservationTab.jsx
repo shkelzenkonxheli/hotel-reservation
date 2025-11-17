@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   CircularProgress,
   Chip,
@@ -28,6 +29,7 @@ import {
   Delete,
   BookOnline,
 } from "@mui/icons-material";
+import ReservationForm from "./ReservationForm";
 
 export default function ReservationsTab() {
   const [reservations, setReservations] = useState([]);
@@ -39,6 +41,8 @@ export default function ReservationsTab() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const router = useRouter();
+  const [openModal, setOpenModal] = useState(false);
 
   useEffect(() => {
     fetchReservations();
@@ -233,6 +237,19 @@ export default function ReservationsTab() {
             <MenuItem value="apartment">Apartment</MenuItem>
           </Select>
         </FormControl>
+        <Button
+          variant="contained"
+          color="primary"
+          sx={{ borderRadius: 2, fontWeight: "bold" }}
+          onClick={() => setOpenModal(true)}
+        >
+          + Add New
+        </Button>
+        <ReservationForm
+          open={openModal}
+          onClose={() => setOpenModal(false)}
+          onSuccess={fetchReservations}
+        />
       </Box>
       {filtered.length === 0 ? (
         <p className="text-center text-gray-500">No reservations found.</p>

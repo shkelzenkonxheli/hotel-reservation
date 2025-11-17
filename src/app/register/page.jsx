@@ -53,7 +53,7 @@ export default function RegisterPage() {
       return false;
     }
 
-    return true; // ➜ Shumë e rëndësishme
+    return true;
   };
 
   const handleSubmit = async (e) => {

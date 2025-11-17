@@ -21,7 +21,7 @@ export async function POST(req) {
       payment_method_types: ["card"],
       customer_email: userEmail,
       metadata: {
-        roomId: roomId.toString(),
+        roomId: roomId,
         roomName,
         totalPrice,
         type,
@@ -30,7 +30,7 @@ export async function POST(req) {
         fullname,
         phone,
         address,
-        guests: guests.toString(),
+        guests: guests,
       },
       line_items: [
         {

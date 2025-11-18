@@ -13,10 +13,17 @@ import {
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 
-export default function ReservationForm({ open, onClose, onSuccess }) {
+export default function ReservationForm({
+  open,
+  onClose,
+  onSuccess,
+  mode = "create",
+  reservation = null,
+}) {
   const { data: session } = useSession();
 
   const [roomTypes, setRoomTypes] = useState([]);
+
   const [fullname, setFullname] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
@@ -38,6 +45,19 @@ export default function ReservationForm({ open, onClose, onSuccess }) {
   }, []);
 
   useEffect(() => {
+    if (mode === "edit" && reservation) {
+      setFullname(reservation.full_name || "");
+      setPhone(reservation.phone || "");
+      setAddress(reservation.address || "");
+      setType(reservation.rooms?.type || "");
+      setGuests(reservation.guests || "");
+      setStartDate(reservation.start_date?.split("T")[0] || "");
+      setEndDate(reservation.end_date?.split("T")[0] || "");
+      setTotalPrice(reservation.total_price || "");
+    }
+  }, [reservation, mode]);
+
+  useEffect(() => {
     if (!type || !startDate || !endDate) return;
 
     const selected = roomTypes.find((r) => r.type === type);
@@ -51,10 +71,11 @@ export default function ReservationForm({ open, onClose, onSuccess }) {
       setTotalPrice((nights * selected.price).toFixed(2));
     }
 
-    // CHECK AVAILABILITY
     async function checkAvailability() {
       const res = await fetch(
-        `/api/reservation?room_type=${type}&start_date=${startDate}&end_date=${endDate}`
+        `/api/reservation?room_type=${type}&start_date=${startDate}&end_date=${endDate}&reservation_id=${
+          reservation?.id || ""
+        }`
       );
       const data = await res.json();
       setIsAvailable(data.available);
@@ -63,40 +84,51 @@ export default function ReservationForm({ open, onClose, onSuccess }) {
     checkAvailability();
   }, [type, startDate, endDate, roomTypes]);
 
-  const handleCreate = async () => {
+  const handleSubmit = async () => {
     if (!fullname || !phone || !type || !startDate || !endDate) {
       alert("Please fill all required fields.");
       return;
     }
 
     if (isAvailable === false) {
-      alert("No rooms available for these dates!");
+      alert("No rooms available for these dates.");
       return;
     }
 
-    const res = await fetch("/api/reservation", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId: session?.user?.id,
-        fullname,
-        phone,
-        address,
-        type,
-        guests,
-        startDate,
-        endDate,
-        total_price: totalPrice,
-      }),
-    });
+    const payload = {
+      fullname,
+      phone,
+      address,
+      type,
+      guests,
+      startDate,
+      endDate,
+      total_price: totalPrice,
+    };
+
+    let res;
+
+    if (mode === "create") {
+      payload.userId = session.user.id;
+      res = await fetch("/api/reservation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } else {
+      res = await fetch(`/api/reservation/${reservation.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    }
 
     if (res.ok) {
-      alert("Reservation created successfully!");
       onClose();
       if (onSuccess) onSuccess();
     } else {
       const data = await res.json();
-      alert(data.error || "Failed to create reservation.");
+      alert(data.error || "Failed to save reservation.");
     }
   };
 
@@ -124,7 +156,7 @@ export default function ReservationForm({ open, onClose, onSuccess }) {
         }}
       >
         <Typography variant="h5" mb={2} fontWeight="bold">
-          Create Reservation
+          {mode === "create" ? "Create Reservation" : "Edit Reservation"}
         </Typography>
 
         <Stack spacing={2}>
@@ -189,16 +221,13 @@ export default function ReservationForm({ open, onClose, onSuccess }) {
             onChange={(e) => setEndDate(e.target.value)}
           />
 
-          {/* AVAILABILITY STATUS */}
           {isAvailable === true && (
             <Alert severity="success">Room AVAILABLE ✔</Alert>
           )}
-
           {isAvailable === false && (
             <Alert severity="error">No Rooms Available ❌</Alert>
           )}
 
-          {/* Total Price */}
           <TextField
             label="Total price (€)"
             type="number"
@@ -207,8 +236,19 @@ export default function ReservationForm({ open, onClose, onSuccess }) {
             onChange={(e) => setTotalPrice(e.target.value)}
           />
 
-          <Button variant="contained" onClick={handleCreate}>
-            Create Reservation
+          <Button
+            variant="contained"
+            onClick={handleSubmit}
+            disabled={
+              isAvailable === false ||
+              !fullname ||
+              !phone ||
+              !type ||
+              !startDate ||
+              !endDate
+            }
+          >
+            {mode === "create" ? "Create Reservation" : "Save Changes"}
           </Button>
         </Stack>
       </Box>

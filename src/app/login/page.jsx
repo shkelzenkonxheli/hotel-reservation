@@ -55,7 +55,7 @@ export default function LoginPage() {
   }
 
   if (status === "authenticated") {
-    return null; // ose loading spinner
+    return null;
   }
 
   const handleLoginCredentials = async (e) => {

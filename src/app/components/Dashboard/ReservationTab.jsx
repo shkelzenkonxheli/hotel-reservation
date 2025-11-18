@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, act } from "react";
 import { useRouter } from "next/navigation";
 import {
   CircularProgress,
@@ -43,6 +43,9 @@ export default function ReservationsTab() {
   const [search, setSearch] = useState("");
   const router = useRouter();
   const [openModal, setOpenModal] = useState(false);
+  const [activeTab, setActiveTab] = useState("all");
+  const [editOpen, setEditOpen] = useState(false);
+  const [editData, setEditData] = useState("null");
 
   useEffect(() => {
     fetchReservations();
@@ -65,7 +68,6 @@ export default function ReservationsTab() {
     }
   }
 
-  // 🔁 Funksioni për ndryshimin e statusit
   async function handleStatusChange(id, newStatus) {
     try {
       const res = await fetch(`/api/reservation/${id}`, {
@@ -110,7 +112,6 @@ export default function ReservationsTab() {
     setFiltered(filteredList);
   }, [search, statusFilter, typeFilter, reservations]);
 
-  // 🗑️ Funksioni për fshirje
   async function handleDeleteReservation() {
     try {
       const res = await fetch(`/api/reservation/${deleteDialog.id}`, {
@@ -126,6 +127,32 @@ export default function ReservationsTab() {
     } finally {
       setDeleteDialog({ open: false, id: null });
     }
+  }
+  function getUpcomingReservations(reservations) {
+    const today = new Date().setHours(0, 0, 0, 0);
+
+    return reservations.filter((r) => {
+      const start = new Date(r.start_date).setHours(0, 0, 0, 0);
+      return start >= today;
+    });
+  }
+  let displayList = filtered;
+  if (activeTab === "upcoming") {
+    displayList = getUpcomingReservations(filtered);
+  }
+  if (activeTab === "today") {
+    const today = new Date().setHours(0, 0, 0, 0);
+    displayList = filtered.filter((r) => {
+      const start = new Date(r.start_date).setHours(0, 0, 0, 0);
+      return start === today;
+    });
+  }
+  if (activeTab === "past") {
+    const today = new Date().setHours(0, 0, 0, 0);
+    displayList = filtered.filter((r) => {
+      const end = new Date(r.end_date).setHours(0, 0, 0, 0);
+      return end < today;
+    });
   }
 
   const getStatusChip = (status = "pending") => {
@@ -200,43 +227,62 @@ export default function ReservationsTab() {
         Reservations Overview
       </Typography>
 
-      {/* 🔍 Filters */}
-      <Box className="flex flex-wrap gap-4 mb-6 mt-4">
-        <TextField
-          label="Search (Name or Email)"
-          variant="outlined"
-          size="small"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+      {/* FILTER BAR */}
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 2,
+          alignItems: "center",
+          justifyContent: "space-between",
+          mb: 3,
+          p: 2,
+          backgroundColor: "white",
+          borderRadius: 2,
+          boxShadow: 1,
+        }}
+      >
+        {/* LEFT SIDE FILTERS */}
+        <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+          <TextField
+            label="Search (Name or Email)"
+            variant="outlined"
+            size="small"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            sx={{ minWidth: 220 }}
+          />
 
-        <FormControl size="small" className="w-40">
-          <InputLabel>Status</InputLabel>
-          <Select
-            value={statusFilter}
-            label="Status"
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <MenuItem value="all">All</MenuItem>
-            <MenuItem value="pending">Pending</MenuItem>
-            <MenuItem value="confirmed">Confirmed</MenuItem>
-            <MenuItem value="completed">Completed</MenuItem>
-            <MenuItem value="cancelled">Cancelled</MenuItem>
-          </Select>
-        </FormControl>
+          <FormControl size="small" sx={{ minWidth: 140 }}>
+            <InputLabel>Status</InputLabel>
+            <Select
+              value={statusFilter}
+              label="Status"
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <MenuItem value="all">All</MenuItem>
+              <MenuItem value="pending">Pending</MenuItem>
+              <MenuItem value="confirmed">Confirmed</MenuItem>
+              <MenuItem value="completed">Completed</MenuItem>
+              <MenuItem value="cancelled">Cancelled</MenuItem>
+            </Select>
+          </FormControl>
 
-        <FormControl size="small" className="w-40">
-          <InputLabel>Type</InputLabel>
-          <Select
-            value={typeFilter}
-            label="Type"
-            onChange={(e) => setTypeFilter(e.target.value)}
-          >
-            <MenuItem value="all">All</MenuItem>
-            <MenuItem value="hotel">Hotel</MenuItem>
-            <MenuItem value="apartment">Apartment</MenuItem>
-          </Select>
-        </FormControl>
+          <FormControl size="small" sx={{ minWidth: 140 }}>
+            <InputLabel>Type</InputLabel>
+            <Select
+              value={typeFilter}
+              label="Type"
+              onChange={(e) => setTypeFilter(e.target.value)}
+            >
+              <MenuItem value="all">All</MenuItem>
+              <MenuItem value="hotel">Hotel</MenuItem>
+              <MenuItem value="apartment">Apartment</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+
+        {/* ADD BUTTON */}
         <Button
           variant="contained"
           color="primary"
@@ -245,13 +291,65 @@ export default function ReservationsTab() {
         >
           + Add New
         </Button>
-        <ReservationForm
-          open={openModal}
-          onClose={() => setOpenModal(false)}
-          onSuccess={fetchReservations}
-        />
       </Box>
-      {filtered.length === 0 ? (
+
+      {/* RESERVATION FORM MODAL */}
+      <ReservationForm
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        onSuccess={fetchReservations}
+        mode="create"
+      />
+      <ReservationForm
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        onSuccess={fetchReservations}
+        mode="edit"
+        reservation={editData}
+      />
+
+      {/* TABS */}
+      <Box
+        sx={{
+          display: "flex",
+          gap: 1.5,
+          mb: 3,
+          p: 1,
+          backgroundColor: "white",
+          borderRadius: 2,
+          boxShadow: 1,
+        }}
+      >
+        <Button
+          variant={activeTab === "all" ? "contained" : "outlined"}
+          onClick={() => setActiveTab("all")}
+        >
+          All
+        </Button>
+
+        <Button
+          variant={activeTab === "upcoming" ? "contained" : "outlined"}
+          onClick={() => setActiveTab("upcoming")}
+        >
+          Upcoming
+        </Button>
+
+        <Button
+          variant={activeTab === "today" ? "contained" : "outlined"}
+          onClick={() => setActiveTab("today")}
+        >
+          Today
+        </Button>
+
+        <Button
+          variant={activeTab === "past" ? "contained" : "outlined"}
+          onClick={() => setActiveTab("past")}
+        >
+          Past
+        </Button>
+      </Box>
+
+      {displayList.length === 0 ? (
         <p className="text-center text-gray-500">No reservations found.</p>
       ) : (
         <div className="overflow-x-auto bg-white rounded-xl shadow-md border border-gray-100 mt-4">
@@ -272,7 +370,7 @@ export default function ReservationsTab() {
             </thead>
 
             <tbody className="divide-y divide-gray-100">
-              {filtered.map((r) => (
+              {displayList.map((r) => (
                 <tr
                   key={r.id}
                   className="hover:bg-blue-50 transition duration-150"
@@ -335,12 +433,28 @@ export default function ReservationsTab() {
         open={Boolean(anchorEl)}
         onClose={() => setAnchorEl(null)}
       >
+        {/* ➕ Edit Option */}
+        <MenuItem
+          onClick={() => {
+            setEditData(selectedReservation);
+            setEditOpen(true);
+            setAnchorEl(null);
+          }}
+        >
+          Edit Reservation
+        </MenuItem>
+
+        {/* Separator (opsional) */}
+        <MenuItem divider />
+
+        {/* Status options */}
         {["Pending", "Confirmed", "Completed", "Cancelled"].map((status) => (
           <MenuItem
             key={status}
-            onClick={() =>
-              handleStatusChange(selectedReservation.id, status.toLowerCase())
-            }
+            onClick={() => {
+              handleStatusChange(selectedReservation.id, status.toLowerCase());
+              setAnchorEl(null);
+            }}
           >
             Set as {status}
           </MenuItem>

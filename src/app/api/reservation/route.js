@@ -63,6 +63,7 @@ export async function POST(request) {
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
+    const reservationId = Number(searchParams.get("reservation_id"));
     const listAll = searchParams.get("list");
     const userId = searchParams.get("user_id");
     const userRole = searchParams.get("role")?.toLowerCase();
@@ -79,11 +80,9 @@ export async function GET(request) {
       return NextResponse.json(latest);
     }
 
-    // ✅ 1️⃣ Nëse kërkohet lista e rezervimeve (për dashboard ose për user)
     if (listAll === "true" || (userId && userRole)) {
       let where = {};
 
-      // nëse është klient → filtro sipas user_id
       if (userRole === "client") {
         where.user_id = Number(userId);
       }
@@ -104,7 +103,6 @@ export async function GET(request) {
       return NextResponse.json(payload);
     }
 
-    // ✅ 2️⃣ Nëse kërkohet kontrollim disponueshmërie
     if (roomType && startDate && endDate) {
       const rooms = await prisma.rooms.findMany({
         where: { type: roomType },
@@ -113,6 +111,7 @@ export async function GET(request) {
 
       const availableRoom = rooms.find((room) => {
         const conflict = room.reservations.some((res) => {
+          if (reservationId && res.id === reservationId) return false;
           return (
             new Date(startDate) < new Date(res.end_date) &&
             new Date(endDate) > new Date(res.start_date)
@@ -124,7 +123,6 @@ export async function GET(request) {
       return NextResponse.json({ available: !!availableRoom });
     }
 
-    // nëse s’përputhet asnjë rast, kthe bosh
     return NextResponse.json([]);
   } catch (error) {
     console.error("❌ GET error:", error);

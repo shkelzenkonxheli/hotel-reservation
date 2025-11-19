@@ -1,153 +1,181 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+
+import {
+  Container,
+  Typography,
+  CircularProgress,
+  Paper,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  Chip,
+  Box,
+} from "@mui/material";
 
 export default function ReservationsPage() {
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null);
   const router = useRouter();
+  const { data: session, status } = useSession();
 
   useEffect(() => {
-    async function fetchUserAndReservations() {
+    if (status === "loading") return;
+
+    if (!session?.user) {
+      router.push("/login");
+    }
+  }, [status, session, router]);
+  useEffect(() => {
+    if (!session?.user) return;
+    async function fetchReservations() {
       try {
-        const resUser = await fetch("/api/me", { credentials: "include" });
-
-        if (!resUser.ok) {
-          router.push("/login");
-          return;
-        }
-
-        const userData = await resUser.json();
-        setUser(userData.user);
+        const userId = session.user.id;
 
         const response = await fetch(
-          `/api/reservation?user_id=${userData.user.id}`,
-          {
-            credentials: "include",
-          }
+          `/api/reservation?user_id=${userId}&role=client`
         );
 
         const data = await response.json();
         setReservations(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error("Error fetching reservations:", error);
+      } catch (err) {
+        console.error("Error fetching reservations:", err);
       } finally {
         setLoading(false);
       }
     }
 
-    fetchUserAndReservations();
-  }, [router]);
+    fetchReservations();
+  }, [session]);
 
-  if (loading) return <div className="p-6 text-center">Loading...</div>;
+  if (loading)
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          mt: 10,
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">
+    <Container maxWidth="lg" sx={{ py: 6 }}>
+      <Typography
+        variant="h4"
+        textAlign="center"
+        fontWeight="bold"
+        gutterBottom
+      >
         My Reservations
-      </h1>
+      </Typography>
 
       {reservations.length === 0 ? (
-        <p className="text-center text-gray-600 text-lg">
+        <Typography
+          variant="h6"
+          textAlign="center"
+          color="text.secondary"
+          sx={{ mt: 4 }}
+        >
           No reservations found.
-        </p>
+        </Typography>
       ) : (
-        <div className="overflow-x-auto shadow-lg rounded-xl border border-gray-200 bg-white">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold uppercase">
-                  Room Name
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold uppercase">
-                  Room number
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold uppercase">
-                  Guest
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold uppercase">
-                  Email / Phone
-                </th>
-                <th className="px-4 py-3 text-center text-sm font-semibold uppercase">
+        <Paper elevation={4} sx={{ overflowX: "auto", mt: 3 }}>
+          <Table>
+            <TableHead sx={{ bgcolor: "primary.main" }}>
+              <TableRow>
+                <TableCell sx={{ color: "white" }}>Room Name</TableCell>
+                <TableCell sx={{ color: "white" }}>Room Number</TableCell>
+                <TableCell sx={{ color: "white" }}>Guest</TableCell>
+                <TableCell sx={{ color: "white" }}>Email / Phone</TableCell>
+                <TableCell sx={{ color: "white" }} align="center">
                   Check-in
-                </th>
-                <th className="px-4 py-3 text-center text-sm font-semibold uppercase">
+                </TableCell>
+                <TableCell sx={{ color: "white" }} align="center">
                   Check-out
-                </th>
-                <th className="px-4 py-3 text-center text-sm font-semibold uppercase">
+                </TableCell>
+                <TableCell sx={{ color: "white" }} align="center">
                   Guests
-                </th>
-                <th className="px-4 py-3 text-center text-sm font-semibold uppercase">
+                </TableCell>
+                <TableCell sx={{ color: "white" }} align="center">
                   Status
-                </th>
-                <th className="px-4 py-3 text-right text-sm font-semibold uppercase">
+                </TableCell>
+                <TableCell sx={{ color: "white" }} align="right">
                   Total (€)
-                </th>
-                <th className="px-4 py-3 text-center text-sm font-semibold uppercase">
+                </TableCell>
+                <TableCell sx={{ color: "white" }} align="center">
                   Created
-                </th>
-              </tr>
-            </thead>
+                </TableCell>
+              </TableRow>
+            </TableHead>
 
-            <tbody className="divide-y divide-gray-100 text-gray-700">
+            <TableBody>
               {reservations.map((r) => (
-                <tr
-                  key={r.id}
-                  className="hover:bg-blue-50 transition-colors duration-200"
-                >
-                  <td className="px-4 py-3 font-semibold text-gray-800">
-                    {r.rooms?.name || "Unnamed Room"}
-                  </td>
-                  <td className="px-4 py-3 text-gray-700 font-medium text-center">
+                <TableRow key={r.id} hover>
+                  <TableCell>{r.rooms?.name || "Unnamed Room"}</TableCell>
+                  <TableCell align="center">
                     {r.rooms?.room_number || "-"}
-                  </td>
-                  <td className="px-4 py-3 text-gray-800 font-medium">
-                    {r.full_name}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-col">
+                  </TableCell>
+
+                  <TableCell>{r.full_name}</TableCell>
+
+                  <TableCell>
+                    <Box sx={{ display: "flex", flexDirection: "column" }}>
                       <span>{r.users?.email}</span>
-                      <span className="text-sm text-gray-500">{r.phone}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-center text-green-500 font-semibold">
+                      <span style={{ fontSize: "0.8rem", color: "#777" }}>
+                        {r.phone}
+                      </span>
+                    </Box>
+                  </TableCell>
+
+                  <TableCell align="center" sx={{ color: "green" }}>
                     {new Date(r.start_date).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-3 text-center text-red-500 font-semibold">
+                  </TableCell>
+
+                  <TableCell align="center" sx={{ color: "red" }}>
                     {new Date(r.end_date).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-3 text-center">{r.guests}</td>
-                  <td className="px-4 py-3 text-center">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-semibold
-                      ${
+                  </TableCell>
+
+                  <TableCell align="center">{r.guests}</TableCell>
+
+                  <TableCell align="center">
+                    <Chip
+                      label={r.status}
+                      color={
                         r.status === "confirmed"
-                          ? "bg-green-100 text-green-700"
+                          ? "success"
                           : r.status === "pending"
-                          ? "bg-yellow-100 text-yellow-700"
+                          ? "warning"
                           : r.status === "cancelled"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {r.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right font-semibold text-gray-900">
+                          ? "error"
+                          : "default"
+                      }
+                      variant="filled"
+                      size="small"
+                    />
+                  </TableCell>
+
+                  <TableCell align="right" sx={{ fontWeight: "bold" }}>
                     €{Number(r.total_price ?? 0).toFixed(2)}
-                  </td>
-                  <td className="px-4 py-3 text-center text-gray-600 text-sm">
+                  </TableCell>
+
+                  <TableCell align="center">
                     {r.created_at
                       ? new Date(r.created_at).toLocaleString()
                       : "-"}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+        </Paper>
       )}
-    </div>
+    </Container>
   );
 }

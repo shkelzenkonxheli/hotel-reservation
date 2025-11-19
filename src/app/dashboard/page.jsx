@@ -58,6 +58,13 @@ export default function Dashboard() {
   }
 
   if (!session?.user) return null;
+  if (session.user.role === "client") {
+    return (
+      <Box className="flex justify-center items-center h-screen">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   const user = session.user;
 

@@ -102,7 +102,7 @@ export default function LoginPage() {
             color="primary"
             gutterBottom
           >
-            Welcome Back 👋
+            Welcome Back
           </Typography>
           <Typography
             variant="body2"

@@ -6,6 +6,9 @@ export async function PATCH(req, context) {
     const params = await context.params;
     const { id } = params;
 
+    const today = new Date().setHours(0, 0, 0, 0);
+    const start = new Date(startDate).setHours(0, 0, 0, 0);
+
     const {
       fullname,
       phone,
@@ -20,6 +23,12 @@ export async function PATCH(req, context) {
     if (!fullname || !phone || !type || !startDate || !endDate) {
       return NextResponse.json(
         { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+    if (start < today) {
+      return NextResponse.json(
+        { error: "Cannot create or edit reservation in the past" },
         { status: 400 }
       );
     }
@@ -93,6 +102,37 @@ export async function PATCH(req, context) {
     console.error("❌ Error updating reservation:", error);
     return NextResponse.json(
       { error: "Failed to update reservation", details: error.message },
+      { status: 500 }
+    );
+  }
+}
+export async function DELETE(req, { params }) {
+  const { id } = await params;
+
+  try {
+    if (!id) {
+      return NextResponse.json({ error: "It needs an id", status: 400 });
+    }
+
+    const existing = await prisma.reservations.findUnique({
+      where: {
+        id: Number(id),
+      },
+    });
+    if (!existing) {
+      console.log("⚠️ Reservation not found in DB");
+      return NextResponse.json(
+        { error: "Reservation not found" },
+        { status: 404 }
+      );
+    }
+    await prisma.reservations.delete({ where: { id: Number(id) } });
+    console.log("🗑️ Reservation deleted successfully!");
+    return NextResponse.json({ message: "Reservation deleted successfully" });
+  } catch (error) {
+    console.error("❌ Error deleting reservation:", error);
+    return NextResponse.json(
+      { error: "Failed to delete reservation", details: error.message },
       { status: 500 }
     );
   }

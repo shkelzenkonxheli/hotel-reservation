@@ -210,6 +210,9 @@ export default function ReservationForm({
             fullWidth
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
+            inputProps={{
+              min: new Date().toISOString().split("T")[0],
+            }}
           />
 
           <TextField
@@ -219,6 +222,9 @@ export default function ReservationForm({
             fullWidth
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
+            inputProps={{
+              min: startDate || new Date().toISOString().split("T")[0],
+            }}
           />
 
           {isAvailable === true && (

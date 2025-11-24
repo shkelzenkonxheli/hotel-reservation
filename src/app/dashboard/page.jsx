@@ -36,7 +36,16 @@ export default function Dashboard() {
   const router = useRouter();
   const { data: session, status } = useSession();
 
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState(
+    typeof window !== "undefined"
+      ? localStorage.getItem("activeTab") || "overview"
+      : "overview"
+  );
+  useEffect(() => {
+    if (activeTab) {
+      localStorage.setItem("activeTab", activeTab);
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     if (status === "loading") return;

@@ -14,6 +14,8 @@ export async function POST(request) {
       guests,
       total_price,
     } = await request.json();
+    const today = new Date().setHours(0, 0, 0, 0);
+    const start = new Date(startDate).setHours(0, 0, 0, 0);
 
     const rooms = await prisma.rooms.findMany({
       where: { type },
@@ -33,6 +35,12 @@ export async function POST(request) {
     if (!availableRoom) {
       return NextResponse.json(
         { error: "No rooms available" },
+        { status: 400 }
+      );
+    }
+    if (start < today) {
+      return NextResponse.json(
+        { error: "Cannot create or edit reservation in the past" },
         { status: 400 }
       );
     }

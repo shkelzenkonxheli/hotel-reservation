@@ -15,6 +15,7 @@ export async function GET() {
     for (const room of rooms) {
       if (!grouped[room.type]) {
         grouped[room.type] = {
+          id: room.type,
           type: room.type,
           price: room.price,
           name: room.name,

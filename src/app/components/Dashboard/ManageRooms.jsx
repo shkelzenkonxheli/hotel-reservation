@@ -16,6 +16,11 @@ import {
   Paper,
   Typography,
   CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 
 export default function ManageRoomsTab() {
@@ -122,7 +127,7 @@ export default function ManageRoomsTab() {
             onClick={handleAdd}
             sx={{ borderRadius: 2 }}
           >
-            ➕ Add Room
+            Add Room
           </Button>
         </Box>
       </Box>
@@ -175,7 +180,9 @@ export default function ManageRoomsTab() {
                       variant="outlined"
                       size="small"
                       color="error"
-                      onClick={() => handleDeleteRoom(room.id)}
+                      onClick={() =>
+                        setDeleteDialog({ open: true, roomId: room.id })
+                      }
                     >
                       Delete
                     </Button>
@@ -195,6 +202,26 @@ export default function ManageRoomsTab() {
           </Table>
         </TableContainer>
       )}
+      <Dialog
+        open={deleteDialog.open}
+        onClose={() => setDeleteDialog({ open: false, id: null })}
+      >
+        <DialogTitle>Delete Reservation</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this room? This action cannot be
+            undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialog({ open: false, id: null })}>
+            Cancel
+          </Button>
+          <Button color="error" onClick={handleDeleteRoom}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {mode && (
         <RoomForm

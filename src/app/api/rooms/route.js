@@ -105,3 +105,35 @@ export async function PATCH(request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+export async function POST(request) {
+  try {
+    const body = await request.json();
+
+    const { name, room_number, type, price, description } = body;
+
+    // Basic validation
+    if (!name || !room_number || !type || !price) {
+      return NextResponse.json(
+        { error: "All required fields must be filled" },
+        { status: 400 }
+      );
+    }
+
+    // Create new room
+    const newRoom = await prisma.rooms.create({
+      data: {
+        name,
+        room_number,
+        type,
+        price: Number(price),
+        description: description || "",
+        status: "available", // default status
+      },
+    });
+
+    return NextResponse.json(newRoom, { status: 201 });
+  } catch (error) {
+    console.error("POST /rooms error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}

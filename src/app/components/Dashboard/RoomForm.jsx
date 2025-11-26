@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogActions,
@@ -7,6 +7,7 @@ import {
   DialogTitle,
   Button,
   TextField,
+  MenuItem,
 } from "@mui/material";
 
 export default function RoomForm({ mode, room, onClose, onSaved }) {
@@ -14,6 +15,16 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
     room || { name: "", room_number: "", type: "", price: "", description: "" }
   );
   const [loading, setLoading] = useState(false);
+  const [roomTypes, setRoomTypes] = useState([]);
+
+  useEffect(() => {
+    async function loadRoomTypes() {
+      const res = await fetch("/api/rooms-type");
+      const data = await res.json();
+      setRoomTypes(data);
+    }
+    loadRoomTypes();
+  }, []);
 
   async function handleSubmit() {
     if (
@@ -55,7 +66,7 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
   return (
     <Dialog open={true} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle className="font-bold text-gray-800">
-        {mode === "edit" ? "✏️ Edit Room" : "➕ Add New Room"}
+        {mode === "edit" ? " Edit Room" : " Add New Room"}
       </DialogTitle>
 
       <DialogContent dividers className="py-4">
@@ -79,12 +90,19 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
         />
         <TextField
           fullWidth
-          label="Type (e.g. apartment, suite, double)"
+          select
+          label="Room Type"
           variant="outlined"
           value={formData.type}
           margin="normal"
           onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-        />
+        >
+          {roomTypes.map((room, index) => (
+            <MenuItem key={index} value={room.type}>
+              {room.type}
+            </MenuItem>
+          ))}
+        </TextField>
         <TextField
           fullWidth
           label="Price (€)"

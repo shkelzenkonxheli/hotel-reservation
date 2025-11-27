@@ -6,17 +6,42 @@ import "swiper/css/navigation";
 import { Navigation, Pagination } from "swiper/modules";
 import { useRouter } from "next/navigation";
 import { useBooking } from "@/context/BookingContext";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
+
+// Formati Y-M-D pa timezone
+function fYMD(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+    2,
+    "0"
+  )}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+// Konverton string Y-M-D në objekt Date pa UTC shift
+function strToDate(str) {
+  const [y, m, d] = str.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
 
 export default function RoomsPage() {
   const [roomTypes, setRoomTypes] = useState([]);
   const [showDateInput, setShowDateInput] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
+
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+
   const [user, setUser] = useState(null);
+
+  const [bookedDays, setBookedDays] = useState([]);
+  const [roomCount, setRoomCount] = useState(0);
+
   const router = useRouter();
   const { setBooking } = useBooking();
 
+  const todayStr = fYMD(new Date());
+
+  // ================= Room types =====================
   useEffect(() => {
     async function fetchRooms() {
       const response = await fetch("/api/rooms-type");
@@ -25,6 +50,8 @@ export default function RoomsPage() {
     }
     fetchRooms();
   }, []);
+
+  // ================= User =====================
   useEffect(() => {
     async function fetchUser() {
       const res = await fetch("/api/me");
@@ -32,15 +59,56 @@ export default function RoomsPage() {
         router.push("/login");
         return;
       }
-      const data = await res.json();
-      setUser(data);
+      setUser(await res.json());
     }
     fetchUser();
   }, [router]);
 
+  // ================= Availability =====================
+  useEffect(() => {
+    if (!selectedRoom) return;
+
+    async function loadAvailability() {
+      const res = await fetch(
+        `/api/availability?room_type=${selectedRoom.type}`
+      );
+      const data = await res.json();
+
+      setRoomCount(data.roomCount || 0);
+
+      const dayMap = {}; // { "2025-12-03": Set([room1,room3]) }
+
+      data.reservations.forEach((r) => {
+        const start = strToDate(r.start_date);
+        const end = strToDate(r.end_date);
+
+        let d = new Date(start);
+
+        // Booked nights = start → end-1
+        while (d < end) {
+          const key = fYMD(d);
+          if (!dayMap[key]) dayMap[key] = new Set();
+          dayMap[key].add(r.room_id);
+          d.setDate(d.getDate() + 1);
+        }
+      });
+
+      const fullDays = Object.entries(dayMap)
+        .filter(([_, set]) => set.size >= data.roomCount)
+        .map(([day]) => day);
+
+      setBookedDays(fullDays);
+    }
+
+    loadAvailability();
+  }, [selectedRoom]);
+
+  // ================= Booking =====================
   const handleBookClick = (room) => {
     setSelectedRoom(room);
     setShowDateInput(true);
+    setStartDate("");
+    setEndDate("");
   };
 
   const checkAvailability = async () => {
@@ -65,9 +133,10 @@ export default function RoomsPage() {
     );
   };
 
+  // ================= UI =====================
   return (
     <div className="pt-10 px-6 pb-16 bg-gray-50 min-h-screen">
-      <h2 className="text-3xl font-bold mb-10 text-center text-gray-800 flex items-center justify-center gap-2">
+      <h2 className="text-3xl font-bold mb-10 text-center text-gray-800">
         🏨 Available Room Types
       </h2>
 
@@ -77,7 +146,6 @@ export default function RoomsPage() {
             key={room.type}
             className="bg-white rounded-2xl shadow-md hover:shadow-xl transition duration-300 overflow-hidden flex flex-col"
           >
-            {/* Swiper images */}
             <div className="relative h-52 w-full">
               <Swiper
                 modules={[Navigation, Pagination]}
@@ -87,20 +155,16 @@ export default function RoomsPage() {
               >
                 {room.images.map((img, i) => (
                   <SwiperSlide key={i}>
-                    <img
-                      src={img}
-                      alt={room.name}
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={img} className="w-full h-full object-cover" />
                   </SwiperSlide>
                 ))}
               </Swiper>
+
               <span className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">
                 {room.type}
               </span>
             </div>
 
-            {/* Details */}
             <div className="p-4 flex flex-col justify-between flex-grow">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">
@@ -115,8 +179,9 @@ export default function RoomsPage() {
                 <span className="text-blue-600 font-semibold text-sm">
                   ${room.price}/night
                 </span>
+
                 <button
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 transition"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg"
                   onClick={() => handleBookClick(room)}
                 >
                   Book
@@ -127,37 +192,66 @@ export default function RoomsPage() {
         ))}
       </div>
 
-      {/* Modal for dates */}
       {showDateInput && selectedRoom && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-          <div className="bg-white p-6 rounded-xl shadow-xl w-80 flex flex-col gap-4">
-            <h3 className="text-lg font-bold text-gray-800 text-center">
-              Select Dates
-            </h3>
-            <input
-              type="date"
-              value={startDate}
-              min={new Date().toISOString().split("T")[0]}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="p-2 border rounded w-full focus:ring-2 focus:ring-blue-400"
+          <div className="bg-white p-6 rounded-xl shadow-xl w-[350px]">
+            <h3 className="text-lg font-bold text-center">Select Dates</h3>
+
+            <Calendar
+              selectRange={true}
+              minDate={new Date()}
+              onChange={(range) => {
+                if (Array.isArray(range)) {
+                  setStartDate(fYMD(range[0]));
+                  setEndDate(fYMD(range[1]));
+                }
+              }}
+              tileDisabled={({ date }) => {
+                const d = fYMD(date);
+                return d < todayStr || bookedDays.includes(d);
+              }}
+              tileClassName={({ date }) => {
+                const d = fYMD(date);
+
+                // 1) Ditët e kaluara = disable
+                if (d < todayStr) return "disabled-day";
+
+                // 2) Full booked
+                if (bookedDays.includes(d)) return "booked-day";
+
+                // 3) Range selection highlight (UI logic)
+                if (startDate && !endDate && d === startDate) {
+                  return "start-day";
+                }
+
+                if (startDate && endDate) {
+                  if (d === startDate) return "start-day";
+                  if (d === endDate) return "end-day";
+
+                  // mid-range days
+                  if (d > startDate && d < endDate) return "range-day";
+                }
+
+                // 4) Default available
+                return "available-day";
+              }}
             />
-            <input
-              type="date"
-              value={endDate}
-              min={startDate || new Date().toISOString().split("T")[0]}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="p-2 border rounded w-full focus:ring-2 focus:ring-blue-400"
-            />
-            <div className="flex justify-between mt-2">
+
+            <div className="flex justify-between mt-4">
               <button
-                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition"
-                onClick={() => setShowDateInput(false)}
+                className="px-4 py-2 bg-gray-300 rounded"
+                onClick={() => {
+                  setShowDateInput(false);
+                  setSelectedRoom(null);
+                }}
               >
                 Cancel
               </button>
+
               <button
-                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                className="px-4 py-2 bg-green-600 text-white rounded"
                 onClick={checkAvailability}
+                disabled={!startDate || !endDate}
               >
                 Continue
               </button>

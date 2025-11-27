@@ -24,3 +24,53 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+.booked-day {
+  background-color: #ef4444 !important; /* red */
+  color: white !important;
+  border-radius: 6px !important;
+}
+
+.available-day {
+  background-color: #86efac !important; /* light green */
+  color: #065f46 !important;
+  border-radius: 6px !important;
+}
+.checkout-day {
+  background-color: #818cf8 !important; /* purple/indigo */
+  color: white !important;
+  border-radius: 6px !important;
+  border: 1px solid #4f46e5 !important;
+}.disabled-day {
+  background-color: #e5e7eb !important;
+  color: #9ca3af !important;
+  border-radius: 6px !important;
+}
+.selected-start,
+.selected-end {
+  background-color: #2563eb !important; /* Blue */
+  color: white !important;
+  border-radius: 6px !important;
+}
+
+.selected-range {
+  background-color: #93c5fd !important; /* Light blue */
+  color: #1e3a8a !important;
+  border-radius: 6px !important;
+}
+.start-day {
+  background-color: #2563eb !important; /* blue */
+  color: white !important;
+  border-radius: 8px;
+}
+
+.end-day {
+  background-color: #2563eb !important;
+  color: white !important;
+  border-radius: 8px;
+}
+
+.range-day {
+  background-color: #bfdbfe !important; /* light blue */
+  color: #1e3a8a !important;
+  border-radius: 8px;
+}

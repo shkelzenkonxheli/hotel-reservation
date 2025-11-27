@@ -19,6 +19,8 @@ import {
   Tooltip,
 } from "@mui/material";
 import { CleaningServices, Close, MeetingRoom } from "@mui/icons-material";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 
 export default function RoomsTab() {
   const [rooms, setRooms] = useState([]);
@@ -28,13 +30,16 @@ export default function RoomsTab() {
   );
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [filter, setFilter] = useState("all");
+  const [showCalendar, setShowCalendar] = useState(false);
 
   useEffect(() => {
     fetchRooms();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate]);
 
   async function fetchRooms() {
     try {
+      setLoading(true);
       const res = await fetch(`/api/rooms?include=true&date=${selectedDate}`);
       const data = await res.json();
       setRooms(data);
@@ -66,7 +71,7 @@ export default function RoomsTab() {
     }
   }
 
-  // Filtrimi
+  // Filtrimi sipas statusit
   const filteredRooms = rooms.filter((r) => {
     if (filter === "booked") return r.current_status === "booked";
     if (filter === "available") return r.current_status === "available";
@@ -94,6 +99,72 @@ export default function RoomsTab() {
         return "#9ca3af"; // gray
     }
   };
+
+  // Ngjyros ditët e rezervuara në calendar
+  function tileClassName({ date, view }) {
+    if (!selectedRoom || view !== "month") return "";
+
+    const reservations = selectedRoom.room.reservations || [];
+
+    // Normalizo today
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    // Normalizo ditën e qelizës
+    const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+    // Past dates (para dites se sotme)
+    if (d < today) return "";
+
+    let isBooked = false;
+    let isCheckout = false;
+    let isCheckin = false;
+
+    // Check each reservation
+    for (let i = 0; i < reservations.length; i++) {
+      const r = reservations[i];
+
+      const start = new Date(r.start_date);
+      const end = new Date(r.end_date);
+
+      const startDay = new Date(
+        start.getFullYear(),
+        start.getMonth(),
+        start.getDate()
+      );
+      const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+
+      // 1️⃣ BOOKED: d falls inside (start ≤ d < end)
+      if (d >= startDay && d < endDay) {
+        isBooked = true;
+        break;
+      }
+
+      // 2️⃣ Check-out day (d == end)
+      if (d.getTime() === endDay.getTime()) {
+        isCheckout = true;
+      }
+
+      // 3️⃣ Check-in day (d == start)
+      if (d.getTime() === startDay.getTime()) {
+        isCheckin = true;
+      }
+    }
+
+    // 🟥 if this date is check-out & check-in at the same date → it's ACTUALLY booked
+    if (isCheckout && isCheckin) {
+      return "booked-day";
+    }
+
+    // 🟥 Booked
+    if (isBooked) return "booked-day";
+
+    // 🟣 Checkout day (only if NOT booked and NOT check-in)
+    if (isCheckout) return "checkout-day";
+
+    // 🟢 Otherwise → free & future
+    return "available-day";
+  }
 
   if (loading)
     return (
@@ -180,12 +251,13 @@ export default function RoomsTab() {
                         cursor: "pointer",
                         "&:hover": { transform: "scale(1.05)" },
                       }}
-                      onClick={() =>
+                      onClick={() => {
                         setSelectedRoom({
                           room,
                           reservation: room.active_reservation,
-                        })
-                      }
+                        });
+                        setShowCalendar(false); // fillimisht i fshehur
+                      }}
                     >
                       <MeetingRoom sx={{ fontSize: 24 }} />
                       <Typography>{room.room_number}</Typography>
@@ -198,7 +270,7 @@ export default function RoomsTab() {
         </Grid>
 
         {/* 🏨 Hotel Rooms */}
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={6}>
           <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
             <Typography
               variant="h6"
@@ -229,12 +301,13 @@ export default function RoomsTab() {
                         cursor: "pointer",
                         "&:hover": { transform: "scale(1.05)" },
                       }}
-                      onClick={() =>
+                      onClick={() => {
                         setSelectedRoom({
                           room,
                           reservation: room.active_reservation,
-                        })
-                      }
+                        });
+                        setShowCalendar(false);
+                      }}
                     >
                       <MeetingRoom sx={{ fontSize: 24 }} />
                       <Typography>{room.room_number}</Typography>
@@ -252,7 +325,7 @@ export default function RoomsTab() {
         <Dialog
           open={!!selectedRoom}
           onClose={() => setSelectedRoom(null)}
-          maxWidth="xs"
+          maxWidth="sm"
           fullWidth
         >
           <DialogTitle>
@@ -310,6 +383,7 @@ export default function RoomsTab() {
                 No active reservation.
               </Typography>
             )}
+
             {selectedRoom.room.current_status === "needs_cleaning" && (
               <Box textAlign="center" mt={3}>
                 <Button
@@ -324,6 +398,23 @@ export default function RoomsTab() {
                 >
                   Clean Room
                 </Button>
+              </Box>
+            )}
+
+            {/* Button për të shfaqur/fshirë calendarin */}
+            <Box mt={3}>
+              <Button
+                variant="outlined"
+                onClick={() => setShowCalendar((prev) => !prev)}
+              >
+                {showCalendar ? "Hide Calendar" : "Show Calendar"}
+              </Button>
+            </Box>
+
+            {/* Calendar opcional – për TË GJITHA dhomat */}
+            {showCalendar && (
+              <Box mt={2}>
+                <Calendar tileClassName={tileClassName} />
               </Box>
             )}
           </DialogContent>

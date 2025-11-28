@@ -9,7 +9,6 @@ import { useBooking } from "@/context/BookingContext";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 
-// Formati Y-M-D pa timezone
 function fYMD(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
     2,
@@ -17,7 +16,6 @@ function fYMD(date) {
   )}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
-// Konverton string Y-M-D në objekt Date pa UTC shift
 function strToDate(str) {
   const [y, m, d] = str.split("-").map(Number);
   return new Date(y, m - 1, d);
@@ -41,7 +39,6 @@ export default function RoomsPage() {
 
   const todayStr = fYMD(new Date());
 
-  // ================= Room types =====================
   useEffect(() => {
     async function fetchRooms() {
       const response = await fetch("/api/rooms-type");
@@ -51,7 +48,6 @@ export default function RoomsPage() {
     fetchRooms();
   }, []);
 
-  // ================= User =====================
   useEffect(() => {
     async function fetchUser() {
       const res = await fetch("/api/me");
@@ -64,7 +60,6 @@ export default function RoomsPage() {
     fetchUser();
   }, [router]);
 
-  // ================= Availability =====================
   useEffect(() => {
     if (!selectedRoom) return;
 
@@ -76,7 +71,7 @@ export default function RoomsPage() {
 
       setRoomCount(data.roomCount || 0);
 
-      const dayMap = {}; // { "2025-12-03": Set([room1,room3]) }
+      const dayMap = {};
 
       data.reservations.forEach((r) => {
         const start = strToDate(r.start_date);
@@ -84,7 +79,6 @@ export default function RoomsPage() {
 
         let d = new Date(start);
 
-        // Booked nights = start → end-1
         while (d < end) {
           const key = fYMD(d);
           if (!dayMap[key]) dayMap[key] = new Set();
@@ -103,7 +97,6 @@ export default function RoomsPage() {
     loadAvailability();
   }, [selectedRoom]);
 
-  // ================= Booking =====================
   const handleBookClick = (room) => {
     setSelectedRoom(room);
     setShowDateInput(true);
@@ -133,7 +126,6 @@ export default function RoomsPage() {
     );
   };
 
-  // ================= UI =====================
   return (
     <div className="pt-10 px-6 pb-16 bg-gray-50 min-h-screen">
       <h2 className="text-3xl font-bold mb-10 text-center text-gray-800">
@@ -213,13 +205,10 @@ export default function RoomsPage() {
               tileClassName={({ date }) => {
                 const d = fYMD(date);
 
-                // 1) Ditët e kaluara = disable
                 if (d < todayStr) return "disabled-day";
 
-                // 2) Full booked
                 if (bookedDays.includes(d)) return "booked-day";
 
-                // 3) Range selection highlight (UI logic)
                 if (startDate && !endDate && d === startDate) {
                   return "start-day";
                 }
@@ -228,11 +217,9 @@ export default function RoomsPage() {
                   if (d === startDate) return "start-day";
                   if (d === endDate) return "end-day";
 
-                  // mid-range days
                   if (d > startDate && d < endDate) return "range-day";
                 }
 
-                // 4) Default available
                 return "available-day";
               }}
             />

@@ -64,18 +64,21 @@ export default function RoomsPage() {
     if (!selectedRoom) return;
 
     async function loadAvailability() {
+      console.log("=== LOADING AVAILABILITY ===");
+
       const res = await fetch(
         `/api/availability?room_type=${selectedRoom.type}`
       );
       const data = await res.json();
 
-      setRoomCount(data.roomCount || 0);
+      console.log("API RESPONSE:", data);
 
       const dayMap = {};
 
       data.reservations.forEach((r) => {
-        const start = strToDate(r.start_date);
-        const end = strToDate(r.end_date);
+        const start = new Date(r.start_date);
+        const end = new Date(r.end_date);
+        if (isNaN(start) || isNaN(end)) return;
 
         let d = new Date(start);
 
@@ -90,6 +93,8 @@ export default function RoomsPage() {
       const fullDays = Object.entries(dayMap)
         .filter(([_, set]) => set.size >= data.roomCount)
         .map(([day]) => day);
+
+      console.log("FULL DAYS:", fullDays);
 
       setBookedDays(fullDays);
     }

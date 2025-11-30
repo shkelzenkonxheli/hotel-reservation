@@ -124,6 +124,7 @@ export default function ReservationForm({
     }
 
     if (res.ok) {
+      await fetch("/api/rooms?include=true");
       onClose();
       if (onSuccess) onSuccess();
     } else {

@@ -96,6 +96,7 @@ export async function PATCH(request) {
       where: { id: Number(room_id) },
       data: { status: "available" },
     });
+    lo;
 
     return NextResponse.json({
       message: "✅ Room marked as cleaned",

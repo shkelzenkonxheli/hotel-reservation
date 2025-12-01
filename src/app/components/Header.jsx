@@ -12,6 +12,7 @@ import {
   Menu,
   MenuItem,
   Box,
+  Icon,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -20,6 +21,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import BookOnlineIcon from "@mui/icons-material/BookOnline";
 import LoginIcon from "@mui/icons-material/Login";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 
 export default function Header() {
   const { data: session } = useSession();
@@ -95,14 +97,14 @@ export default function Header() {
                 </Button>
               )}
 
-              {user.role === "client" && (
+              {user && (
                 <Button
                   component={Link}
-                  href="/reservations"
-                  startIcon={<BookOnlineIcon />}
+                  href="/profile"
+                  startIcon={<PersonOutlineIcon />}
                   sx={{ color: "white" }}
                 >
-                  Reservations
+                  Profile
                 </Button>
               )}
 
@@ -180,6 +182,7 @@ export default function Header() {
                 Reservations
               </MenuItem>
             ),
+
             <MenuItem
               key="logout"
               onClick={() => {

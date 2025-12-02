@@ -42,7 +42,10 @@ export const authOptions = {
 
       if (dbUser) {
         token.id = dbUser.id;
-        token.role = dbUser.role; // KËTU MBRICOHET ROLI I VËRTETË
+        token.role = dbUser.role;
+        token.name = dbUser.name;
+        token.phone = dbUser.phone;
+        token.address = dbUser.address;
       }
 
       return token;
@@ -51,6 +54,9 @@ export const authOptions = {
     async session({ session, token }) {
       session.user.id = token.id;
       session.user.role = token.role;
+      session.user.name = token.name;
+      session.user.phone = token.phone;
+      session.user.address = token.address;
       return session;
     },
 

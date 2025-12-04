@@ -231,7 +231,7 @@ export default function RoomsTab() {
             >
               🏢 Apartments
             </Typography>
-            <Divider sx={{ mb: 3 }} />
+
             <Grid container spacing={2}>
               {apartments.map((room) => (
                 <Grid item xs={3} key={room.id}>
@@ -281,7 +281,7 @@ export default function RoomsTab() {
             >
               🏨 Hotel Rooms
             </Typography>
-            <Divider sx={{ mb: 3 }} />
+
             <Grid container spacing={2}>
               {hotelRooms.map((room) => (
                 <Grid item xs={3} key={room.id}>

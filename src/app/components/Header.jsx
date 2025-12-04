@@ -30,6 +30,10 @@ export default function Header() {
 
   const handleMenuOpen = (e) => setAnchorEl(e.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
+  const handleLogut = () => {
+    localStorage.removeItem("activeTab");
+    signOut();
+  };
 
   return (
     <AppBar position="sticky" sx={{ backgroundColor: "#1f2937" }}>
@@ -109,7 +113,7 @@ export default function Header() {
               )}
 
               <Button
-                onClick={() => signOut({ callbackUrl: "/" })}
+                onClick={handleLogut}
                 startIcon={<LogoutIcon />}
                 sx={{ color: "white" }}
               >
@@ -186,7 +190,7 @@ export default function Header() {
             <MenuItem
               key="logout"
               onClick={() => {
-                handleLogout();
+                handleLogut();
                 handleMenuClose();
               }}
             >

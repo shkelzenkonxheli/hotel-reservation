@@ -14,6 +14,7 @@ import {
   CircularProgress,
   Paper,
 } from "@mui/material";
+import { useSession } from "next-auth/react";
 
 export default function CheckoutBooking() {
   const { booking } = useBooking();
@@ -23,8 +24,9 @@ export default function CheckoutBooking() {
   const [address, setAddress] = useState("");
   const [guests, setGuests] = useState(2);
   const [totalPrice, setTotalPrice] = useState(0);
-  const [user, setUser] = useState(null);
+
   const router = useRouter();
+  const { data: session, status } = useSession();
 
   if (!booking)
     return (
@@ -32,32 +34,19 @@ export default function CheckoutBooking() {
         <CircularProgress />
       </Box>
     );
-  useEffect(() => {
-    async function fetchUser() {
-      try {
-        const res = await fetch("/api/me", { credentials: "include" });
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data.user);
-        } else {
-          setUser(null);
-          router.push("/login");
-        }
-      } catch (err) {
-        console.error("Error fetching user:", err);
-        router.push("/login");
-      }
-    }
 
-    fetchUser();
-  }, [router]);
+  useEffect(() => {
+    if (status === "loading") return;
+    if (!session?.user) {
+      router.push("/login");
+    }
+  }, [session, status, router]);
 
   const { room, startDate, endDate } = booking;
 
   const nights = Math.ceil(
     (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)
   );
-
   useEffect(() => {
     let basePrice = Number(room.price);
     let extraPrice = 0;
@@ -66,6 +55,13 @@ export default function CheckoutBooking() {
     if (guests > 2) extraPrice = (guests - 2) * 20;
     setTotalPrice((basePrice + extraPrice) * nights);
   }, [room.price, room.type, guests, nights]);
+  useEffect(() => {
+    if (session?.user) {
+      setFullname(session.user.name || "");
+      setAddress(session.user.address || "");
+      setPhone(session.user.phone || "");
+    }
+  }, [session]);
 
   const handleBookClick = async () => {
     if (!fullname || !phone || !address) {
@@ -73,7 +69,7 @@ export default function CheckoutBooking() {
       return;
     }
 
-    if (!user) {
+    if (!session.user) {
       alert("Please log in to complete your booking.");
       router.push("/login");
       return;
@@ -87,7 +83,7 @@ export default function CheckoutBooking() {
         body: JSON.stringify({
           totalPrice,
           roomName: room.name,
-          userEmail: user.email,
+          userEmail: session.user.email,
           type: room.type,
           startDate,
           endDate,

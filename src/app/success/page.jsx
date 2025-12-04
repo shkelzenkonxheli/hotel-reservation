@@ -10,26 +10,32 @@ import {
 } from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 export default function SuccessPage() {
   const [reservation, setReservation] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    localStorage.removeItem("booking");
+  }, []);
 
   useEffect(() => {
     async function fetchReservation() {
+      if (status === "unauthenticated") {
+        router.push("/login");
+        return;
+      }
+
+      if (status !== "authenticated") return;
+
       try {
-        const res = await fetch("/api/me", { credentials: "include" });
-        if (!res.ok) {
-          router.push("/login");
-          return;
-        }
-
-        const userData = await res.json();
-
         const resv = await fetch(
-          `/api/reservation?latest=true&userId=${userData.user.id}`
+          `/api/reservation?latest=true&userId=${session.user.id}`
         );
+
         const data = await resv.json();
 
         if (resv.ok && data) {
@@ -45,7 +51,7 @@ export default function SuccessPage() {
     }
 
     fetchReservation();
-  }, [router]);
+  }, [session, status, router]);
 
   if (loading) {
     return (

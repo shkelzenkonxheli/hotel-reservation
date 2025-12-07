@@ -81,7 +81,8 @@ export default function ManageRoomsTab() {
       setDeleteDialog({ open: false, roomId: null });
     }
   }
-  const filteredRooms = rooms.filter((room) => {
+  const safeRooms = Array.isArray(rooms) ? rooms : [];
+  const filteredRooms = safeRooms.filter((room) => {
     const matchesSearch =
       room.name.toLowerCase().includes(search.toLowerCase()) ||
       room.room_number.toString().includes(search);

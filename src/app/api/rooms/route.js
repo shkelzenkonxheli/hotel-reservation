@@ -6,12 +6,19 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const includeReservations = searchParams.get("include") === "true";
     const selectedDateParam = searchParams.get("date");
+    if (!includeReservations) {
+      const rooms = await prisma.rooms.findMany({
+        orderBy: { room_number: "asc" },
+      });
+
+      return NextResponse.json(rooms);
+    }
 
     const selectedDate = selectedDateParam
       ? new Date(selectedDateParam)
       : new Date();
 
-    const selectedDateOnly = new Date(
+    const selectedDay = new Date(
       selectedDate.getFullYear(),
       selectedDate.getMonth(),
       selectedDate.getDate()
@@ -28,48 +35,59 @@ export async function GET(request) {
       orderBy: { room_number: "asc" },
     });
 
-    const updatedRooms = rooms.map((room) => {
-      let current_status = room.status || "available";
+    const updatedRooms = [];
+
+    for (const room of rooms) {
+      let newStatus = room.status;
       let activeReservation = null;
 
-      room.reservations?.forEach((r) => {
+      for (const r of room.reservations) {
         const start = new Date(r.start_date);
         const end = new Date(r.end_date);
 
-        const startDateOnly = new Date(
+        const startDay = new Date(
           start.getFullYear(),
           start.getMonth(),
           start.getDate()
         );
-        const endDateOnly = new Date(
+        const endDay = new Date(
           end.getFullYear(),
           end.getMonth(),
           end.getDate()
         );
 
-        if (
-          selectedDateOnly.getTime() >= startDateOnly.getTime() &&
-          selectedDateOnly.getTime() < endDateOnly.getTime()
-        ) {
-          current_status = "booked";
+        // BOOKED
+        if (selectedDay >= startDay && selectedDay < endDay) {
+          newStatus = "booked";
           activeReservation = r;
-        } else if (endDateOnly.getTime() <= selectedDateOnly.getTime()) {
+        }
+
+        // CHECKOUT DAY → needs_cleaning (ONLY if still dirty)
+        if (selectedDay.getTime() >= endDay.getTime()) {
           if (room.status !== "available") {
-            current_status = "needs_cleaning";
+            newStatus = "needs_cleaning";
           }
         }
-      });
+      }
 
-      return {
+      // Update DB only if needed
+      if (newStatus !== room.status) {
+        await prisma.rooms.update({
+          where: { id: room.id },
+          data: { status: newStatus },
+        });
+      }
+
+      updatedRooms.push({
         ...room,
-        current_status,
+        status: newStatus,
+        current_status: newStatus,
         active_reservation: activeReservation,
-      };
-    });
+      });
+    }
 
     return NextResponse.json(updatedRooms);
   } catch (error) {
-    console.error("GET /rooms error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -77,7 +95,11 @@ export async function GET(request) {
 export async function PATCH(request) {
   try {
     const { room_id } = await request.json();
+
+    console.log("\n🧼 CLEAN REQUEST FOR ROOM:", room_id);
+
     if (!room_id) {
+      console.log("❌ No room_id provided");
       return NextResponse.json(
         { error: "Room ID is required" },
         { status: 400 }
@@ -88,24 +110,30 @@ export async function PATCH(request) {
       where: { id: Number(room_id) },
     });
 
+    console.log("Found room in DB:", room);
+
     if (!room) {
+      console.log("❌ Room not found");
       return NextResponse.json({ error: "Room not found" }, { status: 404 });
     }
 
-    const updatedRoom = await prisma.rooms.update({
+    const updated = await prisma.rooms.update({
       where: { id: Number(room_id) },
       data: { status: "available" },
     });
-    lo;
+
+    console.log("✅ ROOM CLEANED → DB UPDATED:", updated);
 
     return NextResponse.json({
-      message: "✅ Room marked as cleaned",
+      message: "Room cleaned",
+      room: updated,
     });
   } catch (error) {
-    console.error("PATCH /rooms error:", error);
+    console.error("❌ PATCH /rooms error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
 export async function POST(request) {
   try {
     const body = await request.json();

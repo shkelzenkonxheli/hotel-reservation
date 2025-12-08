@@ -44,6 +44,7 @@ export async function POST(req) {
       });
 
       const availableRoom = rooms.find((room) => {
+        if (room.status === "out_of_order") return;
         const conflict = room.reservations.some((reservation) => {
           return (
             new Date(meta.startDate) < new Date(reservation.end_date) &&

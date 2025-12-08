@@ -23,6 +23,7 @@ export async function POST(request) {
     });
 
     const availableRoom = rooms.find((room) => {
+      if (room.status === "out_of_order") return;
       const conflict = room.reservations.some((reservation) => {
         return (
           new Date(startDate) < new Date(reservation.end_date) &&
@@ -118,6 +119,7 @@ export async function GET(request) {
       });
 
       const availableRoom = rooms.find((room) => {
+        if (room.status === "out_of_order") return;
         const conflict = room.reservations.some((res) => {
           if (reservationId && res.id === reservationId) return false;
           return (

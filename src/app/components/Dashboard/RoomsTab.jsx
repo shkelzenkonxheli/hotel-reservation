@@ -51,20 +51,44 @@ export default function RoomsTab() {
     }
   }
 
-  async function handleCleanRoom(room_id) {
+  async function handleCleanRoom(room_id, status) {
     if (!confirm("Mark this room as cleaned?")) return;
 
     try {
       const res = await fetch("/api/rooms", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ room_id }),
+        body: JSON.stringify({ room_id, status }),
       });
       if (res.ok) {
         fetchRooms();
         setSelectedRoom(null);
       } else {
         alert("Error cleaning room");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+  async function handleRoomStatus(room_id, status, currentStatus) {
+    const message =
+      currentStatus === "out_of_order"
+        ? "Mark this room as available?"
+        : "Mark this room as out of order?";
+
+    if (!confirm(message)) return;
+
+    try {
+      const res = await fetch("/api/rooms", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ room_id, status }),
+      });
+      if (res.ok) {
+        fetchRooms();
+        setSelectedRoom(null);
+      } else {
+        alert("Error cchanging room status");
       }
     } catch (err) {
       console.error(err);
@@ -115,6 +139,7 @@ export default function RoomsTab() {
 
     // Past dates (para dites se sotme)
     if (d < today) return "";
+    if (selectedRoom.room.current_status === "out_of_order") return "";
 
     let isBooked = false;
     let isCheckout = false;
@@ -328,20 +353,75 @@ export default function RoomsTab() {
           maxWidth="sm"
           fullWidth
         >
-          <DialogTitle>
-            Room {selectedRoom.room.room_number}
+          <DialogTitle
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              pr: 6, // i jep hapësirë që X të mos afrohet te butoni
+              position: "relative",
+            }}
+          >
+            {/* TITULLI */}
+            <Typography variant="h6" fontWeight="bold">
+              Room {selectedRoom.room.room_number}
+            </Typography>
+
+            {/* BUTONI OUT OF ORDER */}
+            <Button
+              variant="outlined"
+              onClick={() =>
+                handleRoomStatus(
+                  selectedRoom.room.id,
+                  selectedRoom.room.current_status === "out_of_order"
+                    ? "available"
+                    : "out_of_order",
+                  selectedRoom.room.current_status
+                )
+              }
+              sx={{
+                borderColor:
+                  selectedRoom.room.current_status === "out_of_order"
+                    ? "#22c55e"
+                    : "#f87171",
+                color:
+                  selectedRoom.room.current_status === "out_of_order"
+                    ? "#16a34a"
+                    : "#dc2626",
+                textTransform: "none",
+                borderRadius: 2,
+                px: 2,
+                py: 0.5,
+                fontWeight: "600",
+                "&:hover": {
+                  borderColor:
+                    selectedRoom.room.current_status === "out_of_order"
+                      ? "#16a34a"
+                      : "#b91c1c",
+                  bgcolor: "transparent",
+                },
+              }}
+            >
+              {selectedRoom.room.current_status === "out_of_order"
+                ? "✔ Mark Available"
+                : "⛔ Out of Order"}
+            </Button>
+
+            {/* CLOSE BUTTON */}
             <Button
               onClick={() => setSelectedRoom(null)}
               sx={{
                 position: "absolute",
-                right: 10,
-                top: 10,
-                color: "gray.500",
+                right: 8,
+                top: 8,
+                color: "gray",
+                minWidth: "32px",
               }}
             >
               <Close />
             </Button>
           </DialogTitle>
+
           <Divider />
           <DialogContent dividers>
             {selectedRoom.reservation ? (
@@ -389,7 +469,9 @@ export default function RoomsTab() {
                 <Button
                   variant="contained"
                   startIcon={<CleaningServices />}
-                  onClick={() => handleCleanRoom(selectedRoom.room.id)}
+                  onClick={() =>
+                    handleCleanRoom(selectedRoom.room.id, "available")
+                  }
                   sx={{
                     bgcolor: "#facc15",
                     color: "black",

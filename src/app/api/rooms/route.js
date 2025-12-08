@@ -6,11 +6,12 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const includeReservations = searchParams.get("include") === "true";
     const selectedDateParam = searchParams.get("date");
+
+    // IF only listing rooms (Manage Rooms)
     if (!includeReservations) {
       const rooms = await prisma.rooms.findMany({
         orderBy: { room_number: "asc" },
       });
-
       return NextResponse.json(rooms);
     }
 
@@ -25,13 +26,11 @@ export async function GET(request) {
     );
 
     const rooms = await prisma.rooms.findMany({
-      include: includeReservations
-        ? {
-            reservations: {
-              include: { users: true },
-            },
-          }
-        : undefined,
+      include: {
+        reservations: {
+          include: { users: true },
+        },
+      },
       orderBy: { room_number: "asc" },
     });
 
@@ -56,21 +55,21 @@ export async function GET(request) {
           end.getDate()
         );
 
-        // BOOKED
+        // BOOKED (between start and end)
         if (selectedDay >= startDay && selectedDay < endDay) {
           newStatus = "booked";
           activeReservation = r;
         }
 
-        // CHECKOUT DAY → needs_cleaning (ONLY if still dirty)
-        if (selectedDay.getTime() >= endDay.getTime()) {
+        // CHECKOUT DAY ONLY → needs cleaning
+        if (selectedDay.getTime() === endDay.getTime()) {
           if (room.status !== "available") {
             newStatus = "needs_cleaning";
           }
         }
       }
 
-      // Update DB only if needed
+      // Update DB only if status changed
       if (newStatus !== room.status) {
         await prisma.rooms.update({
           where: { id: room.id },
@@ -94,9 +93,7 @@ export async function GET(request) {
 
 export async function PATCH(request) {
   try {
-    const { room_id } = await request.json();
-
-    console.log("\n🧼 CLEAN REQUEST FOR ROOM:", room_id);
+    const { room_id, status } = await request.json();
 
     if (!room_id) {
       console.log("❌ No room_id provided");
@@ -105,6 +102,7 @@ export async function PATCH(request) {
         { status: 400 }
       );
     }
+    const newStatus = status || "available";
 
     const room = await prisma.rooms.findUnique({
       where: { id: Number(room_id) },
@@ -119,10 +117,8 @@ export async function PATCH(request) {
 
     const updated = await prisma.rooms.update({
       where: { id: Number(room_id) },
-      data: { status: "available" },
+      data: { status: newStatus },
     });
-
-    console.log("✅ ROOM CLEANED → DB UPDATED:", updated);
 
     return NextResponse.json({
       message: "Room cleaned",

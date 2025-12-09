@@ -10,19 +10,21 @@ import {
   List,
   ListItem,
   ListItemButton,
-  ListItemText,
   ListItemIcon,
+  ListItemText,
   Toolbar,
+  IconButton,
   CircularProgress,
+  AppBar,
+  Typography,
 } from "@mui/material";
 
-import {
-  Dashboard as DashboardIcon,
-  MeetingRoom as RoomIcon,
-  BookOnline as ReservationIcon,
-  People as UsersIcon,
-  BuildCircle as ManageIcon,
-} from "@mui/icons-material";
+import MenuIcon from "@mui/icons-material/Menu";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
+import BookOnlineIcon from "@mui/icons-material/BookOnline";
+import PeopleIcon from "@mui/icons-material/People";
+import BuildCircleIcon from "@mui/icons-material/BuildCircle";
 
 import OverviewTab from "../components/Dashboard/OverviewTab";
 import RoomsTab from "../components/Dashboard/RoomsTab";
@@ -41,10 +43,13 @@ export default function Dashboard() {
       ? localStorage.getItem("activeTab") || "overview"
       : "overview"
   );
+
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
+
   useEffect(() => {
-    if (activeTab) {
-      localStorage.setItem("activeTab", activeTab);
-    }
+    if (activeTab) localStorage.setItem("activeTab", activeTab);
   }, [activeTab]);
 
   useEffect(() => {
@@ -52,32 +57,23 @@ export default function Dashboard() {
 
     if (!session?.user) {
       router.push("/login");
-    } else if (session?.user?.role === "client") {
-      alert("You dont have premission to access dashboard");
+    } else if (session.user.role === "client") {
+      alert("You dont have permission to access dashboard");
       router.push("/");
     }
-  }, [status, session, router]);
+  }, [session, status]);
 
-  if (status === "loading") {
+  if (status === "loading")
     return (
       <Box className="flex justify-center items-center h-screen">
         <CircularProgress />
       </Box>
     );
-  }
 
   if (!session?.user) return null;
-  if (session.user.role === "client") {
-    return (
-      <Box className="flex justify-center items-center h-screen">
-        <CircularProgress />
-      </Box>
-    );
-  }
 
   const user = session.user;
 
-  // Cakto cilat tab-a shfaqen
   const allowedTabs =
     user.role === "admin"
       ? ["overview", "rooms", "reservations", "users", "manageRooms"]
@@ -87,19 +83,88 @@ export default function Dashboard() {
 
   const tabs = [
     { key: "overview", label: "Overview", icon: <DashboardIcon /> },
-    { key: "rooms", label: "Rooms", icon: <RoomIcon /> },
-    { key: "reservations", label: "Reservations", icon: <ReservationIcon /> },
-    { key: "users", label: "Users", icon: <UsersIcon /> },
-    { key: "manageRooms", label: "Manage Rooms", icon: <ManageIcon /> },
+    { key: "rooms", label: "Rooms", icon: <MeetingRoomIcon /> },
+    { key: "reservations", label: "Reservations", icon: <BookOnlineIcon /> },
+    { key: "users", label: "Users", icon: <PeopleIcon /> },
+    { key: "manageRooms", label: "Manage Rooms", icon: <BuildCircleIcon /> },
   ];
 
   const visibleTabs = tabs.filter((t) => allowedTabs.includes(t.key));
 
+  const drawer = (
+    <div>
+      <Toolbar
+        sx={{
+          bgcolor: "#111827",
+          color: "white",
+          fontWeight: "bold",
+          textAlign: "center",
+        }}
+      >
+        {user.role === "admin" ? "Admin Panel" : "Worker Panel"}
+      </Toolbar>
+
+      <List>
+        {visibleTabs.map((tab) => (
+          <ListItem key={tab.key} disablePadding>
+            <ListItemButton
+              selected={activeTab === tab.key}
+              onClick={() => {
+                setActiveTab(tab.key);
+                setMobileOpen(false);
+              }}
+            >
+              <ListItemIcon sx={{ color: "white" }}>{tab.icon}</ListItemIcon>
+              <ListItemText primary={tab.label} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+    </div>
+  );
+
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
+      {/* TOP BAR FOR MOBILE */}
+      <AppBar
+        position="fixed"
+        sx={{
+          display: { md: "none" },
+          bgcolor: "#1f2937",
+        }}
+      >
+        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Typography variant="h6">Dashboard</Typography>
+
+          <IconButton color="inherit" onClick={handleDrawerToggle}>
+            <MenuIcon />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
+
+      {/* MOBILE DRAWER */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{ keepMounted: true }}
+        sx={{
+          display: { xs: "block", md: "none" },
+          "& .MuiDrawer-paper": {
+            width: drawerWidth,
+            bgcolor: "#1e293b",
+            color: "white",
+          },
+        }}
+      >
+        {drawer}
+      </Drawer>
+
+      {/* DESKTOP DRAWER */}
       <Drawer
         variant="permanent"
         sx={{
+          display: { xs: "none", md: "block" },
           width: drawerWidth,
           "& .MuiDrawer-paper": {
             width: drawerWidth,
@@ -108,28 +173,18 @@ export default function Dashboard() {
           },
         }}
       >
-        <Toolbar
-          sx={{ bgcolor: "#111827", color: "white", fontWeight: "bold" }}
-        >
-          {user.role === "admin" ? "Admin Panel" : "Worker Panel"}
-        </Toolbar>
-
-        <List>
-          {visibleTabs.map((tab) => (
-            <ListItem key={tab.key} disablePadding>
-              <ListItemButton
-                selected={activeTab === tab.key}
-                onClick={() => setActiveTab(tab.key)}
-              >
-                <ListItemIcon sx={{ color: "white" }}>{tab.icon}</ListItemIcon>
-                <ListItemText primary={tab.label} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
+        {drawer}
       </Drawer>
 
-      <Box component="main" sx={{ p: 4, flexGrow: 1 }}>
+      {/* MAIN CONTENT */}
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: { xs: 2, md: 4 },
+          mt: { xs: 7, md: 0 }, // pushes content down under mobile AppBar
+        }}
+      >
         {activeTab === "overview" && <OverviewTab />}
         {activeTab === "rooms" && <RoomsTab />}
         {activeTab === "reservations" && <ReservationsTab />}

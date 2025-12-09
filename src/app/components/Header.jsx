@@ -2,7 +2,7 @@
 
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   AppBar,
   Toolbar,
@@ -12,33 +12,55 @@ import {
   Menu,
   MenuItem,
   Box,
-  Icon,
 } from "@mui/material";
+
 import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import HomeIcon from "@mui/icons-material/Home";
-import BookOnlineIcon from "@mui/icons-material/BookOnline";
 import LoginIcon from "@mui/icons-material/Login";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 
 export default function Header() {
   const { data: session } = useSession();
   const user = session?.user;
-  const [anchorEl, setAnchorEl] = useState(null);
 
-  const handleMenuOpen = (e) => setAnchorEl(e.currentTarget);
-  const handleMenuClose = () => setAnchorEl(null);
-  const handleLogut = () => {
+  const [menuAnchor, setMenuAnchor] = useState(null);
+  const [alertsAnchor, setAlertsAnchor] = useState(null);
+  const [summary, setSummary] = useState(null);
+
+  const openMenu = (e) => setMenuAnchor(e.currentTarget);
+  const closeMenu = () => setMenuAnchor(null);
+
+  const openAlerts = (e) => setAlertsAnchor(e.currentTarget);
+  const closeAlerts = () => setAlertsAnchor(null);
+
+  const logout = () => {
     localStorage.removeItem("activeTab");
     signOut();
   };
 
+  useEffect(() => {
+    async function loadSummary() {
+      const res = await fetch("/api/houseKeeping/summary");
+      const data = await res.json();
+      setSummary(data);
+    }
+    loadSummary();
+  }, []);
+
   return (
     <AppBar position="sticky" sx={{ backgroundColor: "#1f2937" }}>
-      <Toolbar className="flex justify-between">
-        {/* Logo */}
+      <Toolbar
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          gap: 2,
+        }}
+      >
+        {/* LEFT — LOGO */}
         <Typography
           variant="h6"
           component={Link}
@@ -52,8 +74,8 @@ export default function Header() {
           🏨 Hotel Management
         </Typography>
 
-        {/* Desktop Navigation */}
-        <Box className="hidden md:flex items-center gap-3">
+        {/* CENTER — DESKTOP NAVIGATION */}
+        <Box className="hidden md:flex items-center gap-4">
           <Button
             component={Link}
             href="/"
@@ -66,8 +88,72 @@ export default function Header() {
           <Button component={Link} href="/contact" sx={{ color: "white" }}>
             Contact
           </Button>
+        </Box>
 
-          {!user && (
+        {/* RIGHT — PROFILE, NOTIFICATIONS, LOGOUT */}
+        <Box className="hidden md:flex items-center gap-3">
+          {user && user.role !== "client" && (
+            <>
+              <IconButton color="inherit" onClick={openAlerts}>
+                <NotificationsIcon />
+              </IconButton>
+
+              {/* Notifications dropdown */}
+              <Menu
+                anchorEl={alertsAnchor}
+                open={Boolean(alertsAnchor)}
+                onClose={closeAlerts}
+              >
+                <Box sx={{ p: 2, width: 250 }}>
+                  <Typography variant="subtitle1" fontWeight="bold" mb={1}>
+                    🧹 Housekeeping Alerts
+                  </Typography>
+
+                  <Typography>
+                    🚪 Checkouts Today: {summary?.checkout_today}
+                  </Typography>
+                  <Typography>
+                    🧼 Needs Cleaning: {summary?.needs_cleaning}
+                  </Typography>
+                  <Typography>
+                    ⚠️ Out of Order: {summary?.out_of_order}
+                  </Typography>
+                </Box>
+              </Menu>
+            </>
+          )}
+
+          {user ? (
+            <>
+              {user.role !== "client" && (
+                <Button
+                  component={Link}
+                  href="/dashboard"
+                  startIcon={<DashboardIcon />}
+                  sx={{ color: "white" }}
+                >
+                  Dashboard
+                </Button>
+              )}
+
+              <Button
+                component={Link}
+                href="/profile"
+                startIcon={<PersonOutlineIcon />}
+                sx={{ color: "white" }}
+              >
+                {session?.user.name}
+              </Button>
+
+              <Button
+                onClick={logout}
+                startIcon={<LogoutIcon />}
+                sx={{ color: "white" }}
+              >
+                Logout
+              </Button>
+            </>
+          ) : (
             <>
               <Button
                 component={Link}
@@ -87,116 +173,94 @@ export default function Header() {
               </Button>
             </>
           )}
-
-          {user && (
-            <>
-              {user.role !== "client" && (
-                <Button
-                  component={Link}
-                  href="/dashboard"
-                  startIcon={<DashboardIcon />}
-                  sx={{ color: "white" }}
-                >
-                  Dashboard
-                </Button>
-              )}
-
-              {user && (
-                <Button
-                  component={Link}
-                  href="/profile"
-                  startIcon={<PersonOutlineIcon />}
-                  sx={{ color: "white" }}
-                >
-                  Profile
-                </Button>
-              )}
-
-              <Button
-                onClick={handleLogut}
-                startIcon={<LogoutIcon />}
-                sx={{ color: "white" }}
-              >
-                Logout
-              </Button>
-            </>
-          )}
         </Box>
 
-        {/* Mobile Menu Button */}
+        {/* MOBILE MENU BUTTON */}
         <IconButton
           color="inherit"
           edge="end"
-          onClick={handleMenuOpen}
+          onClick={openMenu}
           className="md:hidden"
         >
           <MenuIcon />
         </IconButton>
 
-        {/* Mobile Dropdown Menu */}
+        {/* MOBILE DROPDOWN MENU */}
         <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleMenuClose}
+          anchorEl={menuAnchor}
+          open={Boolean(menuAnchor)}
+          onClose={closeMenu}
         >
-          <MenuItem component={Link} href="/" onClick={handleMenuClose}>
-            Home
-          </MenuItem>
-
-          <MenuItem component={Link} href="/contact" onClick={handleMenuClose}>
-            Contact
-          </MenuItem>
-
-          {!user && [
-            <MenuItem
-              key="login"
-              component={Link}
-              href="/login"
-              onClick={handleMenuClose}
-            >
-              Login
+          {[
+            <MenuItem key="home" component={Link} href="/" onClick={closeMenu}>
+              Home
             </MenuItem>,
+
             <MenuItem
-              key="register"
+              key="contact"
               component={Link}
-              href="/register"
-              onClick={handleMenuClose}
+              href="/contact"
+              onClick={closeMenu}
             >
-              Register
+              Contact
             </MenuItem>,
-          ]}
-          {user && [
-            user.role !== "client" && (
+
+            !user && (
+              <MenuItem
+                key="login"
+                component={Link}
+                href="/login"
+                onClick={closeMenu}
+              >
+                Login
+              </MenuItem>
+            ),
+
+            !user && (
+              <MenuItem
+                key="register"
+                component={Link}
+                href="/register"
+                onClick={closeMenu}
+              >
+                Register
+              </MenuItem>
+            ),
+
+            user && user.role !== "client" && (
               <MenuItem
                 key="dashboard"
                 component={Link}
                 href="/dashboard"
-                onClick={handleMenuClose}
+                onClick={closeMenu}
               >
                 Dashboard
               </MenuItem>
             ),
-            user.role === "client" && (
+
+            user && (
               <MenuItem
-                key="reservations"
+                key="profile"
                 component={Link}
-                href="/reservations"
-                onClick={handleMenuClose}
+                href="/profile"
+                onClick={closeMenu}
               >
-                Reservations
+                Profile
               </MenuItem>
             ),
 
-            <MenuItem
-              key="logout"
-              onClick={() => {
-                handleLogut();
-                handleMenuClose();
-              }}
-            >
-              Logout
-            </MenuItem>,
-          ]}
+            user && (
+              <MenuItem
+                key="logout"
+                onClick={() => {
+                  closeMenu();
+                  logout();
+                }}
+              >
+                Logout
+              </MenuItem>
+            ),
+          ].filter(Boolean)}
         </Menu>
       </Toolbar>
     </AppBar>

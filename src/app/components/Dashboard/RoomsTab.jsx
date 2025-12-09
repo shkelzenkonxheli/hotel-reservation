@@ -34,7 +34,6 @@ export default function RoomsTab() {
 
   useEffect(() => {
     fetchRooms();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate]);
 
   async function fetchRooms() {
@@ -363,7 +362,7 @@ export default function RoomsTab() {
             }}
           >
             {/* TITULLI */}
-            <Typography variant="h6" fontWeight="bold">
+            <Typography variant="h6" component="div" fontWeight="bold">
               Room {selectedRoom.room.room_number}
             </Typography>
 

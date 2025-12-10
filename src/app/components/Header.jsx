@@ -42,6 +42,9 @@ export default function Header() {
     signOut();
   };
 
+  // fix for hydration — detect real client
+  const isClient = typeof window !== "undefined";
+
   useEffect(() => {
     async function loadSummary() {
       const res = await fetch("/api/houseKeeping/summary");
@@ -53,25 +56,16 @@ export default function Header() {
 
   return (
     <AppBar position="sticky" sx={{ backgroundColor: "#1f2937" }}>
-      <Toolbar
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          gap: 2,
-        }}
-      >
+      <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
         {/* LEFT — LOGO */}
         <Typography
           variant="h6"
-          component={Link}
-          href="/"
-          sx={{
-            textDecoration: "none",
-            color: "white",
-            fontWeight: "bold",
-          }}
+          component="div"
+          sx={{ fontWeight: "bold", display: "flex", alignItems: "center" }}
         >
-          🏨 Hotel Management
+          <Link href="/" style={{ color: "white", textDecoration: "none" }}>
+            🏨 Hotel Management
+          </Link>
         </Typography>
 
         {/* CENTER — DESKTOP NAVIGATION */}
@@ -91,14 +85,17 @@ export default function Header() {
         </Box>
 
         {/* RIGHT — PROFILE, NOTIFICATIONS, LOGOUT */}
-        <Box className="hidden md:flex items-center gap-3">
-          {user && user.role !== "client" && (
+        <Box
+          className="hidden md:flex items-center gap-3"
+          sx={{ marginLeft: "auto" }}
+        >
+          {/* Notifications (only worker/admin) */}
+          {isClient && user && user.role !== "client" && (
             <>
               <IconButton color="inherit" onClick={openAlerts}>
                 <NotificationsIcon />
               </IconButton>
 
-              {/* Notifications dropdown */}
               <Menu
                 anchorEl={alertsAnchor}
                 open={Boolean(alertsAnchor)}
@@ -123,7 +120,8 @@ export default function Header() {
             </>
           )}
 
-          {user ? (
+          {/* User section */}
+          {isClient && user ? (
             <>
               {user.role !== "client" && (
                 <Button
@@ -142,7 +140,7 @@ export default function Header() {
                 startIcon={<PersonOutlineIcon />}
                 sx={{ color: "white" }}
               >
-                {session?.user.name}
+                {user.name}
               </Button>
 
               <Button

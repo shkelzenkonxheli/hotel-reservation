@@ -33,6 +33,8 @@ import UsersTab from "../components/Dashboard/UserTab";
 import ManageRoomsTab from "../components/Dashboard/ManageRooms";
 
 const drawerWidth = 240;
+// lartësia e AppBar-it të header-it (afërsisht 64px)
+const HEADER_HEIGHT = 64;
 
 export default function Dashboard() {
   const router = useRouter();
@@ -45,7 +47,6 @@ export default function Dashboard() {
   );
 
   const [mobileOpen, setMobileOpen] = useState(false);
-
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
 
   useEffect(() => {
@@ -61,19 +62,21 @@ export default function Dashboard() {
       alert("You dont have permission to access dashboard");
       router.push("/");
     }
-  }, [session, status]);
+  }, [session, status, router]);
 
-  if (status === "loading")
+  if (status === "loading") {
     return (
       <Box className="flex justify-center items-center h-screen">
         <CircularProgress />
       </Box>
     );
+  }
 
   if (!session?.user) return null;
 
   const user = session.user;
 
+  // cilat tab-a lejohet me i pa
   const allowedTabs =
     user.role === "admin"
       ? ["overview", "rooms", "reservations", "users", "manageRooms"]
@@ -125,24 +128,25 @@ export default function Dashboard() {
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
-      {/* TOP BAR FOR MOBILE */}
+      {/* APPBAR VETËM PËR MOBILE (brenda dashboard-it) */}
       <AppBar
         position="fixed"
         sx={{
-          display: { md: "none" },
-          bgcolor: "#1f2937",
+          display: { xs: "flex", md: "none" },
+          top: 50, // poshtë header-it kryesor
+          bgcolor: "#111827",
+          zIndex: (theme) => theme.zIndex.appBar - 1,
         }}
       >
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           <Typography variant="h6">Dashboard</Typography>
-
           <IconButton color="inherit" onClick={handleDrawerToggle}>
             <MenuIcon />
           </IconButton>
         </Toolbar>
       </AppBar>
 
-      {/* MOBILE DRAWER */}
+      {/* DRAWER MOBILE */}
       <Drawer
         variant="temporary"
         open={mobileOpen}
@@ -154,13 +158,15 @@ export default function Dashboard() {
             width: drawerWidth,
             bgcolor: "#1e293b",
             color: "white",
+            top: HEADER_HEIGHT, // mos e mbulo header-in
+            height: `calc(100% - ${HEADER_HEIGHT}px)`,
           },
         }}
       >
         {drawer}
       </Drawer>
 
-      {/* DESKTOP DRAWER */}
+      {/* DRAWER DESKTOP */}
       <Drawer
         variant="permanent"
         sx={{
@@ -170,19 +176,22 @@ export default function Dashboard() {
             width: drawerWidth,
             bgcolor: "#1e293b",
             color: "white",
+            top: HEADER_HEIGHT, // KJO E ZGJIDH: nis poshtë header-it
+            height: `calc(100% - ${HEADER_HEIGHT}px)`,
           },
         }}
       >
         {drawer}
       </Drawer>
 
-      {/* MAIN CONTENT */}
+      {/* PËRMBAJTJA KRYESORE */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
           p: { xs: 2, md: 4 },
-          mt: { xs: 7, md: 0 }, // pushes content down under mobile AppBar
+          // për mobile: header kryesor + appbar i dashboard-it
+          mt: { xs: 8, md: 0 },
         }}
       >
         {activeTab === "overview" && <OverviewTab />}

@@ -74,3 +74,29 @@ body {
   color: #1e3a8a !important;
   border-radius: 20px;
 }
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  .receipt-print,
+  .receipt-print * {
+    visibility: visible !important;
+  }
+
+  .receipt-print {
+    position: fixed;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px; /* 👈 KEY */
+    padding: 32px;
+    background: white;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
+

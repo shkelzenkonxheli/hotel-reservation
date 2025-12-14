@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { nanoid } from "nanoid";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 export async function POST(req) {
   try {
@@ -22,6 +23,7 @@ export async function POST(req) {
       customer_email: userEmail,
       metadata: {
         roomId: roomId,
+        reservation_code: "RES-" + nanoid(6).toUpperCase(),
         roomName,
         totalPrice,
         type,

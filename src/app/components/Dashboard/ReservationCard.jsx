@@ -5,8 +5,9 @@ import {
   Chip,
   Box,
   IconButton,
+  Divider,
 } from "@mui/material";
-import { MoreVert, Star, StarBorder, Print } from "@mui/icons-material";
+import { MoreVert, Star, StarBorder, Print, Delete } from "@mui/icons-material";
 
 export default function ReservationCard({
   reservation,
@@ -16,30 +17,75 @@ export default function ReservationCard({
   onPrint,
 }) {
   return (
-    <Card sx={{ borderRadius: 3 }}>
+    <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
       <CardContent>
-        <Box display="flex" justifyContent="space-between">
-          <Typography fontWeight={600}>{reservation.full_name}</Typography>
-          <IconButton onClick={onFavorite}>
+        {/* HEADER */}
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box>
+            <Typography fontWeight={600}>{reservation.full_name}</Typography>
+            <Typography variant="caption" color="text.secondary">
+              {reservation.users?.email}
+            </Typography>
+          </Box>
+
+          <IconButton size="small" onClick={onFavorite}>
             {favorite ? <Star color="warning" /> : <StarBorder />}
           </IconButton>
         </Box>
 
-        <Typography variant="caption" color="text.secondary">
-          {reservation.users?.email}
-        </Typography>
+        <Divider sx={{ my: 1.5 }} />
 
-        <Box mt={1}>
+        {/* ROOM + STATUS */}
+        <Box display="flex" gap={1} flexWrap="wrap">
           <Chip label={reservation.rooms?.name} size="small" />
-          <Chip label={reservation.status} size="small" sx={{ ml: 1 }} />
+          <Chip
+            label={reservation.status}
+            size="small"
+            sx={{
+              background:
+                reservation.status === "confirmed"
+                  ? "#dbeafe"
+                  : reservation.status === "completed"
+                  ? "#dcfce7"
+                  : reservation.status === "cancelled"
+                  ? "#fee2e2"
+                  : "#fef9c3",
+            }}
+          />
         </Box>
 
+        {/* DATES */}
+        <Box mt={1} display="flex" gap={1}>
+          <Chip
+            size="small"
+            label={`IN: ${new Date(
+              reservation.start_date
+            ).toLocaleDateString()}`}
+            sx={{ background: "#ecfeff", color: "#155e75" }}
+          />
+          <Chip
+            size="small"
+            label={`OUT: ${new Date(
+              reservation.end_date
+            ).toLocaleDateString()}`}
+            sx={{ background: "#fff7ed", color: "#9a3412" }}
+          />
+        </Box>
+
+        {/* ACTIONS */}
         <Box display="flex" justifyContent="flex-end" mt={2}>
-          <IconButton onClick={onPrint}>
+          <IconButton size="small" onClick={onPrint}>
             <Print />
           </IconButton>
-          <IconButton onClick={onManage}>
+          <IconButton size="small" onClick={onManage}>
             <MoreVert />
+          </IconButton>
+          <IconButton
+            size="small"
+            color="error"
+            onClick={() => setDeleteDialog({ open: true, id: r.id })}
+          >
+            <Delete />
           </IconButton>
         </Box>
       </CardContent>

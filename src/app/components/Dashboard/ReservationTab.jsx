@@ -19,7 +19,10 @@ import {
   DialogContentText,
   Typography,
   FormControl,
+  IconButton,
 } from "@mui/material";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import ReservationCard from "./ReservationCard";
 import {
   CheckCircle,
   Cancel,
@@ -28,8 +31,12 @@ import {
   MoreVert,
   Delete,
   BookOnline,
+  Star,
+  StarBorder,
+  Print as PrintIcon,
 } from "@mui/icons-material";
 import ReservationForm from "./ReservationForm";
+import PrintReceipt from "./PrintReceipt";
 
 export default function ReservationsTab() {
   const [reservations, setReservations] = useState([]);
@@ -46,6 +53,17 @@ export default function ReservationsTab() {
   const [activeTab, setActiveTab] = useState("all");
   const [editOpen, setEditOpen] = useState(false);
   const [editData, setEditData] = useState("null");
+
+  // ✅ SHTESA (UI) — pa prekur funksionet
+  const isMobile = useMediaQuery("(max-width:768px)");
+  const [favorites, setFavorites] = useState([]);
+  const [printReservation, setPrintReservation] = useState(null);
+
+  const toggleFavorite = (id) => {
+    setFavorites((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
 
   useEffect(() => {
     fetchReservations();
@@ -90,6 +108,7 @@ export default function ReservationsTab() {
       setSelectedReservation(null);
     }
   }
+
   useEffect(() => {
     let filteredList = reservations;
     if (search.trim()) {
@@ -109,8 +128,15 @@ export default function ReservationsTab() {
         r.rooms?.type?.toLowerCase().includes(typeFilter)
       );
     }
+    filteredList = [...filteredList].sort((a, b) => {
+      const aFav = favorites.includes(a.id);
+      const bFav = favorites.includes(b.id);
+      return bFav - aFav;
+    });
+
     setFiltered(filteredList);
-  }, [search, statusFilter, typeFilter, reservations]);
+    setFiltered(filteredList);
+  }, [search, statusFilter, typeFilter, reservations, favorites]);
 
   async function handleDeleteReservation() {
     try {
@@ -128,6 +154,7 @@ export default function ReservationsTab() {
       setDeleteDialog({ open: false, id: null });
     }
   }
+
   function getUpcomingReservations(reservations) {
     const today = new Date().setHours(0, 0, 0, 0);
 
@@ -136,6 +163,7 @@ export default function ReservationsTab() {
       return start >= today;
     });
   }
+
   let displayList = filtered;
   if (activeTab === "upcoming") {
     displayList = getUpcomingReservations(filtered);
@@ -157,7 +185,6 @@ export default function ReservationsTab() {
 
   const getStatusChip = (status = "pending") => {
     const s = status.toLowerCase();
-    const base = "text-xs font-semibold";
 
     switch (s) {
       case "pending":
@@ -349,20 +376,38 @@ export default function ReservationsTab() {
         </Button>
       </Box>
 
+      {/* ✅ MOBILE CARD VIEW — vetëm UI, pa prekur funksionet */}
       {displayList.length === 0 ? (
         <p className="text-center text-gray-500">No reservations found.</p>
+      ) : isMobile ? (
+        <Box display="flex" flexDirection="column" gap={2}>
+          {displayList.map((r) => (
+            <ReservationCard
+              key={r.id}
+              reservation={r}
+              favorite={favorites.includes(r.id)}
+              onFavorite={() => toggleFavorite(r.id)}
+              onPrint={() => setPrintData(r)}
+              onManage={(e) => {
+                setAnchorEl(e.currentTarget);
+                setSelectedReservation(r);
+              }}
+            />
+          ))}
+        </Box>
       ) : (
+        /* ✅ DESKTOP TABLE — ruajtur, vetëm UI i përmirësuar për date + pin + print */
         <div className="overflow-x-auto bg-white rounded-xl shadow-md border border-gray-100 mt-4">
           <table className="min-w-full text-sm text-gray-700">
             <thead className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs uppercase">
               <tr>
+                <th className="p-3 text-center">Pin</th>
                 <th className="p-3 text-left">Reservation Code</th>
                 <th className="p-3 text-left">Guest</th>
                 <th className="p-3 text-left">Email</th>
                 <th className="p-3 text-left">Room</th>
                 <th className="p-3 text-center">#</th>
-                <th className="p-3 text-center">Check-in</th>
-                <th className="p-3 text-center">Check-out</th>
+                <th className="p-3 text-center">Dates</th>
                 <th className="p-3 text-center">Guests</th>
                 <th className="p-3 text-center">Status</th>
                 <th className="p-3 text-center">Total (€)</th>
@@ -376,54 +421,93 @@ export default function ReservationsTab() {
                   key={r.id}
                   className="hover:bg-blue-50 transition duration-150"
                 >
+                  {/* PIN */}
+                  <td className="p-3 text-center">
+                    <IconButton onClick={() => toggleFavorite(r.id)}>
+                      {favorites.includes(r.id) ? (
+                        <Star color="warning" />
+                      ) : (
+                        <StarBorder />
+                      )}
+                    </IconButton>
+                  </td>
+
                   <td className="p-3 font-mono text-sm text-gray-700">
                     {r.reservation_code || "-"}
                   </td>
+
                   <td className="p-3 font-medium text-gray-800">
                     {r.full_name}
                   </td>
+
                   <td className="p-3">{r.users?.email}</td>
+
                   <td className="p-3">{r.rooms?.name}</td>
+
                   <td className="p-3 text-center">
                     {r.rooms?.room_number || "-"}
                   </td>
-                  <td className="p-3 text-center text-gray-700">
-                    {new Date(r.start_date).toLocaleDateString()}
+
+                  {/* Dates me ngjyra */}
+                  <td className="p-3 text-center">
+                    <Box display="flex" flexDirection="column" gap={0.5}>
+                      <Chip
+                        size="small"
+                        label={`IN: ${new Date(
+                          r.start_date
+                        ).toLocaleDateString()}`}
+                        sx={{ background: "#ecfeff", color: "#155e75" }}
+                      />
+                      <Chip
+                        size="small"
+                        label={`OUT: ${new Date(
+                          r.end_date
+                        ).toLocaleDateString()}`}
+                        sx={{ background: "#fff7ed", color: "#9a3412" }}
+                      />
+                    </Box>
                   </td>
-                  <td className="p-3 text-center text-gray-700">
-                    {new Date(r.end_date).toLocaleDateString()}
-                  </td>
+
                   <td className="p-3 text-center">{r.guests}</td>
+
                   <td className="p-3 text-center">{getStatusChip(r.status)}</td>
+
                   <td className="p-3 text-center font-semibold">
                     €{Number(r.total_price ?? 0).toFixed(2)}
                   </td>
 
-                  {/* 🔘 Butona për veprime */}
+                  {/* Actions – ruajtur Manage + Delete, shtuar Print */}
                   <td className="p-3 text-center">
-                    <Button
+                    <IconButton
                       size="small"
-                      variant="outlined"
-                      color="primary"
                       onClick={(e) => {
                         setAnchorEl(e.currentTarget);
                         setSelectedReservation(r);
                       }}
-                      startIcon={<MoreVert />}
                     >
-                      Manage
-                    </Button>
+                      <MoreVert />
+                    </IconButton>
 
-                    <Button
-                      size="small"
-                      color="error"
-                      variant="outlined"
-                      startIcon={<Delete />}
-                      className="ml-2"
-                      onClick={() => setDeleteDialog({ open: true, id: r.id })}
-                    >
-                      Delete
-                    </Button>
+                    <Tooltip title="Print receipt">
+                      <IconButton
+                        size="small"
+                        onClick={() => setPrintReservation(r)}
+                      >
+                        <PrintIcon />
+                      </IconButton>
+                    </Tooltip>
+
+                    <Tooltip title="Delete reservation">
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() =>
+                          setDeleteDialog({ open: true, id: r.id })
+                        }
+                      >
+                        <Delete />
+                      </IconButton>
+                    </Tooltip>
                   </td>
                 </tr>
               ))}
@@ -432,12 +516,12 @@ export default function ReservationsTab() {
         </div>
       )}
 
+      {/* MENU (Manage) — pa prekur funksionet */}
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={() => setAnchorEl(null)}
       >
-        {/* ➕ Edit Option */}
         <MenuItem
           onClick={() => {
             setEditData(selectedReservation);
@@ -448,10 +532,8 @@ export default function ReservationsTab() {
           Edit Reservation
         </MenuItem>
 
-        {/* Separator (opsional) */}
         <MenuItem divider />
 
-        {/* Status options */}
         {["Pending", "Confirmed", "Completed", "Cancelled"].map((status) => (
           <MenuItem
             key={status}
@@ -464,6 +546,8 @@ export default function ReservationsTab() {
           </MenuItem>
         ))}
       </Menu>
+
+      {/* DELETE DIALOG — pa prekur */}
       <Dialog
         open={deleteDialog.open}
         onClose={() => setDeleteDialog({ open: false, id: null })}
@@ -484,6 +568,14 @@ export default function ReservationsTab() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* PRINT RECEIPT — shtesë UI */}
+      {printReservation && (
+        <PrintReceipt
+          reservation={printReservation}
+          onClose={() => setPrintReservation(null)}
+        />
+      )}
     </div>
   );
 }

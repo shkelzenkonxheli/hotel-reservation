@@ -9,20 +9,21 @@ datasource db {
 }
 
 model reservations {
-  id          Int       @id @default(autoincrement())
-  user_id     Int?
-  room_id     Int?
-  start_date  DateTime  @db.Date
-  end_date    DateTime  @db.Date
-  status      String?   @default("pending") @db.VarChar(50)
-  created_at  DateTime? @default(now()) @db.Timestamp(6)
-  full_name   String?   @db.VarChar(100)
-  phone       String?   @db.VarChar(50)
-  address     String?   @db.VarChar(255)
-  guests      Int?
-  total_price Decimal?  @db.Decimal(10, 2)
-  rooms       rooms?    @relation(fields: [room_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  users       users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id               Int       @id @default(autoincrement())
+  user_id          Int?
+  room_id          Int?
+  start_date       DateTime  @db.Date
+  end_date         DateTime  @db.Date
+  status           String?   @default("pending") @db.VarChar(50)
+  created_at       DateTime? @default(now()) @db.Timestamp(6)
+  full_name        String?   @db.VarChar(100)
+  phone            String?   @db.VarChar(50)
+  address          String?   @db.VarChar(255)
+  guests           Int?
+  total_price      Decimal?  @db.Decimal(10, 2)
+  reservation_code String?   @unique @db.VarChar(20)
+  rooms            rooms?    @relation(fields: [room_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users            users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model rooms {

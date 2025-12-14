@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogActions,
@@ -8,22 +9,79 @@ import {
   Button,
   TextField,
   MenuItem,
+  Autocomplete,
+  CircularProgress,
 } from "@mui/material";
 
 export default function RoomForm({ mode, room, onClose, onSaved }) {
   const [formData, setFormData] = useState(
     room || { name: "", room_number: "", type: "", price: "", description: "" }
   );
+
   const [loading, setLoading] = useState(false);
-  const [roomTypes, setRoomTypes] = useState([]);
+  const [roomTypeOptions, setRoomTypeOptions] = useState([]);
+  const [typesLoading, setTypesLoading] = useState(false);
+
+  // ✅ suggestions
+  const [roomsLoading, setRoomsLoading] = useState(false);
+  const [roomNameOptions, setRoomNameOptions] = useState([]);
+
+  // ✅ keep form in sync when edit room changes
+  useEffect(() => {
+    setFormData(
+      room || {
+        name: "",
+        room_number: "",
+        type: "",
+        price: "",
+        description: "",
+      }
+    );
+  }, [room]);
 
   useEffect(() => {
     async function loadRoomTypes() {
-      const res = await fetch("/api/rooms-type");
-      const data = await res.json();
-      setRoomTypes(data);
+      try {
+        setTypesLoading(true);
+        const res = await fetch("/api/rooms-type");
+        const data = await res.json();
+
+        // nxjerr vetëm type string
+        const types = data.map((t) => t.type).filter(Boolean);
+
+        setRoomTypeOptions([...new Set(types)]);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setTypesLoading(false);
+      }
     }
+
     loadRoomTypes();
+  }, []);
+
+  // ✅ load existing rooms for name suggestions
+  useEffect(() => {
+    async function loadRoomNames() {
+      try {
+        setRoomsLoading(true);
+        const res = await fetch("/api/rooms");
+        const data = await res.json();
+
+        // data mund të jetë array ose {rooms: [...]}
+        const list = Array.isArray(data) ? data : data?.rooms || [];
+
+        // nxjerr vetëm emrat unik
+        const names = [...new Set(list.map((r) => r?.name).filter(Boolean))];
+
+        setRoomNameOptions(names);
+      } catch (e) {
+        console.error("Failed to load room names", e);
+      } finally {
+        setRoomsLoading(false);
+      }
+    }
+    loadRoomNames();
   }, []);
 
   async function handleSubmit() {
@@ -53,7 +111,7 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
         onClose();
       } else {
         const data = await res.json();
-        alert("Error: " + data.error);
+        alert("Error: " + (data.error || "Unknown error"));
       }
     } catch (err) {
       console.error(err);
@@ -70,14 +128,42 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
       </DialogTitle>
 
       <DialogContent dividers className="py-4">
-        <TextField
-          fullWidth
-          label="Room Name"
-          variant="outlined"
-          value={formData.name}
-          margin="normal"
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+        {/* ✅ Room Name with suggestions */}
+        <Autocomplete
+          freeSolo
+          options={roomNameOptions}
+          loading={roomsLoading}
+          value={formData.name || ""}
+          onChange={(e, newValue) => {
+            // kur zgjedh nga lista
+            setFormData((prev) => ({ ...prev, name: newValue || "" }));
+          }}
+          onInputChange={(e, newInputValue) => {
+            // kur shkruan me tastaturë
+            setFormData((prev) => ({ ...prev, name: newInputValue }));
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              fullWidth
+              label="Room Name"
+              variant="outlined"
+              margin="normal"
+              InputProps={{
+                ...params.InputProps,
+                endAdornment: (
+                  <>
+                    {roomsLoading ? (
+                      <CircularProgress color="inherit" size={18} />
+                    ) : null}
+                    {params.InputProps.endAdornment}
+                  </>
+                ),
+              }}
+            />
+          )}
         />
+
         <TextField
           fullWidth
           label="Room Number"
@@ -85,24 +171,43 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
           value={formData.room_number}
           margin="normal"
           onChange={(e) =>
-            setFormData({ ...formData, room_number: e.target.value })
+            setFormData((prev) => ({ ...prev, room_number: e.target.value }))
           }
         />
-        <TextField
-          fullWidth
-          select
-          label="Room Type"
-          variant="outlined"
-          value={formData.type}
-          margin="normal"
-          onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-        >
-          {roomTypes.map((room, index) => (
-            <MenuItem key={index} value={room.type}>
-              {room.type}
-            </MenuItem>
-          ))}
-        </TextField>
+
+        <Autocomplete
+          freeSolo
+          options={roomTypeOptions}
+          loading={typesLoading}
+          value={formData.type || ""}
+          onChange={(e, newValue) => {
+            setFormData((prev) => ({ ...prev, type: newValue || "" }));
+          }}
+          onInputChange={(e, newInputValue) => {
+            setFormData((prev) => ({ ...prev, type: newInputValue }));
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              fullWidth
+              label="Room Type"
+              variant="outlined"
+              margin="normal"
+              InputProps={{
+                ...params.InputProps,
+                endAdornment: (
+                  <>
+                    {typesLoading ? (
+                      <CircularProgress color="inherit" size={18} />
+                    ) : null}
+                    {params.InputProps.endAdornment}
+                  </>
+                ),
+              }}
+            />
+          )}
+        />
+
         <TextField
           fullWidth
           label="Price (€)"
@@ -110,8 +215,11 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
           variant="outlined"
           margin="normal"
           value={formData.price}
-          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, price: e.target.value }))
+          }
         />
+
         <TextField
           fullWidth
           label="Description"
@@ -121,7 +229,7 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
           margin="normal"
           value={formData.description}
           onChange={(e) =>
-            setFormData({ ...formData, description: e.target.value })
+            setFormData((prev) => ({ ...prev, description: e.target.value }))
           }
         />
       </DialogContent>

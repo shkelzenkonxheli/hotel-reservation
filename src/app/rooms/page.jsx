@@ -114,7 +114,10 @@ export default function RoomsPage() {
       alert("Please select both start and end dates.");
       return;
     }
-
+    if (startDate === endDate) {
+      alert("Minimum one night");
+      return;
+    }
     const res = await fetch(
       `/api/reservation?room_type=${selectedRoom.type}&start_date=${startDate}&end_date=${endDate}`
     );

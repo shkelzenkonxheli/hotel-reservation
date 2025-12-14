@@ -56,6 +56,17 @@ export default function ReservationForm({
       setTotalPrice(reservation.total_price || "");
     }
   }, [reservation, mode]);
+  const resetForm = () => {
+    setFullname("");
+    setPhone("");
+    setAddress("");
+    setType("");
+    setGuests("");
+    setStartDate("");
+    setEndDate("");
+    setTotalPrice("");
+    setIsAvailable(null);
+  };
 
   useEffect(() => {
     if (!type || !startDate || !endDate) return;
@@ -125,6 +136,9 @@ export default function ReservationForm({
 
     if (res.ok) {
       await fetch("/api/rooms?include=true");
+      if (mode === "create") {
+        resetForm();
+      }
       onClose();
       if (onSuccess) onSuccess();
     } else {
@@ -170,6 +184,7 @@ export default function ReservationForm({
 
           <TextField
             label="Phone number"
+            type="number"
             fullWidth
             value={phone}
             onChange={(e) => setPhone(e.target.value)}

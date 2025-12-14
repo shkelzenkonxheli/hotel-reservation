@@ -356,6 +356,7 @@ export default function ReservationsTab() {
           <table className="min-w-full text-sm text-gray-700">
             <thead className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs uppercase">
               <tr>
+                <th className="p-3 text-left">Reservation Code</th>
                 <th className="p-3 text-left">Guest</th>
                 <th className="p-3 text-left">Email</th>
                 <th className="p-3 text-left">Room</th>
@@ -375,6 +376,9 @@ export default function ReservationsTab() {
                   key={r.id}
                   className="hover:bg-blue-50 transition duration-150"
                 >
+                  <td className="p-3 font-mono text-sm text-gray-700">
+                    {r.reservation_code || "-"}
+                  </td>
                   <td className="p-3 font-medium text-gray-800">
                     {r.full_name}
                   </td>

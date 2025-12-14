@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { nanoid } from "nanoid";
 
 export async function POST(request) {
   try {
@@ -49,6 +50,7 @@ export async function POST(request) {
     const reservation = await prisma.reservations.create({
       data: {
         room_id: availableRoom.id,
+        reservation_code: "RES-" + nanoid(6).toUpperCase(),
         user_id: userId,
         start_date: new Date(startDate),
         end_date: new Date(endDate),

@@ -7,7 +7,22 @@ export async function PATCH(req, context) {
     const { id } = params;
 
     const today = new Date().setHours(0, 0, 0, 0);
-    const start = new Date(startDate).setHours(0, 0, 0, 0);
+    const start = new Date().setHours(0, 0, 0, 0);
+    const body = await req.json();
+
+    /* 🔹 RASTI 1: Vetëm ndryshim statusi */
+    if (body.status && Object.keys(body).length === 1) {
+      const updated = await prisma.reservations.update({
+        where: { id: Number(id) },
+        data: { status: body.status },
+        include: {
+          users: { select: { email: true } },
+          rooms: true,
+        },
+      });
+
+      return NextResponse.json(updated);
+    }
 
     const {
       fullname,
@@ -18,7 +33,7 @@ export async function PATCH(req, context) {
       startDate,
       endDate,
       total_price,
-    } = await req.json();
+    } = body;
 
     if (!fullname || !phone || !type || !startDate || !endDate) {
       return NextResponse.json(

@@ -1,4 +1,5 @@
 "use client";
+
 import { useBooking } from "@/context/BookingContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -13,20 +14,30 @@ import {
   Grid,
   CircularProgress,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import { useSession } from "next-auth/react";
 
 export default function CheckoutBooking() {
   const { booking } = useBooking();
+  const router = useRouter();
+  const { data: session, status } = useSession();
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
   const [loading, setLoading] = useState(false);
+  const [openDetails, setOpenDetails] = useState(false);
+
   const [fullname, setFullname] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [guests, setGuests] = useState(2);
   const [totalPrice, setTotalPrice] = useState(0);
-
-  const router = useRouter();
-  const { data: session, status } = useSession();
 
   if (!booking)
     return (
@@ -37,9 +48,7 @@ export default function CheckoutBooking() {
 
   useEffect(() => {
     if (status === "loading") return;
-    if (!session?.user) {
-      router.push("/login");
-    }
+    if (!session?.user) router.push("/login");
   }, [session, status, router]);
 
   const { room, startDate, endDate } = booking;
@@ -47,6 +56,7 @@ export default function CheckoutBooking() {
   const nights = Math.ceil(
     (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)
   );
+
   useEffect(() => {
     let basePrice = Number(room.price);
     let extraPrice = 0;
@@ -55,6 +65,7 @@ export default function CheckoutBooking() {
     if (guests > 2) extraPrice = (guests - 2) * 20;
     setTotalPrice((basePrice + extraPrice) * nights);
   }, [room.price, room.type, guests, nights]);
+
   useEffect(() => {
     if (session?.user) {
       setFullname(session.user.name || "");
@@ -66,12 +77,6 @@ export default function CheckoutBooking() {
   const handleBookClick = async () => {
     if (!fullname || !phone || !address) {
       alert("Please fill in all fields.");
-      return;
-    }
-
-    if (!session.user) {
-      alert("Please log in to complete your booking.");
-      router.push("/login");
       return;
     }
 
@@ -96,193 +101,211 @@ export default function CheckoutBooking() {
       });
 
       const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert("Payment initialization failed.");
-      }
+      if (data.url) window.location.href = data.url;
+      else alert("Payment initialization failed.");
     } catch (error) {
-      console.error("Error creating payment session:", error);
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
+  /* ---------- UI PARTS ---------- */
+
+  const RoomInfo = () => (
+    <Box sx={{ background: "#f8fafc", borderRadius: isMobile ? 2 : 0 }}>
+      <img
+        src={room.images?.[0] || "/placeholder.jpg"}
+        alt={room.name}
+        style={{
+          width: "100%",
+          height: "260px",
+          objectFit: "cover",
+          borderRadius: isMobile ? "12px" : "0",
+        }}
+      />
+
+      <CardContent>
+        <Typography variant="h5" fontWeight="bold">
+          {room.name}
+        </Typography>
+
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          {room.description}
+        </Typography>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Typography>
+          <strong>Check-in:</strong> {startDate}
+        </Typography>
+        <Typography>
+          <strong>Check-out:</strong> {endDate}
+        </Typography>
+        <Typography>
+          <strong>Nights:</strong> {nights}
+        </Typography>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Typography variant="h6" color="primary">
+          €{room.price} / night
+        </Typography>
+
+        <Box
+          sx={{
+            mt: 3,
+            background: "#f1f5f9",
+            borderRadius: "12px",
+            textAlign: "center",
+            py: 2,
+          }}
+        >
+          <Typography variant="h6" fontWeight="bold" color="success.main">
+            Total: €{totalPrice.toFixed(2)}
+          </Typography>
+        </Box>
+      </CardContent>
+    </Box>
+  );
+
+  const UserForm = () => (
+    <>
+      <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
+        Your Information
+      </Typography>
+
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <TextField
+          label="Full Name"
+          value={fullname}
+          onChange={(e) => setFullname(e.target.value)}
+        />
+        <TextField
+          label="Phone"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+        />
+        <TextField
+          label="Address"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+        />
+        <TextField
+          label="Guests"
+          type="number"
+          value={guests}
+          onChange={(e) => setGuests(Number(e.target.value))}
+        />
+      </Box>
+
+      <Divider sx={{ my: 3 }} />
+
+      <Button
+        onClick={handleBookClick}
+        variant="contained"
+        size="large"
+        fullWidth
+        disabled={loading}
+      >
+        {loading ? (
+          <CircularProgress size={24} color="inherit" />
+        ) : (
+          "Confirm Booking & Pay"
+        )}
+      </Button>
+    </>
+  );
+
+  /* ---------- RENDER ---------- */
+
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #eef2ff 0%, #f9fafb 100%)",
-        py: 8,
-        px: 3,
-      }}
-    >
+    <Box sx={{ minHeight: "100vh", py: 6, px: 2 }}>
       <Box sx={{ maxWidth: "1100px", mx: "auto" }}>
         <Typography
           variant="h4"
           fontWeight="bold"
           align="center"
-          sx={{ mb: 4, color: "#1e3a8a" }}
+          sx={{ mb: 4 }}
         >
           🏨 Confirm Your Booking
         </Typography>
 
-        <Paper
-          elevation={4}
-          sx={{
-            borderRadius: "20px",
-            overflow: "hidden",
-            backdropFilter: "blur(8px)",
-          }}
-        >
-          <Grid container spacing={0}>
-            {/* Left - Room Info */}
-            <Grid item xs={12} md={6}>
-              <Box
-                sx={{
-                  position: "relative",
-                  height: "100%",
-                  backgroundColor: "#f8fafc",
-                }}
-              >
-                <img
-                  src={room.images?.[0] || "/placeholder.jpg"}
-                  alt={room.name}
-                  style={{
-                    width: "100%",
-                    height: "340px",
-                    objectFit: "cover",
-                    borderTopLeftRadius: "20px",
-                  }}
-                />
-                <CardContent>
-                  <Typography
-                    variant="h5"
-                    fontWeight="bold"
-                    color="text.primary"
-                  >
-                    {room.name}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mt: 1 }}
-                  >
-                    {room.description}
-                  </Typography>
-
-                  <Divider sx={{ my: 2 }} />
-                  <Typography>
-                    <strong>Check-in:</strong> {startDate}
-                  </Typography>
-                  <Typography>
-                    <strong>Check-out:</strong> {endDate}
-                  </Typography>
-                  <Typography>
-                    <strong>Nights:</strong> {nights}
-                  </Typography>
-
-                  <Divider sx={{ my: 2 }} />
-
-                  <Typography variant="h6" color="primary">
-                    €{room.price}{" "}
-                    <Typography component="span">/ night</Typography>
-                  </Typography>
-
-                  <Box
-                    sx={{
-                      mt: 3,
-                      background: "#f1f5f9",
-                      borderRadius: "12px",
-                      textAlign: "center",
-                      py: 2,
-                    }}
-                  >
-                    <Typography
-                      variant="h6"
-                      fontWeight="bold"
-                      color="success.main"
-                    >
-                      Total: €{totalPrice.toFixed(2)}
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Box>
+        {/* DESKTOP */}
+        {!isMobile && (
+          <Paper elevation={4} sx={{ borderRadius: 4, overflow: "hidden" }}>
+            <Grid container>
+              <Grid item xs={12} md={6}>
+                <RoomInfo />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Box sx={{ p: 4 }}>
+                  <UserForm />
+                </Box>
+              </Grid>
             </Grid>
+          </Paper>
+        )}
 
-            {/* Right - User Info */}
-            <Grid item xs={12} md={6}>
-              <Box sx={{ p: 4 }}>
-                <Typography
-                  variant="h6"
-                  fontWeight="bold"
-                  sx={{ mb: 2, color: "#1e40af" }}
-                >
-                  Your Information
+        {/* MOBILE */}
+        {isMobile && (
+          <>
+            <Card sx={{ borderRadius: 3 }}>
+              <CardContent>
+                <Typography variant="h6" fontWeight="bold">
+                  {room.name}
                 </Typography>
 
-                <Box
-                  component="form"
-                  sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-                >
-                  <TextField
-                    label="Full Name"
-                    value={fullname}
-                    onChange={(e) => setFullname(e.target.value)}
-                  />
-                  <TextField
-                    label="Phone"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                  />
-                  <TextField
-                    label="Address"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                  />
-                  <TextField
-                    label="Guests"
-                    type="number"
-                    value={guests}
-                    onChange={(e) => setGuests(Number(e.target.value))}
-                    inputProps={{
-                      min: 1,
-                      max: room.type.toLowerCase().includes("apartment")
-                        ? 4
-                        : 2,
-                    }}
-                  />
-                </Box>
+                <Typography variant="body2" color="text.secondary">
+                  {startDate} → {endDate} ({nights} nights)
+                </Typography>
 
-                <Divider sx={{ my: 3 }} />
+                <Divider sx={{ my: 2 }} />
+
+                <Typography fontWeight="bold" color="success.main">
+                  Total: €{totalPrice.toFixed(2)}
+                </Typography>
 
                 <Button
-                  onClick={handleBookClick}
-                  variant="contained"
-                  size="large"
                   fullWidth
-                  sx={{
-                    py: 1.5,
-                    borderRadius: "10px",
-                    background: "linear-gradient(90deg, #2563eb, #1d4ed8)",
-                    fontWeight: "bold",
-                    boxShadow: "0px 4px 14px rgba(37, 99, 235, 0.4)",
-                    "&:hover": {
-                      background: "linear-gradient(90deg, #1d4ed8, #1e40af)",
-                    },
-                  }}
-                  disabled={loading}
+                  sx={{ mt: 2 }}
+                  variant="outlined"
+                  onClick={() => setOpenDetails(true)}
                 >
-                  {loading ? (
-                    <CircularProgress size={26} color="inherit" />
-                  ) : (
-                    "Confirm Booking and Pay"
-                  )}
+                  View booking details
                 </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </Paper>
+              </CardContent>
+            </Card>
+
+            <Dialog
+              open={openDetails}
+              onClose={() => setOpenDetails(false)}
+              fullWidth
+              maxWidth="sm"
+              PaperProps={{
+                sx: {
+                  position: "fixed",
+                  bottom: 0,
+                  m: 0,
+                  borderTopLeftRadius: 20,
+                  borderTopRightRadius: 20,
+                },
+              }}
+            >
+              <DialogTitle>Complete booking</DialogTitle>
+
+              <DialogContent
+                sx={{
+                  maxHeight: "70vh",
+                  overflowY: "auto",
+                  pb: 10,
+                }}
+              >
+                <UserForm />
+              </DialogContent>
+            </Dialog>
+          </>
+        )}
       </Box>
     </Box>
   );

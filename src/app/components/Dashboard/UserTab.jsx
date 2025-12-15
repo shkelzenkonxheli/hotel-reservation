@@ -21,13 +21,20 @@ import {
   MenuItem,
   TextField,
 } from "@mui/material";
-import { ManageAccounts, Edit } from "@mui/icons-material";
+import { ManageAccounts, Edit, Password, Delete } from "@mui/icons-material";
 
 export default function UsersTab() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState(null);
   const [newRole, setNewRole] = useState("");
+  const [addOpen, setAddOpen] = useState(false);
+  const [newUser, setNewUser] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "client",
+  });
 
   useEffect(() => {
     fetchUsers();
@@ -80,6 +87,57 @@ export default function UsersTab() {
       console.error(err);
     }
   }
+  async function handleAddUser() {
+    const { name, email, password, role } = newUser;
+
+    if (!name || !email || !password) {
+      alert("Please fill all required fields");
+      return;
+    }
+    try {
+      const res = await fetch("/api/user/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newUser),
+      });
+
+      if (res.ok) {
+        setAddOpen(false);
+        setNewUser({ name: "", email: "", password: "", role: "client" });
+        fetchUsers();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to create User");
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  async function handleDeleteUser(userId) {
+    const confirm = window.confirm(
+      "Are you sure you want to delete this user?"
+    );
+    if (!confirm) return;
+
+    try {
+      const res = await fetch("/api/user", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error || "Failed to delete user");
+        return;
+      }
+
+      fetchUsers();
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   if (loading)
     return (
@@ -90,11 +148,17 @@ export default function UsersTab() {
 
   return (
     <Box className="p-6">
-      <Box className="flex items-center gap-2 mb-6">
-        <ManageAccounts color="primary" fontSize="large" />
-        <Typography variant="h5" fontWeight="bold">
-          User Management
-        </Typography>
+      <Box className="flex items-center justify-between mb-6">
+        <Box className="flex items-center gap-2">
+          <ManageAccounts color="primary" fontSize="large" />
+          <Typography variant="h5" fontWeight="bold">
+            User Management
+          </Typography>
+        </Box>
+
+        <Button variant="contained" onClick={() => setAddOpen(true)}>
+          + Add User
+        </Button>
       </Box>
 
       {users.length === 0 ? (
@@ -163,6 +227,16 @@ export default function UsersTab() {
                     >
                       Change Role
                     </Button>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      color="error"
+                      startIcon={<Delete />}
+                      disabled={u.role === "admin"}
+                      onClick={() => handleDeleteUser(u.id)}
+                    >
+                      Delete
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -204,6 +278,60 @@ export default function UsersTab() {
           </DialogActions>
         </Dialog>
       )}
+      <Dialog
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Add New User</DialogTitle>
+        <DialogContent dividers>
+          <Box display="flex" flexDirection={"column"} gap={2}>
+            <TextField
+              label="Name"
+              value={newUser.name}
+              type="email"
+              onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+              fullWidth
+            />
+            <TextField
+              label="Email"
+              value={newUser.email}
+              onChange={(e) =>
+                setNewUser({ ...newUser, email: e.target.value })
+              }
+              fullWidth
+            />
+            <TextField
+              label="Passord"
+              type="password"
+              value={newUser.password}
+              onChange={(e) =>
+                setNewUser({ ...newUser, password: e.target.value })
+              }
+              fullWidth
+            />
+            <TextField
+              label="Role"
+              value={newUser.role}
+              select
+              onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+              fullWidth
+            >
+              <MenuItem value="admin">Admin</MenuItem>
+              <MenuItem value="worker">Worker</MenuItem>
+              <MenuItem value="client">Client</MenuItem>
+            </TextField>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setAddOpen(false)}> Cancel</Button>
+          <Button variant="contained" onClick={handleAddUser}>
+            {" "}
+            Create User
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

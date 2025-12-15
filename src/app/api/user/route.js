@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../../lib/prisma";
+import bcrypt from "bcryptjs";
 
 export async function GET() {
   try {
@@ -33,5 +34,76 @@ export async function PATCH(request) {
   } catch (error) {
     console.error("Patch error", error);
     return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+}
+export async function POST(req) {
+  const { name, email, password, role } = await req.json();
+
+  try {
+    if (!name || !email || !password) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+    const existingUser = await prisma.users.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      return NextResponse.json(
+        { error: "User with this email already exists" },
+        { status: 400 }
+      );
+    }
+    const hashedPassrod = await bcrypt.hash(password, 10);
+
+    const user = await prisma.users.create({
+      data: {
+        name,
+        email,
+        password: hashedPassrod,
+        role: role || "client",
+      },
+    });
+    return NextResponse.json(user);
+  } catch (error) {
+    return NextResponse.json({ error: "Mising Fields" }, { status: 400 });
+  }
+}
+export async function DELETE(req) {
+  try {
+    const { userId } = await req.json();
+
+    if (!userId) {
+      return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+    }
+
+    const user = await prisma.users.findUnique({
+      where: { id: Number(userId) },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    if (user.role === "admin") {
+      return NextResponse.json(
+        { error: "Admin users cannot be deleted" },
+        { status: 403 }
+      );
+    }
+
+    await prisma.users.delete({
+      where: { id: Number(userId) },
+    });
+
+    return NextResponse.json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("❌ Delete user error:", error);
+    return NextResponse.json(
+      { error: "Failed to delete user" },
+      { status: 500 }
+    );
   }
 }

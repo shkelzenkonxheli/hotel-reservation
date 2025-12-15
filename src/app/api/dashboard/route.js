@@ -10,6 +10,9 @@ export async function GET() {
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
+    const start_date = new Date();
+    start_date.setHours(0, 0, 0, 0);
+
     // ================= OVERALL STATS =================
     const totalUsers = await prisma.users.count();
     const totalReservation = await prisma.reservations.count();
@@ -23,10 +26,7 @@ export async function GET() {
     // ================= TODAY CHECK-INS =================
     const todayCheckins = await prisma.reservations.count({
       where: {
-        start_date: {
-          gte: today,
-          lt: tomorrow,
-        },
+        start_date: today,
       },
     });
 

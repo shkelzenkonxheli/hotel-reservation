@@ -25,12 +25,14 @@ import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
 import BookOnlineIcon from "@mui/icons-material/BookOnline";
 import PeopleIcon from "@mui/icons-material/People";
 import BuildCircleIcon from "@mui/icons-material/BuildCircle";
+import HistoryIcon from "@mui/icons-material/History";
 
 import OverviewTab from "../components/Dashboard/OverviewTab";
 import RoomsTab from "../components/Dashboard/RoomsTab";
 import ReservationsTab from "../components/Dashboard/ReservationTab";
 import UsersTab from "../components/Dashboard/UserTab";
 import ManageRoomsTab from "../components/Dashboard/ManageRooms";
+import ActivityLogsTab from "../components/Dashboard/ActivityLogsTab";
 
 const drawerWidth = 240;
 // lartësia e AppBar-it të header-it (afërsisht 64px)
@@ -79,7 +81,14 @@ export default function Dashboard() {
   // cilat tab-a lejohet me i pa
   const allowedTabs =
     user.role === "admin"
-      ? ["overview", "rooms", "reservations", "users", "manageRooms"]
+      ? [
+          "overview",
+          "rooms",
+          "reservations",
+          "users",
+          "manageRooms",
+          "activityLogsTab",
+        ]
       : user.role === "worker"
       ? ["rooms", "reservations"]
       : [];
@@ -90,6 +99,7 @@ export default function Dashboard() {
     { key: "reservations", label: "Reservations", icon: <BookOnlineIcon /> },
     { key: "users", label: "Users", icon: <PeopleIcon /> },
     { key: "manageRooms", label: "Manage Rooms", icon: <BuildCircleIcon /> },
+    { key: "activityLogsTab", label: "Activity Log", icon: <HistoryIcon /> },
   ];
 
   const visibleTabs = tabs.filter((t) => allowedTabs.includes(t.key));
@@ -199,6 +209,7 @@ export default function Dashboard() {
         {activeTab === "reservations" && <ReservationsTab />}
         {activeTab === "users" && <UsersTab />}
         {activeTab === "manageRooms" && <ManageRoomsTab />}
+        {activeTab === "activityLogsTab" && <ActivityLogsTab />}
       </Box>
     </Box>
   );

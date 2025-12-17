@@ -144,6 +144,7 @@ export default function ReservationsTab() {
         method: "DELETE",
       });
       if (res.ok) {
+        alert("Reservation successfully deleted!");
         fetchReservations();
       } else {
         console.error("Failed to delete reservation");

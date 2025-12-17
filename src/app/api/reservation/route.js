@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { nanoid } from "nanoid";
+import { logActivity } from "../../../../lib/activityLogger";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/route";
 
 export async function POST(request) {
   try {
+    const session = await getServerSession(authOptions);
     const {
       userId,
       type,
@@ -61,6 +65,13 @@ export async function POST(request) {
         guests: parseInt(guests),
         total_price: parseFloat(total_price),
       },
+    });
+    await logActivity({
+      action: "CREATE",
+      entity: "reservation",
+      entity_id: reservation.id,
+      description: `Created reservation #${reservation.id}`,
+      performed_by: session.user.email,
     });
 
     return NextResponse.json(reservation);

@@ -1,16 +1,20 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { logActivity } from "../../../../../lib/activityLogger";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../auth/[...nextauth]/route";
 
 export async function PATCH(req, context) {
   try {
     const params = await context.params;
     const { id } = params;
+    const session = await getServerSession(authOptions);
+    const performedBy = session?.user?.email ?? "system";
 
     const today = new Date().setHours(0, 0, 0, 0);
     const start = new Date().setHours(0, 0, 0, 0);
     const body = await req.json();
 
-    /* 🔹 RASTI 1: Vetëm ndryshim statusi */
     if (body.status && Object.keys(body).length === 1) {
       const updated = await prisma.reservations.update({
         where: { id: Number(id) },
@@ -19,6 +23,13 @@ export async function PATCH(req, context) {
           users: { select: { email: true } },
           rooms: true,
         },
+      });
+      await logActivity({
+        action: "STATUS_CHANGE",
+        entity: "reservation",
+        entity_id: updated.id,
+        description: `Reservation #${updated.id} status → ${body.status}`,
+        performed_by: performedBy,
       });
 
       return NextResponse.json(updated);
@@ -111,6 +122,13 @@ export async function PATCH(req, context) {
         rooms: true,
       },
     });
+    await logActivity({
+      action: "UPDATE",
+      entity: "reservation",
+      entity_id: updated.id,
+      description: `Updated reservation #${updated.id}`,
+      performed_by: performedBy,
+    });
 
     return NextResponse.json(updated);
   } catch (error) {
@@ -122,9 +140,13 @@ export async function PATCH(req, context) {
   }
 }
 export async function DELETE(req, { params }) {
+  const session = await getServerSession(authOptions);
   const { id } = await params;
 
   try {
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     if (!id) {
       return NextResponse.json({ error: "It needs an id", status: 400 });
     }
@@ -142,6 +164,13 @@ export async function DELETE(req, { params }) {
       );
     }
     await prisma.reservations.delete({ where: { id: Number(id) } });
+    await logActivity({
+      action: "DELETE",
+      entity: "reservation",
+      entity_id: Number(id),
+      description: `Deleted reservation #${id}`,
+      performed_by: session.user.email,
+    });
     console.log("🗑️ Reservation deleted successfully!");
     return NextResponse.json({ message: "Reservation deleted successfully" });
   } catch (error) {

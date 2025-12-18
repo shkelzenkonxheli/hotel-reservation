@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { logActivity } from "../../../../lib/activityLogger";
+import { authOptions } from "../auth/[...nextauth]/route";
 
 export async function GET(request) {
   try {
@@ -94,6 +97,7 @@ export async function GET(request) {
 export async function PATCH(request) {
   try {
     const { room_id, status } = await request.json();
+    const session = await getServerSession(authOptions);
 
     if (!room_id) {
       console.log("❌ No room_id provided");
@@ -119,6 +123,13 @@ export async function PATCH(request) {
       where: { id: Number(room_id) },
       data: { status: newStatus },
     });
+    await logActivity({
+      action: "CLEAN",
+      entity: "room",
+      entity_id: updated.id,
+      description: `Cleaned room "${room.type}" (Room #${room.room_number})`,
+      performed_by: session?.user?.email || "system",
+    });
 
     return NextResponse.json({
       message: "Room cleaned",
@@ -133,6 +144,7 @@ export async function PATCH(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
+    const session = await getServerSession(authOptions);
 
     const { name, room_number, type, price, description } = body;
 
@@ -154,6 +166,14 @@ export async function POST(request) {
         description: description || "",
         status: "available", // default status
       },
+    });
+
+    await logActivity({
+      action: "CREATE",
+      entity: "room",
+      entity_id: newRoom.id,
+      description: `Created room "${newRoom.type}" (Room #${newRoom.room_number})`,
+      performed_by: session?.user?.email || "system",
     });
 
     return NextResponse.json(newRoom, { status: 201 });

@@ -54,7 +54,6 @@ export default function ReservationsTab() {
   const [editOpen, setEditOpen] = useState(false);
   const [editData, setEditData] = useState("null");
 
-  // ✅ SHTESA (UI) — pa prekur funksionet
   const isMobile = useMediaQuery("(max-width:768px)");
   const [favorites, setFavorites] = useState([]);
   const [printReservation, setPrintReservation] = useState(null);

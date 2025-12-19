@@ -154,7 +154,7 @@ export default function activityLogTab() {
                       }
                       onChange={(e) => {
                         if (e.target.checked) {
-                          setSelectedIds(logs.map((l) => l.id));
+                          setSelectedIds(filteredLogs.map((l) => l.id));
                         } else {
                           setSelectedIds([]);
                         }

@@ -113,7 +113,7 @@ export default function CheckoutBooking() {
   /* ---------- UI PARTS ---------- */
 
   const RoomInfo = () => (
-    <Box sx={{ background: "#f8fafc", borderRadius: isMobile ? 2 : 0 }}>
+    <Box sx={{ background: "#eae1df", borderRadius: isMobile ? 2 : 0 }}>
       <img
         src={room.images?.[0] || "/placeholder.jpg"}
         alt={room.name}
@@ -220,8 +220,8 @@ export default function CheckoutBooking() {
   /* ---------- RENDER ---------- */
 
   return (
-    <Box sx={{ minHeight: "100vh", py: 6, px: 2 }}>
-      <Box sx={{ maxWidth: "1100px", mx: "auto" }}>
+    <Box sx={{ minHeight: "100vh", py: 6, px: 2, bgcolor: "#eae1df" }}>
+      <Box sx={{ maxWidth: "800px", mx: "auto" }}>
         <Typography
           variant="h4"
           fontWeight="bold"
@@ -233,7 +233,10 @@ export default function CheckoutBooking() {
 
         {/* DESKTOP */}
         {!isMobile && (
-          <Paper elevation={4} sx={{ borderRadius: 4, overflow: "hidden" }}>
+          <Paper
+            elevation={4}
+            sx={{ borderRadius: 4, overflow: "hidden", bgcolor: "#eae1df" }}
+          >
             <Grid container>
               <Grid item xs={12} md={6}>
                 <RoomInfo />

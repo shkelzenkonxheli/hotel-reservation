@@ -111,6 +111,7 @@ export default function activityLogTab() {
             label="Action"
             value={actionFilter}
             onChange={(e) => setActionFilter(e.target.value)}
+            bgcolor="#eae1df"
           >
             <MenuItem value="all">All</MenuItem>
             <MenuItem value="CREATE">Create</MenuItem>
@@ -140,7 +141,7 @@ export default function activityLogTab() {
       ) : (
         <Paper elevation={3} sx={{ borderRadius: 3, overflow: "hidden" }}>
           <Table>
-            <TableHead sx={{ bgcolor: "grey.100" }}>
+            <TableHead sx={{ bgcolor: "#d6c9c6" }}>
               <TableRow>
                 <TableCell padding="checkbox">
                   <Tooltip title="Select all">
@@ -179,6 +180,7 @@ export default function activityLogTab() {
                   hover
                   sx={{
                     "&:hover": { bgcolor: "rgba(25, 118, 210, 0.05)" },
+                    bgcolor: "#eae1df",
                   }}
                 >
                   <TableCell padding="checkbox">

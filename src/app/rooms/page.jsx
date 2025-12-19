@@ -135,7 +135,10 @@ export default function RoomsPage() {
   };
 
   return (
-    <div className="pt-10 px-6 pb-16 bg-gray-50 min-h-screen">
+    <div
+      className="pt-10 px-6 pb-16 min-h-screen"
+      style={{ backgroundColor: "#eae1df" }}
+    >
       <h2 className="text-3xl font-bold mb-10 text-center text-gray-800">
         🏨 Available Room Types
       </h2>

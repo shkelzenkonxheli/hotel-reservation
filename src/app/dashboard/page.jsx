@@ -17,6 +17,7 @@ import {
   CircularProgress,
   AppBar,
   Typography,
+  Avatar,
 } from "@mui/material";
 
 import MenuIcon from "@mui/icons-material/Menu";
@@ -78,7 +79,6 @@ export default function Dashboard() {
 
   const user = session.user;
 
-  // cilat tab-a lejohet me i pa
   const allowedTabs =
     user.role === "admin"
       ? [
@@ -105,19 +105,33 @@ export default function Dashboard() {
   const visibleTabs = tabs.filter((t) => allowedTabs.includes(t.key));
 
   const drawer = (
-    <div>
-      <Toolbar
+    <Box sx={{ height: "100%", bgcolor: "#364958" }}>
+      {/* BRAND + PROFILE */}
+      <Box
         sx={{
-          bgcolor: "#111827",
-          color: "white",
-          fontWeight: "bold",
-          textAlign: "center",
+          height: HEADER_HEIGHT,
+          display: "flex",
+          alignItems: "center",
+          gap: 2,
+          px: 2,
         }}
       >
-        {user.role === "admin" ? "Admin Panel" : "Worker Panel"}
-      </Toolbar>
+        <Avatar
+          src={user.image || "/profile.jpg"} // fallback image
+          sx={{ width: 40, height: 40 }}
+        />
+        <Box>
+          <Typography fontWeight={600} color="white">
+            {user.role === "admin" ? "Admin Panel" : "Worker Panel"}
+          </Typography>
+          <Typography variant="caption" color="gray">
+            {user.email}
+          </Typography>
+        </Box>
+      </Box>
 
-      <List>
+      {/* MENU */}
+      <List sx={{ mt: 1 }}>
         {visibleTabs.map((tab) => (
           <ListItem key={tab.key} disablePadding>
             <ListItemButton
@@ -126,24 +140,33 @@ export default function Dashboard() {
                 setActiveTab(tab.key);
                 setMobileOpen(false);
               }}
+              sx={{
+                mx: 1,
+                my: 0.5,
+                borderRadius: 2,
+                "&.Mui-selected": {
+                  bgcolor: "#39555e",
+                },
+              }}
             >
-              <ListItemIcon sx={{ color: "white" }}>{tab.icon}</ListItemIcon>
+              <ListItemIcon sx={{ color: "white", minWidth: 36 }}>
+                {tab.icon}
+              </ListItemIcon>
               <ListItemText primary={tab.label} />
             </ListItemButton>
           </ListItem>
         ))}
       </List>
-    </div>
+    </Box>
   );
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
-      {/* APPBAR VETËM PËR MOBILE (brenda dashboard-it) */}
       <AppBar
         position="fixed"
         sx={{
           display: { xs: "flex", md: "none" },
-          top: 50, // poshtë header-it kryesor
+          top: 50,
           bgcolor: "#111827",
           zIndex: (theme) => theme.zIndex.appBar - 1,
         }}
@@ -200,8 +223,8 @@ export default function Dashboard() {
         sx={{
           flexGrow: 1,
           p: { xs: 2, md: 4 },
-          // për mobile: header kryesor + appbar i dashboard-it
           mt: { xs: 8, md: 0 },
+          bgcolor: "#eae1df",
         }}
       >
         {activeTab === "overview" && <OverviewTab />}

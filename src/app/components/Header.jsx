@@ -55,7 +55,7 @@ export default function Header() {
   }, []);
 
   return (
-    <AppBar position="sticky" sx={{ backgroundColor: "#1f2937" }}>
+    <AppBar position="sticky" sx={{ backgroundColor: "#364958" }}>
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
         {/* LEFT — LOGO */}
         <Typography

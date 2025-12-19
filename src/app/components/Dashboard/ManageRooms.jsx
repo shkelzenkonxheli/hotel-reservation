@@ -141,7 +141,7 @@ export default function ManageRoomsTab() {
       ) : (
         <TableContainer component={Paper} elevation={3}>
           <Table>
-            <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
+            <TableHead sx={{ backgroundColor: "#d6c9c6" }}>
               <TableRow>
                 <TableCell>Room #</TableCell>
                 <TableCell>Name</TableCell>
@@ -158,6 +158,7 @@ export default function ManageRoomsTab() {
                   hover
                   sx={{
                     "&:hover": { backgroundColor: "#f0f8ff" },
+                    bgcolor: "#eae1df",
                   }}
                 >
                   <TableCell>{room.room_number}</TableCell>

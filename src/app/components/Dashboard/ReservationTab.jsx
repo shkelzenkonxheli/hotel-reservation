@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, act } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   CircularProgress,
@@ -44,7 +44,7 @@ export default function ReservationsTab() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedReservation, setSelectedReservation] = useState(null);
   const [deleteDialog, setDeleteDialog] = useState({ open: false, id: null });
-  const [filtered, setFiltered] = useState([]);
+
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [search, setSearch] = useState("");
@@ -74,7 +74,6 @@ export default function ReservationsTab() {
       const data = await res.json();
       if (res.ok) {
         setReservations(data);
-        setFiltered(data);
       } else {
         console.error("Error fetching reservations", data.error);
       }
@@ -108,34 +107,40 @@ export default function ReservationsTab() {
     }
   }
 
-  useEffect(() => {
-    let filteredList = reservations;
+  const filtered = useMemo(() => {
+    let list = reservations;
+
+    // 🔍 Search
     if (search.trim()) {
-      filteredList = filteredList.filter(
+      const q = search.toLowerCase();
+      list = list.filter(
         (r) =>
-          r.full_name?.toLowerCase().includes(search.toLowerCase()) ||
-          r.email?.toLowerCase().includes(search.toLowerCase())
+          r.full_name?.toLowerCase().includes(q) ||
+          r.users?.email?.toLowerCase().includes(q)
       );
     }
+
+    // 📌 Status
     if (statusFilter !== "all") {
-      filteredList = filteredList.filter(
-        (r) => r.status?.toLowerCase() === statusFilter
-      );
+      list = list.filter((r) => r.status?.toLowerCase() === statusFilter);
     }
+
+    // 🏨 Room type
     if (typeFilter !== "all") {
-      filteredList = filteredList.filter((r) =>
+      list = list.filter((r) =>
         r.rooms?.type?.toLowerCase().includes(typeFilter)
       );
     }
-    filteredList = [...filteredList].sort((a, b) => {
+
+    // ⭐ Favorites lart
+    list = [...list].sort((a, b) => {
       const aFav = favorites.includes(a.id);
       const bFav = favorites.includes(b.id);
       return bFav - aFav;
     });
 
-    setFiltered(filteredList);
-    setFiltered(filteredList);
-  }, [search, statusFilter, typeFilter, reservations, favorites]);
+    return list;
+  }, [reservations, search, statusFilter, typeFilter, favorites]);
 
   async function handleDeleteReservation() {
     try {
@@ -264,7 +269,7 @@ export default function ReservationsTab() {
           justifyContent: "space-between",
           mb: 3,
           p: 2,
-          backgroundColor: "white",
+          backgroundColor: "#eae1df",
           borderRadius: 2,
           boxShadow: 1,
         }}
@@ -342,7 +347,7 @@ export default function ReservationsTab() {
           gap: 1.5,
           mb: 3,
           p: 1,
-          backgroundColor: "white",
+          backgroundColor: "#eae1df",
           borderRadius: 2,
           boxShadow: 1,
         }}
@@ -397,9 +402,9 @@ export default function ReservationsTab() {
         </Box>
       ) : (
         /* ✅ DESKTOP TABLE — ruajtur, vetëm UI i përmirësuar për date + pin + print */
-        <div className="overflow-x-auto bg-white rounded-xl shadow-md border border-gray-100 mt-4">
+        <div className="overflow-x-auto bg-#eae1df rounded-xl shadow-md border border-gray-100 mt-4">
           <table className="min-w-full text-sm text-gray-700">
-            <thead className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs uppercase">
+            <thead className="bg-blue-400 text-white text-xs uppercase">
               <tr>
                 <th className="p-3 text-center">Pin</th>
                 <th className="p-3 text-left">Reservation Code</th>

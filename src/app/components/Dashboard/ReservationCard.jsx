@@ -17,7 +17,7 @@ export default function ReservationCard({
   onPrint,
 }) {
   return (
-    <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
+    <Card sx={{ borderRadius: 3, boxShadow: 2, bgcolor: "#eae1df" }}>
       <CardContent>
         {/* HEADER */}
         <Box display="flex" justifyContent="space-between" alignItems="center">

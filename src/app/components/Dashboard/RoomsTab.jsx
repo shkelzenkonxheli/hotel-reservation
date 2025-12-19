@@ -245,7 +245,10 @@ export default function RoomsTab() {
       <Grid container spacing={4}>
         {/* 🏢 Apartments */}
         <Grid item xs={12} md={6}>
-          <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
+          <Paper
+            elevation={2}
+            sx={{ p: 3, borderRadius: 3, bgcolor: "#eae1df" }}
+          >
             <Typography
               variant="h6"
               align="center"
@@ -295,7 +298,10 @@ export default function RoomsTab() {
 
         {/* 🏨 Hotel Rooms */}
         <Grid item xs={12} md={6}>
-          <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
+          <Paper
+            elevation={2}
+            sx={{ p: 3, borderRadius: 3, bgcolor: "#eae1df" }}
+          >
             <Typography
               variant="h6"
               align="center"

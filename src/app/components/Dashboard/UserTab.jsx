@@ -172,7 +172,7 @@ export default function UsersTab() {
           sx={{ borderRadius: 3, overflow: "hidden" }}
         >
           <Table>
-            <TableHead sx={{ bgcolor: "grey.100" }}>
+            <TableHead sx={{ bgcolor: "#d6c9c6" }}>
               <TableRow>
                 <TableCell sx={{ fontWeight: "bold" }}>Name</TableCell>
                 <TableCell sx={{ fontWeight: "bold" }}>Email</TableCell>
@@ -193,6 +193,7 @@ export default function UsersTab() {
                   hover
                   sx={{
                     "&:hover": { bgcolor: "rgba(25, 118, 210, 0.05)" },
+                    bgcolor: "#eae1df",
                   }}
                 >
                   <TableCell>{u.name}</TableCell>

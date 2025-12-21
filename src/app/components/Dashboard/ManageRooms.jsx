@@ -30,6 +30,8 @@ export default function ManageRoomsTab() {
   const [mode, setMode] = useState(null);
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("all");
+  const [filterRoomType, setFilterRoomType] = useState("all");
+
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
     roomId: null,
@@ -82,13 +84,19 @@ export default function ManageRoomsTab() {
     }
   }
   const safeRooms = Array.isArray(rooms) ? rooms : [];
+  const roomTypeOptions = [
+    "all",
+    ...Array.from(new Set(safeRooms.map((room) => room.type))),
+  ];
   const filteredRooms = safeRooms.filter((room) => {
     const matchesSearch =
       room.name.toLowerCase().includes(search.toLowerCase()) ||
       room.room_number.toString().includes(search);
     const matchesType =
       filterType === "all" || room.type.toLowerCase().includes(filterType);
-    return matchesSearch && matchesType;
+    const matchesRoomType =
+      filterRoomType === "all" || room.type === filterRoomType;
+    return matchesSearch && matchesType && matchesRoomType;
   });
   return (
     <Box p={4}>
@@ -112,6 +120,17 @@ export default function ManageRoomsTab() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+          <Select
+            value={filterRoomType}
+            onChange={(e) => setFilterRoomType(e.target.value)}
+            size="small"
+          >
+            {roomTypeOptions.map((type) => (
+              <MenuItem key={type} value={type}>
+                {type === "all" ? "All Room Types" : type}
+              </MenuItem>
+            ))}
+          </Select>
           <Select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}

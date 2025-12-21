@@ -32,7 +32,8 @@ export default function RoomsPage() {
   const [user, setUser] = useState(null);
 
   const [bookedDays, setBookedDays] = useState([]);
-  const [roomCount, setRoomCount] = useState(0);
+  const [expandedRoom, setExpandedRoom] = useState(null);
+  const [galleryRoom, setGalleryRoom] = useState(null);
 
   const router = useRouter();
   const { setBooking } = useBooking();
@@ -40,6 +41,18 @@ export default function RoomsPage() {
   const todayStr = fYMD(new Date());
 
   useEffect(() => {
+    /*************  ✨ Windsurf Command ⭐  *************/
+    /**
+     * Fetches the list of room types from the API and sets the state with the result.
+     * The result is an array of objects with the following properties:
+     * - id (number): The ID of the room type.
+     * - type (string): The type of the room.
+     * - price (number): The price of the room.
+     * - status (string): The status of the room.
+     * - roomCount (number): The number of rooms available of this type.
+     * @returns {Promise<void>}
+     */
+    /*******  a2996f47-d846-4eec-a7cd-c90361b502f7  *******/
     async function fetchRooms() {
       const response = await fetch("/api/rooms-type");
       const data = await response.json();
@@ -134,6 +147,10 @@ export default function RoomsPage() {
     );
   };
 
+  const getFirstLine = (text) => {
+    if (!text) return "";
+    return text.split("\n")[0];
+  };
   return (
     <div
       className="pt-10 px-6 pb-16 min-h-screen"
@@ -154,7 +171,8 @@ export default function RoomsPage() {
                 modules={[Navigation, Pagination]}
                 navigation
                 pagination={{ clickable: true }}
-                className="h-full w-full"
+                className="h-full w-full cursor-pointer"
+                onClick={() => setGalleryRoom(room)}
               >
                 {room.images.map((img, i) => (
                   <SwiperSlide key={i}>
@@ -174,8 +192,14 @@ export default function RoomsPage() {
                   {room.name}
                 </h3>
                 <p className="text-gray-600 text-sm mt-1 line-clamp-2">
-                  {room.description}
+                  {getFirstLine(room.description)}
                 </p>
+                <button
+                  className="text-blue-600 text-sm mt-1 underline w-fit cursor-pointer"
+                  onClick={() => setExpandedRoom(room)}
+                >
+                  View more
+                </button>
               </div>
 
               <div className="flex items-center justify-between mt-4">
@@ -254,6 +278,52 @@ export default function RoomsPage() {
                 Continue
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {expandedRoom && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-xl p-6 max-w-lg w-full relative">
+            <button
+              className="absolute top-3 right-3 text-gray-500"
+              onClick={() => setExpandedRoom(null)}
+            >
+              ✕
+            </button>
+
+            <h2 className="text-xl font-bold mb-4">{expandedRoom.name}</h2>
+
+            <p className="text-gray-700 text-sm whitespace-pre-line">
+              {expandedRoom.description}
+            </p>
+          </div>
+        </div>
+      )}
+      {galleryRoom && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
+          <div className="relative w-full max-w-4xl px-4">
+            <button
+              className="absolute -top-10 right-0 text-white text-3xl"
+              onClick={() => setGalleryRoom(null)}
+            >
+              ✕
+            </button>
+
+            <Swiper
+              modules={[Navigation, Pagination]}
+              navigation
+              pagination={{ clickable: true }}
+              className="w-full h-[70vh] rounded-lg overflow-hidden"
+            >
+              {galleryRoom.images.map((img, i) => (
+                <SwiperSlide key={i}>
+                  <img
+                    src={img}
+                    className="w-full h-full object-contain bg-black"
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
           </div>
         </div>
       )}

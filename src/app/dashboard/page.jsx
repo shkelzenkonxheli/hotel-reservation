@@ -117,8 +117,8 @@ export default function Dashboard() {
         }}
       >
         <Avatar
-          src={user.image || "/profile.jpg"} // fallback image
-          sx={{ width: 40, height: 40 }}
+          src={"/Profile.jpg"} // fallback image
+          sx={{ width: 60, height: 60 }}
         />
         <Box>
           <Typography fontWeight={600} color="white">

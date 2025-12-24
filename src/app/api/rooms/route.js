@@ -38,7 +38,10 @@ export async function GET(request) {
     });
 
     const updatedRooms = [];
-
+    function normalize(date) {
+      const d = new Date(date);
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    }
     for (const room of rooms) {
       let newStatus = room.status;
       let activeReservation = null;
@@ -47,16 +50,8 @@ export async function GET(request) {
         const start = new Date(r.start_date);
         const end = new Date(r.end_date);
 
-        const startDay = new Date(
-          start.getFullYear(),
-          start.getMonth(),
-          start.getDate()
-        );
-        const endDay = new Date(
-          end.getFullYear(),
-          end.getMonth(),
-          end.getDate()
-        );
+        const startDay = normalize(r.start_date);
+        const endDay = normalize(r.end_date);
 
         // BOOKED (between start and end)
         if (selectedDay >= startDay && selectedDay < endDay) {

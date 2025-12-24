@@ -28,6 +28,7 @@
     "react-calendar": "^6.0.0",
     "react-dom": "19.1.0",
     "react-qr-code": "^2.0.18",
+    "react-snowfall": "^2.4.0",
     "recharts": "^3.2.1",
     "resend": "^6.5.2",
     "stripe": "^19.3.0",

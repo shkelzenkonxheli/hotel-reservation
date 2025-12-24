@@ -1,4 +1,6 @@
+"use client";
 import Link from "next/link";
+import Snowfall from "react-snowfall";
 
 export default function Home() {
   return (
@@ -8,6 +10,17 @@ export default function Home() {
         className="relative w-full h-screen bg-cover bg-center flex items-center justify-center"
         style={{ backgroundImage: "url('/hotel-images/hotelbg1.jpg')" }}
       >
+        <Snowfall
+          color="#ffffff"
+          snowflakeCount={120}
+          style={{
+            position: "absolute",
+            width: "100%",
+            height: "100%",
+            zIndex: 5,
+            pointerEvents: "none",
+          }}
+        />
         <div className="absolute inset-0 bg-black/50"></div>
 
         <div className="relative z-10 text-center text-white px-4 space-y-4 animate-fadeIn">

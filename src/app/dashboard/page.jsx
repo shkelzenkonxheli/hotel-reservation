@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 import {
   Box,
@@ -119,7 +120,10 @@ export default function Dashboard() {
         <Avatar
           src={"/Profile.jpg"} // fallback image
           sx={{ width: 60, height: 60 }}
+          component={Link}
+          href="/profile"
         />
+
         <Box>
           <Typography fontWeight={600} color="white">
             {user.role === "admin" ? "Admin Panel" : "Worker Panel"}

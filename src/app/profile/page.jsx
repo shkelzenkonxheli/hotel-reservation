@@ -131,9 +131,8 @@ export default function ProfilePage() {
                   fontSize: 32,
                   bgcolor: "primary.main",
                 }}
-              >
-                {user.name?.charAt(0)}
-              </Avatar>
+                src={"/Profile.jpg"}
+              />
 
               <Typography variant="h5" mt={1} fontWeight={600}>
                 {user.name}

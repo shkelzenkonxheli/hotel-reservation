@@ -38,34 +38,15 @@ export default function CheckoutBooking() {
   const [address, setAddress] = useState("");
   const [guests, setGuests] = useState(2);
   const [totalPrice, setTotalPrice] = useState(0);
+  const [expandedRoom, setExpandedRoom] = useState(null);
 
-  if (!booking)
-    return (
-      <Box className="flex items-center justify-center min-h-screen">
-        <CircularProgress />
-      </Box>
-    );
-
+  /* ---------------- AUTH GUARD ---------------- */
   useEffect(() => {
     if (status === "loading") return;
     if (!session?.user) router.push("/login");
   }, [session, status, router]);
 
-  const { room, startDate, endDate } = booking;
-
-  const nights = Math.ceil(
-    (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)
-  );
-
-  useEffect(() => {
-    let basePrice = Number(room.price);
-    let extraPrice = 0;
-    const maxGuests = room.type.toLowerCase().includes("apartment") ? 4 : 2;
-    if (guests > maxGuests) setGuests(maxGuests);
-    if (guests > 2) extraPrice = (guests - 2) * 20;
-    setTotalPrice((basePrice + extraPrice) * nights);
-  }, [room.price, room.type, guests, nights]);
-
+  /* ---------------- PREFILL USER DATA ---------------- */
   useEffect(() => {
     if (session?.user) {
       setFullname(session.user.name || "");
@@ -74,6 +55,47 @@ export default function CheckoutBooking() {
     }
   }, [session]);
 
+  /* ---------------- PRICE CALCULATION ---------------- */
+  useEffect(() => {
+    if (!booking) return;
+
+    const { room, startDate, endDate } = booking;
+
+    const nights =
+      (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24);
+
+    if (nights <= 0) {
+      router.push("/rooms");
+      return;
+    }
+
+    let basePrice = Number(room.price);
+    let extraPrice = 0;
+
+    const maxGuests = room.type.toLowerCase().includes("apartment") ? 4 : 2;
+    if (guests > maxGuests) setGuests(maxGuests);
+
+    if (guests > 2) extraPrice = (guests - 2) * 20;
+
+    setTotalPrice((basePrice + extraPrice) * nights);
+  }, [booking, guests, router]);
+
+  /* ---------------- LOADING IF NO BOOKING ---------------- */
+  if (!booking) {
+    return (
+      <Box className="flex items-center justify-center min-h-screen">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  const { room, startDate, endDate } = booking;
+
+  const nights = Math.ceil(
+    (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)
+  );
+
+  /* ---------------- SUBMIT ---------------- */
   const handleBookClick = async () => {
     if (!fullname || !phone || !address) {
       alert("Please fill in all fields.");
@@ -110,8 +132,13 @@ export default function CheckoutBooking() {
     }
   };
 
-  /* ---------- UI PARTS ---------- */
+  /* ---------------- HELPERS ---------------- */
+  const getFirstLine = (text) => {
+    if (!text) return "";
+    return text.split("\n")[0];
+  };
 
+  /* ---------------- COMPONENTS ---------------- */
   const RoomInfo = () => (
     <Box sx={{ background: "#eae1df", borderRadius: isMobile ? 2 : 0 }}>
       <img
@@ -131,8 +158,15 @@ export default function CheckoutBooking() {
         </Typography>
 
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-          {room.description}
+          {getFirstLine(room.description)}
         </Typography>
+
+        <button
+          className="text-blue-600 text-sm mt-1 underline w-fit"
+          onClick={() => setExpandedRoom(room)}
+        >
+          View more
+        </button>
 
         <Divider sx={{ my: 2 }} />
 
@@ -194,6 +228,7 @@ export default function CheckoutBooking() {
         <TextField
           label="Guests"
           type="number"
+          inputProps={{ min: 1 }}
           value={guests}
           onChange={(e) => setGuests(Number(e.target.value))}
         />
@@ -217,8 +252,7 @@ export default function CheckoutBooking() {
     </>
   );
 
-  /* ---------- RENDER ---------- */
-
+  /* ---------------- RENDER ---------------- */
   return (
     <Box sx={{ minHeight: "100vh", py: 6, px: 2, bgcolor: "#eae1df" }}>
       <Box sx={{ maxWidth: "800px", mx: "auto" }}>
@@ -231,7 +265,6 @@ export default function CheckoutBooking() {
           🏨 Confirm Your Booking
         </Typography>
 
-        {/* DESKTOP */}
         {!isMobile && (
           <Paper
             elevation={4}
@@ -250,7 +283,6 @@ export default function CheckoutBooking() {
           </Paper>
         )}
 
-        {/* MOBILE */}
         {isMobile && (
           <>
             <Card sx={{ borderRadius: 3 }}>
@@ -258,7 +290,6 @@ export default function CheckoutBooking() {
                 <Typography variant="h6" fontWeight="bold">
                   {room.name}
                 </Typography>
-
                 <Typography variant="body2" color="text.secondary">
                   {startDate} → {endDate} ({nights} nights)
                 </Typography>
@@ -285,24 +316,10 @@ export default function CheckoutBooking() {
               onClose={() => setOpenDetails(false)}
               fullWidth
               maxWidth="sm"
-              PaperProps={{
-                sx: {
-                  position: "fixed",
-                  bottom: 0,
-                  m: 0,
-                  borderTopLeftRadius: 20,
-                  borderTopRightRadius: 20,
-                },
-              }}
             >
               <DialogTitle>Complete booking</DialogTitle>
-
               <DialogContent
-                sx={{
-                  maxHeight: "70vh",
-                  overflowY: "auto",
-                  pb: 10,
-                }}
+                sx={{ maxHeight: "70vh", overflowY: "auto", pb: 10 }}
               >
                 <UserForm />
               </DialogContent>
@@ -310,6 +327,23 @@ export default function CheckoutBooking() {
           </>
         )}
       </Box>
+
+      {expandedRoom && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-xl p-6 max-w-lg w-full relative">
+            <button
+              className="absolute top-3 right-3 text-gray-500"
+              onClick={() => setExpandedRoom(null)}
+            >
+              ✕
+            </button>
+            <h2 className="text-xl font-bold mb-4">{expandedRoom.name}</h2>
+            <p className="text-gray-700 text-sm whitespace-pre-line">
+              {expandedRoom.description}
+            </p>
+          </div>
+        </div>
+      )}
     </Box>
   );
 }

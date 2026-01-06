@@ -60,7 +60,7 @@ export async function GET(request) {
         }
 
         // CHECKOUT DAY ONLY → needs cleaning
-        if (selectedDay.getTime() === endDay.getTime()) {
+        if (selectedDay.getTime() >= endDay.getTime()) {
           if (room.status !== "available") {
             newStatus = "needs_cleaning";
           }

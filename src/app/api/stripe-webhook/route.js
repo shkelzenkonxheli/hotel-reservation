@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import Stripe from "stripe";
 import { Resend } from "resend";
+import { nanoid } from "nanoid";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -62,6 +63,7 @@ export async function POST(req) {
       await prisma.reservations.create({
         data: {
           room_id: availableRoom.id,
+          reservation_code: "RES-" + nanoid(6).toUpperCase(),
           user_id: user.id,
           start_date: new Date(meta.startDate),
           end_date: new Date(meta.endDate),

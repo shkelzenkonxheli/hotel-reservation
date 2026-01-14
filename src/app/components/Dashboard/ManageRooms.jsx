@@ -21,7 +21,15 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  FormControlLabel,
+  Switch,
 } from "@mui/material";
+
+// ✅ Swiper
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/navigation";
+import { Navigation, Pagination } from "swiper/modules";
 
 export default function ManageRoomsTab() {
   const [loading, setLoading] = useState(true);
@@ -32,10 +40,15 @@ export default function ManageRoomsTab() {
   const [filterType, setFilterType] = useState("all");
   const [filterRoomType, setFilterRoomType] = useState("all");
 
+  // ✅ toggle
+  const [onlyWithPhotos, setOnlyWithPhotos] = useState(false);
+
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
     roomId: null,
   });
+
+  const [galleryRoom, setGalleryRoom] = useState(null);
 
   useEffect(() => {
     fetchRooms();
@@ -83,21 +96,34 @@ export default function ManageRoomsTab() {
       setDeleteDialog({ open: false, roomId: null });
     }
   }
+
   const safeRooms = Array.isArray(rooms) ? rooms : [];
   const roomTypeOptions = [
     "all",
     ...Array.from(new Set(safeRooms.map((room) => room.type))),
   ];
+
+  const hasPhotos = (room) =>
+    Array.isArray(room?.images) &&
+    room.images.some((img) => typeof img === "string" && img.trim().length > 0);
+
   const filteredRooms = safeRooms.filter((room) => {
     const matchesSearch =
       room.name.toLowerCase().includes(search.toLowerCase()) ||
       room.room_number.toString().includes(search);
+
     const matchesType =
       filterType === "all" || room.type.toLowerCase().includes(filterType);
+
     const matchesRoomType =
       filterRoomType === "all" || room.type === filterRoomType;
-    return matchesSearch && matchesType && matchesRoomType;
+
+    // ✅ vetëm kur toggle ON filtro me foto
+    const matchesPhotos = !onlyWithPhotos || hasPhotos(room);
+
+    return matchesSearch && matchesType && matchesRoomType && matchesPhotos;
   });
+
   return (
     <Box p={4}>
       <Box
@@ -112,7 +138,7 @@ export default function ManageRoomsTab() {
           🏨 Manage Rooms
         </Typography>
 
-        <Box display="flex" gap={2} flexWrap="wrap">
+        <Box display="flex" gap={2} flexWrap="wrap" alignItems="center">
           <TextField
             label="Search rooms..."
             variant="outlined"
@@ -120,6 +146,7 @@ export default function ManageRoomsTab() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+
           <Select
             value={filterRoomType}
             onChange={(e) => setFilterRoomType(e.target.value)}
@@ -131,6 +158,7 @@ export default function ManageRoomsTab() {
               </MenuItem>
             ))}
           </Select>
+
           <Select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
@@ -140,6 +168,17 @@ export default function ManageRoomsTab() {
             <MenuItem value="hotel">Hotel</MenuItem>
             <MenuItem value="apartment">Apartment</MenuItem>
           </Select>
+
+          {/* ✅ Only when enabled: show rooms with photos + show photos column */}
+          <FormControlLabel
+            control={
+              <Switch
+                checked={onlyWithPhotos}
+                onChange={(e) => setOnlyWithPhotos(e.target.checked)}
+              />
+            }
+            label="Only rooms with photos"
+          />
 
           <Button
             variant="contained"
@@ -167,9 +206,14 @@ export default function ManageRoomsTab() {
                 <TableCell>Type</TableCell>
                 <TableCell>Price (€)</TableCell>
                 <TableCell>Description</TableCell>
+
+                {/* ✅ kolona Photos shfaqet vetëm kur toggle ON */}
+                {onlyWithPhotos && <TableCell>Photos</TableCell>}
+
                 <TableCell align="center">Actions</TableCell>
               </TableRow>
             </TableHead>
+
             <TableBody>
               {filteredRooms.map((room) => (
                 <TableRow
@@ -187,6 +231,35 @@ export default function ManageRoomsTab() {
                   </TableCell>
                   <TableCell>€{room.price}</TableCell>
                   <TableCell>{room.description?.slice(0, 60) || "—"}</TableCell>
+
+                  {/* ✅ fotot shfaqen vetëm kur toggle ON */}
+                  {onlyWithPhotos && (
+                    <TableCell sx={{ width: 240 }}>
+                      <div
+                        className="h-24 w-52"
+                        style={{ borderRadius: 12, overflow: "hidden" }}
+                      >
+                        <Swiper
+                          modules={[Navigation, Pagination]}
+                          navigation
+                          pagination={{ clickable: true }}
+                          className="h-full w-full cursor-pointer"
+                          onClick={() => setGalleryRoom(room)}
+                        >
+                          {(room.images || []).map((img, i) => (
+                            <SwiperSlide key={i}>
+                              <img
+                                src={img}
+                                className="w-full h-full object-cover"
+                                alt={`${room.name}-${i}`}
+                              />
+                            </SwiperSlide>
+                          ))}
+                        </Swiper>
+                      </div>
+                    </TableCell>
+                  )}
+
                   <TableCell align="center">
                     <Button
                       variant="outlined"
@@ -210,9 +283,15 @@ export default function ManageRoomsTab() {
                   </TableCell>
                 </TableRow>
               ))}
+
               {filteredRooms.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
+                  {/* ✅ colSpan ndryshon varësisht a ka photos column */}
+                  <TableCell
+                    colSpan={onlyWithPhotos ? 7 : 6}
+                    align="center"
+                    sx={{ py: 3 }}
+                  >
                     <Typography color="text.secondary">
                       No rooms found.
                     </Typography>
@@ -223,11 +302,12 @@ export default function ManageRoomsTab() {
           </Table>
         </TableContainer>
       )}
+
       <Dialog
         open={deleteDialog.open}
         onClose={() => setDeleteDialog({ open: false, id: null })}
       >
-        <DialogTitle>Delete Reservation</DialogTitle>
+        <DialogTitle>Delete Room</DialogTitle>
         <DialogContent>
           <DialogContentText>
             Are you sure you want to delete this room? This action cannot be
@@ -251,6 +331,37 @@ export default function ManageRoomsTab() {
           onClose={() => setMode(null)}
           onSaved={fetchRooms}
         />
+      )}
+
+      {/* ✅ Gallery modal shfaqet vetëm kur ke foto dhe klikon */}
+      {galleryRoom && onlyWithPhotos && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
+          <div className="relative w-full max-w-4xl px-4">
+            <button
+              className="absolute -top-10 right-0 text-white text-3xl"
+              onClick={() => setGalleryRoom(null)}
+            >
+              ✕
+            </button>
+
+            <Swiper
+              modules={[Navigation, Pagination]}
+              navigation
+              pagination={{ clickable: true }}
+              className="w-full h-[70vh] rounded-lg overflow-hidden"
+            >
+              {(galleryRoom.images || []).map((img, i) => (
+                <SwiperSlide key={i}>
+                  <img
+                    src={img}
+                    className="w-full h-full object-contain bg-black"
+                    alt={`gallery-${i}`}
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
+        </div>
       )}
     </Box>
   );

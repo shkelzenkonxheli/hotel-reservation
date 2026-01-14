@@ -41,18 +41,6 @@ export default function RoomsPage() {
   const todayStr = fYMD(new Date());
 
   useEffect(() => {
-    /*************  ✨ Windsurf Command ⭐  *************/
-    /**
-     * Fetches the list of room types from the API and sets the state with the result.
-     * The result is an array of objects with the following properties:
-     * - id (number): The ID of the room type.
-     * - type (string): The type of the room.
-     * - price (number): The price of the room.
-     * - status (string): The status of the room.
-     * - roomCount (number): The number of rooms available of this type.
-     * @returns {Promise<void>}
-     */
-    /*******  a2996f47-d846-4eec-a7cd-c90361b502f7  *******/
     async function fetchRooms() {
       const response = await fetch("/api/rooms-type");
       const data = await response.json();

@@ -3,14 +3,17 @@ import prisma from "@/lib/prisma";
 
 export async function GET() {
   try {
+    // 1. Merr rooms (vetëm për info bazë)
     const rooms = await prisma.rooms.findMany({
-      where: {
-        images: {
-          isEmpty: false,
-        },
+      select: {
+        type: true,
+        price: true,
+        name: true,
+        description: true,
       },
     });
 
+    // 2. Nxjerr types unike
     const grouped = {};
     for (const room of rooms) {
       if (!grouped[room.type]) {
@@ -20,10 +23,23 @@ export async function GET() {
           price: room.price,
           name: room.name,
           description: room.description,
-          images: room.images,
+          images: [], // do mbushet më poshtë
         };
       }
     }
+
+    // 3. Merr fotot nga RoomImage
+    const images = await prisma.roomImage.findMany({
+      orderBy: { order: "asc" },
+    });
+
+    // 4. Vendosi fotot te type përkatës
+    for (const img of images) {
+      if (grouped[img.type]) {
+        grouped[img.type].images.push(img.url);
+      }
+    }
+
     return NextResponse.json(Object.values(grouped));
   } catch (error) {
     console.error("Error fetching room types:", error);

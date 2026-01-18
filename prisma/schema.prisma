@@ -59,3 +59,14 @@ model activity_logs {
   performed_by String?   @db.VarChar(50)
   created_at   DateTime? @default(now()) @db.Timestamp(6)
 }
+
+model RoomImage {
+  id        Int      @id @default(autoincrement())
+  type      String   @db.VarChar(50)
+  url       String
+  order     Int      @default(0)
+  isCover   Boolean  @default(false)
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+
+  @@index([type])
+}

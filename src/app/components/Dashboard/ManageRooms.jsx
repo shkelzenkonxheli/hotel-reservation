@@ -1,6 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import RoomForm from "./RoomForm";
+import RoomTypePhotosManager from "./RoomTypePhotosManager";
 import {
   Box,
   Button,
@@ -25,17 +26,13 @@ import {
   Switch,
 } from "@mui/material";
 
-// ✅ Swiper
-import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
-import "swiper/css/navigation";
-import { Navigation, Pagination } from "swiper/modules";
-
 export default function ManageRoomsTab() {
   const [loading, setLoading] = useState(true);
   const [rooms, setRooms] = useState([]);
+
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [mode, setMode] = useState(null);
+
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [filterRoomType, setFilterRoomType] = useState("all");
@@ -48,19 +45,19 @@ export default function ManageRoomsTab() {
     roomId: null,
   });
 
-  const [galleryRoom, setGalleryRoom] = useState(null);
-
   useEffect(() => {
     fetchRooms();
   }, []);
 
   async function fetchRooms() {
     try {
+      setLoading(true);
       const res = await fetch("/api/rooms?include=false");
       const data = await res.json();
-      setRooms(data);
+      setRooms(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Error fetching rooms:", err);
+      setRooms([]);
     } finally {
       setLoading(false);
     }
@@ -74,10 +71,6 @@ export default function ManageRoomsTab() {
   function handleAdd() {
     setSelectedRoom(null);
     setMode("add");
-  }
-
-  function confirmDeleteRoom(id) {
-    setDeleteDialog({ open: true, roomId: id });
   }
 
   async function handleDeleteRoom() {
@@ -98,30 +91,23 @@ export default function ManageRoomsTab() {
   }
 
   const safeRooms = Array.isArray(rooms) ? rooms : [];
-  const roomTypeOptions = [
-    "all",
-    ...Array.from(new Set(safeRooms.map((room) => room.type))),
-  ];
 
-  const hasPhotos = (room) =>
-    Array.isArray(room?.images) &&
-    room.images.some((img) => typeof img === "string" && img.trim().length > 0);
+  const roomTypeOptions = useMemo(() => {
+    return ["all", ...Array.from(new Set(safeRooms.map((r) => r.type)))];
+  }, [safeRooms]);
 
   const filteredRooms = safeRooms.filter((room) => {
     const matchesSearch =
-      room.name.toLowerCase().includes(search.toLowerCase()) ||
-      room.room_number.toString().includes(search);
+      room.name?.toLowerCase().includes(search.toLowerCase()) ||
+      room.room_number?.toString().includes(search);
 
     const matchesType =
-      filterType === "all" || room.type.toLowerCase().includes(filterType);
+      filterType === "all" || room.type?.toLowerCase().includes(filterType);
 
     const matchesRoomType =
       filterRoomType === "all" || room.type === filterRoomType;
 
-    // ✅ vetëm kur toggle ON filtro me foto
-    const matchesPhotos = !onlyWithPhotos || hasPhotos(room);
-
-    return matchesSearch && matchesType && matchesRoomType && matchesPhotos;
+    return matchesSearch && matchesType && matchesRoomType;
   });
 
   return (
@@ -139,37 +125,51 @@ export default function ManageRoomsTab() {
         </Typography>
 
         <Box display="flex" gap={2} flexWrap="wrap" alignItems="center">
-          <TextField
-            label="Search rooms..."
-            variant="outlined"
-            size="small"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+          {/* Kur je te Photos manager, search/filters për rooms s’janë të domosdoshme,
+              por i lëmë — thjesht s’i përdorim në atë view */}
+          {!onlyWithPhotos && (
+            <>
+              <TextField
+                label="Search rooms..."
+                variant="outlined"
+                size="small"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
 
-          <Select
-            value={filterRoomType}
-            onChange={(e) => setFilterRoomType(e.target.value)}
-            size="small"
-          >
-            {roomTypeOptions.map((type) => (
-              <MenuItem key={type} value={type}>
-                {type === "all" ? "All Room Types" : type}
-              </MenuItem>
-            ))}
-          </Select>
+              <Select
+                value={filterRoomType}
+                onChange={(e) => setFilterRoomType(e.target.value)}
+                size="small"
+              >
+                {roomTypeOptions.map((type) => (
+                  <MenuItem key={type} value={type}>
+                    {type === "all" ? "All Room Types" : type}
+                  </MenuItem>
+                ))}
+              </Select>
 
-          <Select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            size="small"
-          >
-            <MenuItem value="all">All Types</MenuItem>
-            <MenuItem value="hotel">Hotel</MenuItem>
-            <MenuItem value="apartment">Apartment</MenuItem>
-          </Select>
+              <Select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                size="small"
+              >
+                <MenuItem value="all">All Types</MenuItem>
+                <MenuItem value="hotel">Hotel</MenuItem>
+                <MenuItem value="apartment">Apartment</MenuItem>
+              </Select>
 
-          {/* ✅ Only when enabled: show rooms with photos + show photos column */}
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleAdd}
+                sx={{ borderRadius: 2 }}
+              >
+                Add Room
+              </Button>
+            </>
+          )}
+
           <FormControlLabel
             control={
               <Switch
@@ -179,24 +179,19 @@ export default function ManageRoomsTab() {
             }
             label="Only rooms with photos"
           />
-
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleAdd}
-            sx={{ borderRadius: 2 }}
-          >
-            Add Room
-          </Button>
         </Box>
       </Box>
 
-      {loading ? (
+      {/* ✅ VIEW 1: Photo manager (Room Types) */}
+      {onlyWithPhotos ? (
+        <RoomTypePhotosManager />
+      ) : loading ? (
         <Box textAlign="center" py={6}>
           <CircularProgress />
           <Typography mt={2}>Loading rooms...</Typography>
         </Box>
       ) : (
+        /* ✅ VIEW 2: Rooms table (CRUD) */
         <TableContainer component={Paper} elevation={3}>
           <Table>
             <TableHead sx={{ backgroundColor: "#d6c9c6" }}>
@@ -206,10 +201,6 @@ export default function ManageRoomsTab() {
                 <TableCell>Type</TableCell>
                 <TableCell>Price (€)</TableCell>
                 <TableCell>Description</TableCell>
-
-                {/* ✅ kolona Photos shfaqet vetëm kur toggle ON */}
-                {onlyWithPhotos && <TableCell>Photos</TableCell>}
-
                 <TableCell align="center">Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -232,34 +223,6 @@ export default function ManageRoomsTab() {
                   <TableCell>€{room.price}</TableCell>
                   <TableCell>{room.description?.slice(0, 60) || "—"}</TableCell>
 
-                  {/* ✅ fotot shfaqen vetëm kur toggle ON */}
-                  {onlyWithPhotos && (
-                    <TableCell sx={{ width: 240 }}>
-                      <div
-                        className="h-24 w-52"
-                        style={{ borderRadius: 12, overflow: "hidden" }}
-                      >
-                        <Swiper
-                          modules={[Navigation, Pagination]}
-                          navigation
-                          pagination={{ clickable: true }}
-                          className="h-full w-full cursor-pointer"
-                          onClick={() => setGalleryRoom(room)}
-                        >
-                          {(room.images || []).map((img, i) => (
-                            <SwiperSlide key={i}>
-                              <img
-                                src={img}
-                                className="w-full h-full object-cover"
-                                alt={`${room.name}-${i}`}
-                              />
-                            </SwiperSlide>
-                          ))}
-                        </Swiper>
-                      </div>
-                    </TableCell>
-                  )}
-
                   <TableCell align="center">
                     <Button
                       variant="outlined"
@@ -270,6 +233,7 @@ export default function ManageRoomsTab() {
                     >
                       Edit
                     </Button>
+
                     <Button
                       variant="outlined"
                       size="small"
@@ -286,12 +250,7 @@ export default function ManageRoomsTab() {
 
               {filteredRooms.length === 0 && (
                 <TableRow>
-                  {/* ✅ colSpan ndryshon varësisht a ka photos column */}
-                  <TableCell
-                    colSpan={onlyWithPhotos ? 7 : 6}
-                    align="center"
-                    sx={{ py: 3 }}
-                  >
+                  <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
                     <Typography color="text.secondary">
                       No rooms found.
                     </Typography>
@@ -303,9 +262,10 @@ export default function ManageRoomsTab() {
         </TableContainer>
       )}
 
+      {/* Delete dialog */}
       <Dialog
         open={deleteDialog.open}
-        onClose={() => setDeleteDialog({ open: false, id: null })}
+        onClose={() => setDeleteDialog({ open: false, roomId: null })}
       >
         <DialogTitle>Delete Room</DialogTitle>
         <DialogContent>
@@ -315,7 +275,9 @@ export default function ManageRoomsTab() {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialog({ open: false, id: null })}>
+          <Button
+            onClick={() => setDeleteDialog({ open: false, roomId: null })}
+          >
             Cancel
           </Button>
           <Button color="error" onClick={handleDeleteRoom}>
@@ -331,37 +293,6 @@ export default function ManageRoomsTab() {
           onClose={() => setMode(null)}
           onSaved={fetchRooms}
         />
-      )}
-
-      {/* ✅ Gallery modal shfaqet vetëm kur ke foto dhe klikon */}
-      {galleryRoom && onlyWithPhotos && (
-        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
-          <div className="relative w-full max-w-4xl px-4">
-            <button
-              className="absolute -top-10 right-0 text-white text-3xl"
-              onClick={() => setGalleryRoom(null)}
-            >
-              ✕
-            </button>
-
-            <Swiper
-              modules={[Navigation, Pagination]}
-              navigation
-              pagination={{ clickable: true }}
-              className="w-full h-[70vh] rounded-lg overflow-hidden"
-            >
-              {(galleryRoom.images || []).map((img, i) => (
-                <SwiperSlide key={i}>
-                  <img
-                    src={img}
-                    className="w-full h-full object-contain bg-black"
-                    alt={`gallery-${i}`}
-                  />
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </div>
-        </div>
       )}
     </Box>
   );

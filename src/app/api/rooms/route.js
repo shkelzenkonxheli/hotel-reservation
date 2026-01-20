@@ -3,14 +3,18 @@ import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { logActivity } from "../../../../lib/activityLogger";
 import { authOptions } from "../auth/[...nextauth]/route";
-
+function normalizeUTC(date) {
+  const d = new Date(date);
+  return new Date(
+    Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()),
+  );
+}
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const includeReservations = searchParams.get("include") === "true";
     const selectedDateParam = searchParams.get("date");
 
-    // IF only listing rooms (Manage Rooms)
     if (!includeReservations) {
       const rooms = await prisma.rooms.findMany({
         orderBy: { room_number: "asc" },
@@ -21,53 +25,45 @@ export async function GET(request) {
     const selectedDate = selectedDateParam
       ? new Date(selectedDateParam)
       : new Date();
-
-    const selectedDay = new Date(
-      selectedDate.getFullYear(),
-      selectedDate.getMonth(),
-      selectedDate.getDate()
-    );
+    const selectedDay = normalizeUTC(selectedDate);
 
     const rooms = await prisma.rooms.findMany({
       include: {
-        reservations: {
-          include: { users: true },
-        },
+        reservations: { include: { users: true } },
       },
       orderBy: { room_number: "asc" },
     });
 
     const updatedRooms = [];
-    function normalize(date) {
-      const d = new Date(date);
-      return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    }
+
     for (const room of rooms) {
-      let newStatus = room.status;
+      let newStatus = "available";
       let activeReservation = null;
+      let hasCheckoutToday = false;
 
       for (const r of room.reservations) {
-        const start = new Date(r.start_date);
-        const end = new Date(r.end_date);
+        const startDay = normalizeUTC(r.start_date);
+        const endDay = normalizeUTC(r.end_date);
 
-        const startDay = normalize(r.start_date);
-        const endDay = normalize(r.end_date);
-
-        // BOOKED (between start and end)
+        // Booked: start <= selected < end
         if (selectedDay >= startDay && selectedDay < endDay) {
           newStatus = "booked";
           activeReservation = r;
+          // booked ka prioritet => s’ka nevojë me kontrollu tjerat
+          break;
         }
 
-        // CHECKOUT DAY ONLY → needs cleaning
-        if (selectedDay.getTime() >= endDay.getTime()) {
-          if (room.status !== "available") {
-            newStatus = "needs_cleaning";
-          }
+        // Checkout day: selected == end
+        if (selectedDay.getTime() === endDay.getTime()) {
+          hasCheckoutToday = true;
         }
       }
 
-      // Update DB only if status changed
+      // Nëse s’është booked, por ka checkout sot => needs_cleaning
+      if (newStatus !== "booked" && hasCheckoutToday) {
+        newStatus = "needs_cleaning";
+      }
+
       if (newStatus !== room.status) {
         await prisma.rooms.update({
           where: { id: room.id },
@@ -88,7 +84,6 @@ export async function GET(request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-
 export async function PATCH(request) {
   try {
     const { room_id, status } = await request.json();
@@ -98,7 +93,7 @@ export async function PATCH(request) {
       console.log("❌ No room_id provided");
       return NextResponse.json(
         { error: "Room ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     const newStatus = status || "available";
@@ -147,7 +142,7 @@ export async function POST(request) {
     if (!name || !room_number || !type || !price) {
       return NextResponse.json(
         { error: "All required fields must be filled" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 

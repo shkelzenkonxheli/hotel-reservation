@@ -26,7 +26,7 @@ export default function RoomsTab() {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
+    new Date().toISOString().split("T")[0],
   );
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [filter, setFilter] = useState("all");
@@ -50,47 +50,36 @@ export default function RoomsTab() {
     }
   }
 
-  async function handleCleanRoom(room_id, status) {
+  async function handleCleanRoom(room_id) {
     if (!confirm("Mark this room as cleaned?")) return;
 
-    try {
-      const res = await fetch("/api/rooms", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ room_id, status }),
-      });
-      if (res.ok) {
-        fetchRooms();
-        setSelectedRoom(null);
-      } else {
-        alert("Error cleaning room");
-      }
-    } catch (err) {
-      console.error(err);
+    const res = await fetch("/api/rooms", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ room_id, action: "CLEAN" }),
+    });
+
+    if (res.ok) {
+      fetchRooms();
+      setSelectedRoom(null);
+    } else {
+      const e = await res.json();
+      alert(e.error || "Error cleaning room");
     }
   }
-  async function handleRoomStatus(room_id, status, currentStatus) {
-    const message =
-      currentStatus === "out_of_order"
-        ? "Mark this room as available?"
-        : "Mark this room as out of order?";
+  async function handleRoomStatus(room_id) {
+    const res = await fetch("/api/rooms", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ room_id, action: "TOGGLE_OUT_OF_ORDER" }),
+    });
 
-    if (!confirm(message)) return;
-
-    try {
-      const res = await fetch("/api/rooms", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ room_id, status }),
-      });
-      if (res.ok) {
-        fetchRooms();
-        setSelectedRoom(null);
-      } else {
-        alert("Error cchanging room status");
-      }
-    } catch (err) {
-      console.error(err);
+    if (res.ok) {
+      fetchRooms();
+      setSelectedRoom(null);
+    } else {
+      const e = await res.json();
+      alert(e.error || "Error changing status");
     }
   }
 
@@ -104,10 +93,10 @@ export default function RoomsTab() {
   });
 
   const apartments = filteredRooms.filter((r) =>
-    r.type.toLowerCase().includes("apartment")
+    r.type.toLowerCase().includes("apartment"),
   );
   const hotelRooms = filteredRooms.filter((r) =>
-    r.type.toLowerCase().includes("hotel")
+    r.type.toLowerCase().includes("hotel"),
   );
 
   const getColor = (status) => {
@@ -154,7 +143,7 @@ export default function RoomsTab() {
       const startDay = new Date(
         start.getFullYear(),
         start.getMonth(),
-        start.getDate()
+        start.getDate(),
       );
       const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
 
@@ -375,15 +364,7 @@ export default function RoomsTab() {
             {/* BUTONI OUT OF ORDER */}
             <Button
               variant="outlined"
-              onClick={() =>
-                handleRoomStatus(
-                  selectedRoom.room.id,
-                  selectedRoom.room.current_status === "out_of_order"
-                    ? "available"
-                    : "out_of_order",
-                  selectedRoom.room.current_status
-                )
-              }
+              onClick={() => handleRoomStatus(selectedRoom.room.id)}
               sx={{
                 borderColor:
                   selectedRoom.room.current_status === "out_of_order"
@@ -440,13 +421,13 @@ export default function RoomsTab() {
                 <Typography>
                   <strong>Check-in:</strong>{" "}
                   {new Date(
-                    selectedRoom.reservation.start_date
+                    selectedRoom.reservation.start_date,
                   ).toLocaleDateString()}
                 </Typography>
                 <Typography>
                   <strong>Check-out:</strong>{" "}
                   {new Date(
-                    selectedRoom.reservation.end_date
+                    selectedRoom.reservation.end_date,
                   ).toLocaleDateString()}
                 </Typography>
 
@@ -474,9 +455,7 @@ export default function RoomsTab() {
                 <Button
                   variant="contained"
                   startIcon={<CleaningServices />}
-                  onClick={() =>
-                    handleCleanRoom(selectedRoom.room.id, "available")
-                  }
+                  onClick={() => handleCleanRoom(selectedRoom.room.id)}
                   sx={{
                     bgcolor: "#facc15",
                     color: "black",

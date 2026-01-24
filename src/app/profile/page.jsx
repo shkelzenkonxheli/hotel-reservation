@@ -108,7 +108,7 @@ export default function ProfilePage() {
   const user = session.user;
 
   return (
-    <Paper sx={{ p: 3, width: "100%", mx: "auto" }}>
+    <Paper sx={{ p: 3, width: "100%", mx: "auto", bgcolor: "#eae1df" }}>
       <TabContext value={value}>
         {/* Tabs */}
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
@@ -147,8 +147,8 @@ export default function ProfilePage() {
                   user.role === "admin"
                     ? "Admin"
                     : user.role === "worker"
-                    ? "Worker"
-                    : "Guest"
+                      ? "Worker"
+                      : "Guest"
                 }
                 color="primary"
                 size="small"

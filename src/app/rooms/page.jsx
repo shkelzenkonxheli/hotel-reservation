@@ -12,7 +12,7 @@ import "react-calendar/dist/Calendar.css";
 function fYMD(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
     2,
-    "0"
+    "0",
   )}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
@@ -68,7 +68,7 @@ export default function RoomsPage() {
       console.log("=== LOADING AVAILABILITY ===");
 
       const res = await fetch(
-        `/api/availability?room_type=${selectedRoom.type}`
+        `/api/availability?room_type=${selectedRoom.type}`,
       );
       const data = await res.json();
 
@@ -120,7 +120,7 @@ export default function RoomsPage() {
       return;
     }
     const res = await fetch(
-      `/api/reservation?room_type=${selectedRoom.type}&start_date=${startDate}&end_date=${endDate}`
+      `/api/reservation?room_type=${selectedRoom.type}&start_date=${startDate}&end_date=${endDate}`,
     );
     const data = await res.json();
 
@@ -131,7 +131,7 @@ export default function RoomsPage() {
 
     setBooking({ room: selectedRoom, startDate, endDate });
     router.push(
-      `/checkoutBooking?room_type=${selectedRoom.type}&start_date=${startDate}&end_date=${endDate}`
+      `/checkoutBooking?room_type=${selectedRoom.type}&start_date=${startDate}&end_date=${endDate}`,
     );
   };
 

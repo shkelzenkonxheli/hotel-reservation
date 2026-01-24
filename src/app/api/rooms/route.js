@@ -28,7 +28,21 @@ export async function GET(request) {
 
     const rooms = await prisma.rooms.findMany({
       include: includeReservations
-        ? { reservations: { include: { users: true } } }
+        ? {
+            reservations: {
+              // ✅ mos i merr krejt users nëse s’të duhet (e ngadalëson)
+              // nëse të duhet, ktheje prap include: { users: true }
+              select: {
+                id: true,
+                start_date: true,
+                end_date: true,
+                full_name: true,
+                phone: true,
+                total_price: true,
+                status: true,
+              },
+            },
+          }
         : undefined,
       orderBy: { room_number: "asc" },
     });
@@ -37,22 +51,18 @@ export async function GET(request) {
       return NextResponse.json(rooms);
     }
 
-    // ✅ Përdor for..of që me mujt me await kur duhet (për update në DB)
-    const updatedRooms = [];
-
-    for (const room of rooms) {
+    const updatedRooms = rooms.map((room) => {
       const operationalStatus = room.status || "available";
 
-      // 1) out_of_order ka prioritet
+      // out_of_order ka prioritet
       if (operationalStatus === "out_of_order") {
-        updatedRooms.push({
+        return {
           ...room,
           operational_status: operationalStatus,
           current_status: "out_of_order",
           active_reservation: null,
           has_checkout_today: false,
-        });
-        continue;
+        };
       }
 
       let activeReservation = null;
@@ -74,37 +84,19 @@ export async function GET(request) {
         }
       }
 
-      // 2) current_status (computed) me rregull të saktë
-      let currentStatus = operationalStatus;
+      // ✅ current_status i thjeshtë:
+      // - nëse ka rezervim aktiv -> booked
+      // - përndryshe -> statusi i DB (available / needs_cleaning)
+      const currentStatus = activeReservation ? "booked" : operationalStatus;
 
-      if (activeReservation) {
-        currentStatus = "booked";
-      } else if (operationalStatus === "needs_cleaning") {
-        currentStatus = "needs_cleaning";
-      } else if (hasCheckoutToday) {
-        // ✅ Checkout day -> needs_cleaning
-        currentStatus = "needs_cleaning";
-
-        // ✅ Shkruje 1 herë në DB që të mbesë needs_cleaning derisa pastrohet
-        // (por mos e prek nëse dikush e ka vendos out_of_order ose e ka ba already needs_cleaning)
-        if (room.status !== "needs_cleaning") {
-          await prisma.rooms.update({
-            where: { id: room.id },
-            data: { status: "needs_cleaning" },
-          });
-        }
-      } else {
-        currentStatus = "available";
-      }
-
-      updatedRooms.push({
+      return {
         ...room,
         operational_status: operationalStatus,
         current_status: currentStatus,
         active_reservation: activeReservation,
-        has_checkout_today: hasCheckoutToday,
-      });
-    }
+        has_checkout_today: hasCheckoutToday, // vetëm info për UI
+      };
+    });
 
     return NextResponse.json(updatedRooms);
   } catch (error) {
@@ -113,8 +105,10 @@ export async function GET(request) {
 }
 
 /**
- * PATCH me "action"
- * action: "CLEAN" | "TOGGLE_OUT_OF_ORDER" | "MARK_NEEDS_CLEANING"
+ * PATCH super i thjeshtë me action
+ * CLEAN -> available
+ * TOGGLE_OUT_OF_ORDER -> out_of_order/available
+ * MARK_NEEDS_CLEANING -> needs_cleaning
  */
 export async function PATCH(request) {
   try {
@@ -136,45 +130,30 @@ export async function PATCH(request) {
       return NextResponse.json({ error: "Room not found" }, { status: 404 });
     }
 
-    const currentOperational = room.status || "available";
-    let nextOperational = currentOperational;
+    const currentStatus = room.status || "available";
+    let nextStatus = currentStatus;
 
     if (action === "CLEAN") {
-      // lejo CLEAN vetëm në needs_cleaning
-      if (currentOperational !== "needs_cleaning") {
-        return NextResponse.json(
-          { error: "Room is not marked as needs_cleaning" },
-          { status: 400 },
-        );
-      }
-      nextOperational = "available";
-    }
-
-    if (action === "TOGGLE_OUT_OF_ORDER") {
-      nextOperational =
-        currentOperational === "out_of_order" ? "available" : "out_of_order";
-    }
-
-    if (action === "MARK_NEEDS_CLEANING") {
-      if (currentOperational === "out_of_order") {
-        return NextResponse.json(
-          { error: "Room is out_of_order" },
-          { status: 400 },
-        );
-      }
-      nextOperational = "needs_cleaning";
+      nextStatus = "available";
+    } else if (action === "TOGGLE_OUT_OF_ORDER") {
+      nextStatus =
+        currentStatus === "out_of_order" ? "available" : "out_of_order";
+    } else if (action === "MARK_NEEDS_CLEANING") {
+      nextStatus = "needs_cleaning";
+    } else {
+      return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
 
     const updated = await prisma.rooms.update({
       where: { id: Number(room_id) },
-      data: { status: nextOperational },
+      data: { status: nextStatus },
     });
 
     await logActivity({
       action,
       entity: "room",
       entity_id: updated.id,
-      description: `Room #${room.room_number} status: ${currentOperational} -> ${nextOperational}`,
+      description: `Room #${room.room_number} status: ${currentStatus} -> ${nextStatus}`,
       performed_by: session?.user?.email || "system",
     });
 

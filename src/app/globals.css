@@ -100,3 +100,28 @@ body {
   }
 }
 
+/* Calendar tile styles */
+.react-calendar__tile.disabled-day {
+  opacity: 0.35;
+}
+
+.react-calendar__tile.booked-day {
+  background: rgba(244, 67, 54, 0.22) !important;
+  color: #b71c1c !important;
+  pointer-events: none;
+}
+
+.react-calendar__tile.start-day,
+.react-calendar__tile.end-day {
+  background: rgba(25, 118, 210, 0.25) !important;
+  color: #0d47a1 !important;
+  font-weight: 700;
+}
+
+.react-calendar__tile.range-day {
+  background: rgba(25, 118, 210, 0.12) !important;
+}
+
+.react-calendar__tile.available-day:hover {
+  background: rgba(0, 0, 0, 0.06) !important;
+}

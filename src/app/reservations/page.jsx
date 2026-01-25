@@ -18,6 +18,8 @@ import {
   DialogTitle,
   DialogContent,
   IconButton,
+  DialogActions,
+  TextField,
   Divider,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -49,6 +51,9 @@ export default function ReservationsPage() {
   const [tab, setTab] = useState("upcoming"); // upcoming | completed | cancelled
   const [details, setDetails] = useState(null);
   const [typeCoverMap, setTypeCoverMap] = useState({});
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [cancelTarget, setCancelTarget] = useState(null);
+  const [cancelReason, setCancelReason] = useState("");
 
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -114,6 +119,60 @@ export default function ReservationsPage() {
 
     fetchRoomImages();
   }, []);
+  async function hideReservation(reservationId) {
+    try {
+      const res = await fetch("/api/reservation/hide", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reservationId }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || "Failed to delete");
+        return;
+      }
+      setReservations((prev) => prev.filter((x) => x.id !== reservationId));
+    } catch (e) {
+      console.error(e);
+      alert("Network error");
+    }
+  }
+  async function cancelReservation(reservationId, reason) {
+    try {
+      const res = await fetch("/api/reservation/cancel", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reservationId, reason }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        alert(data.error || "Failed to cancel");
+        return false;
+      }
+
+      // ✅ update në UI (pa refresh)
+      setReservations((prev) =>
+        prev.map((x) =>
+          x.id === reservationId
+            ? {
+                ...x,
+                cancelled_at: new Date().toISOString(),
+                cancel_reason: reason || null,
+              }
+            : x,
+        ),
+      );
+
+      return true;
+    } catch (e) {
+      console.error(e);
+      alert("Network error");
+      return false;
+    }
+  }
+
   // Tabs sipas dates (jo status pagesës)
   const upcoming = useMemo(
     () =>
@@ -391,6 +450,36 @@ export default function ReservationsPage() {
                           >
                             View Details
                           </Button>
+                          <Button
+                            variant="outlined"
+                            onClick={() => {
+                              setCancelTarget(r);
+                              setCancelReason("");
+                            }}
+                            disabled={!!r.cancelled_at}
+                            sx={{
+                              mt: 1,
+                              borderRadius: 999,
+                              textTransform: "none",
+                              fontWeight: 900,
+                            }}
+                          >
+                            Cancel
+                          </Button>
+
+                          <Button
+                            color="error"
+                            variant="text"
+                            onClick={() => setDeleteTarget(r)}
+                            sx={{
+                              mt: 1,
+                              borderRadius: 999,
+                              textTransform: "none",
+                              fontWeight: 900,
+                            }}
+                          >
+                            Delete
+                          </Button>
                         </Box>
                       </Stack>
                     </Box>
@@ -446,6 +535,76 @@ export default function ReservationsPage() {
             </Stack>
           )}
         </DialogContent>
+      </Dialog>
+      <Dialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
+        <DialogTitle fontWeight={900}>Delete reservation?</DialogTitle>
+
+        <DialogContent>
+          <Typography>
+            Are you sure you want to remove this reservation from your list?
+            <br />
+            <b>This action cannot be undone.</b>
+          </Typography>
+        </DialogContent>
+
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
+            onClick={() => setDeleteTarget(null)}
+            sx={{ textTransform: "none" }}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            color="error"
+            variant="contained"
+            sx={{ textTransform: "none", fontWeight: 900 }}
+            onClick={async () => {
+              await hideReservation(deleteTarget.id);
+              setDeleteTarget(null);
+            }}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={!!cancelTarget} onClose={() => setCancelTarget(null)}>
+        <DialogTitle fontWeight={900}>Cancel reservation?</DialogTitle>
+
+        <DialogContent>
+          <Typography sx={{ mb: 2 }}>
+            Are you sure you want to cancel this reservation?
+          </Typography>
+
+          <TextField
+            label="Reason (optional)"
+            fullWidth
+            value={cancelReason}
+            onChange={(e) => setCancelReason(e.target.value)}
+            placeholder="Change of plans..."
+          />
+        </DialogContent>
+
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
+            onClick={() => setCancelTarget(null)}
+            sx={{ textTransform: "none" }}
+          >
+            Keep booking
+          </Button>
+
+          <Button
+            color="warning"
+            variant="contained"
+            sx={{ textTransform: "none", fontWeight: 900 }}
+            onClick={async () => {
+              const ok = await cancelReservation(cancelTarget.id, cancelReason);
+              if (ok) setCancelTarget(null);
+            }}
+          >
+            Cancel booking
+          </Button>
+        </DialogActions>
       </Dialog>
     </Box>
   );

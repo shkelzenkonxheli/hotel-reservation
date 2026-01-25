@@ -12,6 +12,8 @@ import {
   Menu,
   MenuItem,
   Box,
+  Divider,
+  Badge,
 } from "@mui/material";
 
 import MenuIcon from "@mui/icons-material/Menu";
@@ -29,12 +31,14 @@ export default function Header() {
 
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [alertsAnchor, setAlertsAnchor] = useState(null);
+
   const [summary, setSummary] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const openMenu = (e) => setMenuAnchor(e.currentTarget);
   const closeMenu = () => setMenuAnchor(null);
 
-  const openAlerts = (e) => setAlertsAnchor(e.currentTarget);
   const closeAlerts = () => setAlertsAnchor(null);
 
   const logout = () => {
@@ -45,14 +49,58 @@ export default function Header() {
   // fix for hydration — detect real client
   const isClient = typeof window !== "undefined";
 
-  useEffect(() => {
-    async function loadSummary() {
-      const res = await fetch("/api/houseKeeping/summary");
+  async function loadUnreadCount() {
+    try {
+      const res = await fetch("/api/notifications");
       const data = await res.json();
-      setSummary(data);
+      const arr = Array.isArray(data) ? data : [];
+      setUnreadCount(arr.filter((n) => !n.is_read).length);
+    } catch (e) {
+      console.error("Failed to load unread count", e);
     }
-    loadSummary();
-  }, []);
+  }
+
+  // Poll unread count (only worker/admin)
+  useEffect(() => {
+    if (!isClient || !user || user.role === "client") return;
+
+    loadUnreadCount();
+    const t = setInterval(loadUnreadCount, 30000); // çdo 30 sekonda
+    return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isClient, user?.role]);
+
+  const openAlerts = async (e) => {
+    setAlertsAnchor(e.currentTarget);
+
+    // Housekeeping summary (load once)
+    if (!summary) {
+      try {
+        const res = await fetch("/api/houseKeeping/summary");
+        const data = await res.json();
+        setSummary(data);
+      } catch (err) {
+        console.error("Failed to load summary", err);
+      }
+    }
+
+    // Notifications (admin/worker)
+    try {
+      const res = await fetch("/api/notifications");
+      const data = await res.json();
+      const arr = Array.isArray(data) ? data : [];
+      setNotifications(arr);
+
+      // Mark as read when opened
+      await fetch("/api/notifications", { method: "PATCH" });
+
+      // Update UI immediately
+      setUnreadCount(0);
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    } catch (err) {
+      console.error("Failed to load notifications", err);
+    }
+  };
 
   return (
     <AppBar position="sticky" sx={{ backgroundColor: "#364958" }}>
@@ -93,7 +141,13 @@ export default function Header() {
           {isClient && user && user.role !== "client" && (
             <>
               <IconButton color="inherit" onClick={openAlerts}>
-                <NotificationsIcon />
+                <Badge
+                  badgeContent={unreadCount}
+                  color="error"
+                  overlap="circular"
+                >
+                  <NotificationsIcon />
+                </Badge>
               </IconButton>
 
               <Menu
@@ -101,20 +155,67 @@ export default function Header() {
                 open={Boolean(alertsAnchor)}
                 onClose={closeAlerts}
               >
-                <Box sx={{ p: 2, width: 250 }}>
+                <Box sx={{ p: 2, width: 320 }}>
+                  {/* Housekeeping */}
                   <Typography variant="subtitle1" fontWeight="bold" mb={1}>
                     🧹 Housekeeping Alerts
                   </Typography>
 
                   <Typography>
-                    🚪 Checkouts Today: {summary?.checkout_today}
+                    🚪 Checkouts Today: {summary?.checkout_today ?? 0}
                   </Typography>
                   <Typography>
-                    🧼 Needs Cleaning: {summary?.needs_cleaning}
+                    🧼 Needs Cleaning: {summary?.needs_cleaning ?? 0}
                   </Typography>
                   <Typography>
-                    ⚠️ Out of Order: {summary?.out_of_order}
+                    ⚠️ Out of Order: {summary?.out_of_order ?? 0}
                   </Typography>
+
+                  <Divider sx={{ my: 1.5 }} />
+
+                  {/* Reservation Notifications */}
+                  <Typography variant="subtitle1" fontWeight="bold" mb={1}>
+                    🔔 Reservation Notifications
+                  </Typography>
+
+                  {notifications.length === 0 ? (
+                    <Typography variant="body2" color="text.secondary">
+                      No notifications
+                    </Typography>
+                  ) : (
+                    <Box
+                      sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+                    >
+                      {notifications.slice(0, 6).map((n) => (
+                        <Box
+                          key={n.id}
+                          sx={{
+                            p: 1,
+                            borderRadius: 2,
+                            bgcolor: n.is_read
+                              ? "transparent"
+                              : "rgba(212,163,115,0.18)",
+                            borderLeft: n.is_read
+                              ? "0px solid transparent"
+                              : "4px solid #d4a373",
+                          }}
+                        >
+                          <Typography
+                            fontWeight={n.is_read ? 700 : 950}
+                            fontSize={14}
+                          >
+                            {n.title}
+                          </Typography>
+                          <Typography variant="body2" sx={{ lineHeight: 1.25 }}>
+                            {n.message}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {new Date(n.created_at).toLocaleString()}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
                 </Box>
               </Menu>
             </>

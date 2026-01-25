@@ -9,21 +9,26 @@ datasource db {
 }
 
 model reservations {
-  id               Int       @id @default(autoincrement())
+  id               Int             @id @default(autoincrement())
   user_id          Int?
   room_id          Int?
-  start_date       DateTime  @db.Date
-  end_date         DateTime  @db.Date
-  status           String?   @default("pending") @db.VarChar(50)
-  created_at       DateTime? @default(now()) @db.Timestamp(6)
-  full_name        String?   @db.VarChar(100)
-  phone            String?   @db.VarChar(50)
-  address          String?   @db.VarChar(255)
+  start_date       DateTime        @db.Date
+  end_date         DateTime        @db.Date
+  status           String?         @default("pending") @db.VarChar(50)
+  created_at       DateTime?       @default(now()) @db.Timestamp(6)
+  full_name        String?         @db.VarChar(100)
+  phone            String?         @db.VarChar(50)
+  address          String?         @db.VarChar(255)
   guests           Int?
-  total_price      Decimal?  @db.Decimal(10, 2)
-  reservation_code String?   @unique @db.VarChar(20)
-  rooms            rooms?    @relation(fields: [room_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  users            users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  total_price      Decimal?        @db.Decimal(10, 2)
+  reservation_code String?         @unique @db.VarChar(20)
+  client_hidden    Boolean         @default(false)
+  client_hidden_at DateTime?       @db.Timestamp(6)
+  cancelled_at     DateTime?       @db.Timestamp(6)
+  cancel_reason    String?         @db.VarChar(255)
+  notifications    notifications[]
+  rooms            rooms?          @relation(fields: [room_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users            users?          @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model rooms {
@@ -39,15 +44,16 @@ model rooms {
 }
 
 model users {
-  id           Int            @id @default(autoincrement())
-  name         String         @db.VarChar(100)
-  email        String         @unique @db.VarChar(100)
-  password     String         @db.VarChar(200)
-  role         String         @default("client") @db.VarChar(50)
-  phone        String?        @db.VarChar(50)
-  address      String?
-  created_at   DateTime       @default(now()) @db.Timestamp(6)
-  reservations reservations[]
+  id            Int             @id @default(autoincrement())
+  name          String          @db.VarChar(100)
+  email         String          @unique @db.VarChar(100)
+  password      String          @db.VarChar(200)
+  role          String          @default("client") @db.VarChar(50)
+  phone         String?         @db.VarChar(50)
+  address       String?
+  created_at    DateTime        @default(now()) @db.Timestamp(6)
+  notifications notifications[]
+  reservations  reservations[]
 }
 
 model activity_logs {
@@ -69,4 +75,17 @@ model RoomImage {
   createdAt DateTime @default(now()) @db.Timestamp(6)
 
   @@index([type])
+}
+
+model notifications {
+  id             Int           @id @default(autoincrement())
+  type           String        @db.VarChar(50)
+  title          String        @db.VarChar(255)
+  message        String
+  reservation_id Int?
+  user_id        Int?
+  is_read        Boolean       @default(false)
+  created_at     DateTime      @default(now()) @db.Timestamp(6)
+  reservations   reservations? @relation(fields: [reservation_id], references: [id], onUpdate: NoAction, map: "fk_notification_reservation")
+  users          users?        @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "fk_notification_user")
 }

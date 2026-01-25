@@ -41,13 +41,13 @@ export async function POST(request) {
     if (!availableRoom) {
       return NextResponse.json(
         { error: "No rooms available" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (start < today) {
       return NextResponse.json(
         { error: "Cannot create or edit reservation in the past" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -107,6 +107,7 @@ export async function GET(request) {
 
       if (userRole === "client") {
         where.user_id = Number(userId);
+        where.client_hidden = false;
       }
 
       const reservations = await prisma.reservations.findMany({

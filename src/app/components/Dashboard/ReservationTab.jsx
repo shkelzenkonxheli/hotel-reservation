@@ -44,6 +44,7 @@ export default function ReservationsTab() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedReservation, setSelectedReservation] = useState(null);
   const [deleteDialog, setDeleteDialog] = useState({ open: false, id: null });
+  const [reasonTarget, setReasonTarget] = useState(null);
 
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
@@ -60,7 +61,7 @@ export default function ReservationsTab() {
 
   const toggleFavorite = (id) => {
     setFavorites((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
   };
 
@@ -94,7 +95,7 @@ export default function ReservationsTab() {
       if (res.ok) {
         const updated = await res.json();
         setReservations((prev) =>
-          prev.map((r) => (r.id === updated.id ? updated : r))
+          prev.map((r) => (r.id === updated.id ? updated : r)),
         );
       } else {
         console.error("Failed to update status");
@@ -116,7 +117,7 @@ export default function ReservationsTab() {
       list = list.filter(
         (r) =>
           r.full_name?.toLowerCase().includes(q) ||
-          r.users?.email?.toLowerCase().includes(q)
+          r.users?.email?.toLowerCase().includes(q),
       );
     }
 
@@ -128,7 +129,7 @@ export default function ReservationsTab() {
     // 🏨 Room type
     if (typeFilter !== "all") {
       list = list.filter((r) =>
-        r.rooms?.type?.toLowerCase().includes(typeFilter)
+        r.rooms?.type?.toLowerCase().includes(typeFilter),
       );
     }
 
@@ -245,6 +246,21 @@ export default function ReservationsTab() {
         return <Chip label={status} size="small" />;
     }
   };
+  function getBookingState(r) {
+    if (r.cancelled_at) return "CANCELLED";
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const end = new Date(r.end_date);
+    end.setHours(0, 0, 0, 0);
+
+    // nëse check-out ka kaluar -> completed
+    if (end < today) return "FINISHED";
+
+    // sot ose e ardhme -> active/upcoming
+    return "ACTIVE";
+  }
 
   if (loading)
     return (
@@ -271,7 +287,6 @@ export default function ReservationsTab() {
           p: 2,
           backgroundColor: "#eae1df",
           borderRadius: 2,
-          boxShadow: 1,
         }}
       >
         {/* LEFT SIDE FILTERS */}
@@ -349,7 +364,6 @@ export default function ReservationsTab() {
           p: 1,
           backgroundColor: "#eae1df",
           borderRadius: 2,
-          boxShadow: 1,
         }}
       >
         <Button
@@ -416,6 +430,7 @@ export default function ReservationsTab() {
                 <th className="p-3 text-center">Guests</th>
                 <th className="p-3 text-center">Status</th>
                 <th className="p-3 text-center">Total (€)</th>
+                <th className="p-3 text-center">Booking</th>
                 <th className="p-3 text-center">Actions</th>
               </tr>
             </thead>
@@ -424,7 +439,13 @@ export default function ReservationsTab() {
               {displayList.map((r) => (
                 <tr
                   key={r.id}
-                  className="hover:bg-blue-50 transition duration-150"
+                  className={`transition duration-150 ${
+                    r.cancelled_at
+                      ? "bg-red-100 hover:bg-red-100"
+                      : getBookingState(r) === "FINISHED"
+                        ? "bg-green-100 hover:bg-gray-100"
+                        : "bg-blue-100"
+                  }`}
                 >
                   {/* PIN */}
                   <td className="p-3 text-center">
@@ -459,14 +480,14 @@ export default function ReservationsTab() {
                       <Chip
                         size="small"
                         label={`IN: ${new Date(
-                          r.start_date
+                          r.start_date,
                         ).toLocaleDateString()}`}
                         sx={{ background: "#ecfeff", color: "#155e75" }}
                       />
                       <Chip
                         size="small"
                         label={`OUT: ${new Date(
-                          r.end_date
+                          r.end_date,
                         ).toLocaleDateString()}`}
                         sx={{ background: "#fff7ed", color: "#9a3412" }}
                       />
@@ -480,39 +501,76 @@ export default function ReservationsTab() {
                   <td className="p-3 text-center font-semibold">
                     €{Number(r.total_price ?? 0).toFixed(2)}
                   </td>
-
-                  {/* Actions – ruajtur Manage + Delete, shtuar Print */}
                   <td className="p-3 text-center">
-                    <IconButton
-                      size="small"
-                      onClick={(e) => {
-                        setAnchorEl(e.currentTarget);
-                        setSelectedReservation(r);
-                      }}
-                    >
-                      <MoreVert />
-                    </IconButton>
+                    {(() => {
+                      const state = getBookingState(r);
 
-                    <Tooltip title="Print receipt">
+                      if (state === "CANCELLED") {
+                        return (
+                          <Tooltip
+                            title={
+                              r.cancel_reason?.trim()
+                                ? `Reason: ${r.cancel_reason}`
+                                : "No reason provided"
+                            }
+                          >
+                            <span>
+                              <Chip
+                                label="Cancelled"
+                                color="error"
+                                size="small"
+                                clickable
+                                onClick={() => setReasonTarget(r)}
+                              />
+                            </span>
+                          </Tooltip>
+                        );
+                      }
+
+                      if (state === "FINISHED") {
+                        return (
+                          <Chip label="Finished" color="default" size="small" />
+                        );
+                      }
+
+                      return (
+                        <Chip label="Active" color="success" size="small" />
+                      );
+                    })()}
+                  </td>
+                  <td className="p-3 text-center">
+                    <div className="flex items-center justify-center gap-1">
                       <IconButton
                         size="small"
-                        onClick={() => setPrintReservation(r)}
+                        onClick={(e) => {
+                          setAnchorEl(e.currentTarget);
+                          setSelectedReservation(r);
+                        }}
                       >
-                        <PrintIcon />
+                        <MoreVert />
                       </IconButton>
-                    </Tooltip>
 
-                    <Tooltip title="Delete reservation">
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() =>
-                          setDeleteDialog({ open: true, id: r.id })
-                        }
-                      >
-                        <Delete />
-                      </IconButton>
-                    </Tooltip>
+                      <Tooltip title="Print receipt">
+                        <IconButton
+                          size="small"
+                          onClick={() => setPrintReservation(r)}
+                        >
+                          <PrintIcon />
+                        </IconButton>
+                      </Tooltip>
+
+                      <Tooltip title="Delete reservation">
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() =>
+                            setDeleteDialog({ open: true, id: r.id })
+                          }
+                        >
+                          <Delete />
+                        </IconButton>
+                      </Tooltip>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -571,6 +629,31 @@ export default function ReservationsTab() {
           <Button color="error" onClick={handleDeleteReservation}>
             Delete
           </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={!!reasonTarget} onClose={() => setReasonTarget(null)}>
+        <DialogTitle>Cancellation Details</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            <b>Reservation:</b> #{reasonTarget?.id}
+            <br />
+            <b>Guest:</b> {reasonTarget?.full_name || "-"}
+            <br />
+            <b>Cancelled at:</b>{" "}
+            {reasonTarget?.cancelled_at
+              ? new Date(reasonTarget.cancelled_at).toLocaleString()
+              : "-"}
+            <br />
+            <br />
+            <b>Reason:</b>{" "}
+            {reasonTarget?.cancel_reason?.trim()
+              ? reasonTarget.cancel_reason
+              : "No reason provided."}
+          </DialogContentText>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setReasonTarget(null)}>Close</Button>
         </DialogActions>
       </Dialog>
 

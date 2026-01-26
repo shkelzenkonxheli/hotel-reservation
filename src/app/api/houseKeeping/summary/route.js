@@ -7,7 +7,7 @@ export async function GET() {
     const todayOnly = new Date(
       today.getFullYear(),
       today.getMonth(),
-      today.getDate()
+      today.getDate(),
     );
 
     const rooms = await prisma.rooms.findMany({
@@ -15,6 +15,7 @@ export async function GET() {
     });
 
     let checkout_today = 0;
+    let checkin_today = 0;
     let needs_cleaning = 0;
     let out_of_order = 0;
 
@@ -32,16 +33,29 @@ export async function GET() {
 
       // Check if checkout is today
       for (const res of room.reservations) {
+        if (res.cancelled_at) continue; // ✅ mos i llogarit të anuluarat
+
+        const start = new Date(res.start_date);
         const end = new Date(res.end_date);
 
+        const startDay = new Date(
+          start.getFullYear(),
+          start.getMonth(),
+          start.getDate(),
+        );
         const endDay = new Date(
           end.getFullYear(),
           end.getMonth(),
-          end.getDate()
+          end.getDate(),
         );
 
         if (endDay.getTime() === todayOnly.getTime()) {
           checkout_today++;
+          break;
+        }
+
+        if (startDay.getTime() === todayOnly.getTime()) {
+          checkin_today++;
           break;
         }
       }
@@ -49,6 +63,7 @@ export async function GET() {
 
     return NextResponse.json({
       checkout_today,
+      checkin_today,
       needs_cleaning,
       out_of_order,
     });

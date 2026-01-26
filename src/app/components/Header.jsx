@@ -39,7 +39,19 @@ export default function Header() {
   const openMenu = (e) => setMenuAnchor(e.currentTarget);
   const closeMenu = () => setMenuAnchor(null);
 
-  const closeAlerts = () => setAlertsAnchor(null);
+  const closeAlerts = async () => {
+    setAlertsAnchor(null);
+
+    try {
+      await fetch("/api/notifications", { method: "PATCH" });
+
+      // ✅ update UI menjëherë
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      setUnreadCount(0);
+    } catch (err) {
+      console.error("Failed to mark notifications as read", err);
+    }
+  };
 
   const logout = () => {
     localStorage.removeItem("activeTab");
@@ -73,7 +85,6 @@ export default function Header() {
   const openAlerts = async (e) => {
     setAlertsAnchor(e.currentTarget);
 
-    // Housekeeping summary (load once)
     if (!summary) {
       try {
         const res = await fetch("/api/houseKeeping/summary");
@@ -84,19 +95,14 @@ export default function Header() {
       }
     }
 
-    // Notifications (admin/worker)
     try {
       const res = await fetch("/api/notifications");
       const data = await res.json();
       const arr = Array.isArray(data) ? data : [];
       setNotifications(arr);
 
-      // Mark as read when opened
-      await fetch("/api/notifications", { method: "PATCH" });
-
-      // Update UI immediately
-      setUnreadCount(0);
-      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      // ✅ këtu NUK e bëjmë read
+      setUnreadCount(arr.filter((n) => !n.is_read).length);
     } catch (err) {
       console.error("Failed to load notifications", err);
     }
@@ -159,6 +165,9 @@ export default function Header() {
                   {/* Housekeeping */}
                   <Typography variant="subtitle1" fontWeight="bold" mb={1}>
                     🧹 Housekeeping Alerts
+                  </Typography>
+                  <Typography>
+                    🚪 Checkin Today: {summary?.checkin_today ?? 0}
                   </Typography>
 
                   <Typography>

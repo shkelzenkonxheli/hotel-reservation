@@ -73,6 +73,16 @@ export async function POST(request) {
       description: `Created reservation #${reservation.id}`,
       performed_by: session.user.email,
     });
+    await prisma.notifications.create({
+      data: {
+        type: "reservation_created",
+        title: "New reservation",
+        message: `New reservation created for ${fullname || "guest"}.`,
+        reservation_id: reservation.id,
+        user_id: session.user.id ?? null,
+        is_read: false,
+      },
+    });
 
     return NextResponse.json(reservation);
   } catch (error) {

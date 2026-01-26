@@ -21,7 +21,7 @@ export async function POST(req) {
     const event = stripe.webhooks.constructEvent(
       rawBody,
       sig,
-      process.env.STRIPE_WEBHOOK_SECRET
+      process.env.STRIPE_WEBHOOK_SECRET,
     );
 
     if (event.type === "checkout.session.completed") {
@@ -115,7 +115,7 @@ export async function POST(req) {
       });
 
       console.log(
-        `🏨 Reservation confirmed for ${user.email} in room #${availableRoom.id}`
+        `🏨 Reservation confirmed for ${user.email} in room #${availableRoom.id}`,
       );
     }
 

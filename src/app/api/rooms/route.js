@@ -30,8 +30,9 @@ export async function GET(request) {
       include: includeReservations
         ? {
             reservations: {
-              // ✅ mos i merr krejt users nëse s’të duhet (e ngadalëson)
-              // nëse të duhet, ktheje prap include: { users: true }
+              where: {
+                cancelled_at: null,
+              },
               select: {
                 id: true,
                 start_date: true,

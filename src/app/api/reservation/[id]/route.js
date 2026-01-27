@@ -49,13 +49,13 @@ export async function PATCH(req, context) {
     if (!fullname || !phone || !type || !startDate || !endDate) {
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (start < today) {
       return NextResponse.json(
         { error: "Cannot create or edit reservation in the past" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -67,7 +67,7 @@ export async function PATCH(req, context) {
     if (!existing) {
       return NextResponse.json(
         { error: "Reservation not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -98,7 +98,7 @@ export async function PATCH(req, context) {
       if (!availableRoom) {
         return NextResponse.json(
           { error: "No available rooms for the new type or dates." },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -135,49 +135,61 @@ export async function PATCH(req, context) {
     console.error("❌ Error updating reservation:", error);
     return NextResponse.json(
       { error: "Failed to update reservation", details: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 export async function DELETE(req, { params }) {
   const session = await getServerSession(authOptions);
-  const { id } = await params;
+  const { id } = params;
 
   try {
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
     if (!id) {
-      return NextResponse.json({ error: "It needs an id", status: 400 });
+      return NextResponse.json({ error: "It needs an id" }, { status: 400 });
     }
 
+    const reservationId = Number(id);
+
     const existing = await prisma.reservations.findUnique({
-      where: {
-        id: Number(id),
-      },
+      where: { id: reservationId },
     });
+
     if (!existing) {
-      console.log("⚠️ Reservation not found in DB");
       return NextResponse.json(
         { error: "Reservation not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
-    await prisma.reservations.delete({ where: { id: Number(id) } });
+
+    // ✅ ADMIN HIDE (JO DELETE)
+    await prisma.reservations.update({
+      where: { id: reservationId },
+      data: {
+        admin_hidden: true,
+        admin_hidden_at: new Date(),
+      },
+    });
+
     await logActivity({
-      action: "DELETE",
+      action: "ARCHIVE",
       entity: "reservation",
-      entity_id: Number(id),
-      description: `Deleted reservation #${id}`,
+      entity_id: reservationId,
+      description: `Admin archived reservation #${reservationId}`,
       performed_by: session.user.email,
     });
-    console.log("🗑️ Reservation deleted successfully!");
-    return NextResponse.json({ message: "Reservation deleted successfully" });
+
+    return NextResponse.json({
+      message: "Reservation archived successfully",
+    });
   } catch (error) {
-    console.error("❌ Error deleting reservation:", error);
+    console.error("❌ Error archiving reservation:", error);
     return NextResponse.json(
-      { error: "Failed to delete reservation", details: error.message },
-      { status: 500 }
+      { error: "Failed to archive reservation" },
+      { status: 500 },
     );
   }
 }

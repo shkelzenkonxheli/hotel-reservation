@@ -111,6 +111,8 @@ export async function GET(request) {
       });
       return NextResponse.json(latest);
     }
+    const session = await getServerSession(authOptions);
+    const role = session?.user?.role?.toLowerCase();
 
     if (listAll === "true" || (userId && userRole)) {
       let where = {};
@@ -118,6 +120,9 @@ export async function GET(request) {
       if (userRole === "client") {
         where.user_id = Number(userId);
         where.client_hidden = false;
+      }
+      if (role === "admin" || role === "worker") {
+        where.admin_hidden = false;
       }
 
       const reservations = await prisma.reservations.findMany({

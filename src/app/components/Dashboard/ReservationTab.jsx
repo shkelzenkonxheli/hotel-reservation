@@ -149,6 +149,7 @@ export default function ReservationsTab() {
         method: "DELETE",
       });
       if (res.ok) {
+        setReservations((prev) => prev.filter((r) => r.id !== deleteDialog.id));
         alert("Reservation successfully deleted!");
         fetchReservations();
       } else {

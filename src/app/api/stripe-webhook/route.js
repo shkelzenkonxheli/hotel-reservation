@@ -130,10 +130,6 @@ export async function POST(req) {
         invoice_number: invoiceNumber,
       },
     });
-    await prisma.rooms.update({
-      where: { id: availableRoom.id },
-      data: { status: "booked" },
-    });
 
     await prisma.notifications.create({
       data: {

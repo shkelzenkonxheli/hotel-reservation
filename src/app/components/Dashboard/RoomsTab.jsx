@@ -111,6 +111,24 @@ export default function RoomsTab() {
         return "#9ca3af"; // gray
     }
   };
+  const countByStatus = (list) => {
+    const booked = list.filter((r) => r.current_status === "booked").length;
+    const available = list.filter(
+      (r) => r.current_status === "available",
+    ).length;
+    const needsCleaning = list.filter(
+      (r) => r.current_status === "needs_cleaning",
+    ).length;
+    const outOfOrder = list.filter(
+      (r) => r.current_status === "out_of_order",
+    ).length;
+
+    return { booked, available, needsCleaning, outOfOrder, total: list.length };
+  };
+
+  const apartmentsCount = countByStatus(apartments);
+  const hotelRoomsCount = countByStatus(hotelRooms);
+  const totalCount = countByStatus(filteredRooms);
 
   // Ngjyros ditët e rezervuara në calendar
   function tileClassName({ date, view }) {
@@ -193,6 +211,17 @@ export default function RoomsTab() {
         <Typography variant="h5" fontWeight="bold" color="text.primary">
           🏨 Rooms Overview
         </Typography>
+        <Box className="flex items-center gap-2 flex-wrap">
+          <Chip
+            label={`Booked: ${totalCount.booked}`}
+            sx={{ bgcolor: "#fee2e2", color: "#b91c1c" }}
+          />
+          <Chip
+            label={`Available: ${totalCount.available}`}
+            sx={{ bgcolor: "#dcfce7", color: "#166534" }}
+          />
+          <Chip label={`Total: ${totalCount.total}`} variant="outlined" />
+        </Box>
 
         <Box className="flex items-center gap-3 text-sm">
           <Chip
@@ -208,28 +237,95 @@ export default function RoomsTab() {
       </Box>
 
       {/* Filters */}
-      <Box className="flex flex-col sm:flex-row gap-4 mb-6">
-        <TextField
-          label="Select Date"
-          type="date"
-          size="small"
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
-          InputLabelProps={{ shrink: true }}
-        />
-        <TextField
-          label="Filter"
-          size="small"
-          select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
+      <Paper
+        elevation={2}
+        sx={{
+          p: 2,
+          mb: 4,
+          borderRadius: 3,
+          bgcolor: "#eae1df",
+        }}
+      >
+        <Box
+          display="flex"
+          flexDirection={{ xs: "column", sm: "row" }}
+          alignItems={{ sm: "center" }}
+          justifyContent="space-between"
+          gap={2}
         >
-          <MenuItem value="all">All</MenuItem>
-          <MenuItem value="available">Available</MenuItem>
-          <MenuItem value="booked">Booked</MenuItem>
-          <MenuItem value="needs_cleaning">Needs Cleaning</MenuItem>
-        </TextField>
-      </Box>
+          {/* Date picker */}
+          <Box display="flex" alignItems="center" gap={2}>
+            <Typography fontWeight="600" color="text.secondary">
+              Date
+            </Typography>
+
+            <TextField
+              type="date"
+              size="small"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              sx={{
+                minWidth: 160,
+                bgcolor: "white",
+                borderRadius: 2,
+              }}
+            />
+          </Box>
+
+          {/* Status filter */}
+          <Box display="flex" alignItems="center" gap={2} flexWrap="wrap">
+            <Typography fontWeight="600" color="text.secondary">
+              Status
+            </Typography>
+
+            <Chip
+              label="All"
+              clickable
+              onClick={() => setFilter("all")}
+              color={filter === "all" ? "primary" : "default"}
+              variant={filter === "all" ? "filled" : "outlined"}
+            />
+
+            <Chip
+              label="Available"
+              clickable
+              onClick={() => setFilter("available")}
+              sx={{
+                bgcolor: filter === "available" ? "#dcfce7" : "transparent",
+                color: "#166534",
+                borderColor: "#22c55e",
+              }}
+              variant={filter === "available" ? "filled" : "outlined"}
+            />
+
+            <Chip
+              label="Booked"
+              clickable
+              onClick={() => setFilter("booked")}
+              sx={{
+                bgcolor: filter === "booked" ? "#fee2e2" : "transparent",
+                color: "#b91c1c",
+                borderColor: "#ef4444",
+              }}
+              variant={filter === "booked" ? "filled" : "outlined"}
+            />
+
+            <Chip
+              label="Needs Cleaning"
+              clickable
+              onClick={() => setFilter("needs_cleaning")}
+              sx={{
+                bgcolor:
+                  filter === "needs_cleaning" ? "#fef9c3" : "transparent",
+                color: "#a16207",
+                borderColor: "#facc15",
+              }}
+              variant={filter === "needs_cleaning" ? "filled" : "outlined"}
+            />
+          </Box>
+        </Box>
+      </Paper>
 
       <Grid container spacing={4}>
         {/* 🏢 Apartments */}
@@ -238,15 +334,36 @@ export default function RoomsTab() {
             elevation={2}
             sx={{ p: 3, borderRadius: 3, bgcolor: "#eae1df" }}
           >
-            <Typography
-              variant="h6"
-              align="center"
-              fontWeight="bold"
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
               mb={2}
-              color="text.primary"
             >
-              🏢 Apartments
-            </Typography>
+              <Typography variant="h6" fontWeight="bold" color="text.primary">
+                🏢 Apartments
+              </Typography>
+
+              <Box
+                display="flex"
+                gap={1}
+                flexWrap="wrap"
+                justifyContent="flex-end"
+              >
+                <Chip
+                  label={`Booked: ${apartmentsCount.booked}`}
+                  sx={{ bgcolor: "#fee2e2", color: "#b91c1c" }}
+                />
+                <Chip
+                  label={`Available: ${apartmentsCount.available}`}
+                  sx={{ bgcolor: "#dcfce7", color: "#166534" }}
+                />
+                <Chip
+                  label={`Total: ${apartmentsCount.total}`}
+                  variant="outlined"
+                />
+              </Box>
+            </Box>
 
             <Grid container spacing={2}>
               {apartments.map((room) => (
@@ -291,15 +408,36 @@ export default function RoomsTab() {
             elevation={2}
             sx={{ p: 3, borderRadius: 3, bgcolor: "#eae1df" }}
           >
-            <Typography
-              variant="h6"
-              align="center"
-              fontWeight="bold"
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
               mb={2}
-              color="text.primary"
             >
-              🏨 Hotel Rooms
-            </Typography>
+              <Typography variant="h6" fontWeight="bold" color="text.primary">
+                🏨 Hotel Rooms
+              </Typography>
+
+              <Box
+                display="flex"
+                gap={1}
+                flexWrap="wrap"
+                justifyContent="flex-end"
+              >
+                <Chip
+                  label={`Booked: ${hotelRoomsCount.booked}`}
+                  sx={{ bgcolor: "#fee2e2", color: "#b91c1c" }}
+                />
+                <Chip
+                  label={`Available: ${hotelRoomsCount.available}`}
+                  sx={{ bgcolor: "#dcfce7", color: "#166534" }}
+                />
+                <Chip
+                  label={`Total: ${hotelRoomsCount.total}`}
+                  variant="outlined"
+                />
+              </Box>
+            </Box>
 
             <Grid container spacing={2}>
               {hotelRooms.map((room) => (

@@ -53,11 +53,18 @@ export default function ReservationsTab() {
   const [openModal, setOpenModal] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const [editOpen, setEditOpen] = useState(false);
-  const [editData, setEditData] = useState("null");
+  const [editData, setEditData] = useState(null);
 
   const isMobile = useMediaQuery("(max-width:768px)");
   const [favorites, setFavorites] = useState([]);
   const [printReservation, setPrintReservation] = useState(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsReservation, setDetailsReservation] = useState(null);
+
+  const openDetails = (r) => {
+    setDetailsReservation(r);
+    setDetailsOpen(true);
+  };
 
   const toggleFavorite = (id) => {
     setFavorites((prev) =>
@@ -149,7 +156,6 @@ export default function ReservationsTab() {
         method: "DELETE",
       });
       if (res.ok) {
-        setReservations((prev) => prev.filter((r) => r.id !== deleteDialog.id));
         alert("Reservation successfully deleted!");
         fetchReservations();
       } else {
@@ -422,16 +428,13 @@ export default function ReservationsTab() {
             <thead className="bg-blue-400 text-white text-xs uppercase">
               <tr>
                 <th className="p-3 text-center">Pin</th>
-                <th className="p-3 text-left">Reservation Code</th>
+                <th className="p-3 text-left">Code</th>
                 <th className="p-3 text-left">Guest</th>
-                <th className="p-3 text-left">Email</th>
                 <th className="p-3 text-left">Room</th>
-                <th className="p-3 text-center">#</th>
                 <th className="p-3 text-center">Dates</th>
-                <th className="p-3 text-center">Guests</th>
                 <th className="p-3 text-center">Status</th>
                 <th className="p-3 text-center">Total (€)</th>
-                <th className="p-3 text-center">Booking</th>
+                <th className="p-3 text-center">Invoice</th>
                 <th className="p-3 text-center">Actions</th>
               </tr>
             </thead>
@@ -464,83 +467,61 @@ export default function ReservationsTab() {
                   </td>
 
                   <td className="p-3 font-medium text-gray-800">
-                    {r.full_name}
+                    {r.full_name || "-"}
                   </td>
 
-                  <td className="p-3">{r.users?.email}</td>
-
-                  <td className="p-3">{r.rooms?.name}</td>
-
-                  <td className="p-3 text-center">
-                    {r.rooms?.room_number || "-"}
+                  <td className="p-3">
+                    <div className="flex flex-col">
+                      <span>{r.rooms?.name || "-"}</span>
+                      <span className="text-xs text-gray-600">
+                        #{r.rooms?.room_number || "-"} • {r.rooms?.type || "-"}
+                      </span>
+                    </div>
                   </td>
 
-                  {/* Dates me ngjyra */}
                   <td className="p-3 text-center">
                     <Box display="flex" flexDirection="column" gap={0.5}>
                       <Chip
                         size="small"
-                        label={`IN: ${new Date(
-                          r.start_date,
-                        ).toLocaleDateString()}`}
+                        label={`IN: ${new Date(r.start_date).toLocaleDateString()}`}
                         sx={{ background: "#ecfeff", color: "#155e75" }}
                       />
                       <Chip
                         size="small"
-                        label={`OUT: ${new Date(
-                          r.end_date,
-                        ).toLocaleDateString()}`}
+                        label={`OUT: ${new Date(r.end_date).toLocaleDateString()}`}
                         sx={{ background: "#fff7ed", color: "#9a3412" }}
                       />
                     </Box>
                   </td>
-
-                  <td className="p-3 text-center">{r.guests}</td>
 
                   <td className="p-3 text-center">{getStatusChip(r.status)}</td>
 
                   <td className="p-3 text-center font-semibold">
                     €{Number(r.total_price ?? 0).toFixed(2)}
                   </td>
+
                   <td className="p-3 text-center">
-                    {(() => {
-                      const state = getBookingState(r);
-
-                      if (state === "CANCELLED") {
-                        return (
-                          <Tooltip
-                            title={
-                              r.cancel_reason?.trim()
-                                ? `Reason: ${r.cancel_reason}`
-                                : "No reason provided"
-                            }
-                          >
-                            <span>
-                              <Chip
-                                label="Cancelled"
-                                color="error"
-                                size="small"
-                                clickable
-                                onClick={() => setReasonTarget(r)}
-                              />
-                            </span>
-                          </Tooltip>
-                        );
-                      }
-
-                      if (state === "FINISHED") {
-                        return (
-                          <Chip label="Finished" color="default" size="small" />
-                        );
-                      }
-
-                      return (
-                        <Chip label="Active" color="success" size="small" />
-                      );
-                    })()}
+                    {r.invoice_number ? (
+                      <Chip
+                        label={r.invoice_number}
+                        size="small"
+                        sx={{ fontWeight: 600 }}
+                      />
+                    ) : (
+                      <span className="text-gray-500">—</span>
+                    )}
                   </td>
+
                   <td className="p-3 text-center">
                     <div className="flex items-center justify-center gap-1">
+                      {/* View details */}
+                      <Tooltip title="View details">
+                        <IconButton size="small" onClick={() => openDetails(r)}>
+                          <BookOnline />
+                        </IconButton>
+                      </Tooltip>
+
+                      {/* Manage */}
                       <IconButton
                         size="small"
                         onClick={(e) => {
@@ -551,6 +532,7 @@ export default function ReservationsTab() {
                         <MoreVert />
                       </IconButton>
 
+                      {/* Print */}
                       <Tooltip title="Print receipt">
                         <IconButton
                           size="small"
@@ -560,6 +542,7 @@ export default function ReservationsTab() {
                         </IconButton>
                       </Tooltip>
 
+                      {/* Delete */}
                       <Tooltip title="Delete reservation">
                         <IconButton
                           size="small"
@@ -577,6 +560,108 @@ export default function ReservationsTab() {
               ))}
             </tbody>
           </table>
+          <Dialog
+            open={detailsOpen}
+            onClose={() => {
+              setDetailsOpen(false);
+              setDetailsReservation(null);
+            }}
+            maxWidth="sm"
+            fullWidth
+          >
+            <DialogTitle>Reservation Details</DialogTitle>
+            <DialogContent dividers>
+              {detailsReservation ? (
+                <Box display="flex" flexDirection="column" gap={1.2}>
+                  <Typography variant="body2">
+                    <b>Code:</b> {detailsReservation.reservation_code || "-"}
+                  </Typography>
+
+                  <Typography variant="body2">
+                    <b>Invoice:</b> {detailsReservation.invoice_number || "—"}
+                  </Typography>
+
+                  <Typography variant="body2">
+                    <b>Guest:</b> {detailsReservation.full_name || "-"}
+                  </Typography>
+
+                  <Typography variant="body2">
+                    <b>Email:</b> {detailsReservation.users?.email || "-"}
+                  </Typography>
+
+                  <Typography variant="body2">
+                    <b>Phone:</b> {detailsReservation.phone || "-"}
+                  </Typography>
+
+                  <Typography variant="body2">
+                    <b>Address:</b> {detailsReservation.address || "-"}
+                  </Typography>
+
+                  <Typography variant="body2">
+                    <b>Room:</b> {detailsReservation.rooms?.name || "-"} #
+                    {detailsReservation.rooms?.room_number || "-"}
+                  </Typography>
+
+                  <Typography variant="body2">
+                    <b>Dates:</b>{" "}
+                    {new Date(
+                      detailsReservation.start_date,
+                    ).toLocaleDateString()}{" "}
+                    →{" "}
+                    {new Date(detailsReservation.end_date).toLocaleDateString()}
+                  </Typography>
+
+                  <Typography variant="body2">
+                    <b>Guests:</b> {detailsReservation.guests ?? "-"}
+                  </Typography>
+
+                  <Typography variant="body2">
+                    <b>Status:</b> {detailsReservation.status || "-"}
+                  </Typography>
+
+                  <Typography variant="body2">
+                    <b>Total:</b> €
+                    {Number(detailsReservation.total_price ?? 0).toFixed(2)}
+                  </Typography>
+
+                  <Typography variant="body2">
+                    <b>Paid:</b> €
+                    {Number(detailsReservation.amount_paid ?? 0).toFixed(2)}
+                  </Typography>
+
+                  <Typography variant="body2">
+                    <b>Payment status:</b>{" "}
+                    {detailsReservation.payment_status || "—"}
+                  </Typography>
+
+                  <Typography variant="body2">
+                    <b>Paid at:</b>{" "}
+                    {detailsReservation.paid_at
+                      ? new Date(detailsReservation.paid_at).toLocaleString()
+                      : "—"}
+                  </Typography>
+
+                  {detailsReservation.cancelled_at && (
+                    <Typography variant="body2">
+                      <b>Cancelled at:</b>{" "}
+                      {new Date(
+                        detailsReservation.cancelled_at,
+                      ).toLocaleString()}
+                    </Typography>
+                  )}
+
+                  {detailsReservation.cancel_reason?.trim() && (
+                    <Typography variant="body2">
+                      <b>Cancel reason:</b> {detailsReservation.cancel_reason}
+                    </Typography>
+                  )}
+                </Box>
+              ) : null}
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setDetailsOpen(false)}>Close</Button>
+            </DialogActions>
+          </Dialog>
         </div>
       )}
 

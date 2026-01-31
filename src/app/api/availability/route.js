@@ -22,7 +22,11 @@ export async function GET(req) {
 
     // Merr të gjitha rezervimet për ato dhoma
     const reservations = await prisma.reservations.findMany({
-      where: { room_id: { in: roomIds }, cancelled_at: null },
+      where: {
+        room_id: { in: roomIds },
+        cancelled_at: null,
+        admin_hidden: false,
+      },
       select: {
         room_id: true,
         start_date: true,

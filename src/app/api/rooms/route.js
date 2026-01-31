@@ -32,6 +32,7 @@ export async function GET(request) {
             reservations: {
               where: {
                 cancelled_at: null,
+                admin_hidden: false,
               },
               select: {
                 id: true,

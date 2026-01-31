@@ -144,13 +144,21 @@ export async function GET(request) {
     if (roomType && startDate && endDate) {
       const rooms = await prisma.rooms.findMany({
         where: { type: roomType },
-        include: { reservations: true },
+        include: {
+          reservations: {
+            where: {
+              cancelled_at: null,
+              admin_hidden: false,
+            },
+          },
+        },
       });
 
       const availableRoom = rooms.find((room) => {
         if (room.status === "out_of_order") return;
         const conflict = room.reservations.some((res) => {
           if (reservationId && res.id === reservationId) return false;
+          if (res.cancelled_at) return false;
           return (
             new Date(startDate) < new Date(res.end_date) &&
             new Date(endDate) > new Date(res.start_date)

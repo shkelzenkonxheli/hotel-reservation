@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { logActivity } from "../../../../lib/activityLogger";
 import { authOptions } from "../auth/[...nextauth]/route";
 
+// Normalize any date to UTC midnight (date-only comparisons).
 function normalizeUTC(date) {
   const d = new Date(date);
   return new Date(
@@ -15,12 +16,14 @@ function isSameDay(a, b) {
   return a.getTime() === b.getTime();
 }
 
+// Handle GET requests for this route.
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const includeReservations = searchParams.get("include") === "true";
     const selectedDateParam = searchParams.get("date");
 
+    // Use the provided date (or today) and normalize to UTC day.
     const selectedDate = selectedDateParam
       ? new Date(selectedDateParam)
       : new Date();
@@ -89,6 +92,7 @@ export async function GET(request) {
       // ✅ current_status i thjeshtë:
       // - nëse ka rezervim aktiv -> booked
       // - përndryshe -> statusi i DB (available / needs_cleaning)
+      // Derive current status for UI based on active reservation.
       const currentStatus = activeReservation ? "booked" : operationalStatus;
 
       return {
@@ -112,6 +116,7 @@ export async function GET(request) {
  * TOGGLE_OUT_OF_ORDER -> out_of_order/available
  * MARK_NEEDS_CLEANING -> needs_cleaning
  */
+// Handle PATCH requests for this route.
 export async function PATCH(request) {
   try {
     const { room_id, action } = await request.json();
@@ -132,6 +137,7 @@ export async function PATCH(request) {
       return NextResponse.json({ error: "Room not found" }, { status: 404 });
     }
 
+    // Compute next status based on action and current status.
     const currentStatus = room.status || "available";
     let nextStatus = currentStatus;
 

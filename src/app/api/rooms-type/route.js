@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
+// Handle GET requests for this route.
 export async function GET() {
   try {
     // 1. Merr rooms (vetëm për info bazë)
@@ -13,7 +14,7 @@ export async function GET() {
       },
     });
 
-    // 2. Nxjerr types unike
+    // 2. Build a map of unique room types.
     const grouped = {};
     for (const room of rooms) {
       if (!grouped[room.type]) {
@@ -33,7 +34,7 @@ export async function GET() {
       orderBy: { order: "asc" },
     });
 
-    // 4. Vendosi fotot te type përkatës
+    // 4. Attach image URLs to their matching room type.
     for (const img of images) {
       if (grouped[img.type]) {
         grouped[img.type].images.push(img.url);

@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 
+// Handle PATCH requests for this route.
 export async function PATCH(req) {
   try {
     const session = await getServerSession(authOptions);
@@ -38,6 +39,7 @@ export async function PATCH(req) {
     }
 
     // ✅ opsionale: mos e lejo anulimin në ditën e check-in ose pas (mund ta heqim nëse s’e do)
+    // Compare date-only (midnight) to avoid time-of-day issues.
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const start = new Date(reservation.start_date);
@@ -53,6 +55,7 @@ export async function PATCH(req) {
       where: { id: Number(reservationId) },
       data: {
         cancelled_at: new Date(),
+        // Trim reason to a safe max length for storage.
         cancel_reason: typeof reason === "string" ? reason.slice(0, 255) : null,
       },
       select: { id: true, cancelled_at: true, cancel_reason: true },

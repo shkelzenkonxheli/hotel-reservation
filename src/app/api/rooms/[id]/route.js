@@ -3,9 +3,11 @@ import { NextResponse } from "next/server";
 import { logActivity } from "../../../../../lib/activityLogger";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
+// Handle PATCH requests for this route.
 export async function PATCH(request, context) {
   try {
     const { id } = await context.params;
+    // Parse route param to a numeric ID.
     const roomId = parseInt(id);
     const { name, room_number, type, price, description, status } =
       await request.json();
@@ -30,6 +32,7 @@ export async function PATCH(request, context) {
         name,
         room_number,
         type,
+        // Coerce price to a number for storage.
         price: parseFloat(price),
         description,
         status: status || undefined,
@@ -50,6 +53,7 @@ export async function PATCH(request, context) {
   }
 }
 
+// Handle DELETE requests for this route.
 export async function DELETE(req, { params }) {
   try {
     const { id } = await params;

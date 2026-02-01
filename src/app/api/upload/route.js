@@ -9,6 +9,7 @@ const s3 = new S3Client({
   },
 });
 
+// Handle POST requests for this route.
 export async function POST(req) {
   try {
     const formData = await req.formData();
@@ -25,6 +26,7 @@ export async function POST(req) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
+    // Normalize filename and add a timestamp to avoid collisions.
     const safeName = file.name.replace(/\s+/g, "-");
     const key = `room-types/${type}/${Date.now()}-${safeName}`;
 

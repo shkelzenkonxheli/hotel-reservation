@@ -4,6 +4,7 @@ import { logActivity } from "../../../../../lib/activityLogger";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 
+// Handle PATCH requests for this route.
 export async function PATCH(req, context) {
   try {
     const params = await context.params;
@@ -11,6 +12,7 @@ export async function PATCH(req, context) {
     const session = await getServerSession(authOptions);
     const performedBy = session?.user?.email ?? "system";
 
+    // Normalize today/start to date-only for "past" checks.
     const today = new Date().setHours(0, 0, 0, 0);
     const start = new Date().setHours(0, 0, 0, 0);
     const body = await req.json();
@@ -71,6 +73,7 @@ export async function PATCH(req, context) {
       );
     }
 
+    // Detect whether room type or date range is being changed.
     const isTypeChanged = type !== existing.rooms.type;
     const isDatesChanged =
       startDate !== existing.start_date.toISOString().split("T")[0] ||
@@ -84,6 +87,7 @@ export async function PATCH(req, context) {
         include: { reservations: true },
       });
 
+      // Find any room without overlap in the new date range.
       const availableRoom = rooms.find((room) => {
         const conflict = room.reservations.some((reservation) => {
           if (reservation.id === existing.id) return false;
@@ -112,6 +116,7 @@ export async function PATCH(req, context) {
         full_name: fullname,
         phone,
         address,
+        // Coerce numeric and date fields before update.
         guests: Number(guests),
         start_date: new Date(startDate),
         end_date: new Date(endDate),
@@ -139,6 +144,7 @@ export async function PATCH(req, context) {
     );
   }
 }
+// Handle DELETE requests for this route.
 export async function DELETE(req, { params }) {
   const session = await getServerSession(authOptions);
   const { id } = params;

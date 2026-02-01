@@ -5,11 +5,13 @@ import { logActivity } from "../../../../lib/activityLogger";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 
+// Convert YYYY-MM-DD to a UTC midnight Date for day-precision comparisons.
 function parseDateOnlyToUTC(dateStr) {
   const [y, m, d] = dateStr.split("-").map(Number);
   return new Date(Date.UTC(y, m - 1, d));
 }
 
+// Handle POST requests for this route.
 export async function POST(request) {
   try {
     const session = await getServerSession(authOptions);
@@ -35,6 +37,7 @@ export async function POST(request) {
       );
     }
 
+    // Normalize input dates to UTC (date-only) for consistent overlap checks.
     const start = parseDateOnlyToUTC(startDate);
     const end = parseDateOnlyToUTC(endDate);
 
@@ -46,6 +49,7 @@ export async function POST(request) {
     }
 
     // s’lejojmë start në të kaluarën (date-only)
+    // Today's date at UTC midnight (date-only).
     const today = parseDateOnlyToUTC(new Date().toISOString().slice(0, 10));
     if (start < today) {
       return NextResponse.json(
@@ -67,6 +71,7 @@ export async function POST(request) {
     const availableRoom = rooms.find((room) => {
       if (room.status === "out_of_order") return false;
 
+      // Overlap rule: start < existing_end AND end > existing_start.
       const conflict = room.reservations.some((r) => {
         // overlap: start < existing_end AND end > existing_start
         return start < new Date(r.end_date) && end > new Date(r.start_date);
@@ -82,10 +87,12 @@ export async function POST(request) {
       );
     }
 
+    // Normalize pricing and payment metadata.
     const total = Number(total_price || 0);
     const payStatus = payment_status === "PAID" ? "PAID" : "UNPAID";
     const payMethod = payment_method === "card" ? "card" : "cash";
 
+    // If unpaid, amount_paid is zero.
     const amountPaid = payStatus === "PAID" ? total : 0;
 
     const reservation = await prisma.reservations.create({
@@ -112,6 +119,7 @@ export async function POST(request) {
         paid_at: payStatus === "PAID" ? new Date() : null, // ✅ ekziston
       },
     });
+    // Create a padded invoice number like INV-2026-000123.
     const year = new Date().getFullYear();
     const invoiceNumber = `INV-${year}-${String(reservation.id).padStart(6, "0")}`;
 
@@ -147,6 +155,7 @@ export async function POST(request) {
 }
 
 // Kontrollo disponueshmërinë
+// Handle GET requests for this route.
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -188,6 +197,7 @@ export async function GET(request) {
 
       console.log("📦 Found reservations:", reservations.length);
 
+      // Ensure numeric totals for client-side calculations.
       const payload = reservations.map((r) => ({
         ...r,
         total_price: r.total_price ? Number(r.total_price) : 0,
@@ -211,6 +221,7 @@ export async function GET(request) {
 
       const availableRoom = rooms.find((room) => {
         if (room.status === "out_of_order") return;
+        // Overlap rule: start < existing_end AND end > existing_start.
         const conflict = room.reservations.some((res) => {
           if (reservationId && res.id === reservationId) return false;
           if (res.cancelled_at) return false;

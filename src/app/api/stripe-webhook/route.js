@@ -12,6 +12,7 @@ export const config = {
   api: { bodyParser: false },
 };
 
+// Handle POST requests for this route.
 export async function POST(req) {
   const sig = req.headers.get("stripe-signature");
   const rawBody = await req.text();
@@ -73,6 +74,7 @@ export async function POST(req) {
 
     // Find one available room
 
+    // Pick the first room without date overlap for the requested range.
     const availableRoom = rooms.find((room) => {
       if (room.status === "out_of_order") return;
       const conflict = room.reservations.some((reservation) => {
@@ -92,6 +94,7 @@ export async function POST(req) {
       return NextResponse.json({ message: "No available room found" });
     }
 
+    // Normalize total price to a numeric value.
     const totalPrice = Number(meta.totalPrice || 0);
 
     // ✅ create reservation with payment fields
@@ -122,6 +125,7 @@ export async function POST(req) {
         // invoice_number: `INV-${new Date().getFullYear()}-${String(session.id).slice(-8).toUpperCase()}`, // opsionale
       },
     });
+    // Create a padded invoice number like INV-2026-000123.
     const year = new Date().getFullYear();
     const invoiceNumber = `INV-${year}-${String(created.id).padStart(6, "0")}`;
 

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "../../../../lib/prisma";
 import bcrypt from "bcryptjs";
 
+// Handle GET requests for this route.
 export async function GET() {
   try {
     const users = await prisma.users.findMany({
@@ -14,6 +15,7 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+// Handle PATCH requests for this route.
 export async function PATCH(request) {
   try {
     const { userId, newRole } = await request.json();
@@ -26,6 +28,7 @@ export async function PATCH(request) {
       );
     }
 
+    // Coerce userId to number before updating.
     const updatedUser = await prisma.users.update({
       where: { id: Number(userId) },
       data: { role: newRole },
@@ -36,6 +39,7 @@ export async function PATCH(request) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }
+// Handle POST requests for this route.
 export async function POST(req) {
   const { name, email, password, role } = await req.json();
 
@@ -56,6 +60,7 @@ export async function POST(req) {
         { status: 400 }
       );
     }
+    // Hash the password with a cost factor of 10.
     const hashedPassrod = await bcrypt.hash(password, 10);
 
     const user = await prisma.users.create({
@@ -71,6 +76,7 @@ export async function POST(req) {
     return NextResponse.json({ error: "Mising Fields" }, { status: 400 });
   }
 }
+// Handle DELETE requests for this route.
 export async function DELETE(req) {
   try {
     const { userId } = await req.json();

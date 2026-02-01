@@ -7,10 +7,12 @@ function utcDateOnly(d = new Date()) {
   );
 }
 
+// Handle GET requests for this route.
 export async function GET() {
   try {
     // ================= DATES (UTC DATE-ONLY) =================
     const today = utcDateOnly(); // 00:00 UTC
+    // Compute the next day boundary for "today" range queries.
     const tomorrow = new Date(today);
     tomorrow.setUTCDate(today.getUTCDate() + 1);
 
@@ -24,6 +26,7 @@ export async function GET() {
       // where: { cancelled_at: null },
     });
 
+    // Normalize aggregate result to a number (Prisma can return null).
     const totalEarnings = Number(totalEarningsResult._sum.total_price ?? 0);
 
     // ================= TODAY CHECK-INS (exclude cancelled) =================
@@ -54,6 +57,7 @@ export async function GET() {
       },
     });
 
+    // Sum of today's reservation totals (converted to a plain number).
     const revenueToday = Number(revenueTodayResult._sum.total_price ?? 0);
 
     // ================= OCCUPANCY (unique rooms, exclude cancelled) =================
@@ -69,10 +73,12 @@ export async function GET() {
       select: { room_id: true },
     });
 
+    // Deduplicate room IDs to get unique occupied rooms.
     const occupiedRoomsToday = new Set(
       occupiedReservations.map((r) => r.room_id),
     ).size;
 
+    // Occupancy = occupied rooms / total rooms (rounded percentage).
     const occupancyPercent =
       totalRooms > 0 ? Math.round((occupiedRoomsToday / totalRooms) * 100) : 0;
 

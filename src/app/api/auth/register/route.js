@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+// Handle POST requests for this route.
 export async function POST(req) {
   try {
     const { name, email, password } = await req.json();
@@ -22,12 +23,14 @@ export async function POST(req) {
       );
     }
 
+    // Hash the password with a cost factor of 10.
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await prisma.users.create({
       data: { name, email, password: hashedPassword, role: "client" },
     });
 
+    // Issue a 1-day session token for the new user.
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
@@ -44,6 +47,7 @@ export async function POST(req) {
       },
     });
 
+    // Persist the token for 24 hours (in seconds).
     res.cookies.set("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

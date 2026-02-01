@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
+// Handle DELETE requests for this route.
 export async function DELETE(_req, { params }) {
   try {
     const id = Number(params.id);

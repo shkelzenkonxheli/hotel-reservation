@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 
+// Handle GET requests for this route.
 export async function GET() {
   const session = await getServerSession(authOptions);
 
@@ -17,6 +18,7 @@ export async function GET() {
 
   return NextResponse.json(notifications);
 }
+// Handle PATCH requests for this route.
 export async function PATCH() {
   await prisma.notifications.updateMany({
     where: { is_read: false },

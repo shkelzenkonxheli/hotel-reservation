@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
+// Handle POST requests for this route.
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -22,9 +23,11 @@ export async function POST(req) {
       select: { order: true },
     });
 
+    // Append the new image after the current max order.
     const nextOrder = (last?.order ?? -1) + 1;
 
     // nëse s’ka asnjë foto për këtë type, kjo bëhet cover
+    // First image for a type becomes the cover by default.
     const count = await prisma.roomImage.count({ where: { type } });
 
     const created = await prisma.roomImage.create({
@@ -45,6 +48,7 @@ export async function POST(req) {
     );
   }
 }
+// Handle GET requests for this route.
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);

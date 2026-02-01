@@ -3,6 +3,7 @@ import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+// Handle POST requests for this route.
 export async function POST(req) {
   try {
     const {
@@ -28,6 +29,7 @@ export async function POST(req) {
     }
 
     // ⚠️ Ideal: calculate totalPrice on server.
+    // Convert total price to cents for Stripe (EUR uses 2 decimal places).
     const unitAmount = Math.round(Number(totalPrice) * 100);
     if (!Number.isFinite(unitAmount) || unitAmount <= 0) {
       return NextResponse.json(

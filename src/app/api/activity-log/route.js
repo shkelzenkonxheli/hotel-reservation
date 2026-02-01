@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
+// Handle GET requests for this route.
 export async function GET() {
   try {
     const logs = await prisma.activity_logs.findMany({
@@ -15,6 +16,7 @@ export async function GET() {
     );
   }
 }
+// Handle DELETE requests for this route.
 export async function DELETE(req) {
   try {
     const { ids } = await req.json();
@@ -22,6 +24,7 @@ export async function DELETE(req) {
       return NextResponse.json({ error: "No ids provided" }, { status: 400 });
     }
 
+    // Coerce incoming IDs to numbers before using the IN filter.
     await prisma.activity_logs.deleteMany({
       where: {
         id: { in: ids.map(Number) },

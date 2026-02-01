@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
+// Handle GET requests for this route.
 export async function GET() {
   try {
     const today = new Date();
+    // Strip time to compare dates at day precision.
     const todayOnly = new Date(
       today.getFullYear(),
       today.getMonth(),
@@ -14,6 +16,7 @@ export async function GET() {
       include: { reservations: true },
     });
 
+    // Accumulators for daily housekeeping metrics.
     let checkout_today = 0;
     let checkin_today = 0;
     let needs_cleaning = 0;
@@ -38,6 +41,7 @@ export async function GET() {
         const start = new Date(res.start_date);
         const end = new Date(res.end_date);
 
+        // Convert reservation dates to date-only for same-day checks.
         const startDay = new Date(
           start.getFullYear(),
           start.getMonth(),
@@ -49,11 +53,13 @@ export async function GET() {
           end.getDate(),
         );
 
+        // A checkout is counted if the reservation ends today.
         if (endDay.getTime() === todayOnly.getTime()) {
           checkout_today++;
           break;
         }
 
+        // A check-in is counted if the reservation starts today.
         if (startDay.getTime() === todayOnly.getTime()) {
           checkin_today++;
           break;

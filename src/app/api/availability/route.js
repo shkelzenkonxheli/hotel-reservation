@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
+// Handle GET requests for this route.
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
@@ -17,7 +18,9 @@ export async function GET(req) {
       select: { id: true },
     });
 
+    // Extract IDs so we can query reservations and compute total capacity.
     const roomIds = rooms.map((r) => r.id);
+    // Count of rooms for the selected type (used by the client to gauge capacity).
     const roomCount = roomIds.length;
 
     // Merr të gjitha rezervimet për ato dhoma

@@ -113,6 +113,7 @@ export async function POST(req) {
         total_price: totalPrice,
 
         // payment tracking
+        payment_method: "card",
         stripe_session_id: session.id,
         stripe_payment_intent_id: session.payment_intent ?? null,
         payment_status: "PAID",

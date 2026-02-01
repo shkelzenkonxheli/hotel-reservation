@@ -5,9 +5,15 @@ import { logActivity } from "../../../../lib/activityLogger";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 
+function parseDateOnlyToUTC(dateStr) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d));
+}
+
 export async function POST(request) {
   try {
     const session = await getServerSession(authOptions);
+
     const {
       userId,
       type,
@@ -18,23 +24,54 @@ export async function POST(request) {
       address,
       guests,
       total_price,
+      payment_method, // "cash" | "card"
+      payment_status, // "PAID" | "UNPAID"
     } = await request.json();
-    const today = new Date().setHours(0, 0, 0, 0);
-    const start = new Date(startDate).setHours(0, 0, 0, 0);
+
+    if (!type || !startDate || !endDate || !fullname || !phone) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 },
+      );
+    }
+
+    const start = parseDateOnlyToUTC(startDate);
+    const end = parseDateOnlyToUTC(endDate);
+
+    if (end <= start) {
+      return NextResponse.json(
+        { error: "Check-out must be after check-in" },
+        { status: 400 },
+      );
+    }
+
+    // s’lejojmë start në të kaluarën (date-only)
+    const today = parseDateOnlyToUTC(new Date().toISOString().slice(0, 10));
+    if (start < today) {
+      return NextResponse.json(
+        { error: "Cannot create reservation in the past" },
+        { status: 400 },
+      );
+    }
 
     const rooms = await prisma.rooms.findMany({
       where: { type },
-      include: { reservations: true },
+      include: {
+        reservations: {
+          where: { cancelled_at: null, admin_hidden: false },
+          select: { start_date: true, end_date: true },
+        },
+      },
     });
 
     const availableRoom = rooms.find((room) => {
-      if (room.status === "out_of_order") return;
-      const conflict = room.reservations.some((reservation) => {
-        return (
-          new Date(startDate) < new Date(reservation.end_date) &&
-          new Date(endDate) > new Date(reservation.start_date)
-        );
+      if (room.status === "out_of_order") return false;
+
+      const conflict = room.reservations.some((r) => {
+        // overlap: start < existing_end AND end > existing_start
+        return start < new Date(r.end_date) && end > new Date(r.start_date);
       });
+
       return !conflict;
     });
 
@@ -44,49 +81,67 @@ export async function POST(request) {
         { status: 400 },
       );
     }
-    if (start < today) {
-      return NextResponse.json(
-        { error: "Cannot create or edit reservation in the past" },
-        { status: 400 },
-      );
-    }
+
+    const total = Number(total_price || 0);
+    const payStatus = payment_status === "PAID" ? "PAID" : "UNPAID";
+    const payMethod = payment_method === "card" ? "card" : "cash";
+
+    const amountPaid = payStatus === "PAID" ? total : 0;
 
     const reservation = await prisma.reservations.create({
       data: {
         room_id: availableRoom.id,
         reservation_code: "RES-" + nanoid(6).toUpperCase(),
-        user_id: userId,
-        start_date: new Date(startDate),
-        end_date: new Date(endDate),
-        status: "pending",
+        user_id: userId ?? session?.user?.id ?? null,
+
+        start_date: start,
+        end_date: end,
+
+        // walk-in zakonisht confirmed
+        status: "confirmed",
+
         full_name: fullname,
         phone,
-        address,
-        guests: parseInt(guests),
-        total_price: parseFloat(total_price),
+        address: address || null,
+        guests: guests ? parseInt(guests, 10) : null,
+        total_price: total,
+
+        payment_method: payMethod, // ✅ (pasi ta shtosh në DB)
+        payment_status: payStatus, // ✅ ekziston
+        amount_paid: amountPaid, // ✅ ekziston
+        paid_at: payStatus === "PAID" ? new Date() : null, // ✅ ekziston
       },
     });
+    const year = new Date().getFullYear();
+    const invoiceNumber = `INV-${year}-${String(reservation.id).padStart(6, "0")}`;
+
+    await prisma.reservations.update({
+      where: { id: reservation.id },
+      data: { invoice_number: invoiceNumber },
+    });
+
     await logActivity({
       action: "CREATE",
       entity: "reservation",
       entity_id: reservation.id,
-      description: `Created reservation #${reservation.id}`,
-      performed_by: session.user.email,
+      description: `Created reservation #${reservation.id} (${payMethod}, ${payStatus})`,
+      performed_by: session?.user?.email || "system",
     });
+
     await prisma.notifications.create({
       data: {
         type: "reservation_created",
         title: "New reservation",
         message: `New reservation created for ${fullname || "guest"}.`,
         reservation_id: reservation.id,
-        user_id: session.user.id ?? null,
+        user_id: session?.user?.id ?? null,
         is_read: false,
       },
     });
 
     return NextResponse.json(reservation);
   } catch (error) {
-    console.error("POST error:", error);
+    console.error("POST /reservation error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

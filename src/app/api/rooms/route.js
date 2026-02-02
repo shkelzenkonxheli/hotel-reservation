@@ -56,6 +56,24 @@ export async function GET(request) {
       return NextResponse.json(rooms);
     }
 
+    const roomIds = rooms.map((r) => r.id);
+    const nextDay = new Date(selectedDay);
+    nextDay.setUTCDate(selectedDay.getUTCDate() + 1);
+
+    // Check which rooms were cleaned today (based on activity_logs).
+    const cleanedLogs = await prisma.activity_logs.findMany({
+      where: {
+        entity: "room",
+        action: "CLEAN",
+        entity_id: { in: roomIds },
+        created_at: { gte: selectedDay, lt: nextDay },
+      },
+      select: { entity_id: true },
+    });
+    const cleanedTodayIds = new Set(
+      cleanedLogs.map((log) => Number(log.entity_id)),
+    );
+
     const updatedRooms = rooms.map((room) => {
       const operationalStatus = room.status || "available";
 
@@ -93,7 +111,13 @@ export async function GET(request) {
       // - nëse ka rezervim aktiv -> booked
       // - përndryshe -> statusi i DB (available / needs_cleaning)
       // Derive current status for UI based on active reservation.
-      const currentStatus = activeReservation ? "booked" : operationalStatus;
+      const currentStatus = activeReservation
+        ? "booked"
+        : !cleanedTodayIds.has(room.id) &&
+            hasCheckoutToday &&
+            operationalStatus === "available"
+          ? "needs_cleaning"
+          : operationalStatus;
 
       return {
         ...room,

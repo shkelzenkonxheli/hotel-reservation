@@ -1,40 +1,15 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
-import {
-  CircularProgress,
-  Chip,
-  Tooltip,
-  Button,
-  Box,
-  TextField,
-  InputLabel,
-  Select,
-  Menu,
-  MenuItem,
-  Dialog,
-  DialogActions,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  Typography,
-  FormControl,
-  IconButton,
-} from "@mui/material";
+import { CircularProgress, Chip, Menu, MenuItem, Typography } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import ReservationCard from "./ReservationCard";
-import {
-  CheckCircle,
-  Cancel,
-  HourglassEmpty,
-  DoneAll,
-  MoreVert,
-  Delete,
-  BookOnline,
-  Star,
-  StarBorder,
-  Print as PrintIcon,
-} from "@mui/icons-material";
+import { DoneAll } from "@mui/icons-material";
+import ReservationFilters from "./ReservationFilters";
+import ReservationTabs from "./ReservationTabs";
+import ReservationTable from "./ReservationTable";
+import ReservationListMobile from "./ReservationListMobile";
+import ReservationDetailsDialog from "./ReservationDetailsDialog";
+import ReservationDeleteDialog from "./ReservationDeleteDialog";
+import ReservationReasonDialog from "./ReservationReasonDialog";
 import ReservationForm from "./ReservationForm";
 import PrintReceipt from "./PrintReceipt";
 
@@ -49,7 +24,6 @@ export default function ReservationsTab() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [search, setSearch] = useState("");
-  const router = useRouter();
   const [openModal, setOpenModal] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const [editOpen, setEditOpen] = useState(false);
@@ -118,7 +92,6 @@ export default function ReservationsTab() {
   const filtered = useMemo(() => {
     let list = reservations;
 
-    // 🔍 Search
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(
@@ -128,19 +101,16 @@ export default function ReservationsTab() {
       );
     }
 
-    // 📌 Status
     if (statusFilter !== "all") {
       list = list.filter((r) => r.status?.toLowerCase() === statusFilter);
     }
 
-    // 🏨 Room type
     if (typeFilter !== "all") {
       list = list.filter((r) =>
         r.rooms?.type?.toLowerCase().includes(typeFilter),
       );
     }
 
-    // ⭐ Favorites lart
     list = [...list].sort((a, b) => {
       const aFav = favorites.includes(a.id);
       const bFav = favorites.includes(b.id);
@@ -168,10 +138,10 @@ export default function ReservationsTab() {
     }
   }
 
-  function getUpcomingReservations(reservations) {
+  function getUpcomingReservations(reservationsList) {
     const today = new Date().setHours(0, 0, 0, 0);
 
-    return reservations.filter((r) => {
+    return reservationsList.filter((r) => {
       const start = new Date(r.start_date).setHours(0, 0, 0, 0);
       return start >= today;
     });
@@ -253,6 +223,7 @@ export default function ReservationsTab() {
         return <Chip label={status} size="small" />;
     }
   };
+
   function getBookingState(r) {
     if (r.cancelled_at) return "CANCELLED";
 
@@ -262,10 +233,8 @@ export default function ReservationsTab() {
     const end = new Date(r.end_date);
     end.setHours(0, 0, 0, 0);
 
-    // nëse check-out ka kaluar -> completed
     if (end < today) return "FINISHED";
 
-    // sot ose e ardhme -> active/upcoming
     return "ACTIVE";
   }
 
@@ -282,72 +251,16 @@ export default function ReservationsTab() {
         Reservations Overview
       </Typography>
 
-      {/* FILTER BAR */}
-      <Box
-        sx={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 2,
-          alignItems: "center",
-          justifyContent: "space-between",
-          mb: 3,
-          p: 2,
-          backgroundColor: "#eae1df",
-          borderRadius: 2,
-        }}
-      >
-        {/* LEFT SIDE FILTERS */}
-        <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-          <TextField
-            label="Search (Name or Email)"
-            variant="outlined"
-            size="small"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            sx={{ minWidth: 220 }}
-          />
+      <ReservationFilters
+        search={search}
+        onSearchChange={setSearch}
+        statusFilter={statusFilter}
+        onStatusFilterChange={setStatusFilter}
+        typeFilter={typeFilter}
+        onTypeFilterChange={setTypeFilter}
+        onAddNew={() => setOpenModal(true)}
+      />
 
-          <FormControl size="small" sx={{ minWidth: 140 }}>
-            <InputLabel>Status</InputLabel>
-            <Select
-              value={statusFilter}
-              label="Status"
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <MenuItem value="all">All</MenuItem>
-              <MenuItem value="pending">Pending</MenuItem>
-              <MenuItem value="confirmed">Confirmed</MenuItem>
-              <MenuItem value="completed">Completed</MenuItem>
-              <MenuItem value="cancelled">Cancelled</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl size="small" sx={{ minWidth: 140 }}>
-            <InputLabel>Type</InputLabel>
-            <Select
-              value={typeFilter}
-              label="Type"
-              onChange={(e) => setTypeFilter(e.target.value)}
-            >
-              <MenuItem value="all">All</MenuItem>
-              <MenuItem value="hotel">Hotel</MenuItem>
-              <MenuItem value="apartment">Apartment</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-
-        {/* ADD BUTTON */}
-        <Button
-          variant="contained"
-          color="primary"
-          sx={{ borderRadius: 2, fontWeight: "bold" }}
-          onClick={() => setOpenModal(true)}
-        >
-          + Add New
-        </Button>
-      </Box>
-
-      {/* RESERVATION FORM MODAL */}
       <ReservationForm
         open={openModal}
         onClose={() => setOpenModal(false)}
@@ -362,310 +275,39 @@ export default function ReservationsTab() {
         reservation={editData}
       />
 
-      {/* TABS */}
-      <Box
-        sx={{
-          display: "flex",
-          gap: 1.5,
-          mb: 3,
-          p: 1,
-          backgroundColor: "#eae1df",
-          borderRadius: 2,
-        }}
-      >
-        <Button
-          variant={activeTab === "all" ? "contained" : "outlined"}
-          onClick={() => setActiveTab("all")}
-        >
-          All
-        </Button>
+      <ReservationTabs activeTab={activeTab} onChange={setActiveTab} />
 
-        <Button
-          variant={activeTab === "upcoming" ? "contained" : "outlined"}
-          onClick={() => setActiveTab("upcoming")}
-        >
-          Upcoming
-        </Button>
-
-        <Button
-          variant={activeTab === "today" ? "contained" : "outlined"}
-          onClick={() => setActiveTab("today")}
-        >
-          Today
-        </Button>
-
-        <Button
-          variant={activeTab === "past" ? "contained" : "outlined"}
-          onClick={() => setActiveTab("past")}
-        >
-          Past
-        </Button>
-      </Box>
-
-      {/* ✅ MOBILE CARD VIEW — vetëm UI, pa prekur funksionet */}
       {displayList.length === 0 ? (
         <p className="text-center text-gray-500">No reservations found.</p>
       ) : isMobile ? (
-        <Box display="flex" flexDirection="column" gap={2}>
-          {displayList.map((r) => (
-            <ReservationCard
-              key={r.id}
-              reservation={r}
-              favorite={favorites.includes(r.id)}
-              onFavorite={() => toggleFavorite(r.id)}
-              onPrint={() => setPrintData(r)}
-              onManage={(e) => {
-                setAnchorEl(e.currentTarget);
-                setSelectedReservation(r);
-              }}
-            />
-          ))}
-        </Box>
+        <ReservationListMobile
+          reservations={displayList}
+          favorites={favorites}
+          onToggleFavorite={toggleFavorite}
+          onManage={(e, r) => {
+            setAnchorEl(e.currentTarget);
+            setSelectedReservation(r);
+          }}
+          onPrint={setPrintReservation}
+          onDelete={(r) => setDeleteDialog({ open: true, id: r.id })}
+        />
       ) : (
-        /* ✅ DESKTOP TABLE — ruajtur, vetëm UI i përmirësuar për date + pin + print */
-        <div className="overflow-x-auto bg-#eae1df rounded-xl shadow-md border border-gray-100 mt-4">
-          <table className="min-w-full text-sm text-gray-700">
-            <thead className="bg-blue-400 text-white text-xs uppercase">
-              <tr>
-                <th className="p-3 text-center">Pin</th>
-                <th className="p-3 text-left">Code</th>
-                <th className="p-3 text-left">Guest</th>
-                <th className="p-3 text-left">Room</th>
-                <th className="p-3 text-center">Dates</th>
-                <th className="p-3 text-center">Status</th>
-                <th className="p-3 text-center">Total (€)</th>
-                <th className="p-3 text-center">Invoice</th>
-                <th className="p-3 text-center">Actions</th>
-              </tr>
-            </thead>
-
-            <tbody className="divide-y divide-gray-100">
-              {displayList.map((r) => (
-                <tr
-                  key={r.id}
-                  className={`transition duration-150 ${
-                    r.cancelled_at
-                      ? "bg-red-100 hover:bg-red-100"
-                      : getBookingState(r) === "FINISHED"
-                        ? "bg-green-100 hover:bg-gray-100"
-                        : "bg-blue-100"
-                  }`}
-                >
-                  {/* PIN */}
-                  <td className="p-3 text-center">
-                    <IconButton onClick={() => toggleFavorite(r.id)}>
-                      {favorites.includes(r.id) ? (
-                        <Star color="warning" />
-                      ) : (
-                        <StarBorder />
-                      )}
-                    </IconButton>
-                  </td>
-
-                  <td className="p-3 font-mono text-sm text-gray-700">
-                    {r.reservation_code || "-"}
-                  </td>
-
-                  <td className="p-3 font-medium text-gray-800">
-                    {r.full_name || "-"}
-                  </td>
-
-                  <td className="p-3">
-                    <div className="flex flex-col">
-                      <span>{r.rooms?.name || "-"}</span>
-                      <span className="text-xs text-gray-600">
-                        #{r.rooms?.room_number || "-"} • {r.rooms?.type || "-"}
-                      </span>
-                    </div>
-                  </td>
-
-                  <td className="p-3 text-center">
-                    <Box display="flex" flexDirection="column" gap={0.5}>
-                      <Chip
-                        size="small"
-                        label={`IN: ${new Date(r.start_date).toLocaleDateString()}`}
-                        sx={{ background: "#ecfeff", color: "#155e75" }}
-                      />
-                      <Chip
-                        size="small"
-                        label={`OUT: ${new Date(r.end_date).toLocaleDateString()}`}
-                        sx={{ background: "#fff7ed", color: "#9a3412" }}
-                      />
-                    </Box>
-                  </td>
-
-                  <td className="p-3 text-center">{getStatusChip(r.status)}</td>
-
-                  <td className="p-3 text-center font-semibold">
-                    €{Number(r.total_price ?? 0).toFixed(2)}
-                  </td>
-
-                  <td className="p-3 text-center">
-                    {r.invoice_number ? (
-                      <Chip
-                        label={r.invoice_number}
-                        size="small"
-                        sx={{ fontWeight: 600 }}
-                      />
-                    ) : (
-                      <span className="text-gray-500">—</span>
-                    )}
-                  </td>
-
-                  <td className="p-3 text-center">
-                    <div className="flex items-center justify-center gap-1">
-                      {/* View details */}
-                      <Tooltip title="View details">
-                        <IconButton size="small" onClick={() => openDetails(r)}>
-                          <BookOnline />
-                        </IconButton>
-                      </Tooltip>
-
-                      {/* Manage */}
-                      <IconButton
-                        size="small"
-                        onClick={(e) => {
-                          setAnchorEl(e.currentTarget);
-                          setSelectedReservation(r);
-                        }}
-                      >
-                        <MoreVert />
-                      </IconButton>
-
-                      {/* Print */}
-                      <Tooltip title="Print receipt">
-                        <IconButton
-                          size="small"
-                          onClick={() => setPrintReservation(r)}
-                        >
-                          <PrintIcon />
-                        </IconButton>
-                      </Tooltip>
-
-                      {/* Delete */}
-                      <Tooltip title="Delete reservation">
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() =>
-                            setDeleteDialog({ open: true, id: r.id })
-                          }
-                        >
-                          <Delete />
-                        </IconButton>
-                      </Tooltip>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <Dialog
-            open={detailsOpen}
-            onClose={() => {
-              setDetailsOpen(false);
-              setDetailsReservation(null);
-            }}
-            maxWidth="sm"
-            fullWidth
-          >
-            <DialogTitle>Reservation Details</DialogTitle>
-            <DialogContent dividers>
-              {detailsReservation ? (
-                <Box display="flex" flexDirection="column" gap={1.2}>
-                  <Typography variant="body2">
-                    <b>Code:</b> {detailsReservation.reservation_code || "-"}
-                  </Typography>
-
-                  <Typography variant="body2">
-                    <b>Invoice:</b> {detailsReservation.invoice_number || "—"}
-                  </Typography>
-
-                  <Typography variant="body2">
-                    <b>Guest:</b> {detailsReservation.full_name || "-"}
-                  </Typography>
-
-                  <Typography variant="body2">
-                    <b>Email:</b> {detailsReservation.users?.email || "-"}
-                  </Typography>
-
-                  <Typography variant="body2">
-                    <b>Phone:</b> {detailsReservation.phone || "-"}
-                  </Typography>
-
-                  <Typography variant="body2">
-                    <b>Address:</b> {detailsReservation.address || "-"}
-                  </Typography>
-
-                  <Typography variant="body2">
-                    <b>Room:</b> {detailsReservation.rooms?.name || "-"} #
-                    {detailsReservation.rooms?.room_number || "-"}
-                  </Typography>
-
-                  <Typography variant="body2">
-                    <b>Dates:</b>{" "}
-                    {new Date(
-                      detailsReservation.start_date,
-                    ).toLocaleDateString()}{" "}
-                    →{" "}
-                    {new Date(detailsReservation.end_date).toLocaleDateString()}
-                  </Typography>
-
-                  <Typography variant="body2">
-                    <b>Guests:</b> {detailsReservation.guests ?? "-"}
-                  </Typography>
-
-                  <Typography variant="body2">
-                    <b>Status:</b> {detailsReservation.status || "-"}
-                  </Typography>
-
-                  <Typography variant="body2">
-                    <b>Total:</b> €
-                    {Number(detailsReservation.total_price ?? 0).toFixed(2)}
-                  </Typography>
-
-                  <Typography variant="body2">
-                    <b>Paid:</b> €
-                    {Number(detailsReservation.amount_paid ?? 0).toFixed(2)}
-                  </Typography>
-
-                  <Typography variant="body2">
-                    <b>Payment status:</b>{" "}
-                    {detailsReservation.payment_status || "—"}
-                  </Typography>
-
-                  <Typography variant="body2">
-                    <b>Paid at:</b>{" "}
-                    {detailsReservation.paid_at
-                      ? new Date(detailsReservation.paid_at).toLocaleString()
-                      : "—"}
-                  </Typography>
-
-                  {detailsReservation.cancelled_at && (
-                    <Typography variant="body2">
-                      <b>Cancelled at:</b>{" "}
-                      {new Date(
-                        detailsReservation.cancelled_at,
-                      ).toLocaleString()}
-                    </Typography>
-                  )}
-
-                  {detailsReservation.cancel_reason?.trim() && (
-                    <Typography variant="body2">
-                      <b>Cancel reason:</b> {detailsReservation.cancel_reason}
-                    </Typography>
-                  )}
-                </Box>
-              ) : null}
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setDetailsOpen(false)}>Close</Button>
-            </DialogActions>
-          </Dialog>
-        </div>
+        <ReservationTable
+          reservations={displayList}
+          favorites={favorites}
+          onToggleFavorite={toggleFavorite}
+          onOpenDetails={openDetails}
+          onManage={(e, r) => {
+            setAnchorEl(e.currentTarget);
+            setSelectedReservation(r);
+          }}
+          onPrint={setPrintReservation}
+          onDelete={(r) => setDeleteDialog({ open: true, id: r.id })}
+          getStatusChip={getStatusChip}
+          getBookingState={getBookingState}
+        />
       )}
 
-      {/* MENU (Manage) — pa prekur funksionet */}
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
@@ -696,54 +338,27 @@ export default function ReservationsTab() {
         ))}
       </Menu>
 
-      {/* DELETE DIALOG — pa prekur */}
-      <Dialog
+      <ReservationDetailsDialog
+        open={detailsOpen}
+        reservation={detailsReservation}
+        onClose={() => {
+          setDetailsOpen(false);
+          setDetailsReservation(null);
+        }}
+      />
+
+      <ReservationDeleteDialog
         open={deleteDialog.open}
         onClose={() => setDeleteDialog({ open: false, id: null })}
-      >
-        <DialogTitle>Delete Reservation</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete this reservation? This action cannot
-            be undone.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialog({ open: false, id: null })}>
-            Cancel
-          </Button>
-          <Button color="error" onClick={handleDeleteReservation}>
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
-      <Dialog open={!!reasonTarget} onClose={() => setReasonTarget(null)}>
-        <DialogTitle>Cancellation Details</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            <b>Reservation:</b> #{reasonTarget?.id}
-            <br />
-            <b>Guest:</b> {reasonTarget?.full_name || "-"}
-            <br />
-            <b>Cancelled at:</b>{" "}
-            {reasonTarget?.cancelled_at
-              ? new Date(reasonTarget.cancelled_at).toLocaleString()
-              : "-"}
-            <br />
-            <br />
-            <b>Reason:</b>{" "}
-            {reasonTarget?.cancel_reason?.trim()
-              ? reasonTarget.cancel_reason
-              : "No reason provided."}
-          </DialogContentText>
-        </DialogContent>
+        onConfirm={handleDeleteReservation}
+      />
 
-        <DialogActions>
-          <Button onClick={() => setReasonTarget(null)}>Close</Button>
-        </DialogActions>
-      </Dialog>
+      <ReservationReasonDialog
+        open={!!reasonTarget}
+        reservation={reasonTarget}
+        onClose={() => setReasonTarget(null)}
+      />
 
-      {/* PRINT RECEIPT — shtesë UI */}
       {printReservation && (
         <PrintReceipt
           reservation={printReservation}

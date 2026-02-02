@@ -15,6 +15,7 @@ export default function ReservationCard({
   onFavorite,
   onManage,
   onPrint,
+  onDelete,
 }) {
   return (
     <Card sx={{ borderRadius: 3, boxShadow: 2, bgcolor: "#eae1df" }}>
@@ -80,11 +81,7 @@ export default function ReservationCard({
           <IconButton size="small" onClick={onManage}>
             <MoreVert />
           </IconButton>
-          <IconButton
-            size="small"
-            color="error"
-            onClick={() => setDeleteDialog({ open: true, id: r.id })}
-          >
+          <IconButton size="small" color="error" onClick={onDelete}>
             <Delete />
           </IconButton>
         </Box>

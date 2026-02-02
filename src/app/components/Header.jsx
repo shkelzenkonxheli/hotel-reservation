@@ -3,6 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   AppBar,
   Toolbar,
@@ -28,6 +29,7 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 export default function Header() {
   const { data: session } = useSession();
   const user = session?.user;
+  const router = useRouter();
 
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [alertsAnchor, setAlertsAnchor] = useState(null);
@@ -35,6 +37,7 @@ export default function Header() {
   const [summary, setSummary] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [hasNewNotifications, setHasNewNotifications] = useState(false);
 
   const openMenu = (e) => setMenuAnchor(e.currentTarget);
   const closeMenu = () => setMenuAnchor(null);
@@ -61,26 +64,41 @@ export default function Header() {
   // fix for hydration — detect real client
   const isClient = typeof window !== "undefined";
 
-  async function loadUnreadCount() {
+  async function loadNotifications() {
     try {
       const res = await fetch("/api/notifications");
       const data = await res.json();
       const arr = Array.isArray(data) ? data : [];
+      setNotifications(arr);
       setUnreadCount(arr.filter((n) => !n.is_read).length);
-    } catch (e) {
-      console.error("Failed to load unread count", e);
+      setHasNewNotifications(false);
+    } catch (err) {
+      console.error("Failed to load notifications", err);
     }
   }
 
-  // Poll unread count (only worker/admin)
+  // SSE unread count (only worker/admin)
   useEffect(() => {
     if (!isClient || !user || user.role === "client") return;
 
-    loadUnreadCount();
-    const t = setInterval(loadUnreadCount, 30000); // çdo 30 sekonda
-    return () => clearInterval(t);
+    const es = new EventSource("/api/notifications/stream");
+    es.addEventListener("unread", (event) => {
+      const count = Number(event.data ?? 0);
+      setUnreadCount(count);
+      if (count > 0) setHasNewNotifications(true);
+      if (Boolean(alertsAnchor) && count > 0) {
+        loadNotifications();
+      }
+    });
+    es.onerror = () => {
+      es.close();
+    };
+
+    return () => {
+      es.close();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isClient, user?.role]);
+  }, [isClient, user?.role, alertsAnchor]);
 
   const openAlerts = async (e) => {
     setAlertsAnchor(e.currentTarget);
@@ -95,16 +113,8 @@ export default function Header() {
       }
     }
 
-    try {
-      const res = await fetch("/api/notifications");
-      const data = await res.json();
-      const arr = Array.isArray(data) ? data : [];
-      setNotifications(arr);
-
-      // ✅ këtu NUK e bëjmë read
-      setUnreadCount(arr.filter((n) => !n.is_read).length);
-    } catch (err) {
-      console.error("Failed to load notifications", err);
+    if (notifications.length === 0 || hasNewNotifications) {
+      await loadNotifications();
     }
   };
 
@@ -207,6 +217,15 @@ export default function Header() {
                             borderLeft: n.is_read
                               ? "0px solid transparent"
                               : "4px solid #d4a373",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => {
+                            closeAlerts();
+                            if (n.reservation_id) {
+                              router.push(
+                                `/dashboard?reservationId=${n.reservation_id}`,
+                              );
+                            }
                           }}
                         >
                           <Typography

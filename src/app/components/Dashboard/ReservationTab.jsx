@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import {
   CircularProgress,
   Chip,
@@ -43,6 +44,10 @@ export default function ReservationsTab() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [detailsReservation, setDetailsReservation] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const reservationIdParam = searchParams.get("reservationId");
 
   const openDetails = (r) => {
     setDetailsReservation(r);
@@ -58,6 +63,17 @@ export default function ReservationsTab() {
   useEffect(() => {
     fetchReservations();
   }, []);
+
+  useEffect(() => {
+    if (!reservationIdParam) return;
+    const id = Number(reservationIdParam);
+    if (!Number.isFinite(id)) return;
+    const found = reservations.find((r) => r.id === id);
+    if (found) {
+      openDetails(found);
+      router.replace(pathname);
+    }
+  }, [reservationIdParam, reservations]);
 
   async function fetchReservations() {
     try {

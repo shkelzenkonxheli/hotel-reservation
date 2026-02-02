@@ -1,4 +1,4 @@
-import { Box, Chip, IconButton, Tooltip } from "@mui/material";
+import { Box, Chip, IconButton, Tooltip, Checkbox } from "@mui/material";
 import {
   MoreVert,
   Delete,
@@ -18,12 +18,24 @@ export default function ReservationTable({
   onDelete,
   getStatusChip,
   getBookingState,
+  selectedIds,
+  onToggleSelect,
+  onSelectAll,
+  allSelected,
 }) {
   return (
     <div className="overflow-x-auto bg-#eae1df rounded-xl shadow-md border border-gray-100 mt-4">
       <table className="min-w-full text-sm text-gray-700">
         <thead className="bg-blue-400 text-white text-xs uppercase">
           <tr>
+            <th className="p-3 text-center">
+              <Checkbox
+                size="small"
+                checked={allSelected}
+                onChange={(e) => onSelectAll(e.target.checked)}
+                inputProps={{ "aria-label": "select all reservations" }}
+              />
+            </th>
             <th className="p-3 text-center">Pin</th>
             <th className="p-3 text-left">Code</th>
             <th className="p-3 text-left">Guest</th>
@@ -48,6 +60,14 @@ export default function ReservationTable({
                     : "bg-blue-100"
               }`}
             >
+              <td className="p-3 text-center">
+                <Checkbox
+                  size="small"
+                  checked={selectedIds.includes(r.id)}
+                  onChange={() => onToggleSelect(r.id)}
+                  inputProps={{ "aria-label": "select reservation" }}
+                />
+              </td>
               <td className="p-3 text-center">
                 <IconButton onClick={() => onToggleFavorite(r.id)}>
                   {favorites.includes(r.id) ? (

@@ -1,6 +1,14 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
-import { CircularProgress, Chip, Menu, MenuItem, Typography } from "@mui/material";
+import {
+  CircularProgress,
+  Chip,
+  Menu,
+  MenuItem,
+  Typography,
+  Box,
+  Button,
+} from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { DoneAll } from "@mui/icons-material";
 import ReservationFilters from "./ReservationFilters";
@@ -34,6 +42,7 @@ export default function ReservationsTab() {
   const [printReservation, setPrintReservation] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [detailsReservation, setDetailsReservation] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]);
 
   const openDetails = (r) => {
     setDetailsReservation(r);
@@ -138,6 +147,37 @@ export default function ReservationsTab() {
     }
   }
 
+  async function handleBulkDelete() {
+    if (selectedIds.length === 0) return;
+    if (!confirm(`Delete ${selectedIds.length} reservations?`)) return;
+
+    try {
+      await fetch("/api/reservation/bulk", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: selectedIds }),
+      });
+      setSelectedIds([]);
+      fetchReservations();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  const toggleSelect = (id) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  };
+
+  const selectAllVisible = (checked, list) => {
+    if (checked) {
+      setSelectedIds(list.map((r) => r.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
   function getUpcomingReservations(reservationsList) {
     const today = new Date().setHours(0, 0, 0, 0);
 
@@ -238,6 +278,18 @@ export default function ReservationsTab() {
     return "ACTIVE";
   }
 
+  const totals = useMemo(() => {
+    const total = displayList.length;
+    let active = 0;
+    let finished = 0;
+    for (const r of displayList) {
+      const state = getBookingState(r);
+      if (state === "FINISHED") finished++;
+      if (state === "ACTIVE") active++;
+    }
+    return { total, active, finished };
+  }, [displayList]);
+
   if (loading)
     return (
       <div className="flex justify-center py-16">
@@ -247,9 +299,28 @@ export default function ReservationsTab() {
 
   return (
     <div className="p-6">
-      <Typography variant="h5" fontWeight="bold" className="mb-6">
-        Reservations Overview
-      </Typography>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <Typography variant="h5" fontWeight="bold">
+          Reservations Overview
+        </Typography>
+        <Box display="flex" gap={1} flexWrap="wrap">
+          <Chip
+            label={`Total: ${totals.total}`}
+            size="small"
+            sx={{ backgroundColor: "#e0f2fe", color: "#075985", fontWeight: 600 }}
+          />
+          <Chip
+            label={`Active: ${totals.active}`}
+            size="small"
+            sx={{ backgroundColor: "#dcfce7", color: "#166534", fontWeight: 600 }}
+          />
+          <Chip
+            label={`Finished: ${totals.finished}`}
+            size="small"
+            sx={{ backgroundColor: "#fef9c3", color: "#854d0e", fontWeight: 600 }}
+          />
+        </Box>
+      </div>
 
       <ReservationFilters
         search={search}
@@ -277,6 +348,28 @@ export default function ReservationsTab() {
 
       <ReservationTabs activeTab={activeTab} onChange={setActiveTab} />
 
+      {selectedIds.length > 0 ? (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            mb: 2,
+            p: 1.5,
+            borderRadius: 2,
+            backgroundColor: "#fff7ed",
+            border: "1px solid #fed7aa",
+          }}
+        >
+          <Typography fontWeight={600}>
+            Selected: {selectedIds.length}
+          </Typography>
+          <Button color="error" variant="contained" onClick={handleBulkDelete}>
+            Delete Selected
+          </Button>
+        </Box>
+      ) : null}
+
       {displayList.length === 0 ? (
         <p className="text-center text-gray-500">No reservations found.</p>
       ) : isMobile ? (
@@ -290,6 +383,8 @@ export default function ReservationsTab() {
           }}
           onPrint={setPrintReservation}
           onDelete={(r) => setDeleteDialog({ open: true, id: r.id })}
+          selectedIds={selectedIds}
+          onToggleSelect={toggleSelect}
         />
       ) : (
         <ReservationTable
@@ -305,6 +400,13 @@ export default function ReservationsTab() {
           onDelete={(r) => setDeleteDialog({ open: true, id: r.id })}
           getStatusChip={getStatusChip}
           getBookingState={getBookingState}
+          selectedIds={selectedIds}
+          onToggleSelect={toggleSelect}
+          onSelectAll={(checked) => selectAllVisible(checked, displayList)}
+          allSelected={
+            displayList.length > 0 &&
+            displayList.every((r) => selectedIds.includes(r.id))
+          }
         />
       )}
 

@@ -6,6 +6,7 @@ import {
   Box,
   IconButton,
   Divider,
+  Checkbox,
 } from "@mui/material";
 import { MoreVert, Star, StarBorder, Print, Delete } from "@mui/icons-material";
 
@@ -16,6 +17,9 @@ export default function ReservationCard({
   onManage,
   onPrint,
   onDelete,
+  selectable = false,
+  selected = false,
+  onSelect,
 }) {
   return (
     <Card sx={{ borderRadius: 3, boxShadow: 2, bgcolor: "#eae1df" }}>
@@ -29,9 +33,19 @@ export default function ReservationCard({
             </Typography>
           </Box>
 
-          <IconButton size="small" onClick={onFavorite}>
-            {favorite ? <Star color="warning" /> : <StarBorder />}
-          </IconButton>
+          <Box display="flex" alignItems="center" gap={0.5}>
+            {selectable ? (
+              <Checkbox
+                size="small"
+                checked={selected}
+                onChange={(e) => onSelect?.(e.target.checked)}
+                inputProps={{ "aria-label": "select reservation" }}
+              />
+            ) : null}
+            <IconButton size="small" onClick={onFavorite}>
+              {favorite ? <Star color="warning" /> : <StarBorder />}
+            </IconButton>
+          </Box>
         </Box>
 
         <Divider sx={{ my: 1.5 }} />

@@ -154,8 +154,48 @@ export async function DELETE(req, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    let body = null;
+    try {
+      body = await req.json();
+    } catch {}
+
+    const isNumericId = !Number.isNaN(Number(id));
+    const ids =
+      Array.isArray(body?.ids) && body.ids.length > 0
+        ? body.ids.map(Number).filter((n) => Number.isFinite(n))
+        : [];
+
     if (!id) {
       return NextResponse.json({ error: "It needs an id" }, { status: 400 });
+    }
+
+    if (!isNumericId && ids.length === 0) {
+      return NextResponse.json(
+        { error: "Invalid id or empty ids list" },
+        { status: 400 },
+      );
+    }
+
+    if (!isNumericId && ids.length > 0) {
+      await prisma.reservations.updateMany({
+        where: { id: { in: ids } },
+        data: {
+          admin_hidden: true,
+          admin_hidden_at: new Date(),
+        },
+      });
+
+      await logActivity({
+        action: "ARCHIVE_BULK",
+        entity: "reservation",
+        entity_id: null,
+        description: `Admin archived reservations: ${ids.join(", ")}`,
+        performed_by: session.user.email,
+      });
+
+      return NextResponse.json({
+        message: `Archived ${ids.length} reservations`,
+      });
     }
 
     const reservationId = Number(id);

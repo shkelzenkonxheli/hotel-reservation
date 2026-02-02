@@ -8,6 +8,8 @@ export default function ReservationListMobile({
   onManage,
   onPrint,
   onDelete,
+  selectedIds,
+  onToggleSelect,
 }) {
   return (
     <Box display="flex" flexDirection="column" gap={2}>
@@ -20,6 +22,9 @@ export default function ReservationListMobile({
           onPrint={() => onPrint(r)}
           onManage={(e) => onManage(e, r)}
           onDelete={() => onDelete(r)}
+          selectable
+          selected={selectedIds.includes(r.id)}
+          onSelect={() => onToggleSelect(r.id)}
         />
       ))}
     </Box>

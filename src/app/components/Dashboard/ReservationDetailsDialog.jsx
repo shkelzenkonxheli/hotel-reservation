@@ -50,7 +50,7 @@ export default function ReservationDetailsDialog({
 
             <Typography variant="body2">
               <b>Dates:</b>{" "}
-              {new Date(reservation.start_date).toLocaleDateString()} â†’{" "}
+              {new Date(reservation.start_date).toLocaleDateString()}{" "}
               {new Date(reservation.end_date).toLocaleDateString()}
             </Typography>
 
@@ -63,16 +63,15 @@ export default function ReservationDetailsDialog({
             </Typography>
 
             <Typography variant="body2">
-              <b>Total:</b> â‚¬{Number(reservation.total_price ?? 0).toFixed(2)}
+              <b>Total:</b> {Number(reservation.total_price ?? 0).toFixed(2)}
             </Typography>
 
             <Typography variant="body2">
-              <b>Paid:</b> â‚¬{Number(reservation.amount_paid ?? 0).toFixed(2)}
+              <b>Paid:</b> {Number(reservation.amount_paid ?? 0).toFixed(2)}
             </Typography>
 
             <Typography variant="body2">
-              <b>Payment status:</b>{" "}
-              {reservation.payment_status || "â€”"}
+              <b>Payment status:</b> {reservation.payment_status || "â€”"}
             </Typography>
 
             <Typography variant="body2">

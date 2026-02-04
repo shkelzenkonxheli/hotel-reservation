@@ -1,11 +1,30 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../../lib/prisma";
 import bcrypt from "bcryptjs";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/route";
 
 // Handle GET requests for this route.
-export async function GET() {
+export async function GET(req) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user || session.user.role !== "admin") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const rolesParam = searchParams.get("roles");
+    const roles = rolesParam ? rolesParam.split(",") : null;
+    const where = roles ? { role: { in: roles } } : {};
     const users = await prisma.users.findMany({
+      where,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        allowed_tabs: true,
+      },
       orderBy: { id: "desc" },
     });
 
@@ -18,13 +37,18 @@ export async function GET() {
 // Handle PATCH requests for this route.
 export async function PATCH(request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user || session.user.role !== "admin") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const { userId, newRole } = await request.json();
     if (!userId || !newRole) {
       return NextResponse.json(
         {
           error: "Missing userId or newRole",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -44,10 +68,15 @@ export async function POST(req) {
   const { name, email, password, role } = await req.json();
 
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user || session.user.role !== "admin") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     if (!name || !email || !password) {
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     const existingUser = await prisma.users.findUnique({
@@ -57,7 +86,7 @@ export async function POST(req) {
     if (existingUser) {
       return NextResponse.json(
         { error: "User with this email already exists" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     // Hash the password with a cost factor of 10.
@@ -79,6 +108,11 @@ export async function POST(req) {
 // Handle DELETE requests for this route.
 export async function DELETE(req) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user || session.user.role !== "admin") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const { userId } = await req.json();
 
     if (!userId) {
@@ -96,7 +130,7 @@ export async function DELETE(req) {
     if (user.role === "admin") {
       return NextResponse.json(
         { error: "Admin users cannot be deleted" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -109,7 +143,7 @@ export async function DELETE(req) {
     console.error("❌ Delete user error:", error);
     return NextResponse.json(
       { error: "Failed to delete user" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -95,11 +95,17 @@ export async function POST(request) {
     // If unpaid, amount_paid is zero.
     const amountPaid = payStatus === "PAID" ? total : 0;
 
+    const canSetUserId =
+      session?.user?.role === "admin" || session?.user?.role === "worker";
+    const finalUserId = canSetUserId
+      ? userId ?? session?.user?.id ?? null
+      : session?.user?.id ?? null;
+
     const reservation = await prisma.reservations.create({
       data: {
         room_id: availableRoom.id,
         reservation_code: "RES-" + nanoid(6).toUpperCase(),
-        user_id: userId ?? session?.user?.id ?? null,
+        user_id: finalUserId,
 
         start_date: start,
         end_date: end,
@@ -179,6 +185,26 @@ export async function GET(request) {
     const role = session?.user?.role?.toLowerCase();
 
     if (listAll === "true" || (userId && userRole)) {
+      if (!session?.user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      if (listAll === "true") {
+        if (role !== "admin" && role !== "worker") {
+          return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+      } else if (userRole === "client") {
+        if (
+          role !== "admin" &&
+          role !== "worker" &&
+          Number(session.user.id) !== Number(userId)
+        ) {
+          return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+      } else if (role !== "admin" && role !== "worker") {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+
       let where = {};
 
       if (userRole === "client") {

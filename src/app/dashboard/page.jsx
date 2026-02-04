@@ -22,19 +22,21 @@ import {
 } from "@mui/material";
 
 import MenuIcon from "@mui/icons-material/Menu";
+import SecurityIcon from "@mui/icons-material/Security";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
 import BookOnlineIcon from "@mui/icons-material/BookOnline";
 import PeopleIcon from "@mui/icons-material/People";
 import BuildCircleIcon from "@mui/icons-material/BuildCircle";
 import HistoryIcon from "@mui/icons-material/History";
-
 import OverviewTab from "../components/Dashboard/OverviewTab";
 import RoomsTab from "../components/Dashboard/RoomsTab";
 import ReservationsTab from "../components/Dashboard/ReservationTab";
 import UsersTab from "../components/Dashboard/UserTab";
 import ManageRoomsTab from "../components/Dashboard/ManageRooms";
 import ActivityLogsTab from "../components/Dashboard/ActivityLogsTab";
+import PermissionsTab from "../components/Dashboard/PremissionsTabs";
+import { DASHBOARD_TABS } from "@/lib/dashboardTabs";
 
 const drawerWidth = 240;
 // lartësia e AppBar-it të header-it (afërsisht 64px)
@@ -47,7 +49,7 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState(
     typeof window !== "undefined"
       ? localStorage.getItem("activeTab") || "overview"
-      : "overview"
+      : "overview",
   );
 
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -79,31 +81,51 @@ export default function Dashboard() {
   if (!session?.user) return null;
 
   const user = session.user;
+  const tabs = DASHBOARD_TABS.map((t) => ({
+    ...t,
+    icon:
+      t.key === "overview"
+        ? <DashboardIcon />
+        : t.key === "rooms"
+          ? <MeetingRoomIcon />
+          : t.key === "reservations"
+            ? <BookOnlineIcon />
+            : t.key === "users"
+              ? <PeopleIcon />
+              : t.key === "manageRooms"
+                ? <BuildCircleIcon />
+                : t.key === "activityLogsTab"
+                  ? <HistoryIcon />
+                  : t.key === "permissions"
+                    ? <SecurityIcon />
+                    : null,
+  }));
 
   const allowedTabs =
     user.role === "admin"
-      ? [
-          "overview",
-          "rooms",
-          "reservations",
-          "users",
-          "manageRooms",
-          "activityLogsTab",
-        ]
-      : user.role === "worker"
-      ? ["rooms", "reservations"]
-      : [];
-
-  const tabs = [
-    { key: "overview", label: "Overview", icon: <DashboardIcon /> },
-    { key: "rooms", label: "Rooms", icon: <MeetingRoomIcon /> },
-    { key: "reservations", label: "Reservations", icon: <BookOnlineIcon /> },
-    { key: "users", label: "Users", icon: <PeopleIcon /> },
-    { key: "manageRooms", label: "Manage Rooms", icon: <BuildCircleIcon /> },
-    { key: "activityLogsTab", label: "Activity Log", icon: <HistoryIcon /> },
-  ];
+      ? tabs.map((t) => t.key)
+      : user.allowed_tabs && user.allowed_tabs.length > 0
+        ? user.allowed_tabs
+        : [];
 
   const visibleTabs = tabs.filter((t) => allowedTabs.includes(t.key));
+
+  useEffect(() => {
+    if (visibleTabs.length === 0) return;
+    if (!visibleTabs.find((t) => t.key === activeTab)) {
+      setActiveTab(visibleTabs[0].key);
+    }
+  }, [visibleTabs, activeTab]);
+  useEffect(() => {
+    if (!visibleTabs.length) return;
+
+    const allowedKeys = visibleTabs.map((t) => t.key);
+
+    if (!allowedKeys.includes(activeTab)) {
+      setActiveTab(allowedKeys[0]); // tab i parë i lejuar
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.role, JSON.stringify(user?.allowed_tabs)]);
 
   const drawer = (
     <Box sx={{ height: "100%", bgcolor: "#364958" }}>
@@ -237,6 +259,7 @@ export default function Dashboard() {
         {activeTab === "users" && <UsersTab />}
         {activeTab === "manageRooms" && <ManageRoomsTab />}
         {activeTab === "activityLogsTab" && <ActivityLogsTab />}
+        {activeTab === "permissions" && <PermissionsTab />}
       </Box>
     </Box>
   );

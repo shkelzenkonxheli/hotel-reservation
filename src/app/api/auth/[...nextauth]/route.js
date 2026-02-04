@@ -44,6 +44,7 @@ export const authOptions = {
         token.id = dbUser.id;
         token.role = dbUser.role;
         token.name = dbUser.name;
+        token.allowed_tabs = dbUser.allowed_tabs || [];
         token.phone = dbUser.phone;
         token.address = dbUser.address;
       }
@@ -55,8 +56,10 @@ export const authOptions = {
       session.user.id = token.id;
       session.user.role = token.role;
       session.user.name = token.name;
+
       session.user.phone = token.phone;
       session.user.address = token.address;
+      session.user.allowed_tabs = token.allowed_tabs || [];
       return session;
     },
 

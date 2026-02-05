@@ -11,6 +11,7 @@ import "react-calendar/dist/Calendar.css";
 import PublicContainer from "../components/Public/PublicContainer";
 import PublicSection from "../components/Public/PublicSection";
 import PublicCard from "../components/Public/PublicCard";
+import { useSession } from "next-auth/react";
 
 function fYMD(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
@@ -27,7 +28,7 @@ export default function RoomsPage() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const [, setUser] = useState(null);
+  const { data: session } = useSession();
 
   const [bookedDays, setBookedDays] = useState([]);
   const [expandedRoom, setExpandedRoom] = useState(null);
@@ -46,18 +47,6 @@ export default function RoomsPage() {
     }
     fetchRooms();
   }, []);
-
-  useEffect(() => {
-    async function fetchUser() {
-      const res = await fetch("/api/me");
-      if (!res.ok) {
-        router.push("/login");
-        return;
-      }
-      setUser(await res.json());
-    }
-    fetchUser();
-  }, [router]);
 
   useEffect(() => {
     if (!selectedRoom) return;
@@ -109,6 +98,10 @@ export default function RoomsPage() {
     }
     if (startDate === endDate) {
       alert("Minimum one night");
+      return;
+    }
+    if (!session?.user) {
+      router.push("/login");
       return;
     }
     const res = await fetch(

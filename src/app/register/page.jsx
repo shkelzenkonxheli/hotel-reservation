@@ -2,11 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useSession, signIn } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import {
   Box,
-  Card,
-  CardContent,
   TextField,
   Button,
   Typography,
@@ -24,6 +22,9 @@ import {
   Visibility,
   VisibilityOff,
 } from "@mui/icons-material";
+import PublicContainer from "../components/Public/PublicContainer";
+import PublicSection from "../components/Public/PublicSection";
+import PublicCard from "../components/Public/PublicCard";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -33,7 +34,6 @@ export default function RegisterPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { data: status } = useSession();
   const [showPassword, setShowPassword] = useState(false);
 
   const validateForm = () => {
@@ -48,7 +48,7 @@ export default function RegisterPage() {
 
     if (!strongPassword.test(password)) {
       setError(
-        "Password must be at least 8 characters long, include one uppercase letter and one number."
+        "Password must be at least 8 characters long, include one uppercase letter and one number.",
       );
       return false;
     }
@@ -76,7 +76,7 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage("✅ Registration successful! Redirecting...");
+        setMessage("Registration successful. Redirecting...");
         setTimeout(() => router.push("/login"), 1500);
       } else {
         setError(data.message || "Registration failed.");
@@ -89,172 +89,161 @@ export default function RegisterPage() {
   };
 
   return (
-    <Box
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      minHeight="100vh"
-      sx={{
-        background:
-          "linear-gradient(135deg, #e0f2fe 0%, #dbeafe 40%, #f8fafc 100%)",
-      }}
-    >
-      <Card
-        sx={{
-          width: "100%",
-          maxWidth: 420,
-          borderRadius: 3,
-          boxShadow: 4,
-        }}
-      >
-        <CardContent sx={{ p: 5 }}>
-          <Typography
-            variant="h5"
-            fontWeight="bold"
-            align="center"
-            color="primary"
-            gutterBottom
-          >
-            Create an Account
-          </Typography>
-          <Typography
-            variant="body2"
-            align="center"
-            color="text.secondary"
-            mb={3}
-          >
-            Fill in your details to register
-          </Typography>
+    <Box className="public-page min-h-screen">
+      <PublicSection className="pt-10">
+        <PublicContainer>
+          <div className="max-w-md mx-auto">
+            <PublicCard className="p-6 md:p-8">
+              <Typography
+                variant="h5"
+                fontWeight="bold"
+                align="center"
+                sx={{ color: "#0ea5e9" }}
+                gutterBottom
+              >
+                Create an account
+              </Typography>
+              <Typography
+                variant="body2"
+                align="center"
+                color="text.secondary"
+                mb={3}
+              >
+                Fill in your details to register
+              </Typography>
 
-          <Box component="form" onSubmit={handleSubmit}>
-            <TextField
-              label="Full Name"
-              fullWidth
-              required
-              variant="outlined"
-              margin="normal"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <AccountCircle />
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              label="Email"
-              type="email"
-              fullWidth
-              required
-              variant="outlined"
-              margin="normal"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <EmailOutlined />
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              label="Password"
-              type={showPassword ? "text" : "password"}
-              fullWidth
-              required
-              variant="outlined"
-              margin="normal"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <LockOutlined />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={() => setShowPassword(!showPassword)}>
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
+              <Box component="form" onSubmit={handleSubmit}>
+                <TextField
+                  label="Full Name"
+                  fullWidth
+                  required
+                  variant="outlined"
+                  margin="normal"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <AccountCircle />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <TextField
+                  label="Email"
+                  type="email"
+                  fullWidth
+                  required
+                  variant="outlined"
+                  margin="normal"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <EmailOutlined />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <TextField
+                  label="Password"
+                  type={showPassword ? "text" : "password"}
+                  fullWidth
+                  required
+                  variant="outlined"
+                  margin="normal"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LockOutlined />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={() => setShowPassword(!showPassword)}>
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
 
-            {error && (
-              <Alert severity="error" sx={{ mt: 2 }}>
-                {error}
-              </Alert>
-            )}
-            {message && (
-              <Alert severity="success" sx={{ mt: 2 }}>
-                {message}
-              </Alert>
-            )}
+                {error && (
+                  <Alert severity="error" sx={{ mt: 2 }}>
+                    {error}
+                  </Alert>
+                )}
+                {message && (
+                  <Alert severity="success" sx={{ mt: 2 }}>
+                    {message}
+                  </Alert>
+                )}
 
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              fullWidth
-              disabled={loading}
-              sx={{
-                mt: 3,
-                py: 1.3,
-                borderRadius: 2,
-                fontWeight: "bold",
-                textTransform: "none",
-              }}
-            >
-              {loading ? (
-                <CircularProgress size={26} color="inherit" />
-              ) : (
-                "Register"
-              )}
-            </Button>
-          </Box>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  disabled={loading}
+                  sx={{
+                    mt: 3,
+                    py: 1.3,
+                    borderRadius: 2,
+                    fontWeight: 700,
+                    textTransform: "none",
+                  }}
+                >
+                  {loading ? (
+                    <CircularProgress size={26} color="inherit" />
+                  ) : (
+                    "Register"
+                  )}
+                </Button>
+              </Box>
 
-          <Typography
-            variant="body2"
-            align="center"
-            mt={3}
-            color="text.secondary"
-          >
-            Already have an account?{" "}
-            <Typography
-              component="span"
-              color="primary"
-              sx={{ cursor: "pointer" }}
-              onClick={() => router.push("/login")}
-            >
-              Login
-            </Typography>
-          </Typography>
-          <Divider sx={{ my: 2 }}>Or</Divider>
-          <Button
-            fullWidth
-            variant="outlined"
-            startIcon={<Google />}
-            sx={{
-              py: 1.2,
-              textTransform: "none",
-              borderRadius: 2,
-              fontWeight: "bold",
-            }}
-            onClick={() =>
-              signIn("google", {
-                callbackUrl: "/",
-              })
-            }
-          >
-            Login with Google
-          </Button>
-        </CardContent>
-      </Card>
+              <Typography
+                variant="body2"
+                align="center"
+                mt={3}
+                color="text.secondary"
+              >
+                Already have an account?{" "}
+                <Typography
+                  component="span"
+                  sx={{ cursor: "pointer", color: "#0ea5e9", fontWeight: 700 }}
+                  onClick={() => router.push("/login")}
+                >
+                  Login
+                </Typography>
+              </Typography>
+
+              <Divider sx={{ my: 2 }}>Or</Divider>
+
+              <Button
+                fullWidth
+                variant="outlined"
+                startIcon={<Google />}
+                sx={{
+                  py: 1.2,
+                  textTransform: "none",
+                  borderRadius: 2,
+                  fontWeight: 700,
+                }}
+                onClick={() =>
+                  signIn("google", {
+                    callbackUrl: "/",
+                  })
+                }
+              >
+                Continue with Google
+              </Button>
+            </PublicCard>
+          </div>
+        </PublicContainer>
+      </PublicSection>
     </Box>
   );
 }

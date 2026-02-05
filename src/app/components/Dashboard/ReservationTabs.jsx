@@ -8,8 +8,10 @@ export default function ReservationTabs({ activeTab, onChange }) {
         gap: 1.5,
         mb: 3,
         p: 1,
-        backgroundColor: "#eae1df",
-        borderRadius: 2,
+        backgroundColor: "var(--admin-surface)",
+        border: "1px solid var(--admin-border)",
+        borderRadius: "var(--admin-radius)",
+        boxShadow: "var(--admin-shadow-sm)",
       }}
     >
       <Button

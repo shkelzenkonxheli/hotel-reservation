@@ -8,17 +8,15 @@ import { useRouter } from "next/navigation";
 import { useBooking } from "@/context/BookingContext";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+import PublicContainer from "../components/Public/PublicContainer";
+import PublicSection from "../components/Public/PublicSection";
+import PublicCard from "../components/Public/PublicCard";
 
 function fYMD(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
     2,
     "0",
   )}-${String(date.getDate()).padStart(2, "0")}`;
-}
-
-function strToDate(str) {
-  const [y, m, d] = str.split("-").map(Number);
-  return new Date(y, m - 1, d);
 }
 
 export default function RoomsPage() {
@@ -29,7 +27,7 @@ export default function RoomsPage() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const [user, setUser] = useState(null);
+  const [, setUser] = useState(null);
 
   const [bookedDays, setBookedDays] = useState([]);
   const [expandedRoom, setExpandedRoom] = useState(null);
@@ -65,14 +63,10 @@ export default function RoomsPage() {
     if (!selectedRoom) return;
 
     async function loadAvailability() {
-      console.log("=== LOADING AVAILABILITY ===");
-
       const res = await fetch(
         `/api/availability?room_type=${selectedRoom.type}`,
       );
       const data = await res.json();
-
-      console.log("API RESPONSE:", data);
 
       const dayMap = {};
 
@@ -94,8 +88,6 @@ export default function RoomsPage() {
       const fullDays = Object.entries(dayMap)
         .filter(([_, set]) => set.size >= data.roomCount)
         .map(([day]) => day);
-
-      console.log("FULL DAYS:", fullDays);
 
       setBookedDays(fullDays);
     }
@@ -139,78 +131,91 @@ export default function RoomsPage() {
     if (!text) return "";
     return text.split("\n")[0];
   };
+
   return (
-    <div
-      className="pt-10 px-6 pb-16 min-h-screen"
-      style={{ backgroundColor: "#eae1df" }}
-    >
-      <h2 className="text-3xl font-bold mb-10 text-center text-gray-800">
-        🏨 Available Room Types
-      </h2>
-
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 max-w-7xl mx-auto">
-        {roomTypes.map((room) => (
-          <div
-            key={room.type}
-            className="bg-white rounded-2xl shadow-md hover:shadow-xl transition duration-300 overflow-hidden flex flex-col"
-          >
-            <div className="relative h-52 w-full">
-              <Swiper
-                modules={[Navigation, Pagination]}
-                navigation
-                pagination={{ clickable: true }}
-                className="h-full w-full cursor-pointer"
-                onClick={() => setGalleryRoom(room)}
-              >
-                {room.images.map((img, i) => (
-                  <SwiperSlide key={i}>
-                    <img src={img} className="w-full h-full object-cover" />
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-
-              <span className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">
-                {room.type}
-              </span>
-            </div>
-
-            <div className="p-4 flex flex-col justify-between flex-grow">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {room.name}
-                </h3>
-                <p className="text-gray-600 text-sm mt-1 line-clamp-2">
-                  {getFirstLine(room.description)}
-                </p>
-                <button
-                  className="text-blue-600 text-sm mt-1 underline w-fit cursor-pointer"
-                  onClick={() => setExpandedRoom(room)}
-                >
-                  View more
-                </button>
-              </div>
-
-              <div className="flex items-center justify-between mt-4">
-                <span className="text-blue-600 font-semibold text-sm">
-                  ${room.price}/night
-                </span>
-
-                <button
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg"
-                  onClick={() => handleBookClick(room)}
-                >
-                  Book
-                </button>
-              </div>
-            </div>
+    <div className="public-page min-h-screen">
+      <PublicSection className="pt-12">
+        <PublicContainer>
+          <div className="text-center max-w-2xl mx-auto">
+            <p className="public-badge">Dijari Premium</p>
+            <h2 className="text-3xl md:text-4xl font-semibold mt-3">
+              Available room types
+            </h2>
+            <p className="text-sm md:text-base text-slate-500 mt-2">
+              Choose the space that matches your stay. Confirm your dates and
+              book in minutes.
+            </p>
           </div>
-        ))}
-      </div>
+        </PublicContainer>
+      </PublicSection>
+
+      <PublicSection className="pt-2 pb-16">
+        <PublicContainer>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
+            {roomTypes.map((room) => (
+              <PublicCard
+                key={room.type}
+                className="overflow-hidden flex flex-col transition duration-200 hover:-translate-y-1"
+              >
+                <div className="relative h-56 w-full">
+                  <Swiper
+                    modules={[Navigation, Pagination]}
+                    navigation
+                    pagination={{ clickable: true }}
+                    className="h-full w-full cursor-pointer"
+                    onClick={() => setGalleryRoom(room)}
+                  >
+                    {room.images.map((img, i) => (
+                      <SwiperSlide key={i}>
+                        <img src={img} className="w-full h-full object-cover" />
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
+
+                  <span className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">
+                    {room.type}
+                  </span>
+                </div>
+
+                <div className="p-4 flex flex-col justify-between flex-grow">
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-900">
+                      {room.name}
+                    </h3>
+                    <p className="text-slate-500 text-sm mt-1 line-clamp-2">
+                      {getFirstLine(room.description)}
+                    </p>
+                    <button
+                      className="text-slate-700 text-sm mt-2 underline underline-offset-4 w-fit"
+                      onClick={() => setExpandedRoom(room)}
+                    >
+                      View details
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between mt-5">
+                    <span className="text-slate-900 font-semibold text-sm">
+                      EUR {Number(room.price || 0).toFixed(2)} / night
+                    </span>
+
+                    <button
+                      className="public-button primary text-sm px-4 py-2"
+                      onClick={() => handleBookClick(room)}
+                    >
+                      Book now
+                    </button>
+                  </div>
+                </div>
+              </PublicCard>
+            ))}
+          </div>
+        </PublicContainer>
+      </PublicSection>
 
       {showDateInput && selectedRoom && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-          <div className="bg-white p-6 rounded-xl shadow-xl w-[350px]">
-            <h3 className="text-lg font-bold text-center">Select Dates</h3>
+          <div className="public-card p-6 w-[360px]">
+            <h3 className="text-lg font-semibold text-center">Select dates</h3>
 
             <Calendar
               selectRange={true}
@@ -249,7 +254,7 @@ export default function RoomsPage() {
 
             <div className="flex justify-between mt-4">
               <button
-                className="px-4 py-2 bg-gray-300 rounded"
+                className="public-button ghost"
                 onClick={() => {
                   setShowDateInput(false);
                   setSelectedRoom(null);
@@ -259,7 +264,9 @@ export default function RoomsPage() {
               </button>
 
               <button
-                className="px-4 py-2 bg-green-600 text-white rounded"
+                className={`public-button primary ${
+                  !startDate || !endDate ? "opacity-60 cursor-not-allowed" : ""
+                }`}
                 onClick={checkAvailability}
                 disabled={!startDate || !endDate}
               >
@@ -269,32 +276,36 @@ export default function RoomsPage() {
           </div>
         </div>
       )}
+
       {expandedRoom && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-xl p-6 max-w-lg w-full relative">
+          <div className="public-card p-6 max-w-lg w-full relative">
             <button
-              className="absolute top-3 right-3 text-gray-500"
+              className="absolute top-3 right-3 text-slate-500"
               onClick={() => setExpandedRoom(null)}
             >
-              ✕
+              X
             </button>
 
-            <h2 className="text-xl font-bold mb-4">{expandedRoom.name}</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              {expandedRoom.name}
+            </h2>
 
-            <p className="text-gray-700 text-sm whitespace-pre-line">
+            <p className="text-slate-600 text-sm whitespace-pre-line">
               {expandedRoom.description}
             </p>
           </div>
         </div>
       )}
+
       {galleryRoom && (
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
           <div className="relative w-full max-w-4xl px-4">
             <button
-              className="absolute -top-10 right-0 text-white text-3xl"
+              className="absolute -top-10 right-0 text-white text-2xl"
               onClick={() => setGalleryRoom(null)}
             >
-              ✕
+              X
             </button>
 
             <Swiper

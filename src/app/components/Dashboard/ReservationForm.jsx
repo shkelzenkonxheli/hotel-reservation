@@ -46,12 +46,12 @@ export default function ReservationForm({
   const [totalPrice, setTotalPrice] = useState("");
   const [isAvailable, setIsAvailable] = useState(null);
   const [selectedRoomPrice, setSelectedRoomPrice] = useState(0);
-  const [paymentMethod, setPaymentMethod] = useState("cash"); // cash | card
+  const [paymentMethod, setPaymentMethod] = useState("cash");
   const [paymentStatus, setPaymentStatus] = useState("UNPAID");
   const [feedback, setFeedback] = useState({
     open: false,
     message: "",
-    severity: "success", // success | error
+    severity: "success",
   });
 
   useEffect(() => {
@@ -75,6 +75,7 @@ export default function ReservationForm({
       setTotalPrice(reservation.total_price || "");
     }
   }, [reservation, mode]);
+
   const resetForm = () => {
     setFullname("");
     setPhone("");
@@ -183,17 +184,16 @@ export default function ReservationForm({
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ fontWeight: 800 }}>
-        {mode === "create" ? "New Walk-in Reservation" : "Edit Reservation"}
+      <DialogTitle sx={{ fontWeight: 800, pb: 1 }}>
+        {mode === "create" ? "New walk-in reservation" : "Edit reservation"}
         <Typography variant="body2" color="text.secondary" mt={0.5}>
-          Add reservation manually (walk-in / phone / admin).
+          Add reservation manually (walk-in, phone, admin).
         </Typography>
       </DialogTitle>
 
-      <DialogContent dividers>
+      <DialogContent dividers sx={{ bgcolor: "#f8fafc" }}>
         <Stack spacing={2.5}>
-          {/* Guest */}
-          <Box>
+          <Box sx={{ p: 2, borderRadius: 2, bgcolor: "#ffffff" }}>
             <Box
               display="flex"
               alignItems="center"
@@ -204,12 +204,14 @@ export default function ReservationForm({
               {isAvailable === true && (
                 <Chip
                   label="Available"
+                  size="small"
                   sx={{ bgcolor: "#dcfce7", color: "#166534" }}
                 />
               )}
               {isAvailable === false && (
                 <Chip
                   label="No availability"
+                  size="small"
                   sx={{ bgcolor: "#fee2e2", color: "#b91c1c" }}
                 />
               )}
@@ -221,6 +223,7 @@ export default function ReservationForm({
                 fullWidth
                 value={fullname}
                 onChange={(e) => setFullname(e.target.value)}
+                helperText="Required"
               />
 
               <TextField
@@ -229,6 +232,7 @@ export default function ReservationForm({
                 fullWidth
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
+                helperText="Required"
               />
 
               <TextField
@@ -240,10 +244,7 @@ export default function ReservationForm({
             </Stack>
           </Box>
 
-          <Divider />
-
-          {/* Stay */}
-          <Box>
+          <Box sx={{ p: 2, borderRadius: 2, bgcolor: "#ffffff" }}>
             <Typography fontWeight={800} mb={1}>
               Stay details
             </Typography>
@@ -258,7 +259,7 @@ export default function ReservationForm({
               >
                 {roomTypes.map((room, index) => (
                   <MenuItem key={index} value={room.type}>
-                    {room.type} — €{room.price}/night
+                    {room.type} - EUR {room.price}/night
                   </MenuItem>
                 ))}
               </TextField>
@@ -311,12 +312,9 @@ export default function ReservationForm({
             )}
           </Box>
 
-          <Divider />
-
-          {/* Pricing & Payment */}
-          <Box>
+          <Box sx={{ p: 2, borderRadius: 2, bgcolor: "#ffffff" }}>
             <Typography fontWeight={800} mb={1}>
-              Pricing & payment
+              Pricing and payment
             </Typography>
 
             <TextField
@@ -325,13 +323,20 @@ export default function ReservationForm({
               value={totalPrice}
               InputProps={{
                 startAdornment: (
-                  <InputAdornment position="start">€</InputAdornment>
+                  <InputAdornment position="start">EUR</InputAdornment>
                 ),
-                readOnly: true,
               }}
+              helperText={
+                selectedRoomPrice
+                  ? `Nightly rate: EUR ${selectedRoomPrice}`
+                  : ""
+              }
+              onChange={(e) => setTotalPrice(e.target.value)}
             />
 
-            <Box mt={2}>
+            <Divider sx={{ my: 2 }} />
+
+            <Box mt={1}>
               <FormControl>
                 <FormLabel sx={{ fontWeight: 700 }}>Payment method</FormLabel>
                 <RadioGroup

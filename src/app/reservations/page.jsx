@@ -5,10 +5,8 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
   Box,
-  Container,
   Typography,
   CircularProgress,
-  Paper,
   Stack,
   Chip,
   Tabs,
@@ -27,6 +25,9 @@ import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import PublicContainer from "../components/Public/PublicContainer";
+import PublicSection from "../components/Public/PublicSection";
+import PublicCard from "../components/Public/PublicCard";
 
 const FALLBACK_IMG =
   "https://images.unsplash.com/photo-1501117716987-c8e2a5d4d3f4?auto=format&fit=crop&w=1400&q=80";
@@ -48,7 +49,7 @@ function isCompleted(endDate) {
 export default function ReservationsPage() {
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState("upcoming"); // upcoming | completed | cancelled
+  const [tab, setTab] = useState("upcoming");
   const [details, setDetails] = useState(null);
   const [typeCoverMap, setTypeCoverMap] = useState({});
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -58,13 +59,11 @@ export default function ReservationsPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
 
-  // auth: siç e ke, pa e kompliku
   useEffect(() => {
     if (status === "loading") return;
     if (!session?.user) router.push("/login");
   }, [status, session, router]);
 
-  // fetch reservations: siç e ke, pa ndryshim
   useEffect(() => {
     if (!session?.user) return;
 
@@ -86,25 +85,23 @@ export default function ReservationsPage() {
 
     fetchReservations();
   }, [session]);
+
   useEffect(() => {
     async function fetchRoomImages() {
       try {
         const res = await fetch("/api/room-images");
         const images = await res.json();
 
-        // krijojmë map: type -> coverUrl
         const map = {};
 
         for (const img of images) {
           if (!img?.type || !img?.url) continue;
 
-          // Prefero cover (isCover === true)
           if (img.isCover) {
             map[img.type] = img.url;
             continue;
           }
 
-          // nëse nuk ka ende cover për atë type, merre të parën sipas order
           if (!map[img.type]) {
             map[img.type] = img.url;
           }
@@ -119,6 +116,7 @@ export default function ReservationsPage() {
 
     fetchRoomImages();
   }, []);
+
   async function hideReservation(reservationId) {
     try {
       const res = await fetch("/api/reservation/hide", {
@@ -137,6 +135,7 @@ export default function ReservationsPage() {
       alert("Network error");
     }
   }
+
   async function cancelReservation(reservationId, reason) {
     try {
       const res = await fetch("/api/reservation/cancel", {
@@ -152,7 +151,6 @@ export default function ReservationsPage() {
         return false;
       }
 
-      // ✅ update në UI (pa refresh)
       setReservations((prev) =>
         prev.map((x) =>
           x.id === reservationId
@@ -173,7 +171,6 @@ export default function ReservationsPage() {
     }
   }
 
-  // Tabs sipas dates (jo status pagesës)
   const upcoming = useMemo(
     () =>
       reservations.filter(
@@ -216,289 +213,255 @@ export default function ReservationsPage() {
   }
 
   return (
-    <Box sx={{ minHeight: "100vh", py: { xs: 4, md: 6 } }}>
-      <Container maxWidth="lg">
-        <Typography variant="h3" fontWeight={950} sx={{ mb: 0.5 }}>
-          My Bookings
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-          Manage your reservations and travel plans
-        </Typography>
+    <Box className="public-page min-h-screen">
+      <PublicSection className="pt-10">
+        <PublicContainer>
+          <div className="max-w-3xl">
+            <p className="public-badge">Your stays</p>
+            <Typography variant="h3" fontWeight={900} sx={{ mb: 0.5 }}>
+              My bookings
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+              Manage your reservations and travel plans.
+            </Typography>
+          </div>
 
-        {/* Tabs si foto */}
-        <Tabs
-          value={tab}
-          onChange={(_, v) => setTab(v)}
-          sx={{
-            mb: 3,
-            "& .MuiTabs-indicator": { display: "none" },
-            "& .MuiTab-root": {
-              textTransform: "none",
-              fontWeight: 900,
-              borderRadius: 999,
-              minHeight: 44,
-              px: 2,
-              mr: 1,
-              bgcolor: "rgba(0,0,0,0.04)",
-            },
-            "& .Mui-selected": {
-              bgcolor: "#d4a373",
-              color: "white !important",
-            },
-          }}
-        >
-          <Tab
-            value="upcoming"
-            label={
-              <Stack direction="row" spacing={1} alignItems="center">
-                <span>Upcoming</span>
-                <Chip
-                  size="small"
-                  label={upcoming.length}
-                  sx={{
-                    height: 22,
-                    fontWeight: 900,
-                    bgcolor:
-                      tab === "upcoming"
-                        ? "rgba(255,255,255,0.25)"
-                        : "rgba(0,0,0,0.08)",
-                    color: tab === "upcoming" ? "white" : "text.primary",
-                  }}
-                />
-              </Stack>
-            }
-          />
-          <Tab
-            value="completed"
-            label={
-              <Stack direction="row" spacing={1} alignItems="center">
-                <span>Completed</span>
-                <Chip
-                  size="small"
-                  label={completed.length}
-                  sx={{
-                    height: 22,
-                    fontWeight: 900,
-                    bgcolor:
-                      tab === "completed"
-                        ? "rgba(255,255,255,0.25)"
-                        : "rgba(0,0,0,0.08)",
-                    color: tab === "completed" ? "white" : "text.primary",
-                  }}
-                />
-              </Stack>
-            }
-          />
-          <Tab value="cancelled" label="Cancelled" />
-        </Tabs>
-
-        {/* List cards */}
-        {list.length === 0 ? (
-          <Paper
-            elevation={0}
+          <Tabs
+            value={tab}
+            onChange={(_, v) => setTab(v)}
             sx={{
-              borderRadius: 3,
-              p: 4,
-              border: "1px solid",
-              borderColor: "divider",
-              bgcolor: "rgba(255,255,255,0.6)",
-              textAlign: "center",
+              mb: 3,
+              "& .MuiTabs-indicator": { display: "none" },
+              "& .MuiTab-root": {
+                textTransform: "none",
+                fontWeight: 800,
+                borderRadius: 999,
+                minHeight: 44,
+                px: 2,
+                mr: 1,
+                bgcolor: "rgba(0,0,0,0.04)",
+              },
+              "& .Mui-selected": {
+                bgcolor: "#0ea5e9",
+                color: "white !important",
+              },
             }}
           >
-            <Typography variant="h6" fontWeight={900}>
-              No bookings here.
-            </Typography>
-          </Paper>
-        ) : (
-          <Stack spacing={2}>
-            {list.map((r) => {
-              const roomType = r.rooms?.type;
-              const img = (roomType && typeCoverMap[roomType]) || FALLBACK_IMG;
-              const title = r.rooms?.name || "Unnamed Room";
-              const locationLine = r.rooms?.room_number
-                ? `Room #${r.rooms.room_number}`
-                : r.rooms?.type || "Hotel";
+            <Tab
+              value="upcoming"
+              label={
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <span>Upcoming</span>
+                  <Chip
+                    size="small"
+                    label={upcoming.length}
+                    sx={{
+                      height: 22,
+                      fontWeight: 800,
+                      bgcolor:
+                        tab === "upcoming"
+                          ? "rgba(255,255,255,0.25)"
+                          : "rgba(0,0,0,0.08)",
+                      color: tab === "upcoming" ? "white" : "text.primary",
+                    }}
+                  />
+                </Stack>
+              }
+            />
+            <Tab
+              value="completed"
+              label={
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <span>Completed</span>
+                  <Chip
+                    size="small"
+                    label={completed.length}
+                    sx={{
+                      height: 22,
+                      fontWeight: 800,
+                      bgcolor:
+                        tab === "completed"
+                          ? "rgba(255,255,255,0.25)"
+                          : "rgba(0,0,0,0.08)",
+                      color: tab === "completed" ? "white" : "text.primary",
+                    }}
+                  />
+                </Stack>
+              }
+            />
+            <Tab value="cancelled" label="Cancelled" />
+          </Tabs>
 
-              return (
-                <Paper
-                  key={r.id}
-                  elevation={0}
-                  sx={{
-                    borderRadius: 3,
-                    overflow: "hidden",
-                    border: "1px solid",
-                    borderColor: "divider",
-                    bgcolor: "rgba(255,255,255,0.75)",
-                  }}
-                >
-                  <Stack direction={{ xs: "column", sm: "row" }}>
-                    {/* Image */}
-                    <Box
-                      sx={{
-                        width: { xs: "100%", sm: 260 },
-                        height: { xs: 180, sm: 170 },
-                        flexShrink: 0,
-                      }}
-                    >
-                      <img
-                        src={img}
-                        alt={title}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                          display: "block",
+          {list.length === 0 ? (
+            <PublicCard className="p-8 text-center">
+              <Typography variant="h6" fontWeight={800}>
+                No bookings here.
+              </Typography>
+            </PublicCard>
+          ) : (
+            <Stack spacing={2}>
+              {list.map((r) => {
+                const roomType = r.rooms?.type;
+                const img = (roomType && typeCoverMap[roomType]) || FALLBACK_IMG;
+                const title = r.rooms?.name || "Unnamed Room";
+                const locationLine = r.rooms?.room_number
+                  ? `Room #${r.rooms.room_number}`
+                  : r.rooms?.type || "Hotel";
+
+                return (
+                  <PublicCard key={r.id} className="overflow-hidden">
+                    <Stack direction={{ xs: "column", sm: "row" }}>
+                      <Box
+                        sx={{
+                          width: { xs: "100%", sm: 260 },
+                          height: { xs: 180, sm: 170 },
+                          flexShrink: 0,
                         }}
-                      />
-                    </Box>
-
-                    {/* Content */}
-                    <Box sx={{ flexGrow: 1, p: 2.2 }}>
-                      <Stack
-                        direction="row"
-                        justifyContent="space-between"
-                        spacing={2}
-                        alignItems="flex-start"
                       >
-                        <Box>
-                          <Chip
-                            label={
-                              tab === "upcoming"
-                                ? "Upcoming"
-                                : tab === "completed"
-                                  ? "Completed"
-                                  : "Cancelled"
-                            }
-                            size="small"
-                            sx={{
-                              borderRadius: 999,
-                              fontWeight: 900,
-                              bgcolor: "rgba(0,0,0,0.06)",
-                            }}
-                          />
+                        <img
+                          src={img}
+                          alt={title}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                            display: "block",
+                          }}
+                        />
+                      </Box>
 
-                          <Typography
-                            variant="h5"
-                            fontWeight={950}
-                            sx={{ mt: 1 }}
-                          >
-                            {title}
-                          </Typography>
+                      <Box sx={{ flexGrow: 1, p: 2.2 }}>
+                        <Stack
+                          direction="row"
+                          justifyContent="space-between"
+                          spacing={2}
+                          alignItems="flex-start"
+                        >
+                          <Box>
+                            <Chip
+                              label={
+                                tab === "upcoming"
+                                  ? "Upcoming"
+                                  : tab === "completed"
+                                    ? "Completed"
+                                    : "Cancelled"
+                              }
+                              size="small"
+                              sx={{
+                                borderRadius: 999,
+                                fontWeight: 800,
+                                bgcolor: "rgba(0,0,0,0.06)",
+                              }}
+                            />
 
-                          <Stack
-                            direction="row"
-                            spacing={0.75}
-                            alignItems="center"
-                            sx={{ mt: 0.5 }}
-                          >
-                            <LocationOnOutlinedIcon fontSize="small" />
-                            <Typography variant="body2" color="text.secondary">
-                              {locationLine}
+                            <Typography variant="h5" fontWeight={900} sx={{ mt: 1 }}>
+                              {title}
                             </Typography>
-                          </Stack>
-
-                          <Stack
-                            direction="row"
-                            spacing={1.5}
-                            alignItems="center"
-                            sx={{ mt: 1 }}
-                          >
-                            <Stack
-                              direction="row"
-                              spacing={0.75}
-                              alignItems="center"
-                            >
-                              <CalendarMonthOutlinedIcon fontSize="small" />
-                              <Typography variant="body2">
-                                {formatRange(r.start_date, r.end_date)}
-                              </Typography>
-                            </Stack>
 
                             <Stack
                               direction="row"
                               spacing={0.75}
                               alignItems="center"
+                              sx={{ mt: 0.5 }}
                             >
-                              <GroupOutlinedIcon fontSize="small" />
-                              <Typography variant="body2">
-                                {r.guests ?? 1} Guests
+                              <LocationOnOutlinedIcon fontSize="small" />
+                              <Typography variant="body2" color="text.secondary">
+                                {locationLine}
                               </Typography>
                             </Stack>
-                          </Stack>
-                        </Box>
 
-                        {/* Total + button */}
-                        <Box sx={{ textAlign: "right", minWidth: 140 }}>
-                          <Typography variant="body2" color="text.secondary">
-                            Total
-                          </Typography>
-                          <Typography variant="h6" fontWeight={950}>
-                            €{Number(r.total_price ?? 0).toFixed(2)}
-                          </Typography>
+                            <Stack
+                              direction="row"
+                              spacing={1.5}
+                              alignItems="center"
+                              sx={{ mt: 1 }}
+                            >
+                              <Stack direction="row" spacing={0.75} alignItems="center">
+                                <CalendarMonthOutlinedIcon fontSize="small" />
+                                <Typography variant="body2">
+                                  {formatRange(r.start_date, r.end_date)}
+                                </Typography>
+                              </Stack>
 
-                          <Button
-                            variant="outlined"
-                            onClick={() => setDetails(r)}
-                            endIcon={<ChevronRightIcon />}
-                            sx={{
-                              mt: 2,
-                              borderRadius: 999,
-                              textTransform: "none",
-                              fontWeight: 900,
-                              bgcolor: "rgba(255,255,255,0.55)",
-                            }}
-                          >
-                            View Details
-                          </Button>
-                          <Button
-                            variant="outlined"
-                            onClick={() => {
-                              setCancelTarget(r);
-                              setCancelReason("");
-                            }}
-                            disabled={!!r.cancelled_at}
-                            sx={{
-                              mt: 1,
-                              borderRadius: 999,
-                              textTransform: "none",
-                              fontWeight: 900,
-                            }}
-                          >
-                            Cancel
-                          </Button>
+                              <Stack direction="row" spacing={0.75} alignItems="center">
+                                <GroupOutlinedIcon fontSize="small" />
+                                <Typography variant="body2">
+                                  {r.guests ?? 1} Guests
+                                </Typography>
+                              </Stack>
+                            </Stack>
+                          </Box>
 
-                          <Button
-                            color="error"
-                            variant="text"
-                            onClick={() => setDeleteTarget(r)}
-                            sx={{
-                              mt: 1,
-                              borderRadius: 999,
-                              textTransform: "none",
-                              fontWeight: 900,
-                            }}
-                          >
-                            Delete
-                          </Button>
-                        </Box>
-                      </Stack>
-                    </Box>
-                  </Stack>
-                </Paper>
-              );
-            })}
-          </Stack>
-        )}
-      </Container>
+                          <Box sx={{ textAlign: "right", minWidth: 160 }}>
+                            <Typography variant="body2" color="text.secondary">
+                              Total
+                            </Typography>
+                            <Typography variant="h6" fontWeight={900}>
+                              EUR {Number(r.total_price ?? 0).toFixed(2)}
+                            </Typography>
 
-      {/* Simple details modal */}
+                            <Button
+                              variant="outlined"
+                              onClick={() => setDetails(r)}
+                              endIcon={<ChevronRightIcon />}
+                              sx={{
+                                mt: 2,
+                                borderRadius: 999,
+                                textTransform: "none",
+                                fontWeight: 800,
+                              }}
+                            >
+                              View details
+                            </Button>
+                            <Button
+                              variant="outlined"
+                              onClick={() => {
+                                setCancelTarget(r);
+                                setCancelReason("");
+                              }}
+                              disabled={!!r.cancelled_at}
+                              sx={{
+                                mt: 1,
+                                borderRadius: 999,
+                                textTransform: "none",
+                                fontWeight: 800,
+                              }}
+                            >
+                              Cancel
+                            </Button>
+
+                            <Button
+                              color="error"
+                              variant="text"
+                              onClick={() => setDeleteTarget(r)}
+                              sx={{
+                                mt: 1,
+                                borderRadius: 999,
+                                textTransform: "none",
+                                fontWeight: 800,
+                              }}
+                            >
+                              Delete
+                            </Button>
+                          </Box>
+                        </Stack>
+                      </Box>
+                    </Stack>
+                  </PublicCard>
+                );
+              })}
+            </Stack>
+          )}
+        </PublicContainer>
+      </PublicSection>
+
       <Dialog
         open={!!details}
         onClose={() => setDetails(null)}
         PaperProps={{ sx: { borderRadius: 3, width: 640, maxWidth: "95vw" } }}
       >
-        <DialogTitle sx={{ pr: 6, fontWeight: 950 }}>
-          Booking Details
+        <DialogTitle sx={{ pr: 6, fontWeight: 900 }}>
+          Booking details
           <IconButton
             onClick={() => setDetails(null)}
             sx={{ position: "absolute", right: 10, top: 10 }}
@@ -509,7 +472,7 @@ export default function ReservationsPage() {
         <DialogContent dividers>
           {details && (
             <Stack spacing={1.1}>
-              <Typography variant="h6" fontWeight={950}>
+              <Typography variant="h6" fontWeight={900}>
                 {details.rooms?.name || "Unnamed Room"}
               </Typography>
               <Divider />
@@ -517,14 +480,13 @@ export default function ReservationsPage() {
                 <b>Payment status:</b> {details.status}
               </Typography>
               <Typography variant="body2">
-                <b>Dates:</b>{" "}
-                {formatRange(details.start_date, details.end_date)}
+                <b>Dates:</b> {formatRange(details.start_date, details.end_date)}
               </Typography>
               <Typography variant="body2">
                 <b>Guests:</b> {details.guests ?? 1}
               </Typography>
               <Typography variant="body2">
-                <b>Total:</b> €{Number(details.total_price ?? 0).toFixed(2)}
+                <b>Total:</b> EUR {Number(details.total_price ?? 0).toFixed(2)}
               </Typography>
               <Typography variant="body2">
                 <b>Created:</b>{" "}
@@ -536,8 +498,9 @@ export default function ReservationsPage() {
           )}
         </DialogContent>
       </Dialog>
+
       <Dialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
-        <DialogTitle fontWeight={900}>Delete reservation?</DialogTitle>
+        <DialogTitle fontWeight={800}>Delete reservation?</DialogTitle>
 
         <DialogContent>
           <Typography>
@@ -558,7 +521,7 @@ export default function ReservationsPage() {
           <Button
             color="error"
             variant="contained"
-            sx={{ textTransform: "none", fontWeight: 900 }}
+            sx={{ textTransform: "none", fontWeight: 800 }}
             onClick={async () => {
               await hideReservation(deleteTarget.id);
               setDeleteTarget(null);
@@ -568,8 +531,9 @@ export default function ReservationsPage() {
           </Button>
         </DialogActions>
       </Dialog>
+
       <Dialog open={!!cancelTarget} onClose={() => setCancelTarget(null)}>
-        <DialogTitle fontWeight={900}>Cancel reservation?</DialogTitle>
+        <DialogTitle fontWeight={800}>Cancel reservation?</DialogTitle>
 
         <DialogContent>
           <Typography sx={{ mb: 2 }}>
@@ -596,7 +560,7 @@ export default function ReservationsPage() {
           <Button
             color="warning"
             variant="contained"
-            sx={{ textTransform: "none", fontWeight: 900 }}
+            sx={{ textTransform: "none", fontWeight: 800 }}
             onClick={async () => {
               const ok = await cancelReservation(cancelTarget.id, cancelReason);
               if (ok) setCancelTarget(null);

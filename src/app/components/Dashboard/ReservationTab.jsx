@@ -21,6 +21,7 @@ import ReservationDeleteDialog from "./ReservationDeleteDialog";
 import ReservationReasonDialog from "./ReservationReasonDialog";
 import ReservationForm from "./ReservationForm";
 import PrintReceipt from "./PrintReceipt";
+import PageHeader from "./ui/PageHeader";
 
 export default function ReservationsTab() {
   const [reservations, setReservations] = useState([]);
@@ -198,6 +199,7 @@ export default function ReservationsTab() {
     const today = new Date().setHours(0, 0, 0, 0);
 
     return reservationsList.filter((r) => {
+      if (r.cancelled_at !== null) return false;
       const start = new Date(r.start_date).setHours(0, 0, 0, 0);
       return start >= today;
     });
@@ -210,6 +212,7 @@ export default function ReservationsTab() {
   if (activeTab === "today") {
     const today = new Date().setHours(0, 0, 0, 0);
     displayList = filtered.filter((r) => {
+      if (r.cancelled_at !== null) return false;
       const start = new Date(r.start_date).setHours(0, 0, 0, 0);
       return start === today;
     });
@@ -314,29 +317,42 @@ export default function ReservationsTab() {
     );
 
   return (
-    <div className="p-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-        <Typography variant="h5" fontWeight="bold">
-          Reservations Overview
-        </Typography>
-        <Box display="flex" gap={1} flexWrap="wrap">
-          <Chip
-            label={`Total: ${totals.total}`}
-            size="small"
-            sx={{ backgroundColor: "#e0f2fe", color: "#075985", fontWeight: 600 }}
-          />
-          <Chip
-            label={`Active: ${totals.active}`}
-            size="small"
-            sx={{ backgroundColor: "#dcfce7", color: "#166534", fontWeight: 600 }}
-          />
-          <Chip
-            label={`Finished: ${totals.finished}`}
-            size="small"
-            sx={{ backgroundColor: "#fef9c3", color: "#854d0e", fontWeight: 600 }}
-          />
-        </Box>
-      </div>
+    <div className="admin-page">
+      <PageHeader
+        title="Reservations"
+        subtitle="Track bookings, statuses, and payments."
+        actions={
+          <Box display="flex" gap={1} flexWrap="wrap">
+            <Chip
+              label={`Total: ${totals.total}`}
+              size="small"
+              sx={{
+                backgroundColor: "#e0f2fe",
+                color: "#075985",
+                fontWeight: 600,
+              }}
+            />
+            <Chip
+              label={`Active: ${totals.active}`}
+              size="small"
+              sx={{
+                backgroundColor: "#dcfce7",
+                color: "#166534",
+                fontWeight: 600,
+              }}
+            />
+            <Chip
+              label={`Finished: ${totals.finished}`}
+              size="small"
+              sx={{
+                backgroundColor: "#fef9c3",
+                color: "#854d0e",
+                fontWeight: 600,
+              }}
+            />
+          </Box>
+        }
+      />
 
       <ReservationFilters
         search={search}

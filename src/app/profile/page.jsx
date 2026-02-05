@@ -3,7 +3,6 @@
 import * as React from "react";
 import { useSession } from "next-auth/react";
 import {
-  Paper,
   Typography,
   Box,
   Divider,
@@ -21,11 +20,13 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 
 import ReservationsPage from "../reservations/page";
+import PublicContainer from "../components/Public/PublicContainer";
+import PublicSection from "../components/Public/PublicSection";
+import PublicCard from "../components/Public/PublicCard";
 
 export default function ProfilePage() {
   const { data: session, status, update } = useSession();
 
-  // Hooks
   const [value, setValue] = React.useState("1");
   const [openAlert, setOpenAlert] = React.useState(false);
 
@@ -38,7 +39,6 @@ export default function ProfilePage() {
 
   const [hasChanged, setHasChanged] = React.useState(false);
 
-  // Load user data into form
   React.useEffect(() => {
     if (session?.user) {
       setForm({
@@ -108,133 +108,151 @@ export default function ProfilePage() {
   const user = session.user;
 
   return (
-    <Paper sx={{ p: 3, width: "100%", mx: "auto", bgcolor: "#eae1df" }}>
-      <TabContext value={value}>
-        {/* Tabs */}
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <TabList onChange={handleChangeTab}>
-            <Tab label="Profile" value="1" />
-            <Tab label="Reservations" value="2" />
-          </TabList>
-        </Box>
+    <Box className="public-page min-h-screen">
+      <PublicSection>
+        <PublicContainer>
+          <PublicCard className="p-4 md:p-6">
+            <TabContext value={value}>
+              <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}>
+                <TabList
+                  onChange={handleChangeTab}
+                  sx={{
+                    "& .MuiTabs-indicator": { display: "none" },
+                    "& .MuiTab-root": {
+                      textTransform: "none",
+                      fontWeight: 700,
+                      borderRadius: 999,
+                      minHeight: 40,
+                      px: 2,
+                      mr: 1,
+                      bgcolor: "rgba(0,0,0,0.04)",
+                    },
+                    "& .Mui-selected": {
+                      bgcolor: "#0ea5e9",
+                      color: "white !important",
+                    },
+                  }}
+                >
+                  <Tab label="Profile" value="1" />
+                  <Tab label="Reservations" value="2" />
+                </TabList>
+              </Box>
 
-        {/* PROFILE TAB */}
-        <TabPanel value="1">
-          <Box sx={{ maxWidth: 700, mx: "auto" }}>
-            {/* Header */}
-            <Box sx={{ textAlign: "center", mb: 3 }}>
-              <Avatar
-                sx={{
-                  width: 90,
-                  height: 90,
-                  mx: "auto",
-                  fontSize: 32,
-                  bgcolor: "primary.main",
-                }}
-                src={"/Profile.jpg"}
-              />
+              <TabPanel value="1" sx={{ p: 0 }}>
+                <Box sx={{ maxWidth: 700, mx: "auto" }}>
+                  <Box sx={{ textAlign: "center", mb: 3 }}>
+                    <Avatar
+                      sx={{
+                        width: 90,
+                        height: 90,
+                        mx: "auto",
+                        fontSize: 32,
+                        bgcolor: "primary.main",
+                      }}
+                      src="/Profile.jpg"
+                    />
 
-              <Typography variant="h5" mt={1} fontWeight={600}>
-                {user.name}
-              </Typography>
+                    <Typography variant="h5" mt={1} fontWeight={700}>
+                      {user.name}
+                    </Typography>
 
-              <Typography variant="body2" color="text.secondary">
-                {user.email}
-              </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {user.email}
+                    </Typography>
 
-              <Chip
-                label={
-                  user.role === "admin"
-                    ? "Admin"
-                    : user.role === "worker"
-                      ? "Worker"
-                      : "Guest"
-                }
-                color="primary"
-                size="small"
-                sx={{ mt: 1 }}
-              />
-            </Box>
+                    <Chip
+                      label={
+                        user.role === "admin"
+                          ? "Admin"
+                          : user.role === "worker"
+                            ? "Worker"
+                            : "Guest"
+                      }
+                      color="primary"
+                      size="small"
+                      sx={{ mt: 1 }}
+                    />
+                  </Box>
 
-            <Divider sx={{ mb: 3 }} />
+                  <Divider sx={{ mb: 3 }} />
 
-            {/* FORM FIELDS */}
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <TextField
-                label="Full Name"
-                name="name"
-                value={form.name}
-                onChange={handleInput}
-                fullWidth
-              />
+                  <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                    <TextField
+                      label="Full Name"
+                      name="name"
+                      value={form.name}
+                      onChange={handleInput}
+                      fullWidth
+                    />
 
-              <TextField
-                label="Email"
-                name="email"
-                value={form.email}
-                fullWidth
-                disabled
-              />
+                    <TextField
+                      label="Email"
+                      name="email"
+                      value={form.email}
+                      fullWidth
+                      disabled
+                    />
 
-              <TextField
-                label="Phone"
-                name="phone"
-                value={form.phone}
-                onChange={handleInput}
-                fullWidth
-              />
+                    <TextField
+                      label="Phone"
+                      name="phone"
+                      value={form.phone}
+                      onChange={handleInput}
+                      fullWidth
+                    />
 
-              <TextField
-                label="Address"
-                name="address"
-                value={form.address}
-                onChange={handleInput}
-                fullWidth
-              />
-            </Box>
+                    <TextField
+                      label="Address"
+                      name="address"
+                      value={form.address}
+                      onChange={handleInput}
+                      fullWidth
+                    />
+                  </Box>
 
-            {/* BUTTONS */}
-            <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
-              <Button
-                variant="contained"
-                color="success"
-                onClick={handleSave}
-                disabled={!hasChanged}
-              >
-                Save Changes
-              </Button>
+                  <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
+                    <Button
+                      variant="contained"
+                      onClick={handleSave}
+                      disabled={!hasChanged}
+                      sx={{ borderRadius: 2, textTransform: "none" }}
+                    >
+                      Save changes
+                    </Button>
 
-              <Button
-                variant="outlined"
-                color="error"
-                onClick={handleCancel}
-                disabled={!hasChanged}
-              >
-                Cancel
-              </Button>
-            </Box>
-          </Box>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      onClick={handleCancel}
+                      disabled={!hasChanged}
+                      sx={{ borderRadius: 2, textTransform: "none" }}
+                    >
+                      Cancel
+                    </Button>
+                  </Box>
+                </Box>
 
-          {/* SUCCESS SNACKBAR */}
-          <Snackbar
-            open={openAlert}
-            autoHideDuration={3000}
-            onClose={() => setOpenAlert(false)}
-            anchorOrigin={{ vertical: "top", horizontal: "center" }}
-          >
-            <Alert severity="success" onClose={() => setOpenAlert(false)}>
-              Profile updated successfully!
-            </Alert>
-          </Snackbar>
-        </TabPanel>
+                <Snackbar
+                  open={openAlert}
+                  autoHideDuration={3000}
+                  onClose={() => setOpenAlert(false)}
+                  anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                >
+                  <Alert severity="success" onClose={() => setOpenAlert(false)}>
+                    Profile updated successfully.
+                  </Alert>
+                </Snackbar>
+              </TabPanel>
 
-        {/* RESERVATIONS TAB */}
-        <TabPanel value="2">
-          <Box sx={{ maxWidth: "100%", mx: "auto" }}>
-            <ReservationsPage />
-          </Box>
-        </TabPanel>
-      </TabContext>
-    </Paper>
+              <TabPanel value="2" sx={{ p: 0 }}>
+                <Box sx={{ maxWidth: "100%", mx: "auto" }}>
+                  <ReservationsPage />
+                </Box>
+              </TabPanel>
+            </TabContext>
+          </PublicCard>
+        </PublicContainer>
+      </PublicSection>
+    </Box>
   );
 }

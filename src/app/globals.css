@@ -3,6 +3,24 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --admin-bg: #f8fafc;
+  --admin-surface: #ffffff;
+  --admin-border: #e2e8f0;
+  --admin-text: #0f172a;
+  --admin-muted: #64748b;
+  --admin-accent: #0ea5e9;
+  --admin-accent-strong: #0284c7;
+  --admin-radius: 12px;
+  --admin-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --admin-shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --public-bg: #f8fafc;
+  --public-surface: #ffffff;
+  --public-border: #e2e8f0;
+  --public-text: #0f172a;
+  --public-muted: #64748b;
+  --public-accent: #0ea5e9;
+  --public-radius: 16px;
+  --public-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
 }
 
 @theme inline {
@@ -23,6 +41,126 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+.admin-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.admin-card {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius);
+  box-shadow: var(--admin-shadow-sm);
+}
+.admin-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px 0 20px;
+}
+.admin-card-body {
+  padding: 16px 20px 20px 20px;
+}
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.admin-table thead th {
+  text-align: left;
+  padding: 12px 16px;
+  color: var(--admin-muted);
+  font-weight: 700;
+  border-bottom: 1px solid var(--admin-border);
+  background: #f1f5f9;
+}
+.admin-table tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--admin-border);
+}
+.admin-table tbody tr:hover {
+  background: #f8fafc;
+}
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 12px;
+}
+.admin-badge.success {
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+}
+.admin-badge.warning {
+  background: rgba(245, 158, 11, 0.14);
+  color: #b45309;
+}
+.admin-badge.danger {
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+}
+.admin-badge.neutral {
+  background: rgba(100, 116, 139, 0.12);
+  color: #475569;
+}
+.admin-empty {
+  text-align: center;
+  color: var(--admin-muted);
+  padding: 32px;
+}
+.public-page {
+  background: var(--public-bg);
+  color: var(--public-text);
+}
+.public-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.public-section {
+  padding: 64px 0;
+}
+.public-card {
+  background: var(--public-surface);
+  border: 1px solid var(--public-border);
+  border-radius: var(--public-radius);
+  box-shadow: var(--public-shadow);
+}
+.public-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+.public-button.primary {
+  background: var(--public-accent);
+  color: white;
+}
+.public-button.primary:hover {
+  background: #0284c7;
+}
+.public-button.ghost {
+  border: 1px solid var(--public-border);
+  color: var(--public-text);
+}
+.public-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(14, 165, 233, 0.12);
+  color: #0369a1;
 }
 .booked-day {
   background-color: #ef4444 !important; /* red */

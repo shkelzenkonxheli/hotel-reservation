@@ -25,6 +25,9 @@ import {
   FormControlLabel,
   Switch,
 } from "@mui/material";
+import PageHeader from "./ui/PageHeader";
+import SectionCard from "./ui/SectionCard";
+import EmptyState from "./ui/EmptyState";
 
 export default function ManageRoomsTab() {
   const [loading, setLoading] = useState(true);
@@ -111,65 +114,11 @@ export default function ManageRoomsTab() {
   });
 
   return (
-    <Box p={4}>
-      <Box
-        display="flex"
-        flexDirection={{ xs: "column", sm: "row" }}
-        justifyContent="space-between"
-        alignItems={{ xs: "stretch", sm: "center" }}
-        gap={2}
-        mb={4}
-      >
-        <Typography variant="h5" fontWeight="bold">
-          🏨 Manage Rooms
-        </Typography>
-
-        <Box display="flex" gap={2} flexWrap="wrap" alignItems="center">
-          {/* Kur je te Photos manager, search/filters për rooms s’janë të domosdoshme,
-              por i lëmë — thjesht s’i përdorim në atë view */}
-          {!onlyWithPhotos && (
-            <>
-              <TextField
-                label="Search rooms..."
-                variant="outlined"
-                size="small"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-
-              <Select
-                value={filterRoomType}
-                onChange={(e) => setFilterRoomType(e.target.value)}
-                size="small"
-              >
-                {roomTypeOptions.map((type) => (
-                  <MenuItem key={type} value={type}>
-                    {type === "all" ? "All Room Types" : type}
-                  </MenuItem>
-                ))}
-              </Select>
-
-              <Select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                size="small"
-              >
-                <MenuItem value="all">All Types</MenuItem>
-                <MenuItem value="hotel">Hotel</MenuItem>
-                <MenuItem value="apartment">Apartment</MenuItem>
-              </Select>
-
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleAdd}
-                sx={{ borderRadius: 2 }}
-              >
-                Add Room
-              </Button>
-            </>
-          )}
-
+    <Box className="admin-page">
+      <PageHeader
+        title="Manage Rooms"
+        subtitle="Create, edit, and manage inventory."
+        actions={
           <FormControlLabel
             control={
               <Switch
@@ -179,8 +128,48 @@ export default function ManageRoomsTab() {
             }
             label="Only rooms with photos"
           />
-        </Box>
-      </Box>
+        }
+      />
+
+      {!onlyWithPhotos && (
+        <SectionCard title="Filters">
+          <Box display="flex" gap={2} flexWrap="wrap" alignItems="center">
+            <TextField
+              label="Search rooms..."
+              variant="outlined"
+              size="small"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+
+            <Select
+              value={filterRoomType}
+              onChange={(e) => setFilterRoomType(e.target.value)}
+              size="small"
+            >
+              {roomTypeOptions.map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type === "all" ? "All Room Types" : type}
+                </MenuItem>
+              ))}
+            </Select>
+
+            <Select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              size="small"
+            >
+              <MenuItem value="all">All Types</MenuItem>
+              <MenuItem value="hotel">Hotel</MenuItem>
+              <MenuItem value="apartment">Apartment</MenuItem>
+            </Select>
+
+            <Button variant="contained" onClick={handleAdd}>
+              Add Room
+            </Button>
+          </Box>
+        </SectionCard>
+      )}
 
       {/* ✅ VIEW 1: Photo manager (Room Types) */}
       {onlyWithPhotos ? (
@@ -192,9 +181,10 @@ export default function ManageRoomsTab() {
         </Box>
       ) : (
         /* ✅ VIEW 2: Rooms table (CRUD) */
-        <TableContainer component={Paper} elevation={3}>
-          <Table>
-            <TableHead sx={{ backgroundColor: "#d6c9c6" }}>
+        <SectionCard title="Rooms">
+          <TableContainer component={Paper} elevation={0}>
+            <Table className="admin-table">
+              <TableHead>
               <TableRow>
                 <TableCell>Room #</TableCell>
                 <TableCell>Name</TableCell>
@@ -210,10 +200,6 @@ export default function ManageRoomsTab() {
                 <TableRow
                   key={room.id}
                   hover
-                  sx={{
-                    "&:hover": { backgroundColor: "#f0f8ff" },
-                    bgcolor: "#eae1df",
-                  }}
                 >
                   <TableCell>{room.room_number}</TableCell>
                   <TableCell>{room.name}</TableCell>
@@ -251,15 +237,14 @@ export default function ManageRoomsTab() {
               {filteredRooms.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
-                    <Typography color="text.secondary">
-                      No rooms found.
-                    </Typography>
+                    <EmptyState title="No rooms found" />
                   </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
-        </TableContainer>
+          </TableContainer>
+        </SectionCard>
       )}
 
       {/* Delete dialog */}

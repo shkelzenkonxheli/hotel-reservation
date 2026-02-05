@@ -24,9 +24,9 @@ export default function ReservationTable({
   allSelected,
 }) {
   return (
-    <div className="overflow-x-auto bg-#eae1df rounded-xl shadow-md border border-gray-100 mt-4">
-      <table className="min-w-full text-sm text-gray-700">
-        <thead className="bg-blue-400 text-white text-xs uppercase">
+    <div className="overflow-x-auto admin-card">
+      <table className="admin-table">
+        <thead>
           <tr>
             <th className="p-3 text-center">
               <Checkbox
@@ -48,7 +48,7 @@ export default function ReservationTable({
           </tr>
         </thead>
 
-        <tbody className="divide-y divide-gray-100">
+        <tbody>
           {reservations.map((r) => (
             <tr
               key={r.id}
@@ -88,7 +88,6 @@ export default function ReservationTable({
 
               <td className="p-3">
                 <div className="flex flex-col">
-                  <span>{r.rooms?.name || "-"}</span>
                   <span className="text-xs text-gray-600">
                     #{r.rooms?.room_number || "-"} {r.rooms?.type || "-"}
                   </span>

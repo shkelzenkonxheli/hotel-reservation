@@ -3,7 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   AppBar,
   Toolbar,
@@ -15,6 +15,8 @@ import {
   Box,
   Divider,
   Badge,
+  Avatar,
+  Tooltip,
 } from "@mui/material";
 
 import MenuIcon from "@mui/icons-material/Menu";
@@ -30,9 +32,11 @@ export default function Header() {
   const { data: session } = useSession();
   const user = session?.user;
   const router = useRouter();
+  const pathname = usePathname();
 
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [alertsAnchor, setAlertsAnchor] = useState(null);
+  const [userAnchor, setUserAnchor] = useState(null);
 
   const [summary, setSummary] = useState(null);
   const [notifications, setNotifications] = useState([]);
@@ -41,6 +45,7 @@ export default function Header() {
 
   const openMenu = (e) => setMenuAnchor(e.currentTarget);
   const closeMenu = () => setMenuAnchor(null);
+  const closeUserMenu = () => setUserAnchor(null);
 
   const closeAlerts = async () => {
     setAlertsAnchor(null);
@@ -118,58 +123,130 @@ export default function Header() {
     }
   };
 
+  const showDashboard = user && user.role !== "client";
+  const isDashboard = pathname?.startsWith("/dashboard");
+
   return (
-    <AppBar position="sticky" sx={{ backgroundColor: "#364958" }}>
-      <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+    <AppBar
+      position="sticky"
+      elevation={0}
+      sx={{
+        backgroundColor: "#f8fafc",
+        color: "#0f172a",
+        borderBottom: "1px solid #e2e8f0",
+      }}
+    >
+      <Toolbar
+        sx={{
+          minHeight: 64,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 2,
+        }}
+      >
         {/* LEFT — LOGO */}
-        <Typography
-          variant="h6"
-          component="div"
-          sx={{ fontWeight: "bold", display: "flex", alignItems: "center" }}
-        >
-          <Link href="/" style={{ color: "white", textDecoration: "none" }}>
-            🏨 Hotel Management
-          </Link>
-        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Box
+            component="img"
+            src="/hotel-images/Logo.png"
+            alt="Dijari Premium"
+            sx={{
+              width: 44,
+              height: 44,
+              borderRadius: 2,
+              objectFit: "contain",
+              backgroundColor: "#ffffff",
+              border: "1px solid #e2e8f0",
+              p: 0.5,
+            }}
+          />
+          <Box>
+            <Typography variant="subtitle1" fontWeight={800} lineHeight={1}>
+              <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
+                Dijari Premium
+              </Link>
+            </Typography>
+            {isDashboard ? (
+              <Typography variant="caption" color="text.secondary">
+                Dashboard
+              </Typography>
+            ) : null}
+          </Box>
+        </Box>
 
         {/* CENTER — DESKTOP NAVIGATION */}
-        <Box className="hidden md:flex items-center gap-4">
+        <Box className="hidden md:flex items-center gap-2">
           <Button
             component={Link}
             href="/"
-            startIcon={<HomeIcon />}
-            sx={{ color: "white" }}
+            startIcon={<HomeIcon sx={{ fontSize: 20 }} />}
+            sx={{
+              color: "#0f172a",
+              textTransform: "none",
+              fontWeight: 600,
+              "&:hover": { backgroundColor: "#f1f5f9" },
+            }}
           >
             Home
           </Button>
 
-          <Button component={Link} href="/contact" sx={{ color: "white" }}>
+          <Button
+            component={Link}
+            href="/contact"
+            sx={{
+              color: "#0f172a",
+              textTransform: "none",
+              fontWeight: 600,
+              "&:hover": { backgroundColor: "#f1f5f9" },
+            }}
+          >
             Contact
           </Button>
         </Box>
 
         {/* RIGHT — PROFILE, NOTIFICATIONS, LOGOUT */}
         <Box
-          className="hidden md:flex items-center gap-3"
+          className="hidden md:flex items-center gap-2"
           sx={{ marginLeft: "auto" }}
         >
           {/* Notifications (only worker/admin) */}
           {isClient && user && user.role !== "client" && (
             <>
-              <IconButton color="inherit" onClick={openAlerts}>
+              <Tooltip title="Notifications">
+                <IconButton
+                  onClick={openAlerts}
+                  sx={{
+                    color: "#0f172a",
+                    border: "1px solid #e2e8f0",
+                    borderRadius: 2,
+                    width: 40,
+                    height: 40,
+                    "&:hover": { backgroundColor: "#f1f5f9" },
+                  }}
+                >
                 <Badge
                   badgeContent={unreadCount}
                   color="error"
                   overlap="circular"
                 >
-                  <NotificationsIcon />
+                  <NotificationsIcon sx={{ fontSize: 20 }} />
                 </Badge>
-              </IconButton>
+                </IconButton>
+              </Tooltip>
 
               <Menu
                 anchorEl={alertsAnchor}
                 open={Boolean(alertsAnchor)}
                 onClose={closeAlerts}
+                PaperProps={{
+                  sx: {
+                    borderRadius: 2,
+                    mt: 1,
+                    minWidth: 340,
+                    boxShadow: "0 8px 24px rgba(15,23,42,0.12)",
+                  },
+                }}
               >
                 <Box sx={{ p: 2, width: 320 }}>
                   {/* Housekeeping */}
@@ -252,33 +329,81 @@ export default function Header() {
           {/* User section */}
           {isClient && user ? (
             <>
-              {user.role !== "client" && (
-                <Button
-                  component={Link}
-                  href="/dashboard"
-                  startIcon={<DashboardIcon />}
-                  sx={{ color: "white" }}
+              <Button
+                onClick={(e) => setUserAnchor(e.currentTarget)}
+                startIcon={
+                  <Avatar
+                    sx={{
+                      width: 28,
+                      height: 28,
+                      bgcolor: "#e2e8f0",
+                      color: "#0f172a",
+                      fontWeight: 700,
+                      fontSize: 13,
+                    }}
+                  >
+                    {(user.name || user.email || "?").slice(0, 1).toUpperCase()}
+                  </Avatar>
+                }
+                endIcon={<PersonOutlineIcon sx={{ fontSize: 18 }} />}
+                sx={{
+                  textTransform: "none",
+                  color: "#0f172a",
+                  fontWeight: 600,
+                  border: "1px solid #e2e8f0",
+                  borderRadius: 2,
+                  px: 1.5,
+                  "&:hover": { backgroundColor: "#f1f5f9" },
+                }}
+              >
+                {user.name || "Account"}
+              </Button>
+
+              <Menu
+                anchorEl={userAnchor}
+                open={Boolean(userAnchor)}
+                onClose={closeUserMenu}
+                PaperProps={{
+                  sx: {
+                    borderRadius: 2,
+                    mt: 1,
+                    minWidth: 200,
+                    boxShadow: "0 8px 24px rgba(15,23,42,0.12)",
+                  },
+                }}
+              >
+                {showDashboard && (
+                  <MenuItem
+                    onClick={() => {
+                      closeUserMenu();
+                      router.push("/dashboard");
+                    }}
+                  >
+                    <DashboardIcon sx={{ fontSize: 18, mr: 1 }} />
+                    Dashboard
+                  </MenuItem>
+                )}
+                <MenuItem
+                  onClick={() => {
+                    closeUserMenu();
+                    router.push("/profile");
+                  }}
                 >
-                  Dashboard
-                </Button>
-              )}
-
-              <Button
-                component={Link}
-                href="/profile"
-                startIcon={<PersonOutlineIcon />}
-                sx={{ color: "white" }}
-              >
-                {user.name}
-              </Button>
-
-              <Button
-                onClick={logout}
-                startIcon={<LogoutIcon />}
-                sx={{ color: "white" }}
-              >
-                Logout
-              </Button>
+                  <PersonOutlineIcon sx={{ fontSize: 18, mr: 1 }} />
+                  Profile
+                </MenuItem>
+                <Divider />
+                <MenuItem
+                  onClick={() => {
+                    closeUserMenu();
+                    logout();
+                  }}
+                  sx={{ color: "#b91c1c" }}
+                >
+                  <LogoutIcon sx={{ fontSize: 18, mr: 1 }} />
+                  Logout
+                </MenuItem>
+              </Menu>
             </>
           ) : (
             <>
@@ -286,7 +411,11 @@ export default function Header() {
                 component={Link}
                 href="/login"
                 startIcon={<LoginIcon />}
-                sx={{ color: "white" }}
+                sx={{
+                  color: "#0f172a",
+                  textTransform: "none",
+                  fontWeight: 600,
+                }}
               >
                 Login
               </Button>
@@ -294,7 +423,11 @@ export default function Header() {
                 component={Link}
                 href="/register"
                 startIcon={<PersonAddIcon />}
-                sx={{ color: "white" }}
+                sx={{
+                  color: "#0f172a",
+                  textTransform: "none",
+                  fontWeight: 600,
+                }}
               >
                 Register
               </Button>
@@ -308,6 +441,14 @@ export default function Header() {
           edge="end"
           onClick={openMenu}
           className="md:hidden"
+          sx={{
+            color: "#0f172a",
+            border: "1px solid #e2e8f0",
+            borderRadius: 2,
+            width: 40,
+            height: 40,
+            "&:hover": { backgroundColor: "#f1f5f9" },
+          }}
         >
           <MenuIcon />
         </IconButton>
@@ -317,6 +458,14 @@ export default function Header() {
           anchorEl={menuAnchor}
           open={Boolean(menuAnchor)}
           onClose={closeMenu}
+          PaperProps={{
+            sx: {
+              borderRadius: 2,
+              mt: 1,
+              minWidth: 200,
+              boxShadow: "0 8px 24px rgba(15,23,42,0.12)",
+            },
+          }}
         >
           {[
             <MenuItem key="home" component={Link} href="/" onClick={closeMenu}>

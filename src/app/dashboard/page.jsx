@@ -19,9 +19,12 @@ import {
   AppBar,
   Typography,
   Avatar,
+  Divider,
 } from "@mui/material";
 
 import MenuIcon from "@mui/icons-material/Menu";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import SecurityIcon from "@mui/icons-material/Security";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
@@ -38,7 +41,8 @@ import ActivityLogsTab from "../components/Dashboard/ActivityLogsTab";
 import PermissionsTab from "../components/Dashboard/PremissionsTabs";
 import { DASHBOARD_TABS } from "@/lib/dashboardTabs";
 
-const drawerWidth = 240;
+const drawerWidth = 256;
+const collapsedWidth = 76;
 // lartësia e AppBar-it të header-it (afërsisht 64px)
 const HEADER_HEIGHT = 64;
 
@@ -54,10 +58,22 @@ export default function Dashboard() {
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
+  const [collapsed, setCollapsed] = useState(
+    typeof window !== "undefined"
+      ? localStorage.getItem("dashboardSidebarCollapsed") === "true"
+      : false,
+  );
 
   useEffect(() => {
     if (activeTab) localStorage.setItem("activeTab", activeTab);
   }, [activeTab]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "dashboardSidebarCollapsed",
+      collapsed ? "true" : "false",
+    );
+  }, [collapsed]);
 
   useEffect(() => {
     if (status === "loading") return;
@@ -128,36 +144,70 @@ export default function Dashboard() {
   }, [user?.role, JSON.stringify(user?.allowed_tabs)]);
 
   const drawer = (
-    <Box sx={{ height: "100%", bgcolor: "#364958" }}>
+    <Box
+      component="nav"
+      aria-label="Admin sidebar navigation"
+      sx={{
+        height: "100%",
+        bgcolor: "#0f172a",
+        color: "#e2e8f0",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       {/* BRAND + PROFILE */}
       <Box
         sx={{
           height: HEADER_HEIGHT,
           display: "flex",
           alignItems: "center",
-          gap: 2,
+          gap: 1.5,
           px: 2,
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
         }}
       >
         <Avatar
           src={"/Profile.jpg"} // fallback image
-          sx={{ width: 60, height: 60 }}
+          sx={{ width: 36, height: 36 }}
           component={Link}
           href="/profile"
         />
 
-        <Box>
-          <Typography fontWeight={600} color="white">
-            {user.role === "admin" ? "Admin Panel" : "Worker Panel"}
-          </Typography>
-          <Typography variant="caption" color="gray">
-            {user.email}
-          </Typography>
+        {!collapsed ? (
+          <Box>
+            <Typography fontWeight={700} color="white">
+              {user.role === "admin" ? "Admin Panel" : "Worker Panel"}
+            </Typography>
+            <Typography variant="caption" color="#94a3b8">
+              {user.email}
+            </Typography>
+          </Box>
+        ) : null}
+
+        <Box sx={{ marginLeft: "auto" }}>
+          <IconButton
+            onClick={() => setCollapsed((prev) => !prev)}
+            sx={{
+              color: "#e2e8f0",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: 2,
+              width: 32,
+              height: 32,
+              "&:hover": { backgroundColor: "rgba(255,255,255,0.06)" },
+            }}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {collapsed ? (
+              <ChevronRightIcon sx={{ fontSize: 18 }} />
+            ) : (
+              <ChevronLeftIcon sx={{ fontSize: 18 }} />
+            )}
+          </IconButton>
         </Box>
       </Box>
 
       {/* MENU */}
-      <List sx={{ mt: 1 }}>
+      <List sx={{ mt: 1, px: 1 }}>
         {visibleTabs.map((tab) => (
           <ListItem key={tab.key} disablePadding>
             <ListItemButton
@@ -167,22 +217,59 @@ export default function Dashboard() {
                 setMobileOpen(false);
               }}
               sx={{
-                mx: 1,
-                my: 0.5,
+                my: 0.4,
                 borderRadius: 2,
+                gap: 1.5,
+                px: collapsed ? 1.2 : 1.8,
                 "&.Mui-selected": {
-                  bgcolor: "#39555e",
+                  bgcolor: "rgba(59,130,246,0.18)",
+                  color: "#e2e8f0",
+                  "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    left: 0,
+                    top: 8,
+                    bottom: 8,
+                    width: 3,
+                    borderRadius: 8,
+                    backgroundColor: "#38bdf8",
+                  },
+                },
+                "&:hover": {
+                  bgcolor: "rgba(255,255,255,0.06)",
                 },
               }}
             >
-              <ListItemIcon sx={{ color: "white", minWidth: 36 }}>
+              <ListItemIcon
+                sx={{
+                  color: "inherit",
+                  minWidth: collapsed ? 32 : 36,
+                }}
+              >
                 {tab.icon}
               </ListItemIcon>
-              <ListItemText primary={tab.label} />
+              {!collapsed ? (
+                <ListItemText
+                  primary={tab.label}
+                  primaryTypographyProps={{
+                    fontSize: 14,
+                    fontWeight: activeTab === tab.key ? 700 : 600,
+                  }}
+                />
+              ) : null}
             </ListItemButton>
           </ListItem>
         ))}
       </List>
+
+      {!collapsed ? (
+        <Box sx={{ mt: "auto", px: 2, pb: 2 }}>
+          <Divider sx={{ borderColor: "rgba(255,255,255,0.06)", mb: 2 }} />
+          <Typography variant="caption" color="#94a3b8">
+            © Hotel Management
+          </Typography>
+        </Box>
+      ) : null}
     </Box>
   );
 
@@ -190,17 +277,31 @@ export default function Dashboard() {
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <AppBar
         position="fixed"
+        elevation={0}
         sx={{
           display: { xs: "flex", md: "none" },
-          top: 50,
-          bgcolor: "#111827",
+          top: HEADER_HEIGHT,
+          bgcolor: "#f8fafc",
+          color: "#0f172a",
+          borderBottom: "1px solid #e2e8f0",
           zIndex: (theme) => theme.zIndex.appBar - 1,
         }}
       >
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Typography variant="h6">Dashboard</Typography>
-          <IconButton color="inherit" onClick={handleDrawerToggle}>
-            <MenuIcon />
+          <Typography variant="subtitle1" fontWeight={700}>
+            Dashboard
+          </Typography>
+          <IconButton
+            onClick={handleDrawerToggle}
+            sx={{
+              color: "#0f172a",
+              border: "1px solid #e2e8f0",
+              borderRadius: 2,
+              width: 36,
+              height: 36,
+            }}
+          >
+            <MenuIcon sx={{ fontSize: 20 }} />
           </IconButton>
         </Toolbar>
       </AppBar>
@@ -215,8 +316,8 @@ export default function Dashboard() {
           display: { xs: "block", md: "none" },
           "& .MuiDrawer-paper": {
             width: drawerWidth,
-            bgcolor: "#1e293b",
-            color: "white",
+            bgcolor: "#0f172a",
+            color: "#e2e8f0",
             top: HEADER_HEIGHT, // mos e mbulo header-in
             height: `calc(100% - ${HEADER_HEIGHT}px)`,
           },
@@ -230,13 +331,14 @@ export default function Dashboard() {
         variant="permanent"
         sx={{
           display: { xs: "none", md: "block" },
-          width: drawerWidth,
+          width: collapsed ? collapsedWidth : drawerWidth,
           "& .MuiDrawer-paper": {
-            width: drawerWidth,
-            bgcolor: "#1e293b",
-            color: "white",
+            width: collapsed ? collapsedWidth : drawerWidth,
+            bgcolor: "#0f172a",
+            color: "#e2e8f0",
             top: HEADER_HEIGHT, // KJO E ZGJIDH: nis poshtë header-it
             height: `calc(100% - ${HEADER_HEIGHT}px)`,
+            transition: "width 200ms ease",
           },
         }}
       >
@@ -249,8 +351,9 @@ export default function Dashboard() {
         sx={{
           flexGrow: 1,
           p: { xs: 2, md: 4 },
-          mt: { xs: 8, md: 0 },
-          bgcolor: "#eae1df",
+          mt: { xs: 10, md: 2 },
+          bgcolor: "#f8fafc",
+          minHeight: `calc(100vh - ${HEADER_HEIGHT}px)`,
         }}
       >
         {activeTab === "overview" && <OverviewTab />}

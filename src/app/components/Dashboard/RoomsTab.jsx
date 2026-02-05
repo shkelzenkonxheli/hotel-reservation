@@ -21,6 +21,9 @@ import {
 import { CleaningServices, Close, MeetingRoom } from "@mui/icons-material";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+import PageHeader from "./ui/PageHeader";
+import SectionCard from "./ui/SectionCard";
+import StatusBadge from "./ui/StatusBadge";
 
 export default function RoomsTab() {
   const [rooms, setRooms] = useState([]);
@@ -205,47 +208,24 @@ export default function RoomsTab() {
     );
 
   return (
-    <Box className="p-6">
-      {/* Header */}
-      <Box className="flex justify-between items-center mb-6">
-        <Typography variant="h5" fontWeight="bold" color="text.primary">
-          🏨 Rooms Overview
-        </Typography>
-        <Box className="flex items-center gap-2 flex-wrap">
-          <Chip
-            label={`Booked: ${totalCount.booked}`}
-            sx={{ bgcolor: "#fee2e2", color: "#b91c1c" }}
-          />
-          <Chip
-            label={`Available: ${totalCount.available}`}
-            sx={{ bgcolor: "#dcfce7", color: "#166534" }}
-          />
-          <Chip label={`Total: ${totalCount.total}`} variant="outlined" />
-        </Box>
-
-        <Box className="flex items-center gap-3 text-sm">
-          <Chip
-            label="Available"
-            sx={{ bgcolor: "#dcfce7", color: "#166534" }}
-          />
-          <Chip label="Booked" sx={{ bgcolor: "#fee2e2", color: "#b91c1c" }} />
-          <Chip
-            label="Needs Cleaning"
-            sx={{ bgcolor: "#fef9c3", color: "#a16207" }}
-          />
-        </Box>
-      </Box>
+    <Box className="admin-page">
+      <PageHeader
+        title="Rooms"
+        subtitle="Live occupancy and housekeeping status."
+        actions={
+          <Box className="flex items-center gap-2 flex-wrap">
+            <StatusBadge label={`Booked: ${totalCount.booked}`} tone="danger" />
+            <StatusBadge
+              label={`Available: ${totalCount.available}`}
+              tone="success"
+            />
+            <StatusBadge label={`Total: ${totalCount.total}`} tone="neutral" />
+          </Box>
+        }
+      />
 
       {/* Filters */}
-      <Paper
-        elevation={2}
-        sx={{
-          p: 2,
-          mb: 4,
-          borderRadius: 3,
-          bgcolor: "#eae1df",
-        }}
-      >
+      <SectionCard title="Filters">
         <Box
           display="flex"
           flexDirection={{ xs: "column", sm: "row" }}
@@ -325,46 +305,21 @@ export default function RoomsTab() {
             />
           </Box>
         </Box>
-      </Paper>
+      </SectionCard>
 
-      <Grid container spacing={4}>
+      <Grid container spacing={3}>
         {/* 🏢 Apartments */}
         <Grid item xs={12} md={6}>
-          <Paper
-            elevation={2}
-            sx={{ p: 3, borderRadius: 3, bgcolor: "#eae1df" }}
-          >
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-              mb={2}
-            >
-              <Typography variant="h6" fontWeight="bold" color="text.primary">
-                🏢 Apartments
-              </Typography>
-
-              <Box
-                display="flex"
-                gap={1}
-                flexWrap="wrap"
-                justifyContent="flex-end"
-              >
-                <Chip
-                  label={`Booked: ${apartmentsCount.booked}`}
-                  sx={{ bgcolor: "#fee2e2", color: "#b91c1c" }}
-                />
-                <Chip
-                  label={`Available: ${apartmentsCount.available}`}
-                  sx={{ bgcolor: "#dcfce7", color: "#166534" }}
-                />
-                <Chip
-                  label={`Total: ${apartmentsCount.total}`}
-                  variant="outlined"
-                />
+          <SectionCard
+            title={`Apartments`}
+            action={
+              <Box display="flex" gap={1} flexWrap="wrap" justifyContent="flex-end">
+                <StatusBadge label={`Booked: ${apartmentsCount.booked}`} tone="danger" />
+                <StatusBadge label={`Available: ${apartmentsCount.available}`} tone="success" />
+                <StatusBadge label={`Total: ${apartmentsCount.total}`} tone="neutral" />
               </Box>
-            </Box>
-
+            }
+          >
             <Grid container spacing={2}>
               {apartments.map((room) => (
                 <Grid item xs={3} key={room.id}>
@@ -399,45 +354,21 @@ export default function RoomsTab() {
                 </Grid>
               ))}
             </Grid>
-          </Paper>
+          </SectionCard>
         </Grid>
 
         {/* 🏨 Hotel Rooms */}
         <Grid item xs={12} md={6}>
-          <Paper
-            elevation={2}
-            sx={{ p: 3, borderRadius: 3, bgcolor: "#eae1df" }}
-          >
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-              mb={2}
-            >
-              <Typography variant="h6" fontWeight="bold" color="text.primary">
-                🏨 Hotel Rooms
-              </Typography>
-
-              <Box
-                display="flex"
-                gap={1}
-                flexWrap="wrap"
-                justifyContent="flex-end"
-              >
-                <Chip
-                  label={`Booked: ${hotelRoomsCount.booked}`}
-                  sx={{ bgcolor: "#fee2e2", color: "#b91c1c" }}
-                />
-                <Chip
-                  label={`Available: ${hotelRoomsCount.available}`}
-                  sx={{ bgcolor: "#dcfce7", color: "#166534" }}
-                />
-                <Chip
-                  label={`Total: ${hotelRoomsCount.total}`}
-                  variant="outlined"
-                />
+          <SectionCard
+            title="Hotel Rooms"
+            action={
+              <Box display="flex" gap={1} flexWrap="wrap" justifyContent="flex-end">
+                <StatusBadge label={`Booked: ${hotelRoomsCount.booked}`} tone="danger" />
+                <StatusBadge label={`Available: ${hotelRoomsCount.available}`} tone="success" />
+                <StatusBadge label={`Total: ${hotelRoomsCount.total}`} tone="neutral" />
               </Box>
-            </Box>
+            }
+          >
 
             <Grid container spacing={2}>
               {hotelRooms.map((room) => (
@@ -473,7 +404,7 @@ export default function RoomsTab() {
                 </Grid>
               ))}
             </Grid>
-          </Paper>
+          </SectionCard>
         </Grid>
       </Grid>
 

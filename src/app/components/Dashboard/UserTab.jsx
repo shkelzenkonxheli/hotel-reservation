@@ -12,7 +12,6 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Chip,
   Button,
   Dialog,
   DialogTitle,
@@ -21,7 +20,11 @@ import {
   MenuItem,
   TextField,
 } from "@mui/material";
-import { ManageAccounts, Edit, Password, Delete } from "@mui/icons-material";
+import { ManageAccounts, Edit, Delete } from "@mui/icons-material";
+import PageHeader from "./ui/PageHeader";
+import SectionCard from "./ui/SectionCard";
+import StatusBadge from "./ui/StatusBadge";
+import EmptyState from "./ui/EmptyState";
 
 export default function UsersTab() {
   const [users, setUsers] = useState([]);
@@ -53,16 +56,16 @@ export default function UsersTab() {
     }
   }
 
-  const getRoleColor = (role) => {
+  const getRoleTone = (role) => {
     switch (role.toLowerCase()) {
       case "admin":
-        return "primary";
+        return "danger";
       case "worker":
         return "warning";
       case "client":
-        return "default";
+        return "neutral";
       default:
-        return "secondary";
+        return "neutral";
     }
   };
 
@@ -147,32 +150,24 @@ export default function UsersTab() {
     );
 
   return (
-    <Box className="p-6">
-      <Box className="flex items-center justify-between mb-6">
-        <Box className="flex items-center gap-2">
-          <ManageAccounts color="primary" fontSize="large" />
-          <Typography variant="h5" fontWeight="bold">
-            User Management
-          </Typography>
-        </Box>
-
-        <Button variant="contained" onClick={() => setAddOpen(true)}>
-          + Add User
-        </Button>
-      </Box>
+    <Box className="admin-page">
+      <PageHeader
+        title="Users"
+        subtitle="Manage staff and access levels."
+        actions={
+          <Button variant="contained" onClick={() => setAddOpen(true)}>
+            + Add User
+          </Button>
+        }
+      />
 
       {users.length === 0 ? (
-        <Typography color="text.secondary" align="center">
-          No users found.
-        </Typography>
+        <EmptyState title="No users found" subtitle="Create a user to get started." />
       ) : (
-        <TableContainer
-          component={Paper}
-          elevation={3}
-          sx={{ borderRadius: 3, overflow: "hidden" }}
-        >
-          <Table>
-            <TableHead sx={{ bgcolor: "#d6c9c6" }}>
+        <SectionCard title="Staff">
+          <TableContainer component={Paper} elevation={0}>
+            <Table className="admin-table">
+              <TableHead>
               <TableRow>
                 <TableCell sx={{ fontWeight: "bold" }}>Name</TableCell>
                 <TableCell sx={{ fontWeight: "bold" }}>Email</TableCell>
@@ -191,19 +186,11 @@ export default function UsersTab() {
                 <TableRow
                   key={u.id}
                   hover
-                  sx={{
-                    "&:hover": { bgcolor: "rgba(25, 118, 210, 0.05)" },
-                    bgcolor: "#eae1df",
-                  }}
                 >
                   <TableCell>{u.name}</TableCell>
                   <TableCell>{u.email}</TableCell>
                   <TableCell>
-                    <Chip
-                      label={u.role}
-                      color={getRoleColor(u.role)}
-                      variant="filled"
-                    />
+                    <StatusBadge label={u.role} tone={getRoleTone(u.role)} />
                   </TableCell>
                   <TableCell align="center">
                     {u.created_at
@@ -243,7 +230,8 @@ export default function UsersTab() {
               ))}
             </TableBody>
           </Table>
-        </TableContainer>
+          </TableContainer>
+        </SectionCard>
       )}
 
       {/* Dialog për ndërrimin e rolit */}

@@ -20,6 +20,7 @@ import {
   Alert,
 } from "@mui/material";
 import { DASHBOARD_TABS } from "@/lib/dashboardTabs";
+import PageHeader from "./ui/PageHeader";
 
 export default function PermissionsTab() {
   const [users, setUsers] = useState([]);
@@ -124,26 +125,17 @@ export default function PermissionsTab() {
   };
 
   return (
-    <Box p={3}>
-      <Stack
-        direction="row"
-        alignItems="baseline"
-        justifyContent="space-between"
-      >
-        <Box>
-          <Typography variant="h5" fontWeight={800}>
-            Permissions
-          </Typography>
-          <Typography variant="body2" color="text.secondary" mt={0.5}>
-            Manage dashboard access for staff (Admin / Worker).
-          </Typography>
-        </Box>
-
-        <Chip
-          label={`${users.length} staff`}
-          sx={{ bgcolor: "rgba(212,163,115,0.25)", fontWeight: 700 }}
-        />
-      </Stack>
+    <Box className="admin-page">
+      <PageHeader
+        title="Permissions"
+        subtitle="Manage dashboard access for staff."
+        actions={
+          <Chip
+            label={`${users.length} staff`}
+            sx={{ bgcolor: "rgba(212,163,115,0.25)", fontWeight: 700 }}
+          />
+        }
+      />
 
       {error && (
         <Box mt={2}>
@@ -152,7 +144,6 @@ export default function PermissionsTab() {
       )}
 
       <Box
-        mt={3}
         display="grid"
         gridTemplateColumns={{ xs: "1fr", md: "360px 1fr" }}
         gap={2}

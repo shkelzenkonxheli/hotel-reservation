@@ -21,6 +21,10 @@ import {
 import HistoryIcon from "@mui/icons-material/History";
 import { Delete } from "@mui/icons-material";
 import { useMemo } from "react";
+import PageHeader from "./ui/PageHeader";
+import SectionCard from "./ui/SectionCard";
+import StatusBadge from "./ui/StatusBadge";
+import EmptyState from "./ui/EmptyState";
 
 export default function activityLogTab() {
   const [logs, setLogs] = useState([]);
@@ -88,60 +92,47 @@ export default function activityLogTab() {
     );
   }
   return (
-    <Box className="p-6">
-      {/* HEADER */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          mb: 3,
-        }}
-      >
-        {/* LEFT SIDE */}
-        <Box className="flex items-center gap-2">
-          <HistoryIcon color="primary" fontSize="large" />
-          <Typography variant="h5" fontWeight="bold">
-            Activity Logs
-          </Typography>
-        </Box>
-        <FormControl size="small" sx={{ minWidth: 180 }}>
-          <InputLabel>Action</InputLabel>
-          <Select
-            label="Action"
-            value={actionFilter}
-            onChange={(e) => setActionFilter(e.target.value)}
-            bgcolor="#eae1df"
-          >
-            <MenuItem value="all">All</MenuItem>
-            <MenuItem value="CREATE">Create</MenuItem>
-            <MenuItem value="UPDATE">Update</MenuItem>
-            <MenuItem value="DELETE">Delete</MenuItem>
-            <MenuItem value="CLEAN">Clean</MenuItem>
-          </Select>
-        </FormControl>
-
-        {/* RIGHT SIDE */}
-        {selectedIds.length > 0 && (
-          <Button
-            color="error"
-            variant="contained"
-            onClick={handleBulkDelete}
-            startIcon={<Delete />}
-          >
-            Delete ({selectedIds.length})
-          </Button>
-        )}
-      </Box>
+    <Box className="admin-page">
+      <PageHeader
+        title="Activity Log"
+        subtitle="Audit trail of system actions."
+        actions={
+          <Box display="flex" gap={2} alignItems="center">
+            <FormControl size="small" sx={{ minWidth: 180 }}>
+              <InputLabel>Action</InputLabel>
+              <Select
+                label="Action"
+                value={actionFilter}
+                onChange={(e) => setActionFilter(e.target.value)}
+              >
+                <MenuItem value="all">All</MenuItem>
+                <MenuItem value="CREATE">Create</MenuItem>
+                <MenuItem value="UPDATE">Update</MenuItem>
+                <MenuItem value="DELETE">Delete</MenuItem>
+                <MenuItem value="CLEAN">Clean</MenuItem>
+              </Select>
+            </FormControl>
+            {selectedIds.length > 0 && (
+              <Button
+                color="error"
+                variant="contained"
+                onClick={handleBulkDelete}
+                startIcon={<Delete />}
+              >
+                Delete ({selectedIds.length})
+              </Button>
+            )}
+          </Box>
+        }
+      />
 
       {filteredLogs.length === 0 ? (
-        <Typography color="text.secondary" align="center">
-          No activity logs found.
-        </Typography>
+        <EmptyState title="No activity logs found" />
       ) : (
-        <Paper elevation={3} sx={{ borderRadius: 3, overflow: "hidden" }}>
-          <Table>
-            <TableHead sx={{ bgcolor: "#d6c9c6" }}>
+        <SectionCard title="Recent activity">
+          <Paper elevation={0}>
+            <Table className="admin-table">
+              <TableHead>
               <TableRow>
                 <TableCell padding="checkbox">
                   <Tooltip title="Select all">
@@ -178,10 +169,6 @@ export default function activityLogTab() {
                 <TableRow
                   key={log.id}
                   hover
-                  sx={{
-                    "&:hover": { bgcolor: "rgba(25, 118, 210, 0.05)" },
-                    bgcolor: "#eae1df",
-                  }}
                 >
                   <TableCell padding="checkbox">
                     <Checkbox
@@ -202,15 +189,22 @@ export default function activityLogTab() {
                   </TableCell>
 
                   <TableCell>
-                    <Chip
+                    <StatusBadge
                       label={log.action}
-                      color={getActionColor(log.action)}
-                      size="small"
+                      tone={
+                        getActionColor(log.action) === "success"
+                          ? "success"
+                          : getActionColor(log.action) === "warning"
+                            ? "warning"
+                            : getActionColor(log.action) === "error"
+                              ? "danger"
+                              : "neutral"
+                      }
                     />
                   </TableCell>
 
                   <TableCell>
-                    <Chip label={log.entity} variant="outlined" size="small" />
+                    <StatusBadge label={log.entity} tone="neutral" />
                   </TableCell>
 
                   <TableCell>
@@ -232,7 +226,8 @@ export default function activityLogTab() {
               ))}
             </TableBody>
           </Table>
-        </Paper>
+          </Paper>
+        </SectionCard>
       )}
     </Box>
   );

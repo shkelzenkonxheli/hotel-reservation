@@ -2,18 +2,15 @@
 
 import { useBooking } from "@/context/BookingContext";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Box,
-  Card,
   CardContent,
   Typography,
   TextField,
   Button,
   Divider,
-  Grid,
   CircularProgress,
-  Paper,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -21,6 +18,9 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useSession } from "next-auth/react";
+import PublicContainer from "../components/Public/PublicContainer";
+import PublicSection from "../components/Public/PublicSection";
+import PublicCard from "../components/Public/PublicCard";
 
 export default function CheckoutBooking() {
   const { booking } = useBooking();
@@ -92,8 +92,11 @@ export default function CheckoutBooking() {
   const { room, startDate, endDate } = booking;
 
   const nights = Math.ceil(
-    (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)
+    (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24),
   );
+
+  const nightlyRate = Number(room.price || 0);
+  const totalFormatted = totalPrice.toFixed(2);
 
   /* ---------------- SUBMIT ---------------- */
   const handleBookClick = async () => {
@@ -138,92 +141,108 @@ export default function CheckoutBooking() {
     return text.split("\n")[0];
   };
 
-  /* ---------------- COMPONENTS ---------------- */
-  const RoomInfo = () => (
-    <Box sx={{ background: "#eae1df", borderRadius: isMobile ? 2 : 0 }}>
-      <img
-        src={room.images?.[0] || "/placeholder.jpg"}
-        alt={room.name}
-        style={{
-          width: "100%",
-          height: "260px",
-          objectFit: "cover",
-          borderRadius: isMobile ? "12px" : "0",
-        }}
-      />
+  const SummaryCard = () => (
+    <PublicCard className="p-5 md:p-6">
+      <div className="aspect-[4/3] w-full overflow-hidden rounded-2xl">
+        <img
+          src={room.images?.[0] || "/placeholder.jpg"}
+          alt={room.name}
+          className="h-full w-full object-cover"
+        />
+      </div>
 
-      <CardContent>
-        <Typography variant="h5" fontWeight="bold">
+      <div className="mt-4">
+        <Typography variant="h6" fontWeight={800}>
           {room.name}
         </Typography>
-
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
           {getFirstLine(room.description)}
         </Typography>
-
         <button
-          className="text-blue-600 text-sm mt-1 underline w-fit"
+          className="text-slate-700 text-sm mt-2 underline underline-offset-4"
           onClick={() => setExpandedRoom(room)}
         >
-          View more
+          View details
         </button>
+      </div>
 
-        <Divider sx={{ my: 2 }} />
+      <Divider sx={{ my: 2 }} />
 
-        <Typography>
-          <strong>Check-in:</strong> {startDate}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-sm text-slate-600">
+          <span>Check-in</span>
+          <span className="font-semibold text-slate-900">{startDate}</span>
+        </div>
+        <div className="flex items-center justify-between text-sm text-slate-600">
+          <span>Check-out</span>
+          <span className="font-semibold text-slate-900">{endDate}</span>
+        </div>
+        <div className="flex items-center justify-between text-sm text-slate-600">
+          <span>Nights</span>
+          <span className="font-semibold text-slate-900">{nights}</span>
+        </div>
+      </div>
+
+      <Divider sx={{ my: 2 }} />
+
+      <div className="space-y-2">
+        <Typography variant="subtitle2" fontWeight={700}>
+          Price breakdown
         </Typography>
-        <Typography>
-          <strong>Check-out:</strong> {endDate}
-        </Typography>
-        <Typography>
-          <strong>Nights:</strong> {nights}
-        </Typography>
+        <div className="flex items-center justify-between text-sm text-slate-600">
+          <span>
+            EUR {nightlyRate.toFixed(2)} � {nights} nights
+          </span>
+          <span className="font-semibold text-slate-900">
+            EUR {(nightlyRate * nights).toFixed(2)}
+          </span>
+        </div>
+      </div>
 
-        <Divider sx={{ my: 2 }} />
-
-        <Typography variant="h6" color="primary">
-          €{room.price} / night
-        </Typography>
-
-        <Box
-          sx={{
-            mt: 3,
-            background: "#f1f5f9",
-            borderRadius: "12px",
-            textAlign: "center",
-            py: 2,
-          }}
-        >
-          <Typography variant="h6" fontWeight="bold" color="success.main">
-            Total: €{totalPrice.toFixed(2)}
+      <div className="mt-4 rounded-xl bg-slate-50 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <Typography variant="subtitle1" fontWeight={800}>
+            Total
           </Typography>
-        </Box>
-      </CardContent>
-    </Box>
+          <Typography variant="h6" fontWeight={900} color="success.main">
+            EUR {totalFormatted}
+          </Typography>
+        </div>
+      </div>
+
+      <p className="mt-4 text-xs text-slate-500">
+        Secure checkout � your details are protected.
+      </p>
+    </PublicCard>
   );
 
   const UserForm = () => (
-    <>
-      <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
-        Your Information
-      </Typography>
+    <PublicCard className="p-5 md:p-6">
+      <div className="flex items-center justify-between mb-2">
+        <Typography variant="h6" fontWeight={800}>
+          Guest information
+        </Typography>
+        <span className="text-xs text-slate-500">Required fields</span>
+      </div>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <TextField
           label="Full Name"
           value={fullname}
           onChange={(e) => setFullname(e.target.value)}
+          helperText="Enter the name on the booking"
         />
         <TextField
           label="Phone"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
+          helperText="We may contact you for check-in updates"
         />
         <TextField
           label="Address"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
+          helperText="Billing or contact address"
         />
         <TextField
           label="Guests"
@@ -231,6 +250,7 @@ export default function CheckoutBooking() {
           inputProps={{ min: 1 }}
           value={guests}
           onChange={(e) => setGuests(Number(e.target.value))}
+          helperText="Select the number of guests"
         />
       </Box>
 
@@ -242,108 +262,100 @@ export default function CheckoutBooking() {
         size="large"
         fullWidth
         disabled={loading}
+        sx={{ textTransform: "none", borderRadius: 2, fontWeight: 700 }}
       >
         {loading ? (
           <CircularProgress size={24} color="inherit" />
         ) : (
-          "Confirm Booking & Pay"
+          "Confirm booking and pay"
         )}
       </Button>
-    </>
+    </PublicCard>
   );
 
   /* ---------------- RENDER ---------------- */
   return (
-    <Box sx={{ minHeight: "100vh", py: 6, px: 2, bgcolor: "#eae1df" }}>
-      <Box sx={{ maxWidth: "800px", mx: "auto" }}>
-        <Typography
-          variant="h4"
-          fontWeight="bold"
-          align="center"
-          sx={{ mb: 4 }}
-        >
-          🏨 Confirm Your Booking
-        </Typography>
+    <div className="public-page min-h-screen">
+      <PublicSection className="pt-10">
+        <PublicContainer>
+          <div className="max-w-3xl">
+            <p className="public-badge">Checkout</p>
+            <h2 className="text-3xl md:text-4xl font-semibold mt-3">
+              Complete your booking
+            </h2>
+            <p className="text-sm md:text-base text-slate-500 mt-2">
+              Review your stay details and confirm guest information.
+            </p>
+          </div>
 
-        {!isMobile && (
-          <Paper
-            elevation={4}
-            sx={{ borderRadius: 4, overflow: "hidden", bgcolor: "#eae1df" }}
-          >
-            <Grid container>
-              <Grid item xs={12} md={6}>
-                <RoomInfo />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Box sx={{ p: 4 }}>
-                  <UserForm />
-                </Box>
-              </Grid>
-            </Grid>
-          </Paper>
-        )}
+          <div className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_0.8fr] items-start">
+            <div className="space-y-6">
+              {isMobile ? (
+                <PublicCard className="p-4">
+                  <Typography variant="h6" fontWeight="bold">
+                    {room.name}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {startDate} to {endDate} ({nights} nights)
+                  </Typography>
 
-        {isMobile && (
-          <>
-            <Card sx={{ borderRadius: 3 }}>
-              <CardContent>
-                <Typography variant="h6" fontWeight="bold">
-                  {room.name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {startDate} → {endDate} ({nights} nights)
-                </Typography>
+                  <Divider sx={{ my: 2 }} />
 
-                <Divider sx={{ my: 2 }} />
+                  <Typography fontWeight="bold" color="success.main">
+                    Total: EUR {totalFormatted}
+                  </Typography>
 
-                <Typography fontWeight="bold" color="success.main">
-                  Total: €{totalPrice.toFixed(2)}
-                </Typography>
+                  <Button
+                    fullWidth
+                    sx={{ mt: 2, textTransform: "none", borderRadius: 2 }}
+                    variant="outlined"
+                    onClick={() => setOpenDetails(true)}
+                  >
+                    View booking summary
+                  </Button>
 
-                <Button
-                  fullWidth
-                  sx={{ mt: 2 }}
-                  variant="outlined"
-                  onClick={() => setOpenDetails(true)}
-                >
-                  View booking details
-                </Button>
-              </CardContent>
-            </Card>
+                  <Dialog
+                    open={openDetails}
+                    onClose={() => setOpenDetails(false)}
+                    fullWidth
+                    maxWidth="sm"
+                  >
+                    <DialogTitle>Booking summary</DialogTitle>
+                    <DialogContent
+                      sx={{ maxHeight: "70vh", overflowY: "auto", pb: 4 }}
+                    >
+                      <SummaryCard />
+                    </DialogContent>
+                  </Dialog>
+                </PublicCard>
+              ) : null}
 
-            <Dialog
-              open={openDetails}
-              onClose={() => setOpenDetails(false)}
-              fullWidth
-              maxWidth="sm"
-            >
-              <DialogTitle>Complete booking</DialogTitle>
-              <DialogContent
-                sx={{ maxHeight: "70vh", overflowY: "auto", pb: 10 }}
-              >
-                <UserForm />
-              </DialogContent>
-            </Dialog>
-          </>
-        )}
-      </Box>
+              <UserForm />
+            </div>
+
+            <div className="hidden lg:block lg:sticky lg:top-24">
+              <SummaryCard />
+            </div>
+          </div>
+        </PublicContainer>
+      </PublicSection>
 
       {expandedRoom && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-xl p-6 max-w-lg w-full relative">
+          <div className="public-card p-6 max-w-lg w-full relative">
             <button
-              className="absolute top-3 right-3 text-gray-500"
+              className="absolute top-3 right-3 text-slate-500"
               onClick={() => setExpandedRoom(null)}
             >
-              ✕
+              X
             </button>
-            <h2 className="text-xl font-bold mb-4">{expandedRoom.name}</h2>
-            <p className="text-gray-700 text-sm whitespace-pre-line">
+            <h2 className="text-xl font-semibold mb-4">{expandedRoom.name}</h2>
+            <p className="text-slate-600 text-sm whitespace-pre-line">
               {expandedRoom.description}
             </p>
           </div>
         </div>
       )}
-    </Box>
+    </div>
   );
 }

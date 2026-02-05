@@ -6,25 +6,24 @@ import { useRouter } from "next/navigation";
 import {
   Box,
   Button,
-  Card,
-  CardContent,
   CircularProgress,
   TextField,
   Typography,
   Alert,
   Divider,
   IconButton,
+  InputAdornment,
 } from "@mui/material";
-import { InputAdornment } from "@mui/material";
 import {
-  Email,
   EmailOutlined,
   Google,
-  PasswordOutlined,
+  LockOutlined,
+  VisibilityOff,
+  Visibility,
 } from "@mui/icons-material";
-import { VisibilityOff } from "@mui/icons-material";
-import { Visibility } from "@mui/icons-material";
-import { LockOutlined } from "@mui/icons-material";
+import PublicContainer from "../components/Public/PublicContainer";
+import PublicSection from "../components/Public/PublicSection";
+import PublicCard from "../components/Public/PublicCard";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -35,6 +34,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
   useEffect(() => {
     if (status === "authenticated") {
       router.replace("/");
@@ -75,155 +75,140 @@ export default function LoginPage() {
   };
 
   return (
-    <Box
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      minHeight="100vh"
-      sx={{
-        background:
-          "linear-gradient(135deg, #e0e7ff 0%, #f8fafc 50%, #ffffff 100%)",
-        padding: 2,
-      }}
-    >
-      <Card
-        sx={{
-          width: "100%",
-          maxWidth: 420,
-          borderRadius: 3,
-          boxShadow: 6,
-        }}
-      >
-        <CardContent sx={{ p: 4 }}>
-          <Typography
-            variant="h5"
-            align="center"
-            fontWeight="bold"
-            color="primary"
-            gutterBottom
-          >
-            Welcome Back
-          </Typography>
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            align="center"
-            mb={3}
-          >
-            Sign in to access your account
-          </Typography>
+    <Box className="public-page min-h-screen">
+      <PublicSection className="pt-10">
+        <PublicContainer>
+          <div className="max-w-md mx-auto">
+            <PublicCard className="p-6 md:p-8">
+              <Typography
+                variant="h5"
+                align="center"
+                fontWeight="bold"
+                sx={{ color: "#0ea5e9" }}
+                gutterBottom
+              >
+                Welcome back
+              </Typography>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                align="center"
+                mb={3}
+              >
+                Sign in to access your account
+              </Typography>
 
-          {/* Form - Credentials Login */}
-          <form onSubmit={handleLoginCredentials}>
-            <TextField
-              label="Email"
-              fullWidth
-              required
-              margin="normal"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <EmailOutlined />
-                  </InputAdornment>
-                ),
-              }}
-            />
+              <form onSubmit={handleLoginCredentials}>
+                <TextField
+                  label="Email"
+                  fullWidth
+                  required
+                  margin="normal"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <EmailOutlined />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
 
-            <TextField
-              label="Password"
-              fullWidth
-              required
-              margin="normal"
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <LockOutlined />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={() => setShowPassword(!showPassword)}>
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
+                <TextField
+                  label="Password"
+                  fullWidth
+                  required
+                  margin="normal"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LockOutlined />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
 
-            {error && (
-              <Alert severity="error" sx={{ mt: 1 }}>
-                {error}
-              </Alert>
-            )}
+                {error && (
+                  <Alert severity="error" sx={{ mt: 1 }}>
+                    {error}
+                  </Alert>
+                )}
 
-            <Button
-              fullWidth
-              variant="contained"
-              sx={{
-                mt: 3,
-                py: 1.3,
-                fontSize: "1rem",
-                textTransform: "none",
-                borderRadius: 2,
-              }}
-              type="submit"
-              disabled={loading}
-            >
-              {loading ? (
-                <CircularProgress size={26} color="inherit" />
-              ) : (
-                "Login"
-              )}
-            </Button>
-          </form>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  sx={{
+                    mt: 3,
+                    py: 1.3,
+                    fontSize: "1rem",
+                    textTransform: "none",
+                    borderRadius: 2,
+                    fontWeight: 700,
+                  }}
+                  type="submit"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <CircularProgress size={26} color="inherit" />
+                  ) : (
+                    "Login"
+                  )}
+                </Button>
+              </form>
 
-          {/* Divider */}
-          <Divider sx={{ my: 3 }}>OR</Divider>
+              <Divider sx={{ my: 3 }}>OR</Divider>
 
-          {/* Google Login */}
+              <Button
+                fullWidth
+                variant="outlined"
+                startIcon={<Google />}
+                sx={{
+                  py: 1.2,
+                  textTransform: "none",
+                  fontWeight: 700,
+                  borderRadius: 2,
+                }}
+                onClick={() =>
+                  signIn("google", {
+                    callbackUrl: "/",
+                  })
+                }
+              >
+                Continue with Google
+              </Button>
 
-          <Button
-            fullWidth
-            variant="outlined"
-            startIcon={<Google />}
-            sx={{
-              py: 1.2,
-              textTransform: "none",
-              fontWeight: "bold",
-              borderRadius: 2,
-            }}
-            onClick={() =>
-              signIn("google", {
-                callbackUrl: "/",
-              })
-            }
-          >
-            Continue with Google
-          </Button>
-
-          <Typography
-            variant="body2"
-            align="center"
-            mt={3}
-            color="text.secondary"
-          >
-            Don’t have an account?{" "}
-            <Typography
-              component="span"
-              color="primary"
-              sx={{ cursor: "pointer", fontWeight: "bold" }}
-              onClick={() => router.push("/register")}
-            >
-              Register
-            </Typography>
-          </Typography>
-        </CardContent>
-      </Card>
+              <Typography
+                variant="body2"
+                align="center"
+                mt={3}
+                color="text.secondary"
+              >
+                Don't have an account?{" "}
+                <Typography
+                  component="span"
+                  sx={{ cursor: "pointer", fontWeight: 700, color: "#0ea5e9" }}
+                  onClick={() => router.push("/register")}
+                >
+                  Register
+                </Typography>
+              </Typography>
+            </PublicCard>
+          </div>
+        </PublicContainer>
+      </PublicSection>
     </Box>
   );
 }

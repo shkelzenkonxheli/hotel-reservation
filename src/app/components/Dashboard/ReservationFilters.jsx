@@ -27,8 +27,7 @@ export default function ReservationFilters({
         justifyContent: "space-between",
         mb: 3,
         p: 2,
-        backgroundColor: "#eae1df",
-        borderRadius: 2,
+        backgroundColor: "var(--admin-surface)",
       }}
     >
       <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>

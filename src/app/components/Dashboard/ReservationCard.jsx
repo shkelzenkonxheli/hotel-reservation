@@ -22,7 +22,14 @@ export default function ReservationCard({
   onSelect,
 }) {
   return (
-    <Card sx={{ borderRadius: 3, boxShadow: 2, bgcolor: "#eae1df" }}>
+    <Card
+      sx={{
+        borderRadius: 3,
+        boxShadow: 1,
+        bgcolor: "var(--admin-surface)",
+        border: "1px solid var(--admin-border)",
+      }}
+    >
       <CardContent>
         {/* HEADER */}
         <Box display="flex" justifyContent="space-between" alignItems="center">

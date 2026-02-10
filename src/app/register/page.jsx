@@ -76,8 +76,10 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage("Registration successful. Redirecting...");
-        setTimeout(() => router.push("/login"), 1500);
+        setMessage(
+          "A verification link was sent to your email. Please verify before signing in."
+        );
+        setTimeout(() => router.push("/login"), 2000);
       } else {
         setError(data.message || "Registration failed.");
       }

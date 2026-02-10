@@ -23,6 +23,9 @@ export const authOptions = {
         });
 
         if (!user) return null;
+        if (user.email_verified === false) {
+          throw new Error("EMAIL_NOT_VERIFIED");
+        }
 
         const isValid = await compare(credentials.password, user.password);
         if (!isValid) return null;
@@ -47,6 +50,7 @@ export const authOptions = {
         token.allowed_tabs = dbUser.allowed_tabs || [];
         token.phone = dbUser.phone;
         token.address = dbUser.address;
+        token.email_verified = dbUser.email_verified ?? false;
       }
 
       return token;
@@ -60,6 +64,7 @@ export const authOptions = {
       session.user.phone = token.phone;
       session.user.address = token.address;
       session.user.allowed_tabs = token.allowed_tabs || [];
+      session.user.email_verified = token.email_verified ?? false;
       return session;
     },
 
@@ -76,7 +81,13 @@ export const authOptions = {
               name: user.name,
               password: "",
               role: "client",
+              email_verified: true,
             },
+          });
+        } else if (!existing.email_verified) {
+          await prisma.users.update({
+            where: { id: existing.id },
+            data: { email_verified: true },
           });
         }
       }

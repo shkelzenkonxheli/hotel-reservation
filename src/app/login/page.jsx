@@ -34,6 +34,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -68,10 +69,39 @@ export default function LoginPage() {
       redirect: false,
     });
 
-    if (res.error) setError("Invalid email or password");
+    if (res.error === "EMAIL_NOT_VERIFIED") {
+      setError("Email is not verified. Please check your inbox.");
+    } else if (res.error) {
+      setError("Invalid email or password");
+    }
     else router.push("/");
 
     setLoading(false);
+  };
+
+  const handleResend = async () => {
+    if (!email) {
+      setError("Enter your email to resend verification.");
+      return;
+    }
+    try {
+      setResendLoading(true);
+      const res = await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Failed to resend verification email.");
+        return;
+      }
+      setError("Verification email sent. Check your inbox.");
+    } catch (err) {
+      setError("Failed to resend verification email.");
+    } finally {
+      setResendLoading(false);
+    }
   };
 
   return (
@@ -141,15 +171,20 @@ export default function LoginPage() {
                   }}
                 />
 
-                {error && (
-                  <Alert severity="error" sx={{ mt: 1 }}>
-                    {error}
-                  </Alert>
-                )}
+              {error && (
+                <Alert
+                  severity={
+                    error.toLowerCase().includes("sent") ? "success" : "error"
+                  }
+                  sx={{ mt: 1 }}
+                >
+                  {error}
+                </Alert>
+              )}
 
-                <Button
-                  fullWidth
-                  variant="contained"
+              <Button
+                fullWidth
+                variant="contained"
                   sx={{
                     mt: 3,
                     py: 1.3,
@@ -161,15 +196,25 @@ export default function LoginPage() {
                   type="submit"
                   disabled={loading}
                 >
-                  {loading ? (
-                    <CircularProgress size={26} color="inherit" />
-                  ) : (
-                    "Login"
-                  )}
-                </Button>
-              </form>
+                {loading ? (
+                  <CircularProgress size={26} color="inherit" />
+                ) : (
+                  "Login"
+                )}
+              </Button>
+            </form>
 
-              <Divider sx={{ my: 3 }}>OR</Divider>
+            <Button
+              fullWidth
+              variant="text"
+              sx={{ mt: 1, textTransform: "none" }}
+              onClick={handleResend}
+              disabled={resendLoading}
+            >
+              {resendLoading ? "Sending..." : "Didn't receive the link? Resend"}
+            </Button>
+
+            <Divider sx={{ my: 3 }}>OR</Divider>
 
               <Button
                 fullWidth

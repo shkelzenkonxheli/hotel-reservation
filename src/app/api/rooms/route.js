@@ -113,11 +113,13 @@ export async function GET(request) {
       // Derive current status for UI based on active reservation.
       const currentStatus = activeReservation
         ? "booked"
-        : !cleanedTodayIds.has(room.id) &&
-            hasCheckoutToday &&
-            operationalStatus === "available"
+        : operationalStatus === "needs_cleaning"
           ? "needs_cleaning"
-          : operationalStatus;
+          : !cleanedTodayIds.has(room.id) &&
+              hasCheckoutToday &&
+              operationalStatus === "available"
+            ? "needs_cleaning"
+            : operationalStatus;
 
       return {
         ...room,

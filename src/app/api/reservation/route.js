@@ -11,6 +11,14 @@ function parseDateOnlyToUTC(dateStr) {
   return new Date(Date.UTC(y, m - 1, d));
 }
 
+function isOverlapError(error) {
+  return (
+    error?.code === "23P01" ||
+    error?.message?.includes("violates exclusion constraint") ||
+    error?.meta?.cause?.includes?.("exclusion constraint")
+  );
+}
+
 // Handle POST requests for this route.
 export async function POST(request) {
   try {
@@ -156,6 +164,12 @@ export async function POST(request) {
     return NextResponse.json(reservation);
   } catch (error) {
     console.error("POST /reservation error:", error);
+    if (isOverlapError(error)) {
+      return NextResponse.json(
+        { error: "No rooms available for the selected dates" },
+        { status: 409 },
+      );
+    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -165,6 +179,19 @@ export async function POST(request) {
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
+    if (process.env.NODE_ENV !== "production") {
+      try {
+        const dbInfo = await prisma.$queryRaw`
+          SELECT current_database() AS db,
+                 current_schema() AS schema,
+                 inet_server_addr() AS host,
+                 inet_server_port() AS port
+        `;
+        console.log("DB info:", dbInfo?.[0]);
+      } catch (e) {
+        console.warn("Failed to read DB info:", e?.message || e);
+      }
+    }
     const reservationId = Number(searchParams.get("reservation_id"));
     const listAll = searchParams.get("list");
     const userId = searchParams.get("user_id");
@@ -233,6 +260,8 @@ export async function GET(request) {
     }
 
     if (roomType && startDate && endDate) {
+      const start = parseDateOnlyToUTC(startDate);
+      const end = parseDateOnlyToUTC(endDate);
       const rooms = await prisma.rooms.findMany({
         where: { type: roomType },
         include: {
@@ -251,9 +280,15 @@ export async function GET(request) {
         const conflict = room.reservations.some((res) => {
           if (reservationId && res.id === reservationId) return false;
           if (res.cancelled_at) return false;
+          const rStart = parseDateOnlyToUTC(
+            res.start_date.toISOString().slice(0, 10),
+          );
+          const rEnd = parseDateOnlyToUTC(
+            res.end_date.toISOString().slice(0, 10),
+          );
           return (
-            new Date(startDate) < new Date(res.end_date) &&
-            new Date(endDate) > new Date(res.start_date)
+            start < rEnd &&
+            end > rStart
           );
         });
         return !conflict;

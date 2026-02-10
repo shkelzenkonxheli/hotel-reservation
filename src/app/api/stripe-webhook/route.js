@@ -8,6 +8,20 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const adminEmail = "shkonxheli@gmail.com";
 
+// Convert YYYY-MM-DD to a UTC midnight Date for day-precision comparisons.
+function parseDateOnlyToUTC(dateStr) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d));
+}
+
+function isOverlapError(error) {
+  return (
+    error?.code === "23P01" ||
+    error?.message?.includes("violates exclusion constraint") ||
+    error?.meta?.cause?.includes?.("exclusion constraint")
+  );
+}
+
 export const config = {
   api: { bodyParser: false },
 };
@@ -75,16 +89,21 @@ export async function POST(req) {
     // Find one available room
 
     // Pick the first room without date overlap for the requested range.
+    const start = parseDateOnlyToUTC(meta.startDate);
+    const end = parseDateOnlyToUTC(meta.endDate);
     const availableRoom = rooms.find((room) => {
       if (room.status === "out_of_order") return;
       const conflict = room.reservations.some((reservation) => {
         if (reservation.cancelled_at) return false;
         if (reservation.admin_hidden) return false;
 
-        return (
-          new Date(meta.startDate) < new Date(reservation.end_date) &&
-          new Date(meta.endDate) > new Date(reservation.start_date)
+        const rStart = parseDateOnlyToUTC(
+          reservation.start_date.toISOString().slice(0, 10),
         );
+        const rEnd = parseDateOnlyToUTC(
+          reservation.end_date.toISOString().slice(0, 10),
+        );
+        return start < rEnd && end > rStart;
       });
       return !conflict;
     });
@@ -98,33 +117,42 @@ export async function POST(req) {
     const totalPrice = Number(meta.totalPrice || 0);
 
     // ✅ create reservation with payment fields
-    const created = await prisma.reservations.create({
-      data: {
-        room_id: availableRoom.id,
-        reservation_code: "RES-" + nanoid(6).toUpperCase(),
-        user_id: user.id,
-        start_date: new Date(meta.startDate),
-        end_date: new Date(meta.endDate),
+    let created;
+    try {
+      created = await prisma.reservations.create({
+        data: {
+          room_id: availableRoom.id,
+          reservation_code: "RES-" + nanoid(6).toUpperCase(),
+          user_id: user.id,
+          start_date: start,
+          end_date: end,
 
-        status: "confirmed",
+          status: "confirmed",
 
-        full_name: meta.fullname,
-        phone: meta.phone,
-        address: meta.address,
-        guests: parseInt(meta.guests, 10),
+          full_name: meta.fullname,
+          phone: meta.phone,
+          address: meta.address,
+          guests: parseInt(meta.guests, 10),
 
-        total_price: totalPrice,
+          total_price: totalPrice,
 
-        // payment tracking
-        payment_method: "card",
-        stripe_session_id: session.id,
-        stripe_payment_intent_id: session.payment_intent ?? null,
-        payment_status: "PAID",
-        amount_paid: totalPrice,
-        paid_at: new Date(),
-        // invoice_number: `INV-${new Date().getFullYear()}-${String(session.id).slice(-8).toUpperCase()}`, // opsionale
-      },
-    });
+          // payment tracking
+          payment_method: "card",
+          stripe_session_id: session.id,
+          stripe_payment_intent_id: session.payment_intent ?? null,
+          payment_status: "PAID",
+          amount_paid: totalPrice,
+          paid_at: new Date(),
+          // invoice_number: `INV-${new Date().getFullYear()}-${String(session.id).slice(-8).toUpperCase()}`, // opsionale
+        },
+      });
+    } catch (error) {
+      if (isOverlapError(error)) {
+        console.error("❌ Overlap prevented by DB constraint");
+        return NextResponse.json({ message: "No available room found" });
+      }
+      throw error;
+    }
     // Create a padded invoice number like INV-2026-000123.
     const year = new Date().getFullYear();
     const invoiceNumber = `INV-${year}-${String(created.id).padStart(6, "0")}`;

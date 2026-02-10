@@ -4,6 +4,20 @@ import { logActivity } from "../../../../../lib/activityLogger";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 
+// Convert YYYY-MM-DD to a UTC midnight Date for day-precision comparisons.
+function parseDateOnlyToUTC(dateStr) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d));
+}
+
+function isOverlapError(error) {
+  return (
+    error?.code === "23P01" ||
+    error?.message?.includes("violates exclusion constraint") ||
+    error?.meta?.cause?.includes?.("exclusion constraint")
+  );
+}
+
 // Handle PATCH requests for this route.
 export async function PATCH(req, context) {
   try {
@@ -12,9 +26,6 @@ export async function PATCH(req, context) {
     const session = await getServerSession(authOptions);
     const performedBy = session?.user?.email ?? "system";
 
-    // Normalize today/start to date-only for "past" checks.
-    const today = new Date().setHours(0, 0, 0, 0);
-    const start = new Date().setHours(0, 0, 0, 0);
     const body = await req.json();
 
     if (body.status && Object.keys(body).length === 1) {
@@ -54,6 +65,15 @@ export async function PATCH(req, context) {
         { status: 400 },
       );
     }
+    const start = parseDateOnlyToUTC(startDate);
+    const end = parseDateOnlyToUTC(endDate);
+    const today = parseDateOnlyToUTC(new Date().toISOString().slice(0, 10));
+    if (end <= start) {
+      return NextResponse.json(
+        { error: "Check-out must be after check-in" },
+        { status: 400 },
+      );
+    }
     if (start < today) {
       return NextResponse.json(
         { error: "Cannot create or edit reservation in the past" },
@@ -84,17 +104,23 @@ export async function PATCH(req, context) {
     if (isTypeChanged || isDatesChanged) {
       const rooms = await prisma.rooms.findMany({
         where: { type },
-        include: { reservations: true },
+        include: {
+          reservations: { where: { cancelled_at: null, admin_hidden: false } },
+        },
       });
 
       // Find any room without overlap in the new date range.
       const availableRoom = rooms.find((room) => {
+        if (room.status === "out_of_order") return false;
         const conflict = room.reservations.some((reservation) => {
           if (reservation.id === existing.id) return false;
-          return (
-            new Date(startDate) < new Date(reservation.end_date) &&
-            new Date(endDate) > new Date(reservation.start_date)
+          const rStart = parseDateOnlyToUTC(
+            reservation.start_date.toISOString().slice(0, 10),
           );
+          const rEnd = parseDateOnlyToUTC(
+            reservation.end_date.toISOString().slice(0, 10),
+          );
+          return start < rEnd && end > rStart;
         });
         return !conflict;
       });
@@ -118,8 +144,8 @@ export async function PATCH(req, context) {
         address,
         // Coerce numeric and date fields before update.
         guests: Number(guests),
-        start_date: new Date(startDate),
-        end_date: new Date(endDate),
+        start_date: start,
+        end_date: end,
         total_price: parseFloat(total_price),
       },
       include: {
@@ -138,6 +164,12 @@ export async function PATCH(req, context) {
     return NextResponse.json(updated);
   } catch (error) {
     console.error("❌ Error updating reservation:", error);
+    if (isOverlapError(error)) {
+      return NextResponse.json(
+        { error: "No rooms available for the selected dates" },
+        { status: 409 },
+      );
+    }
     return NextResponse.json(
       { error: "Failed to update reservation", details: error.message },
       { status: 500 },

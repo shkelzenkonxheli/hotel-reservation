@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 
@@ -48,6 +48,8 @@ const HEADER_HEIGHT = 64;
 
 export default function Dashboard() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const reservationId = searchParams.get("reservationId");
   const { data: session, status } = useSession();
 
   const [activeTab, setActiveTab] = useState(
@@ -75,28 +77,7 @@ export default function Dashboard() {
     );
   }, [collapsed]);
 
-  useEffect(() => {
-    if (status === "loading") return;
-
-    if (!session?.user) {
-      router.push("/login");
-    } else if (session.user.role === "client") {
-      alert("You dont have permission to access dashboard");
-      router.push("/");
-    }
-  }, [session, status, router]);
-
-  if (status === "loading") {
-    return (
-      <Box className="flex justify-center items-center h-screen">
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (!session?.user) return null;
-
-  const user = session.user;
+  const user = session?.user ?? null;
   const tabs = DASHBOARD_TABS.map((t) => ({
     ...t,
     icon:
@@ -118,22 +99,37 @@ export default function Dashboard() {
   }));
 
   const allowedTabs =
-    user.role === "admin"
+    user?.role === "admin"
       ? tabs.map((t) => t.key)
-      : user.allowed_tabs && user.allowed_tabs.length > 0
+      : user?.allowed_tabs && user.allowed_tabs.length > 0
         ? user.allowed_tabs
         : [];
 
   const visibleTabs = tabs.filter((t) => allowedTabs.includes(t.key));
 
   useEffect(() => {
-    if (visibleTabs.length === 0) return;
+    if (status === "loading") return;
+
+    if (!session?.user) {
+      router.push("/login");
+    } else if (session.user.role === "client") {
+      alert("You dont have permission to access dashboard");
+      router.push("/");
+    }
+  }, [session, status, router]);
+
+  useEffect(() => {
+    if (!user || visibleTabs.length === 0) return;
+    if (reservationId && visibleTabs.find((t) => t.key === "reservations")) {
+      setActiveTab("reservations");
+      return;
+    }
     if (!visibleTabs.find((t) => t.key === activeTab)) {
       setActiveTab(visibleTabs[0].key);
     }
-  }, [visibleTabs, activeTab]);
+  }, [visibleTabs, activeTab, reservationId]);
   useEffect(() => {
-    if (!visibleTabs.length) return;
+    if (!user || !visibleTabs.length) return;
 
     const allowedKeys = visibleTabs.map((t) => t.key);
 
@@ -142,6 +138,16 @@ export default function Dashboard() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.role, JSON.stringify(user?.allowed_tabs)]);
+
+  if (status === "loading") {
+    return (
+      <Box className="flex justify-center items-center h-screen">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (!session?.user) return null;
 
   const drawer = (
     <Box
@@ -167,7 +173,7 @@ export default function Dashboard() {
         }}
       >
         <Avatar
-          src={"/Profile.jpg"} // fallback image
+          src={user?.avatar_url || undefined}
           sx={{ width: 36, height: 36 }}
           component={Link}
           href="/profile"

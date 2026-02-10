@@ -20,6 +20,7 @@ export async function PATCH(req) {
         name: body.name,
         phone: body.phone,
         address: body.address,
+        avatar_url: body.avatar_url ?? undefined,
       },
     });
 

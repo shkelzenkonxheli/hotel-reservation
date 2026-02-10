@@ -50,6 +50,7 @@ export const authOptions = {
         token.allowed_tabs = dbUser.allowed_tabs || [];
         token.phone = dbUser.phone;
         token.address = dbUser.address;
+        token.avatar_url = dbUser.avatar_url || null;
         token.email_verified = dbUser.email_verified ?? false;
       }
 
@@ -64,6 +65,7 @@ export const authOptions = {
       session.user.phone = token.phone;
       session.user.address = token.address;
       session.user.allowed_tabs = token.allowed_tabs || [];
+      session.user.avatar_url = token.avatar_url || null;
       session.user.email_verified = token.email_verified ?? false;
       return session;
     },

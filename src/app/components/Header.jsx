@@ -341,6 +341,7 @@ export default function Header() {
                       fontWeight: 700,
                       fontSize: 13,
                     }}
+                    src={user.avatar_url || undefined}
                   >
                     {(user.name || user.email || "?").slice(0, 1).toUpperCase()}
                   </Avatar>

@@ -38,6 +38,8 @@ export default function ProfilePage() {
   });
 
   const [hasChanged, setHasChanged] = React.useState(false);
+  const [avatarUrl, setAvatarUrl] = React.useState("");
+  const [uploadingAvatar, setUploadingAvatar] = React.useState(false);
 
   React.useEffect(() => {
     if (session?.user) {
@@ -47,6 +49,7 @@ export default function ProfilePage() {
         address: session.user.address || "",
         email: session.user.email || "",
       });
+      setAvatarUrl(session.user.avatar_url || "");
       setHasChanged(false);
     }
   }, [session]);
@@ -58,11 +61,38 @@ export default function ProfilePage() {
     setHasChanged(true);
   };
 
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      setUploadingAvatar(true);
+      const res = await fetch("/api/profile/avatar", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Failed to upload avatar");
+        return;
+      }
+      setAvatarUrl(data.avatar_url || "");
+      await update({ avatar_url: data.avatar_url || "" });
+    } catch (error) {
+      console.error(error);
+      alert("Failed to upload avatar");
+    } finally {
+      setUploadingAvatar(false);
+      e.target.value = "";
+    }
+  };
+
   const handleSave = async () => {
     const res = await fetch("/api/profile/update", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify({ ...form, avatar_url: avatarUrl }),
     });
 
     if (res.ok) {
@@ -70,6 +100,7 @@ export default function ProfilePage() {
         name: form.name,
         phone: form.phone,
         address: form.address,
+        avatar_url: avatarUrl,
       });
       setOpenAlert(true);
       setHasChanged(false);
@@ -87,6 +118,7 @@ export default function ProfilePage() {
       address: session.user.address || "",
       email: session.user.email || "",
     });
+    setAvatarUrl(session.user.avatar_url || "");
 
     setHasChanged(false);
   };
@@ -149,7 +181,7 @@ export default function ProfilePage() {
                         fontSize: 32,
                         bgcolor: "primary.main",
                       }}
-                      src="/Profile.jpg"
+                      src={avatarUrl || undefined}
                     />
 
                     <Typography variant="h5" mt={1} fontWeight={700}>
@@ -175,6 +207,23 @@ export default function ProfilePage() {
                   </Box>
 
                   <Divider sx={{ mb: 3 }} />
+
+                  <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
+                    <Button
+                      variant="outlined"
+                      component="label"
+                      disabled={uploadingAvatar}
+                      sx={{ textTransform: "none", borderRadius: 2 }}
+                    >
+                      {uploadingAvatar ? "Uploading..." : "Change photo"}
+                      <input
+                        hidden
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAvatarChange}
+                      />
+                    </Button>
+                  </Box>
 
                   <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                     <TextField

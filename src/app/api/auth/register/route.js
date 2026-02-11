@@ -12,7 +12,7 @@ export async function POST(req) {
     if (!name || !email || !password) {
       return NextResponse.json(
         { message: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -20,7 +20,7 @@ export async function POST(req) {
     if (existingUser) {
       return NextResponse.json(
         { message: "User already exists" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -39,6 +39,7 @@ export async function POST(req) {
         email_verified: false,
         email_verification_token: verifyToken,
         email_verification_expires: expiresAt,
+        created_at: new Date(),
       },
     });
 
@@ -71,7 +72,7 @@ export async function POST(req) {
     console.error("Register error:", error);
     return NextResponse.json(
       { message: "Something went wrong" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

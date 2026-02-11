@@ -81,21 +81,21 @@ export default function Dashboard() {
   const tabs = DASHBOARD_TABS.map((t) => ({
     ...t,
     icon:
-      t.key === "overview"
-        ? <DashboardIcon />
-        : t.key === "rooms"
-          ? <MeetingRoomIcon />
-          : t.key === "reservations"
-            ? <BookOnlineIcon />
-            : t.key === "users"
-              ? <PeopleIcon />
-              : t.key === "manageRooms"
-                ? <BuildCircleIcon />
-                : t.key === "activityLogsTab"
-                  ? <HistoryIcon />
-                  : t.key === "permissions"
-                    ? <SecurityIcon />
-                    : null,
+      t.key === "overview" ? (
+        <DashboardIcon />
+      ) : t.key === "rooms" ? (
+        <MeetingRoomIcon />
+      ) : t.key === "reservations" ? (
+        <BookOnlineIcon />
+      ) : t.key === "users" ? (
+        <PeopleIcon />
+      ) : t.key === "manageRooms" ? (
+        <BuildCircleIcon />
+      ) : t.key === "activityLogsTab" ? (
+        <HistoryIcon />
+      ) : t.key === "permissions" ? (
+        <SecurityIcon />
+      ) : null,
   }));
 
   const allowedTabs =
@@ -185,7 +185,7 @@ export default function Dashboard() {
               {user.role === "admin" ? "Admin Panel" : "Worker Panel"}
             </Typography>
             <Typography variant="caption" color="#94a3b8">
-              {user.email}
+              {user.name}
             </Typography>
           </Box>
         ) : null}

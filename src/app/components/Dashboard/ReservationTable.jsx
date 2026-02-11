@@ -25,7 +25,7 @@ export default function ReservationTable({
 }) {
   return (
     <div className="overflow-x-auto admin-card">
-      <table className="admin-table">
+      <table className="admin-table min-w-[980px]">
         <thead>
           <tr>
             <th className="p-3 text-center">
@@ -78,11 +78,11 @@ export default function ReservationTable({
                 </IconButton>
               </td>
 
-              <td className="p-3 font-mono text-sm text-gray-700">
+              <td className="p-3 font-mono text-sm text-gray-700 whitespace-nowrap">
                 {r.reservation_code || "-"}
               </td>
 
-              <td className="p-3 font-medium text-gray-800">
+              <td className="p-3 font-medium text-gray-800 whitespace-nowrap">
                 {r.full_name || "-"}
               </td>
 

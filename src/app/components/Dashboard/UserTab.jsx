@@ -165,7 +165,7 @@ export default function UsersTab() {
         <EmptyState title="No users found" subtitle="Create a user to get started." />
       ) : (
         <SectionCard title="Staff">
-          <TableContainer component={Paper} elevation={0}>
+          <TableContainer component={Paper} elevation={0} sx={{ overflowX: "auto" }}>
             <Table className="admin-table">
               <TableHead>
               <TableRow>
@@ -204,7 +204,13 @@ export default function UsersTab() {
                       : "—"}
                   </TableCell>
                   <TableCell align="center">
-                    <Button
+                    <Box
+                      display="flex"
+                      justifyContent="center"
+                      gap={1}
+                      flexWrap="wrap"
+                    >
+                      <Button
                       variant="outlined"
                       size="small"
                       startIcon={<Edit />}
@@ -215,7 +221,7 @@ export default function UsersTab() {
                     >
                       Change Role
                     </Button>
-                    <Button
+                      <Button
                       variant="outlined"
                       size="small"
                       color="error"
@@ -225,6 +231,7 @@ export default function UsersTab() {
                     >
                       Delete
                     </Button>
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))}

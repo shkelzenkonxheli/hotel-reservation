@@ -148,6 +148,9 @@ export default function ProfilePage() {
               <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}>
                 <TabList
                   onChange={handleChangeTab}
+                  variant="scrollable"
+                  scrollButtons="auto"
+                  allowScrollButtonsMobile
                   sx={{
                     "& .MuiTabs-indicator": { display: "none" },
                     "& .MuiTab-root": {
@@ -259,12 +262,23 @@ export default function ProfilePage() {
                     />
                   </Box>
 
-                  <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: { xs: "column", sm: "row" },
+                      gap: 1.2,
+                      mt: 3,
+                    }}
+                  >
                     <Button
                       variant="contained"
                       onClick={handleSave}
                       disabled={!hasChanged}
-                      sx={{ borderRadius: 2, textTransform: "none" }}
+                      sx={{
+                        borderRadius: 2,
+                        textTransform: "none",
+                        width: { xs: "100%", sm: "auto" },
+                      }}
                     >
                       Save changes
                     </Button>
@@ -274,7 +288,11 @@ export default function ProfilePage() {
                       color="error"
                       onClick={handleCancel}
                       disabled={!hasChanged}
-                      sx={{ borderRadius: 2, textTransform: "none" }}
+                      sx={{
+                        borderRadius: 2,
+                        textTransform: "none",
+                        width: { xs: "100%", sm: "auto" },
+                      }}
                     >
                       Cancel
                     </Button>

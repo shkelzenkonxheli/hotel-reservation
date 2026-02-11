@@ -234,7 +234,13 @@ export default function RoomsTab() {
           gap={2}
         >
           {/* Date picker */}
-          <Box display="flex" alignItems="center" gap={2}>
+          <Box
+            display="flex"
+            alignItems={{ xs: "stretch", sm: "center" }}
+            flexDirection={{ xs: "column", sm: "row" }}
+            gap={1.2}
+            width={{ xs: "100%", sm: "auto" }}
+          >
             <Typography fontWeight="600" color="text.secondary">
               Date
             </Typography>
@@ -246,7 +252,7 @@ export default function RoomsTab() {
               onChange={(e) => setSelectedDate(e.target.value)}
               InputLabelProps={{ shrink: true }}
               sx={{
-                minWidth: 160,
+                minWidth: { xs: "100%", sm: 160 },
                 bgcolor: "white",
                 borderRadius: 2,
               }}
@@ -322,7 +328,7 @@ export default function RoomsTab() {
           >
             <Grid container spacing={2}>
               {apartments.map((room) => (
-                <Grid item xs={3} key={room.id}>
+                <Grid item xs={6} sm={4} md={3} key={room.id}>
                   <Tooltip
                     title={`${room.type} | ${room.current_status}`}
                     arrow
@@ -372,7 +378,7 @@ export default function RoomsTab() {
 
             <Grid container spacing={2}>
               {hotelRooms.map((room) => (
-                <Grid item xs={3} key={room.id}>
+                <Grid item xs={6} sm={4} md={3} key={room.id}>
                   <Tooltip
                     title={`${room.type} | ${room.current_status}`}
                     arrow
@@ -419,8 +425,10 @@ export default function RoomsTab() {
           <DialogTitle
             sx={{
               display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
               justifyContent: "space-between",
-              alignItems: "center",
+              alignItems: { xs: "stretch", sm: "center" },
+              gap: 1.2,
               pr: 6, // i jep hapësirë që X të mos afrohet te butoni
               position: "relative",
             }}
@@ -448,6 +456,7 @@ export default function RoomsTab() {
                 px: 2,
                 py: 0.5,
                 fontWeight: "600",
+                width: { xs: "100%", sm: "auto" },
                 "&:hover": {
                   borderColor:
                     selectedRoom.room.current_status === "out_of_order"
@@ -548,7 +557,7 @@ export default function RoomsTab() {
 
             {/* Calendar opcional – për TË GJITHA dhomat */}
             {showCalendar && (
-              <Box mt={2}>
+              <Box mt={2} sx={{ overflowX: "auto" }}>
                 <Calendar tileClassName={tileClassName} />
               </Box>
             )}

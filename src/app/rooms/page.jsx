@@ -206,8 +206,8 @@ export default function RoomsPage() {
       </PublicSection>
 
       {showDateInput && selectedRoom && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-          <div className="public-card p-6 w-[360px]">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50 p-3">
+          <div className="public-card p-4 md:p-6 w-full max-w-[420px]">
             <h3 className="text-lg font-semibold text-center">Select dates</h3>
 
             <Calendar
@@ -271,8 +271,8 @@ export default function RoomsPage() {
       )}
 
       {expandedRoom && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-          <div className="public-card p-6 max-w-lg w-full relative">
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-3">
+          <div className="public-card p-5 md:p-6 max-w-lg w-full relative">
             <button
               className="absolute top-3 right-3 text-slate-500"
               onClick={() => setExpandedRoom(null)}
@@ -293,7 +293,7 @@ export default function RoomsPage() {
 
       {galleryRoom && (
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
-          <div className="relative w-full max-w-4xl px-4">
+          <div className="relative w-full max-w-4xl px-3 md:px-4">
             <button
               className="absolute -top-10 right-0 text-white text-2xl"
               onClick={() => setGalleryRoom(null)}

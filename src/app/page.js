@@ -9,7 +9,7 @@ export default function Home() {
     <div className="public-page min-h-screen">
       {/* Hero */}
       <section
-        className="relative w-full h-[78vh] bg-cover bg-center"
+        className="relative w-full min-h-[70vh] md:h-[78vh] bg-cover bg-center"
         style={{ backgroundImage: "url('/hotel-images/hotelbg1.jpg')" }}
       >
         <div className="absolute inset-0 bg-black/50"></div>
@@ -50,9 +50,9 @@ export default function Home() {
             <PublicCard className="p-6">
               <h3 className="text-xl font-semibold mb-2">What you get</h3>
               <ul className="text-slate-600 space-y-2">
-                <li>• Premium bedding and soundproofed rooms</li>
-                <li>• High‑speed Wi‑Fi and smart workspace</li>
-                <li>• Private check‑in and concierge support</li>
+                <li>- Premium bedding and soundproofed rooms</li>
+                <li>- High-speed Wi-Fi and smart workspace</li>
+                <li>- Private check-in and concierge support</li>
               </ul>
             </PublicCard>
           </div>

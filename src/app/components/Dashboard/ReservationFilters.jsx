@@ -23,24 +23,33 @@ export default function ReservationFilters({
         display: "flex",
         flexWrap: "wrap",
         gap: 2,
-        alignItems: "center",
+        alignItems: { xs: "stretch", md: "center" },
         justifyContent: "space-between",
         mb: 3,
         p: 2,
         backgroundColor: "var(--admin-surface)",
+        border: "1px solid var(--admin-border)",
+        borderRadius: 2,
       }}
     >
-      <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+      <Box
+        sx={{
+          display: "flex",
+          gap: 2,
+          flexWrap: "wrap",
+          width: { xs: "100%", md: "auto" },
+        }}
+      >
         <TextField
           label="Search (Name or Email)"
           variant="outlined"
           size="small"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          sx={{ minWidth: 220 }}
+          sx={{ minWidth: { xs: "100%", sm: 220 }, flex: 1 }}
         />
 
-        <FormControl size="small" sx={{ minWidth: 140 }}>
+        <FormControl size="small" sx={{ minWidth: { xs: "100%", sm: 140 } }}>
           <InputLabel>Status</InputLabel>
           <Select
             value={statusFilter}
@@ -55,7 +64,7 @@ export default function ReservationFilters({
           </Select>
         </FormControl>
 
-        <FormControl size="small" sx={{ minWidth: 140 }}>
+        <FormControl size="small" sx={{ minWidth: { xs: "100%", sm: 140 } }}>
           <InputLabel>Type</InputLabel>
           <Select
             value={typeFilter}
@@ -72,7 +81,12 @@ export default function ReservationFilters({
       <Button
         variant="contained"
         color="primary"
-        sx={{ borderRadius: 2, fontWeight: "bold" }}
+        sx={{
+          borderRadius: 2,
+          fontWeight: "bold",
+          width: { xs: "100%", md: "auto" },
+          minHeight: 40,
+        }}
         onClick={onAddNew}
       >
         + Add New

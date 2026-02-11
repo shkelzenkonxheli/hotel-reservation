@@ -384,8 +384,10 @@ export default function ReservationsTab() {
         <Box
           sx={{
             display: "flex",
-            alignItems: "center",
+            flexDirection: { xs: "column", sm: "row" },
+            alignItems: { xs: "stretch", sm: "center" },
             justifyContent: "space-between",
+            gap: 1.2,
             mb: 2,
             p: 1.5,
             borderRadius: 2,
@@ -396,7 +398,12 @@ export default function ReservationsTab() {
           <Typography fontWeight={600}>
             Selected: {selectedIds.length}
           </Typography>
-          <Button color="error" variant="contained" onClick={handleBulkDelete}>
+          <Button
+            color="error"
+            variant="contained"
+            onClick={handleBulkDelete}
+            sx={{ width: { xs: "100%", sm: "auto" } }}
+          >
             Delete Selected
           </Button>
         </Box>

@@ -97,7 +97,13 @@ export default function activityLogTab() {
         title="Activity Log"
         subtitle="Audit trail of system actions."
         actions={
-          <Box display="flex" gap={2} alignItems="center">
+          <Box
+            display="flex"
+            gap={1.2}
+            alignItems="center"
+            flexWrap="wrap"
+            justifyContent="flex-end"
+          >
             <FormControl size="small" sx={{ minWidth: 180 }}>
               <InputLabel>Action</InputLabel>
               <Select
@@ -118,6 +124,7 @@ export default function activityLogTab() {
                 variant="contained"
                 onClick={handleBulkDelete}
                 startIcon={<Delete />}
+                sx={{ width: { xs: "100%", sm: "auto" } }}
               >
                 Delete ({selectedIds.length})
               </Button>
@@ -130,7 +137,7 @@ export default function activityLogTab() {
         <EmptyState title="No activity logs found" />
       ) : (
         <SectionCard title="Recent activity">
-          <Paper elevation={0}>
+          <Paper elevation={0} sx={{ overflowX: "auto" }}>
             <Table className="admin-table">
               <TableHead>
               <TableRow>

@@ -2,10 +2,9 @@
 
 import { useBooking } from "@/context/BookingContext";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
-  CardContent,
   Typography,
   TextField,
   Button,
@@ -191,7 +190,7 @@ export default function CheckoutBooking() {
         </Typography>
         <div className="flex items-center justify-between text-sm text-slate-600">
           <span>
-            EUR {nightlyRate.toFixed(2)} � {nights} nights
+            EUR {nightlyRate.toFixed(2)} x {nights} nights
           </span>
           <span className="font-semibold text-slate-900">
             EUR {(nightlyRate * nights).toFixed(2)}
@@ -211,7 +210,7 @@ export default function CheckoutBooking() {
       </div>
 
       <p className="mt-4 text-xs text-slate-500">
-        Secure checkout � your details are protected.
+        Secure checkout. Your details are protected.
       </p>
     </PublicCard>
   );

@@ -133,19 +133,27 @@ export default function ManageRoomsTab() {
 
       {!onlyWithPhotos && (
         <SectionCard title="Filters">
-          <Box display="flex" gap={2} flexWrap="wrap" alignItems="center">
+          <Box
+            display="flex"
+            gap={2}
+            flexWrap="wrap"
+            alignItems="center"
+            justifyContent="space-between"
+          >
             <TextField
               label="Search rooms..."
               variant="outlined"
               size="small"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              sx={{ minWidth: { xs: "100%", sm: 220 } }}
             />
 
             <Select
               value={filterRoomType}
               onChange={(e) => setFilterRoomType(e.target.value)}
               size="small"
+              sx={{ minWidth: { xs: "100%", sm: 180 } }}
             >
               {roomTypeOptions.map((type) => (
                 <MenuItem key={type} value={type}>
@@ -158,13 +166,18 @@ export default function ManageRoomsTab() {
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
               size="small"
+              sx={{ minWidth: { xs: "100%", sm: 140 } }}
             >
               <MenuItem value="all">All Types</MenuItem>
               <MenuItem value="hotel">Hotel</MenuItem>
               <MenuItem value="apartment">Apartment</MenuItem>
             </Select>
 
-            <Button variant="contained" onClick={handleAdd}>
+            <Button
+              variant="contained"
+              onClick={handleAdd}
+              sx={{ width: { xs: "100%", sm: "auto" } }}
+            >
               Add Room
             </Button>
           </Box>
@@ -182,7 +195,7 @@ export default function ManageRoomsTab() {
       ) : (
         /* ✅ VIEW 2: Rooms table (CRUD) */
         <SectionCard title="Rooms">
-          <TableContainer component={Paper} elevation={0}>
+          <TableContainer component={Paper} elevation={0} sx={{ overflowX: "auto" }}>
             <Table className="admin-table">
               <TableHead>
               <TableRow>
@@ -210,26 +223,29 @@ export default function ManageRoomsTab() {
                   <TableCell>{room.description?.slice(0, 60) || "—"}</TableCell>
 
                   <TableCell align="center">
-                    <Button
+                    <Box display="flex" gap={1} justifyContent="center" flexWrap="wrap">
+                      <Button
                       variant="outlined"
                       size="small"
                       color="primary"
                       onClick={() => handleEdit(room)}
-                      sx={{ mr: 1 }}
+                      sx={{ minWidth: 92 }}
                     >
                       Edit
                     </Button>
 
-                    <Button
+                      <Button
                       variant="outlined"
                       size="small"
                       color="error"
                       onClick={() =>
                         setDeleteDialog({ open: true, roomId: room.id })
                       }
+                      sx={{ minWidth: 92 }}
                     >
                       Delete
                     </Button>
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))}

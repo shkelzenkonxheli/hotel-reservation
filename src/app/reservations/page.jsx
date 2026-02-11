@@ -229,6 +229,9 @@ export default function ReservationsPage() {
           <Tabs
             value={tab}
             onChange={(_, v) => setTab(v)}
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
             sx={{
               mb: 3,
               "& .MuiTabs-indicator": { display: "none" },
@@ -332,10 +335,10 @@ export default function ReservationsPage() {
 
                       <Box sx={{ flexGrow: 1, p: 2.2 }}>
                         <Stack
-                          direction="row"
+                          direction={{ xs: "column", sm: "row" }}
                           justifyContent="space-between"
                           spacing={2}
-                          alignItems="flex-start"
+                          alignItems={{ xs: "stretch", sm: "flex-start" }}
                         >
                           <Box>
                             <Chip
@@ -392,7 +395,13 @@ export default function ReservationsPage() {
                             </Stack>
                           </Box>
 
-                          <Box sx={{ textAlign: "right", minWidth: 160 }}>
+                          <Box
+                            sx={{
+                              textAlign: { xs: "left", sm: "right" },
+                              minWidth: { xs: 0, sm: 160 },
+                              width: { xs: "100%", sm: "auto" },
+                            }}
+                          >
                             <Typography variant="body2" color="text.secondary">
                               Total
                             </Typography>
@@ -409,6 +418,7 @@ export default function ReservationsPage() {
                                 borderRadius: 999,
                                 textTransform: "none",
                                 fontWeight: 800,
+                                width: { xs: "100%", sm: "auto" },
                               }}
                             >
                               View details
@@ -425,6 +435,7 @@ export default function ReservationsPage() {
                                 borderRadius: 999,
                                 textTransform: "none",
                                 fontWeight: 800,
+                                width: { xs: "100%", sm: "auto" },
                               }}
                             >
                               Cancel
@@ -439,6 +450,7 @@ export default function ReservationsPage() {
                                 borderRadius: 999,
                                 textTransform: "none",
                                 fontWeight: 800,
+                                width: { xs: "100%", sm: "auto" },
                               }}
                             >
                               Delete

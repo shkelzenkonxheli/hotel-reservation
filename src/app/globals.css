@@ -162,6 +162,36 @@ body {
   background: rgba(14, 165, 233, 0.12);
   color: #0369a1;
 }
+
+@media (max-width: 1024px) {
+  .public-container {
+    padding: 0 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-page {
+    gap: 12px;
+  }
+  .admin-card-header {
+    padding: 14px 14px 0 14px;
+  }
+  .admin-card-body {
+    padding: 14px;
+  }
+  .admin-table {
+    min-width: 720px;
+  }
+  .public-container {
+    padding: 0 14px;
+  }
+  .public-section {
+    padding: 42px 0;
+  }
+  .public-button {
+    min-height: 44px;
+  }
+}
 .booked-day {
   background-color: #ef4444 !important; /* red */
   color: white !important;
@@ -174,11 +204,13 @@ body {
   border-radius: 20px !important;
 }
 .checkout-day {
-  background-color: #818cf8 !important; /* purple/indigo */
+  background-color: #818cf8 !important; /* indigo */
   color: white !important;
   border-radius: 20px !important;
   border: 1px solid #4f46e5 !important;
-}.disabled-day {
+}
+
+.disabled-day {
   background-color: #e5e7eb !important;
   color: #9ca3af !important;
   border-radius: 20px !important;

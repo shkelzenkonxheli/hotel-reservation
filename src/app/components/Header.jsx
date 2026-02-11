@@ -18,6 +18,7 @@ import {
   Avatar,
   Tooltip,
 } from "@mui/material";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -33,6 +34,7 @@ export default function Header() {
   const user = session?.user;
   const router = useRouter();
   const pathname = usePathname();
+  const isMobileView = useMediaQuery("(max-width:767px)");
 
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [alertsAnchor, setAlertsAnchor] = useState(null);
@@ -237,7 +239,7 @@ export default function Header() {
 
               <Menu
                 anchorEl={alertsAnchor}
-                open={Boolean(alertsAnchor)}
+                open={Boolean(alertsAnchor) && !isMobileView}
                 onClose={closeAlerts}
                 PaperProps={{
                   sx: {
@@ -437,22 +439,119 @@ export default function Header() {
         </Box>
 
         {/* MOBILE MENU BUTTON */}
-        <IconButton
-          color="inherit"
-          edge="end"
-          onClick={openMenu}
-          className="md:hidden"
+        <Box
           sx={{
-            color: "#0f172a",
-            border: "1px solid #e2e8f0",
-            borderRadius: 2,
-            width: 40,
-            height: 40,
-            "&:hover": { backgroundColor: "#f1f5f9" },
+            display: { xs: "flex", md: "none" },
+            alignItems: "center",
+            gap: 1,
           }}
         >
-          <MenuIcon />
-        </IconButton>
+          {isClient && user && user.role !== "client" && (
+            <>
+              <Tooltip title="Notifications">
+                <IconButton
+                  onClick={openAlerts}
+                  sx={{
+                    color: "#0f172a",
+                    border: "1px solid #e2e8f0",
+                    borderRadius: 2,
+                    width: 40,
+                    height: 40,
+                    "&:hover": { backgroundColor: "#f1f5f9" },
+                  }}
+                >
+                  <Badge badgeContent={unreadCount} color="error" overlap="circular">
+                    <NotificationsIcon sx={{ fontSize: 20 }} />
+                  </Badge>
+                </IconButton>
+              </Tooltip>
+
+              <Menu
+                anchorEl={alertsAnchor}
+                open={Boolean(alertsAnchor) && isMobileView}
+                onClose={closeAlerts}
+                PaperProps={{
+                  sx: {
+                    borderRadius: 2,
+                    mt: 1,
+                    minWidth: 300,
+                    maxWidth: "92vw",
+                    boxShadow: "0 8px 24px rgba(15,23,42,0.12)",
+                  },
+                }}
+              >
+                <Box sx={{ p: 2, width: { xs: 280, sm: 320 } }}>
+                  <Typography variant="subtitle1" fontWeight="bold" mb={1}>
+                    Housekeeping Alerts
+                  </Typography>
+                  <Typography>Checkin Today: {summary?.checkin_today ?? 0}</Typography>
+                  <Typography>Checkouts Today: {summary?.checkout_today ?? 0}</Typography>
+                  <Typography>Needs Cleaning: {summary?.needs_cleaning ?? 0}</Typography>
+                  <Typography>Out of Order: {summary?.out_of_order ?? 0}</Typography>
+
+                  <Divider sx={{ my: 1.5 }} />
+
+                  <Typography variant="subtitle1" fontWeight="bold" mb={1}>
+                    Reservation Notifications
+                  </Typography>
+
+                  {notifications.length === 0 ? (
+                    <Typography variant="body2" color="text.secondary">
+                      No notifications
+                    </Typography>
+                  ) : (
+                    <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                      {notifications.slice(0, 6).map((n) => (
+                        <Box
+                          key={n.id}
+                          sx={{
+                            p: 1,
+                            borderRadius: 2,
+                            bgcolor: n.is_read ? "transparent" : "rgba(212,163,115,0.18)",
+                            borderLeft: n.is_read ? "0px solid transparent" : "4px solid #d4a373",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => {
+                            closeAlerts();
+                            if (n.reservation_id) {
+                              router.push(`/dashboard?reservationId=${n.reservation_id}`);
+                            }
+                          }}
+                        >
+                          <Typography fontWeight={n.is_read ? 700 : 950} fontSize={14}>
+                            {n.title}
+                          </Typography>
+                          <Typography variant="body2" sx={{ lineHeight: 1.25 }}>
+                            {n.message}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {new Date(n.created_at).toLocaleString()}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
+                </Box>
+              </Menu>
+            </>
+          )}
+
+          <IconButton
+            color="inherit"
+            edge="end"
+            onClick={openMenu}
+            sx={{
+              color: "#0f172a",
+              border: "1px solid #e2e8f0",
+              borderRadius: 2,
+              width: 40,
+              height: 40,
+              "&:hover": { backgroundColor: "#f1f5f9" },
+            }}
+          >
+            <MenuIcon />
+          </IconButton>
+        </Box>
 
         {/* MOBILE DROPDOWN MENU */}
         <Menu

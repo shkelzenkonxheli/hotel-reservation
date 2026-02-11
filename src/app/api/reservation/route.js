@@ -106,8 +106,8 @@ export async function POST(request) {
     const canSetUserId =
       session?.user?.role === "admin" || session?.user?.role === "worker";
     const finalUserId = canSetUserId
-      ? userId ?? session?.user?.id ?? null
-      : session?.user?.id ?? null;
+      ? (userId ?? session?.user?.id ?? null)
+      : (session?.user?.id ?? null);
 
     const reservation = await prisma.reservations.create({
       data: {
@@ -179,19 +179,7 @@ export async function POST(request) {
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    if (process.env.NODE_ENV !== "production") {
-      try {
-        const dbInfo = await prisma.$queryRaw`
-          SELECT current_database() AS db,
-                 current_schema() AS schema,
-                 inet_server_addr() AS host,
-                 inet_server_port() AS port
-        `;
-        console.log("DB info:", dbInfo?.[0]);
-      } catch (e) {
-        console.warn("Failed to read DB info:", e?.message || e);
-      }
-    }
+
     const reservationId = Number(searchParams.get("reservation_id"));
     const listAll = searchParams.get("list");
     const userId = searchParams.get("user_id");
@@ -286,10 +274,7 @@ export async function GET(request) {
           const rEnd = parseDateOnlyToUTC(
             res.end_date.toISOString().slice(0, 10),
           );
-          return (
-            start < rEnd &&
-            end > rStart
-          );
+          return start < rEnd && end > rStart;
         });
         return !conflict;
       });

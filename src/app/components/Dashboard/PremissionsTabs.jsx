@@ -1,39 +1,52 @@
 "use client";
+
 import { useEffect, useMemo, useState } from "react";
 import {
-  Box,
-  Typography,
-  Paper,
-  List,
-  ListItemButton,
-  ListItemText,
-  Divider,
-  FormGroup,
-  FormControlLabel,
-  Checkbox,
-  Button,
-  TextField,
-  Chip,
-  Avatar,
-  Stack,
-  Skeleton,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Alert,
+  Box,
+  Button,
+  Chip,
+  Collapse,
+  Paper,
+  Typography,
 } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import { DASHBOARD_TABS } from "@/lib/dashboardTabs";
 import PageHeader from "./ui/PageHeader";
+import StaffList from "./Permissions/StaffList";
+import StaffProfileHeader from "./Permissions/StaffProfileHeader";
+import EmploymentForm from "./Permissions/EmploymentForm";
+import PermissionsGrid from "./Permissions/PermissionsGrid";
 
 export default function PermissionsTab() {
+  const toDateInput = (value) => {
+    if (!value) return "";
+    if (typeof value === "string") return value.slice(0, 10);
+    return new Date(value).toISOString().slice(0, 10);
+  };
+
   const [users, setUsers] = useState([]);
   const [selected, setSelected] = useState(null);
-
   const [saving, setSaving] = useState(false);
   const [loadingUsers, setLoadingUsers] = useState(true);
-
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
+  const [mobileStaffOpen, setMobileStaffOpen] = useState(true);
+  const [showPermissions, setShowPermissions] = useState(false);
 
-  // për me dit a ka ndryshime para Save
   const [initialTabs, setInitialTabs] = useState([]);
+  const [initialProfile, setInitialProfile] = useState({
+    staff_position: "",
+    employment_start_date: "",
+    employment_status: "active",
+    salary_type: "monthly",
+    base_salary: "",
+  });
 
   useEffect(() => {
     (async () => {
@@ -41,7 +54,6 @@ export default function PermissionsTab() {
         setLoadingUsers(true);
         setError("");
 
-        // ✅ kujdes: /api/users jo /api/user
         const res = await fetch("/api/user?roles=admin,worker");
         const data = await res.json();
 
@@ -70,53 +82,105 @@ export default function PermissionsTab() {
 
   const pickUser = (u) => {
     setSelected(u);
+    setMobileStaffOpen(false);
     const tabs = Array.isArray(u.allowed_tabs) ? u.allowed_tabs : [];
     setInitialTabs(tabs);
+    setInitialProfile({
+      staff_position: u.staff_position || "",
+      employment_start_date: toDateInput(u.employment_start_date),
+      employment_status: u.employment_status || "active",
+      salary_type: u.salary_type || "monthly",
+      base_salary:
+        u.base_salary !== null && u.base_salary !== undefined
+          ? String(u.base_salary)
+          : "",
+    });
   };
 
   const toggleTab = (tabKey) => {
     if (!selected) return;
-
     const has = selectedTabs.includes(tabKey);
     const next = has
       ? selectedTabs.filter((t) => t !== tabKey)
       : [...selectedTabs, tabKey];
-
     setSelected({ ...selected, allowed_tabs: next });
   };
+
+  const updateSelectedField = (field, value) => {
+    if (!selected) return;
+    setSelected({ ...selected, [field]: value });
+  };
+
+  const selectedProfile = useMemo(
+    () => ({
+      staff_position: selected?.staff_position || "",
+      employment_start_date: toDateInput(selected?.employment_start_date),
+      employment_status: selected?.employment_status || "active",
+      salary_type: selected?.salary_type || "monthly",
+      base_salary:
+        selected?.base_salary !== null && selected?.base_salary !== undefined
+          ? String(selected.base_salary)
+          : "",
+    }),
+    [selected],
+  );
 
   const hasChanges = useMemo(() => {
     const a = [...new Set(initialTabs)].sort();
     const b = [...new Set(selectedTabs)].sort();
-    return JSON.stringify(a) !== JSON.stringify(b);
-  }, [initialTabs, selectedTabs]);
+    if (JSON.stringify(a) !== JSON.stringify(b)) return true;
+    return (
+      initialProfile.staff_position !== selectedProfile.staff_position ||
+      initialProfile.employment_start_date !==
+        selectedProfile.employment_start_date ||
+      initialProfile.employment_status !== selectedProfile.employment_status ||
+      initialProfile.salary_type !== selectedProfile.salary_type ||
+      initialProfile.base_salary !== selectedProfile.base_salary
+    );
+  }, [initialTabs, selectedTabs, initialProfile, selectedProfile]);
 
   const save = async () => {
     if (!selected) return;
-
     setSaving(true);
     setError("");
 
     try {
-      // ✅ kujdes: /api/users jo /api/user
       const res = await fetch(`/api/user/${selected.id}/allowed-tabs`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ allowed_tabs: selectedTabs }),
+        body: JSON.stringify({
+          allowed_tabs: selectedTabs,
+          staff_position: selected.staff_position || "",
+          employment_start_date: toDateInput(selected.employment_start_date) || null,
+          employment_status: selected.employment_status || "active",
+          salary_type: selected.salary_type || "monthly",
+          base_salary:
+            selected.base_salary === "" || selected.base_salary === null
+              ? null
+              : selected.base_salary,
+        }),
       });
 
       const updated = await res.json();
       if (!res.ok) throw new Error(updated?.error || "Failed to save");
 
-      // update list
       setUsers((prev) =>
         prev.map((u) => (u.id === updated.id ? { ...u, ...updated } : u)),
       );
 
-      // update selected + initial
       const mergedSelected = { ...selected, ...updated };
       setSelected(mergedSelected);
       setInitialTabs(updated.allowed_tabs || []);
+      setInitialProfile({
+        staff_position: updated.staff_position || "",
+        employment_start_date: toDateInput(updated.employment_start_date),
+        employment_status: updated.employment_status || "active",
+        salary_type: updated.salary_type || "monthly",
+        base_salary:
+          updated.base_salary !== null && updated.base_salary !== undefined
+            ? String(updated.base_salary)
+            : "",
+      });
     } catch (e) {
       setError(e.message || "Failed to save permissions");
     } finally {
@@ -128,257 +192,164 @@ export default function PermissionsTab() {
     <Box className="admin-page">
       <PageHeader
         title="Permissions"
-        subtitle="Manage dashboard access for staff."
+        subtitle="Manage staff access and employment profile in one place."
         actions={
           <Chip
             label={`${users.length} staff`}
-            sx={{ bgcolor: "rgba(212,163,115,0.25)", fontWeight: 700 }}
+            sx={{ bgcolor: "rgba(14,165,233,0.14)", fontWeight: 700 }}
           />
         }
       />
 
-      {error && (
-        <Box mt={2}>
+      {error ? (
+        <Box mt={1}>
           <Alert severity="error">{error}</Alert>
         </Box>
-      )}
+      ) : null}
+
+      <Box display={{ xs: "block", md: "none" }} mb={2}>
+        <Accordion
+          expanded={mobileStaffOpen}
+          onChange={(_, expanded) => setMobileStaffOpen(expanded)}
+          elevation={0}
+          sx={{ border: "1px solid #e2e8f0", borderRadius: 3 }}
+        >
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography fontWeight={800}>Staff</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 0 }}>
+            <StaffList
+              loadingUsers={loadingUsers}
+              filteredUsers={filteredUsers}
+              selectedId={selected?.id || null}
+              search={search}
+              onSearchChange={setSearch}
+              onPickUser={pickUser}
+            />
+          </AccordionDetails>
+        </Accordion>
+      </Box>
 
       <Box
         display="grid"
-        gridTemplateColumns={{ xs: "1fr", md: "360px 1fr" }}
-        gap={2}
+        gridTemplateColumns={{ xs: "1fr", md: "320px minmax(0,1fr)" }}
+        gap={{ xs: 2, md: 3 }}
       >
-        {/* LEFT: staff list */}
-        <Paper
-          sx={{
-            p: 1.5,
-            borderRadius: 3,
-            boxShadow: 1,
-          }}
-        >
-          <Box px={1} pb={1}>
-            <Typography fontWeight={800}>Staff</Typography>
-            <Typography variant="caption" color="text.secondary">
-              Select a user to edit permissions
-            </Typography>
+        <Box display={{ xs: "none", md: "block" }}>
+          <StaffList
+            loadingUsers={loadingUsers}
+            filteredUsers={filteredUsers}
+            selectedId={selected?.id || null}
+            search={search}
+            onSearchChange={setSearch}
+            onPickUser={pickUser}
+          />
+        </Box>
 
-            <TextField
-              size="small"
-              placeholder="Search by name, email, role..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              fullWidth
-              sx={{ mt: 1.2 }}
-            />
-          </Box>
-
-          <Divider />
-
-          <List dense sx={{ maxHeight: 420, overflow: "auto" }}>
-            {loadingUsers ? (
-              <Box p={1}>
-                {[...Array(6)].map((_, i) => (
-                  <Box key={i} py={1}>
-                    <Skeleton
-                      variant="rectangular"
-                      height={38}
-                      sx={{ borderRadius: 2 }}
-                    />
-                  </Box>
-                ))}
-              </Box>
-            ) : filteredUsers.length === 0 ? (
-              <Box p={2}>
-                <Typography variant="body2" color="text.secondary">
-                  No staff found.
-                </Typography>
-              </Box>
-            ) : (
-              filteredUsers.map((u) => (
-                <ListItemButton
-                  key={u.id}
-                  selected={selected?.id === u.id}
-                  onClick={() => pickUser(u)}
-                  sx={{
-                    borderRadius: 2,
-                    mx: 1,
-                    my: 0.5,
-                    "&.Mui-selected": {
-                      bgcolor: "rgba(54,73,88,0.12)",
-                    },
-                  }}
-                >
-                  <Avatar sx={{ width: 30, height: 30, mr: 1.2 }}>
-                    {(u.name || u.email || "?").slice(0, 1).toUpperCase()}
-                  </Avatar>
-                  <ListItemText
-                    primary={
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <Typography fontWeight={750} fontSize={14}>
-                          {u.name || u.email}
-                        </Typography>
-                        <Chip
-                          size="small"
-                          label={u.role}
-                          sx={{
-                            height: 20,
-                            fontSize: 11,
-                            fontWeight: 700,
-                            bgcolor:
-                              u.role === "admin"
-                                ? "rgba(59,130,246,0.18)"
-                                : "rgba(34,197,94,0.16)",
-                          }}
-                        />
-                      </Box>
-                    }
-                    secondary={
-                      <Typography variant="caption" color="text.secondary">
-                        {u.email}
-                      </Typography>
-                    }
-                  />
-                </ListItemButton>
-              ))
-            )}
-          </List>
-        </Paper>
-
-        {/* RIGHT: permissions panel */}
-        <Paper
-          sx={{
-            p: 2.2,
-            borderRadius: 3,
-            boxShadow: 1,
-          }}
-        >
+        <Box display="grid" gap={2.4}>
           {!selected ? (
-            <Box
+            <Paper
+              elevation={0}
               sx={{
-                height: "100%",
-                minHeight: 260,
+                border: "1px solid #e2e8f0",
+                borderRadius: 3,
+                minHeight: 320,
                 display: "grid",
                 placeItems: "center",
+                p: 3,
               }}
             >
               <Box textAlign="center">
                 <Typography fontWeight={800}>No user selected</Typography>
                 <Typography variant="body2" color="text.secondary" mt={0.5}>
-                  Pick a staff member from the left to edit allowed tabs.
+                  Select a staff member to edit employment details and access
+                  permissions.
                 </Typography>
               </Box>
-            </Box>
+            </Paper>
           ) : (
             <>
-              {/* Selected user header */}
-              <Box
+              <StaffProfileHeader selected={selected} />
+              <EmploymentForm
+                selected={selected}
+                toDateInput={toDateInput}
+                updateSelectedField={updateSelectedField}
+              />
+              <Paper
+                elevation={0}
                 sx={{
-                  p: 2,
+                  border: "1px solid #e2e8f0",
                   borderRadius: 3,
-                  bgcolor: "rgba(234,225,223,0.65)",
-                  border: "1px solid rgba(0,0,0,0.06)",
+                  p: 1.4,
                 }}
               >
-                <Box display="flex" alignItems="center" gap={1.5}>
-                  <Avatar sx={{ width: 44, height: 44 }}>
-                    {(selected.name || selected.email || "?")
-                      .slice(0, 1)
-                      .toUpperCase()}
-                  </Avatar>
-
-                  <Box flex={1}>
-                    <Typography fontWeight={900} lineHeight={1.1}>
-                      {selected.name || "No name"}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {selected.email}
-                    </Typography>
-                  </Box>
-
-                  <Chip
-                    label={selected.role}
-                    sx={{
-                      fontWeight: 800,
-                      bgcolor:
-                        selected.role === "admin"
-                          ? "rgba(59,130,246,0.18)"
-                          : "rgba(34,197,94,0.16)",
-                    }}
-                  />
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  gap={1}
+                >
+                  <Typography fontWeight={800}>Access Permissions</Typography>
+                  <Button
+                    size="small"
+                    variant="text"
+                    onClick={() => setShowPermissions((prev) => !prev)}
+                    startIcon={
+                      showPermissions ? (
+                        <KeyboardArrowDownIcon />
+                      ) : (
+                        <KeyboardArrowRightIcon />
+                      )
+                    }
+                    sx={{ textTransform: "none", fontWeight: 700 }}
+                  >
+                    {showPermissions ? "Hide" : "Show"}
+                  </Button>
                 </Box>
-
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  mt={1}
-                  display="block"
-                >
-                  Select which tabs this user can access.
-                </Typography>
-              </Box>
-
-              <Divider sx={{ my: 2 }} />
-
-              {/* Tabs grid */}
-              <Box
+                <Collapse in={showPermissions}>
+                  <Box mt={1.2}>
+                    <PermissionsGrid
+                      tabs={DASHBOARD_TABS}
+                      selectedTabs={selectedTabs}
+                      onToggle={toggleTab}
+                    />
+                  </Box>
+                </Collapse>
+              </Paper>
+              <Paper
+                elevation={0}
                 sx={{
-                  display: "grid",
-                  gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-                  gap: 0.5,
+                  border: "1px solid #e2e8f0",
+                  borderRadius: 3,
+                  p: 1.6,
+                  position: { md: "sticky" },
+                  bottom: { md: 16 },
+                  zIndex: 2,
+                  bgcolor: "white",
                 }}
               >
-                <FormGroup>
-                  {DASHBOARD_TABS.map((t) => (
-                    <FormControlLabel
-                      key={t.key}
-                      sx={{
-                        m: 0,
-                        px: 1,
-                        py: 0.6,
-                        borderRadius: 2,
-                        "&:hover": { bgcolor: "rgba(0,0,0,0.04)" },
-                      }}
-                      control={
-                        <Checkbox
-                          checked={selectedTabs.includes(t.key)}
-                          onChange={() => toggleTab(t.key)}
-                        />
-                      }
-                      label={
-                        <Typography fontWeight={650} fontSize={14}>
-                          {t.label}
-                        </Typography>
-                      }
-                    />
-                  ))}
-                </FormGroup>
-              </Box>
-
-              <Divider sx={{ my: 2 }} />
-
-              {/* Actions */}
-              <Box
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-                gap={2}
-              >
-                <Typography variant="caption" color="text.secondary">
-                  Selected: {selectedTabs.length} tab(s)
-                </Typography>
-
-                <Button
-                  variant="contained"
-                  onClick={save}
-                  disabled={saving || !hasChanges}
-                  sx={{ borderRadius: 2, fontWeight: 800 }}
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  gap={2}
                 >
-                  {saving ? "Saving..." : hasChanges ? "Save Changes" : "Saved"}
-                </Button>
-              </Box>
+                  <Typography variant="caption" color="text.secondary">
+                    Selected: {selectedTabs.length} permission(s)
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    onClick={save}
+                    disabled={saving || !hasChanges}
+                    sx={{ borderRadius: 2, fontWeight: 800, minWidth: 140 }}
+                  >
+                    {saving ? "Saving..." : hasChanges ? "Save Changes" : "Saved"}
+                  </Button>
+                </Box>
+              </Paper>
             </>
           )}
-        </Paper>
+        </Box>
       </Box>
     </Box>
   );

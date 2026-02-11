@@ -25,6 +25,12 @@ export async function GET(req) {
         role: true,
         allowed_tabs: true,
         created_at: true,
+        avatar_url: true,
+        staff_position: true,
+        employment_start_date: true,
+        employment_status: true,
+        salary_type: true,
+        base_salary: true,
       },
       orderBy: { id: "desc" },
     });

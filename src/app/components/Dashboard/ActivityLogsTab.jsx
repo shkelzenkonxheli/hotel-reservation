@@ -17,8 +17,8 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  useMediaQuery,
 } from "@mui/material";
-import HistoryIcon from "@mui/icons-material/History";
 import { Delete } from "@mui/icons-material";
 import { useMemo } from "react";
 import PageHeader from "./ui/PageHeader";
@@ -27,6 +27,7 @@ import StatusBadge from "./ui/StatusBadge";
 import EmptyState from "./ui/EmptyState";
 
 export default function activityLogTab() {
+  const isMobile = useMediaQuery("(max-width:900px)");
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState([]);
@@ -104,7 +105,7 @@ export default function activityLogTab() {
             flexWrap="wrap"
             justifyContent="flex-end"
           >
-            <FormControl size="small" sx={{ minWidth: 180 }}>
+            <FormControl size="small" sx={{ minWidth: { xs: "100%", sm: 180 } }}>
               <InputLabel>Action</InputLabel>
               <Select
                 label="Action"
@@ -137,65 +138,29 @@ export default function activityLogTab() {
         <EmptyState title="No activity logs found" />
       ) : (
         <SectionCard title="Recent activity">
-          <Paper elevation={0} sx={{ overflowX: "auto" }}>
-            <Table className="admin-table">
-              <TableHead>
-              <TableRow>
-                <TableCell padding="checkbox">
-                  <Tooltip title="Select all">
-                    <Checkbox
-                      indeterminate={
-                        selectedIds.length > 0 &&
-                        selectedIds.length < logs.length
-                      }
-                      checked={
-                        logs.length > 0 && selectedIds.length === logs.length
-                      }
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedIds(filteredLogs.map((l) => l.id));
-                        } else {
-                          setSelectedIds([]);
-                        }
-                      }}
-                    />
-                  </Tooltip>
-                </TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>User</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Action</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Entity</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Description</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }} align="center">
-                  Date
-                </TableCell>
-              </TableRow>
-            </TableHead>
-
-            <TableBody>
+          {isMobile ? (
+            <Box display="grid" gap={1.5}>
               {filteredLogs.map((log) => (
-                <TableRow
+                <Paper
                   key={log.id}
-                  hover
+                  elevation={0}
+                  sx={{ p: 1.5, border: "1px solid #e2e8f0", borderRadius: 2 }}
                 >
-                  <TableCell padding="checkbox">
+                  <Box display="flex" justifyContent="space-between" alignItems="flex-start" gap={1}>
+                    <Typography fontWeight={700}>{log.performed_by}</Typography>
                     <Checkbox
+                      size="small"
                       checked={selectedIds.includes(log.id)}
                       onChange={(e) => {
                         if (e.target.checked) {
                           setSelectedIds((prev) => [...prev, log.id]);
                         } else {
-                          setSelectedIds((prev) =>
-                            prev.filter((id) => id !== log.id)
-                          );
+                          setSelectedIds((prev) => prev.filter((id) => id !== log.id));
                         }
                       }}
                     />
-                  </TableCell>
-                  <TableCell>
-                    <Typography fontWeight={600}>{log.performed_by}</Typography>
-                  </TableCell>
-
-                  <TableCell>
+                  </Box>
+                  <Box display="flex" gap={1} flexWrap="wrap" mt={0.5}>
                     <StatusBadge
                       label={log.action}
                       tone={
@@ -208,19 +173,12 @@ export default function activityLogTab() {
                               : "neutral"
                       }
                     />
-                  </TableCell>
-
-                  <TableCell>
                     <StatusBadge label={log.entity} tone="neutral" />
-                  </TableCell>
-
-                  <TableCell>
-                    <Typography variant="body2">
-                      {log.description || "—"}
-                    </Typography>
-                  </TableCell>
-
-                  <TableCell align="center">
+                  </Box>
+                  <Typography variant="body2" color="text.secondary" mt={0.8}>
+                    {log.description || "—"}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" mt={0.8} display="block">
                     {new Date(log.created_at).toLocaleString("en-GB", {
                       day: "2-digit",
                       month: "short",
@@ -228,12 +186,106 @@ export default function activityLogTab() {
                       hour: "2-digit",
                       minute: "2-digit",
                     })}
-                  </TableCell>
-                </TableRow>
+                  </Typography>
+                </Paper>
               ))}
-            </TableBody>
-          </Table>
-          </Paper>
+            </Box>
+          ) : (
+            <Paper elevation={0} sx={{ overflowX: "auto" }}>
+              <Table className="admin-table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell padding="checkbox">
+                      <Tooltip title="Select all">
+                        <Checkbox
+                          indeterminate={
+                            selectedIds.length > 0 &&
+                            selectedIds.length < logs.length
+                          }
+                          checked={
+                            logs.length > 0 && selectedIds.length === logs.length
+                          }
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedIds(filteredLogs.map((l) => l.id));
+                            } else {
+                              setSelectedIds([]);
+                            }
+                          }}
+                        />
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>User</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>Action</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>Entity</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>Description</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }} align="center">
+                      Date
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+
+                <TableBody>
+                  {filteredLogs.map((log) => (
+                    <TableRow key={log.id} hover>
+                      <TableCell padding="checkbox">
+                        <Checkbox
+                          checked={selectedIds.includes(log.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedIds((prev) => [...prev, log.id]);
+                            } else {
+                              setSelectedIds((prev) =>
+                                prev.filter((id) => id !== log.id),
+                              );
+                            }
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Typography fontWeight={600}>{log.performed_by}</Typography>
+                      </TableCell>
+
+                      <TableCell>
+                        <StatusBadge
+                          label={log.action}
+                          tone={
+                            getActionColor(log.action) === "success"
+                              ? "success"
+                              : getActionColor(log.action) === "warning"
+                                ? "warning"
+                                : getActionColor(log.action) === "error"
+                                  ? "danger"
+                                  : "neutral"
+                          }
+                        />
+                      </TableCell>
+
+                      <TableCell>
+                        <StatusBadge label={log.entity} tone="neutral" />
+                      </TableCell>
+
+                      <TableCell>
+                        <Typography variant="body2">
+                          {log.description || "—"}
+                        </Typography>
+                      </TableCell>
+
+                      <TableCell align="center">
+                        {new Date(log.created_at).toLocaleString("en-GB", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Paper>
+          )}
         </SectionCard>
       )}
     </Box>

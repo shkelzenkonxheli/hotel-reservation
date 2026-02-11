@@ -24,12 +24,14 @@ import {
   DialogActions,
   FormControlLabel,
   Switch,
+  useMediaQuery,
 } from "@mui/material";
 import PageHeader from "./ui/PageHeader";
 import SectionCard from "./ui/SectionCard";
 import EmptyState from "./ui/EmptyState";
 
 export default function ManageRoomsTab() {
+  const isMobile = useMediaQuery("(max-width:900px)");
   const [loading, setLoading] = useState(true);
   const [rooms, setRooms] = useState([]);
 
@@ -195,71 +197,109 @@ export default function ManageRoomsTab() {
       ) : (
         /* ✅ VIEW 2: Rooms table (CRUD) */
         <SectionCard title="Rooms">
-          <TableContainer component={Paper} elevation={0} sx={{ overflowX: "auto" }}>
-            <Table className="admin-table">
-              <TableHead>
-              <TableRow>
-                <TableCell>Room #</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Type</TableCell>
-                <TableCell>Price (€)</TableCell>
-                <TableCell>Description</TableCell>
-                <TableCell align="center">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-
-            <TableBody>
+          {filteredRooms.length === 0 ? (
+            <EmptyState title="No rooms found" />
+          ) : isMobile ? (
+            <Box display="grid" gap={1.5}>
               {filteredRooms.map((room) => (
-                <TableRow
+                <Paper
                   key={room.id}
-                  hover
+                  elevation={0}
+                  sx={{ p: 1.5, border: "1px solid #e2e8f0", borderRadius: 2 }}
                 >
-                  <TableCell>{room.room_number}</TableCell>
-                  <TableCell>{room.name}</TableCell>
-                  <TableCell sx={{ textTransform: "capitalize" }}>
-                    {room.type}
-                  </TableCell>
-                  <TableCell>€{room.price}</TableCell>
-                  <TableCell>{room.description?.slice(0, 60) || "—"}</TableCell>
-
-                  <TableCell align="center">
-                    <Box display="flex" gap={1} justifyContent="center" flexWrap="wrap">
-                      <Button
+                  <Box display="flex" justifyContent="space-between" gap={1}>
+                    <Typography fontWeight={700}>#{room.room_number}</Typography>
+                    <Typography sx={{ textTransform: "capitalize" }} color="text.secondary">
+                      {room.type}
+                    </Typography>
+                  </Box>
+                  <Typography fontWeight={600} mt={0.4}>
+                    {room.name}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" mt={0.4}>
+                    €{room.price}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" mt={0.8}>
+                    {room.description?.slice(0, 90) || "—"}
+                  </Typography>
+                  <Box display="flex" gap={1} mt={1.2}>
+                    <Button
+                      fullWidth
                       variant="outlined"
                       size="small"
-                      color="primary"
                       onClick={() => handleEdit(room)}
-                      sx={{ minWidth: 92 }}
                     >
                       Edit
                     </Button>
-
-                      <Button
+                    <Button
+                      fullWidth
                       variant="outlined"
                       size="small"
                       color="error"
-                      onClick={() =>
-                        setDeleteDialog({ open: true, roomId: room.id })
-                      }
-                      sx={{ minWidth: 92 }}
+                      onClick={() => setDeleteDialog({ open: true, roomId: room.id })}
                     >
                       Delete
                     </Button>
-                    </Box>
-                  </TableCell>
-                </TableRow>
+                  </Box>
+                </Paper>
               ))}
+            </Box>
+          ) : (
+            <TableContainer component={Paper} elevation={0} sx={{ overflowX: "auto" }}>
+              <Table className="admin-table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Room #</TableCell>
+                    <TableCell>Name</TableCell>
+                    <TableCell>Type</TableCell>
+                    <TableCell>Price (€)</TableCell>
+                    <TableCell>Description</TableCell>
+                    <TableCell align="center">Actions</TableCell>
+                  </TableRow>
+                </TableHead>
 
-              {filteredRooms.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
-                    <EmptyState title="No rooms found" />
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-          </TableContainer>
+                <TableBody>
+                  {filteredRooms.map((room) => (
+                    <TableRow key={room.id} hover>
+                      <TableCell>{room.room_number}</TableCell>
+                      <TableCell>{room.name}</TableCell>
+                      <TableCell sx={{ textTransform: "capitalize" }}>
+                        {room.type}
+                      </TableCell>
+                      <TableCell>€{room.price}</TableCell>
+                      <TableCell>{room.description?.slice(0, 60) || "—"}</TableCell>
+
+                      <TableCell align="center">
+                        <Box display="flex" gap={1} justifyContent="center" flexWrap="wrap">
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            color="primary"
+                            onClick={() => handleEdit(room)}
+                            sx={{ minWidth: 92 }}
+                          >
+                            Edit
+                          </Button>
+
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            color="error"
+                            onClick={() =>
+                              setDeleteDialog({ open: true, roomId: room.id })
+                            }
+                            sx={{ minWidth: 92 }}
+                          >
+                            Delete
+                          </Button>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
         </SectionCard>
       )}
 

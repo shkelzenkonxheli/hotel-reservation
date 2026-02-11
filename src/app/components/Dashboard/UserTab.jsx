@@ -19,14 +19,16 @@ import {
   DialogActions,
   MenuItem,
   TextField,
+  useMediaQuery,
 } from "@mui/material";
-import { ManageAccounts, Edit, Delete } from "@mui/icons-material";
+import { Edit, Delete } from "@mui/icons-material";
 import PageHeader from "./ui/PageHeader";
 import SectionCard from "./ui/SectionCard";
 import StatusBadge from "./ui/StatusBadge";
 import EmptyState from "./ui/EmptyState";
 
 export default function UsersTab() {
+  const isMobile = useMediaQuery("(max-width:900px)");
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -155,7 +157,11 @@ export default function UsersTab() {
         title="Users"
         subtitle="Manage staff and access levels."
         actions={
-          <Button variant="contained" onClick={() => setAddOpen(true)}>
+          <Button
+            variant="contained"
+            onClick={() => setAddOpen(true)}
+            sx={{ width: { xs: "100%", sm: "auto" } }}
+          >
             + Add User
           </Button>
         }
@@ -165,34 +171,23 @@ export default function UsersTab() {
         <EmptyState title="No users found" subtitle="Create a user to get started." />
       ) : (
         <SectionCard title="Staff">
-          <TableContainer component={Paper} elevation={0} sx={{ overflowX: "auto" }}>
-            <Table className="admin-table">
-              <TableHead>
-              <TableRow>
-                <TableCell sx={{ fontWeight: "bold" }}>Name</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Email</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Role</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }} align="center">
-                  Created At
-                </TableCell>
-                <TableCell sx={{ fontWeight: "bold" }} align="center">
-                  Actions
-                </TableCell>
-              </TableRow>
-            </TableHead>
-
-            <TableBody>
+          {isMobile ? (
+            <Box display="grid" gap={1.5}>
               {users.map((u) => (
-                <TableRow
+                <Paper
                   key={u.id}
-                  hover
+                  elevation={0}
+                  sx={{ p: 1.5, border: "1px solid #e2e8f0", borderRadius: 2 }}
                 >
-                  <TableCell>{u.name}</TableCell>
-                  <TableCell>{u.email}</TableCell>
-                  <TableCell>
+                  <Box display="flex" justifyContent="space-between" gap={1}>
+                    <Typography fontWeight={700}>{u.name}</Typography>
                     <StatusBadge label={u.role} tone={getRoleTone(u.role)} />
-                  </TableCell>
-                  <TableCell align="center">
+                  </Box>
+                  <Typography variant="body2" color="text.secondary" mt={0.4}>
+                    {u.email}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" mt={0.6} display="block">
+                    Created:{" "}
                     {u.created_at
                       ? new Date(u.created_at).toLocaleString("en-GB", {
                           day: "2-digit",
@@ -202,15 +197,10 @@ export default function UsersTab() {
                           minute: "2-digit",
                         })
                       : "—"}
-                  </TableCell>
-                  <TableCell align="center">
-                    <Box
-                      display="flex"
-                      justifyContent="center"
-                      gap={1}
-                      flexWrap="wrap"
-                    >
-                      <Button
+                  </Typography>
+                  <Box display="flex" gap={1} mt={1.2}>
+                    <Button
+                      fullWidth
                       variant="outlined"
                       size="small"
                       startIcon={<Edit />}
@@ -221,7 +211,8 @@ export default function UsersTab() {
                     >
                       Change Role
                     </Button>
-                      <Button
+                    <Button
+                      fullWidth
                       variant="outlined"
                       size="small"
                       color="error"
@@ -231,13 +222,82 @@ export default function UsersTab() {
                     >
                       Delete
                     </Button>
-                    </Box>
-                  </TableCell>
-                </TableRow>
+                  </Box>
+                </Paper>
               ))}
-            </TableBody>
-          </Table>
-          </TableContainer>
+            </Box>
+          ) : (
+            <TableContainer component={Paper} elevation={0} sx={{ overflowX: "auto" }}>
+              <Table className="admin-table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: "bold" }}>Name</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>Email</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>Role</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }} align="center">
+                      Created At
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }} align="center">
+                      Actions
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+
+                <TableBody>
+                  {users.map((u) => (
+                    <TableRow key={u.id} hover>
+                      <TableCell>{u.name}</TableCell>
+                      <TableCell>{u.email}</TableCell>
+                      <TableCell>
+                        <StatusBadge label={u.role} tone={getRoleTone(u.role)} />
+                      </TableCell>
+                      <TableCell align="center">
+                        {u.created_at
+                          ? new Date(u.created_at).toLocaleString("en-GB", {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "—"}
+                      </TableCell>
+                      <TableCell align="center">
+                        <Box
+                          display="flex"
+                          justifyContent="center"
+                          gap={1}
+                          flexWrap="wrap"
+                        >
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<Edit />}
+                            onClick={() => {
+                              setSelectedUser(u);
+                              setNewRole(u.role);
+                            }}
+                          >
+                            Change Role
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            color="error"
+                            startIcon={<Delete />}
+                            disabled={u.role === "admin"}
+                            onClick={() => handleDeleteUser(u.id)}
+                          >
+                            Delete
+                          </Button>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
         </SectionCard>
       )}
 

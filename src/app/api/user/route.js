@@ -24,6 +24,7 @@ export async function GET(req) {
         email: true,
         role: true,
         allowed_tabs: true,
+        created_at: true,
       },
       orderBy: { id: "desc" },
     });

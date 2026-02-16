@@ -91,11 +91,23 @@ export default function RegisterPage() {
   };
 
   return (
-    <Box className="public-page min-h-screen">
+    <Box
+      className="public-page min-h-screen"
+      sx={{
+        backgroundImage:
+          "linear-gradient(135deg, rgba(15,23,42,0.62), rgba(15,23,42,0.42)), url('/hotel-images/hotelbg1.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
       <PublicSection className="pt-10">
         <PublicContainer>
           <div className="max-w-md mx-auto">
-            <PublicCard className="p-6 md:p-8">
+            <PublicCard
+              className="p-6 md:p-8"
+              style={{ backgroundColor: "rgba(255,255,255,0.96)" }}
+            >
               <Typography
                 variant="h5"
                 fontWeight="bold"

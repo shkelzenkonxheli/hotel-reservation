@@ -284,15 +284,31 @@ export default function ReservationsTab() {
   };
 
   function getBookingState(r) {
-    if (r.cancelled_at) return "CANCELLED";
+    const status = String(r?.status || "").toLowerCase();
+    if (r.cancelled_at || status === "cancelled") return "CANCELLED";
+    if (status === "completed") return "FINISHED";
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const toLocalYmd = (date) =>
+      `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+        2,
+        "0",
+      )}-${String(date.getDate()).padStart(2, "0")}`;
 
-    const end = new Date(r.end_date);
-    end.setHours(0, 0, 0, 0);
+    const extractYmd = (value) => {
+      const datePart = String(value || "").slice(0, 10);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+        return datePart;
+      }
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return "";
+      return toLocalYmd(d);
+    };
 
-    if (end < today) return "FINISHED";
+    const todayYmd = toLocalYmd(new Date());
+    const endYmd = extractYmd(r.end_date);
+
+    // Checkout day and older reservations are treated as finished.
+    if (endYmd && endYmd <= todayYmd) return "FINISHED";
 
     return "ACTIVE";
   }

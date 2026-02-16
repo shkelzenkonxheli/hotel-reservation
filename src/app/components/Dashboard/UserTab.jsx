@@ -82,7 +82,7 @@ export default function UsersTab() {
       if (res.ok) {
         const updated = await res.json();
         setUsers((prev) =>
-          prev.map((u) => (u.id === updated.id ? updated : u))
+          prev.map((u) => (u.id === updated.id ? updated : u)),
         );
         setSelectedUser(null);
       } else {
@@ -120,7 +120,7 @@ export default function UsersTab() {
   }
   async function handleDeleteUser(userId) {
     const confirm = window.confirm(
-      "Are you sure you want to delete this user?"
+      "Are you sure you want to delete this user?",
     );
     if (!confirm) return;
 
@@ -168,9 +168,12 @@ export default function UsersTab() {
       />
 
       {users.length === 0 ? (
-        <EmptyState title="No users found" subtitle="Create a user to get started." />
+        <EmptyState
+          title="No users found"
+          subtitle="Create a user to get started."
+        />
       ) : (
-        <SectionCard title="Staff">
+        <SectionCard title="Users">
           {isMobile ? (
             <Box display="grid" gap={1.5}>
               {users.map((u) => (
@@ -186,7 +189,12 @@ export default function UsersTab() {
                   <Typography variant="body2" color="text.secondary" mt={0.4}>
                     {u.email}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary" mt={0.6} display="block">
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    mt={0.6}
+                    display="block"
+                  >
                     Created:{" "}
                     {u.created_at
                       ? new Date(u.created_at).toLocaleString("en-GB", {
@@ -227,7 +235,11 @@ export default function UsersTab() {
               ))}
             </Box>
           ) : (
-            <TableContainer component={Paper} elevation={0} sx={{ overflowX: "auto" }}>
+            <TableContainer
+              component={Paper}
+              elevation={0}
+              sx={{ overflowX: "auto" }}
+            >
               <Table className="admin-table">
                 <TableHead>
                   <TableRow>
@@ -249,7 +261,10 @@ export default function UsersTab() {
                       <TableCell>{u.name}</TableCell>
                       <TableCell>{u.email}</TableCell>
                       <TableCell>
-                        <StatusBadge label={u.role} tone={getRoleTone(u.role)} />
+                        <StatusBadge
+                          label={u.role}
+                          tone={getRoleTone(u.role)}
+                        />
                       </TableCell>
                       <TableCell align="center">
                         {u.created_at

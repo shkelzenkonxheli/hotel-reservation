@@ -104,17 +104,53 @@ export default function LoginPage() {
     }
   };
 
+  const fieldSx = {
+    "& .MuiOutlinedInput-root": {
+      height: 52,
+      borderRadius: 2,
+      backgroundColor: "#ffffff",
+      "& fieldset": { borderColor: "#dbe3ed" },
+      "&:hover fieldset": { borderColor: "#b9c7d8" },
+      "&.Mui-focused fieldset": {
+        borderColor: "#0ea5e9",
+        borderWidth: 2,
+      },
+    },
+  };
+
   return (
-    <Box className="public-page min-h-screen">
-      <PublicSection className="pt-10">
+    <Box
+      className="public-page min-h-screen"
+      sx={{
+        backgroundImage:
+          "linear-gradient(135deg, rgba(15,23,42,0.62), rgba(15,23,42,0.42)), url('/hotel-images/hotelbg1.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      <PublicSection className="py-0">
         <PublicContainer>
-          <div className="max-w-md mx-auto">
-            <PublicCard className="p-6 md:p-8">
+          <Box
+            sx={{
+              minHeight: { xs: "calc(100vh - 72px)", md: "calc(100vh - 84px)" },
+              display: "grid",
+              placeItems: "center",
+              py: { xs: 4, md: 6 },
+            }}
+          >
+            <PublicCard
+              className="w-full max-w-md p-8 md:p-9"
+              style={{
+                backgroundColor: "#ffffff",
+                boxShadow: "0 20px 48px rgba(15,23,42,0.12)",
+              }}
+            >
               <Typography
-                variant="h5"
+                variant="h4"
                 align="center"
                 fontWeight="bold"
-                sx={{ color: "#0ea5e9" }}
+                sx={{ color: "#0f172a", fontSize: { xs: "1.7rem", md: "2rem" }, mt: 0.5 }}
                 gutterBottom
               >
                 Welcome back
@@ -123,12 +159,12 @@ export default function LoginPage() {
                 variant="body2"
                 color="text.secondary"
                 align="center"
-                mb={3}
+                mb={3.2}
               >
                 Sign in to access your account
               </Typography>
 
-              <form onSubmit={handleLoginCredentials}>
+              <Box component="form" onSubmit={handleLoginCredentials}>
                 <TextField
                   label="Email"
                   fullWidth
@@ -136,6 +172,7 @@ export default function LoginPage() {
                   margin="normal"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  sx={fieldSx}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -153,6 +190,7 @@ export default function LoginPage() {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  sx={fieldSx}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -187,11 +225,14 @@ export default function LoginPage() {
                 variant="contained"
                   sx={{
                     mt: 3,
-                    py: 1.3,
+                    py: 1.35,
                     fontSize: "1rem",
                     textTransform: "none",
                     borderRadius: 2,
                     fontWeight: 700,
+                    backgroundColor: "#0284c7",
+                    "&:hover": { backgroundColor: "#0369a1" },
+                    "&:active": { backgroundColor: "#075985" },
                   }}
                   type="submit"
                   disabled={loading}
@@ -202,7 +243,7 @@ export default function LoginPage() {
                   "Login"
                 )}
               </Button>
-            </form>
+            </Box>
 
             <Button
               fullWidth
@@ -221,10 +262,15 @@ export default function LoginPage() {
                 variant="outlined"
                 startIcon={<Google />}
                 sx={{
-                  py: 1.2,
+                  py: 1.25,
                   textTransform: "none",
                   fontWeight: 700,
                   borderRadius: 2,
+                  borderColor: "#d1dbe7",
+                  "&:hover": {
+                    borderColor: "#b9c7d8",
+                    backgroundColor: "#f8fafc",
+                  },
                 }}
                 onClick={() =>
                   signIn("google", {
@@ -251,7 +297,7 @@ export default function LoginPage() {
                 </Typography>
               </Typography>
             </PublicCard>
-          </div>
+          </Box>
         </PublicContainer>
       </PublicSection>
     </Box>

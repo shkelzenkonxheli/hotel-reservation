@@ -21,12 +21,46 @@ export default function ReservationCard({
   selected = false,
   onSelect,
 }) {
+  const status = String(reservation?.status || "").toLowerCase();
+  const isCancelled = Boolean(reservation?.cancelled_at) || status === "cancelled";
+  const isCompletedByStatus = status === "completed";
+
+  const toLocalYmd = (date) =>
+    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+      2,
+      "0",
+    )}-${String(date.getDate()).padStart(2, "0")}`;
+
+  const extractYmd = (value) => {
+    const datePart = String(value || "").slice(0, 10);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+      return datePart;
+    }
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "";
+    return toLocalYmd(d);
+  };
+
+  const todayYmd = toLocalYmd(new Date());
+  const endYmd = extractYmd(reservation?.end_date);
+  const isFinishedByDate = Boolean(endYmd) && endYmd <= todayYmd;
+  const bookingState = isCancelled
+    ? "CANCELLED"
+    : isCompletedByStatus || isFinishedByDate
+      ? "FINISHED"
+      : "ACTIVE";
+
   return (
     <Card
       sx={{
         borderRadius: 3,
         boxShadow: 1,
-        bgcolor: "var(--admin-surface)",
+        bgcolor:
+          bookingState === "CANCELLED"
+            ? "#fee2e2"
+            : bookingState === "FINISHED"
+              ? "#dcfce7"
+              : "#dbeafe",
         border: "1px solid var(--admin-border)",
       }}
     >

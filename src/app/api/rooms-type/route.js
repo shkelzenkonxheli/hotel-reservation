@@ -11,6 +11,7 @@ export async function GET() {
         price: true,
         name: true,
         description: true,
+        amenities: true,
       },
     });
 
@@ -24,6 +25,7 @@ export async function GET() {
           price: room.price,
           name: room.name,
           description: room.description,
+          amenities: room.amenities || [],
           images: [], // do mbushet më poshtë
         };
       }

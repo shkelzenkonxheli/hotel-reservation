@@ -157,6 +157,18 @@ export default function CheckoutBooking() {
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
           {getFirstLine(room.description)}
         </Typography>
+        {Array.isArray(room.amenities) && room.amenities.length > 0 ? (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {room.amenities.map((amenity) => (
+              <span
+                key={amenity}
+                className="text-xs px-2.5 py-1 rounded-full border border-slate-200 text-slate-700 bg-slate-50"
+              >
+                {amenity}
+              </span>
+            ))}
+          </div>
+        ) : null}
         <button
           className="text-slate-700 text-sm mt-2 underline underline-offset-4"
           onClick={() => setExpandedRoom(room)}
@@ -349,9 +361,22 @@ export default function CheckoutBooking() {
               X
             </button>
             <h2 className="text-xl font-semibold mb-4">{expandedRoom.name}</h2>
-            <p className="text-slate-600 text-sm whitespace-pre-line">
+            <p className="text-slate-600 text-sm">
               {expandedRoom.description}
             </p>
+            {Array.isArray(expandedRoom.amenities) &&
+            expandedRoom.amenities.length > 0 ? (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {expandedRoom.amenities.map((amenity) => (
+                  <span
+                    key={amenity}
+                    className="text-xs px-2.5 py-1 rounded-full border border-slate-200 text-slate-700 bg-slate-50"
+                  >
+                    {amenity}
+                  </span>
+                ))}
+              </div>
+            ) : null}
           </div>
         </div>
       )}

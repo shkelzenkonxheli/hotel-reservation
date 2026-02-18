@@ -284,9 +284,23 @@ export default function RoomsPage() {
               {expandedRoom.name}
             </h2>
 
-            <p className="text-slate-600 text-sm whitespace-pre-line">
+            <p className="text-slate-600 text-sm">
               {expandedRoom.description}
             </p>
+
+            {Array.isArray(expandedRoom.amenities) &&
+            expandedRoom.amenities.length > 0 ? (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {expandedRoom.amenities.map((amenity) => (
+                  <span
+                    key={amenity}
+                    className="text-xs px-2.5 py-1 rounded-full border border-slate-200 text-slate-700 bg-slate-50"
+                  >
+                    {amenity}
+                  </span>
+                ))}
+              </div>
+            ) : null}
           </div>
         </div>
       )}

@@ -49,6 +49,7 @@ model rooms {
   images       String[]
   name         String         @default("Unknown Room") @db.VarChar(255)
   description  String?
+  amenities    String[]       @default([])
   reservations reservations[]
 }
 

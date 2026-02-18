@@ -8,15 +8,40 @@ import {
   DialogTitle,
   Button,
   TextField,
-  MenuItem,
   Autocomplete,
   CircularProgress,
+  Box,
+  Typography,
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
+  Chip,
 } from "@mui/material";
 
+const DEFAULT_AMENITIES = [
+  "Wi-Fi",
+  "Air Conditioning",
+  "TV",
+  "Private Bathroom",
+  "Balcony",
+  "Mini Bar",
+  "Breakfast Included",
+  "Kitchen",
+  "Parking",
+  "Sea View",
+];
+
 export default function RoomForm({ mode, room, onClose, onSaved }) {
-  const [formData, setFormData] = useState(
-    room || { name: "", room_number: "", type: "", price: "", description: "" }
-  );
+  const initialState = {
+    name: "",
+    room_number: "",
+    type: "",
+    price: "",
+    description: "",
+    amenities: [],
+  };
+
+  const [formData, setFormData] = useState(room || initialState);
 
   const [loading, setLoading] = useState(false);
   const [roomTypeOptions, setRoomTypeOptions] = useState([]);
@@ -25,6 +50,14 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
   // ✅ suggestions
   const [roomsLoading, setRoomsLoading] = useState(false);
   const [roomNameOptions, setRoomNameOptions] = useState([]);
+  const [customAmenity, setCustomAmenity] = useState("");
+  const [amenityOptions, setAmenityOptions] = useState(DEFAULT_AMENITIES);
+  const [applyToType, setApplyToType] = useState(false);
+
+  const selectedAmenities = useMemo(
+    () => (Array.isArray(formData.amenities) ? formData.amenities : []),
+    [formData.amenities],
+  );
 
   // ✅ keep form in sync when edit room changes
   useEffect(() => {
@@ -35,8 +68,17 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
         type: "",
         price: "",
         description: "",
+        amenities: [],
       }
     );
+    setApplyToType(false);
+  }, [room]);
+
+  useEffect(() => {
+    const fromRoom = Array.isArray(room?.amenities) ? room.amenities : [];
+    if (fromRoom.length > 0) {
+      setAmenityOptions((prev) => [...new Set([...prev, ...fromRoom])]);
+    }
   }, [room]);
 
   useEffect(() => {
@@ -103,10 +145,20 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          apply_to_type: mode === "edit" ? applyToType : false,
+        }),
       });
 
       if (res.ok) {
+        const data = await res.json();
+        if (mode === "edit" && applyToType) {
+          alert(
+            data?.message ||
+              "Updated this room and all rooms of the selected type.",
+          );
+        }
         onSaved();
         onClose();
       } else {
@@ -119,6 +171,33 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
     } finally {
       setLoading(false);
     }
+  }
+
+  function toggleAmenity(amenity) {
+    setFormData((prev) => {
+      const current = Array.isArray(prev.amenities) ? prev.amenities : [];
+      const exists = current.includes(amenity);
+      return {
+        ...prev,
+        amenities: exists
+          ? current.filter((a) => a !== amenity)
+          : [...current, amenity],
+      };
+    });
+  }
+
+  function addCustomAmenity() {
+    const value = customAmenity.trim();
+    if (!value) return;
+
+    setAmenityOptions((prev) => [...new Set([...prev, value])]);
+    setFormData((prev) => {
+      const current = Array.isArray(prev.amenities) ? prev.amenities : [];
+      return current.includes(value)
+        ? prev
+        : { ...prev, amenities: [...current, value] };
+    });
+    setCustomAmenity("");
   }
 
   return (
@@ -222,16 +301,89 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
 
         <TextField
           fullWidth
-          label="Description"
+          label="Short Marketing Description"
           variant="outlined"
           multiline
-          rows={3}
+          rows={2}
           margin="normal"
+          placeholder="e.g. Modern sea-view room ideal for couples."
           value={formData.description}
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, description: e.target.value }))
           }
         />
+
+        <Box mt={2}>
+          <Typography variant="subtitle2" fontWeight={700} mb={1}>
+            Amenities
+          </Typography>
+
+          <FormGroup>
+            <Box display="grid" gridTemplateColumns={{ xs: "1fr", sm: "1fr 1fr" }}>
+              {amenityOptions.map((amenity) => (
+                <FormControlLabel
+                  key={amenity}
+                  control={
+                    <Checkbox
+                      checked={selectedAmenities.includes(amenity)}
+                      onChange={() => toggleAmenity(amenity)}
+                    />
+                  }
+                  label={amenity}
+                />
+              ))}
+            </Box>
+          </FormGroup>
+
+          <Box display="flex" gap={1} mt={1.2}>
+            <TextField
+              fullWidth
+              size="small"
+              label="Add custom amenity"
+              value={customAmenity}
+              onChange={(e) => setCustomAmenity(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addCustomAmenity();
+                }
+              }}
+            />
+            <Button variant="outlined" onClick={addCustomAmenity}>
+              Add
+            </Button>
+          </Box>
+
+          {selectedAmenities.length > 0 ? (
+            <Box display="flex" gap={0.8} flexWrap="wrap" mt={1.2}>
+              {selectedAmenities.map((amenity) => (
+                <Chip
+                  key={amenity}
+                  label={amenity}
+                  onDelete={() => toggleAmenity(amenity)}
+                  size="small"
+                />
+              ))}
+            </Box>
+          ) : null}
+        </Box>
+
+        {mode === "edit" ? (
+          <Box mt={2}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={applyToType}
+                  onChange={(e) => setApplyToType(e.target.checked)}
+                />
+              }
+              label="Apply shared fields to all rooms of this type"
+            />
+            <Typography variant="caption" color="text.secondary" display="block" ml={4}>
+              Applies name, price, short description and amenities to all rooms with this type.
+            </Typography>
+          </Box>
+        ) : null}
       </DialogContent>
 
       <DialogActions className="px-6 py-3">

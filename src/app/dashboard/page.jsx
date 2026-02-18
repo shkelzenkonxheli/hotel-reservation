@@ -324,7 +324,7 @@ export default function Dashboard() {
             width: drawerWidth,
             bgcolor: "#0f172a",
             color: "#e2e8f0",
-            top: HEADER_HEIGHT, // mos e mbulo header-in
+            top: HEADER_HEIGHT,
             height: `calc(100% - ${HEADER_HEIGHT}px)`,
           },
         }}

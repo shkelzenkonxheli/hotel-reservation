@@ -3,13 +3,30 @@ import { NextResponse } from "next/server";
 import { logActivity } from "../../../../../lib/activityLogger";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
+
+function normalizeAmenities(input) {
+  if (!Array.isArray(input)) return [];
+  const clean = input
+    .map((item) => String(item || "").trim())
+    .filter(Boolean);
+  return [...new Set(clean)];
+}
 // Handle PATCH requests for this route.
 export async function PATCH(request, context) {
   try {
     const { id } = await context.params;
     // Parse route param to a numeric ID.
     const roomId = parseInt(id);
-    const { name, room_number, type, price, description, status } =
+    const {
+      name,
+      room_number,
+      type,
+      price,
+      description,
+      status,
+      amenities,
+      apply_to_type,
+    } =
       await request.json();
     const session = await getServerSession(authOptions);
 
@@ -35,9 +52,28 @@ export async function PATCH(request, context) {
         // Coerce price to a number for storage.
         price: parseFloat(price),
         description,
+        amenities: normalizeAmenities(amenities),
         status: status || undefined,
       },
     });
+
+    let bulkUpdated = 0;
+    if (apply_to_type) {
+      const result = await prisma.rooms.updateMany({
+        where: {
+          type: updatedRoom.type,
+          NOT: { id: roomId },
+        },
+        data: {
+          name,
+          price: parseFloat(price),
+          description,
+          amenities: normalizeAmenities(amenities),
+        },
+      });
+      bulkUpdated = result.count || 0;
+    }
+
     await logActivity({
       action: "UPDATE",
       entity: "room",
@@ -46,7 +82,13 @@ export async function PATCH(request, context) {
       performed_by: session.user.email,
     });
 
-    return NextResponse.json(updatedRoom);
+    return NextResponse.json({
+      ...updatedRoom,
+      bulk_updated: bulkUpdated,
+      message: apply_to_type
+        ? `Updated this room and ${bulkUpdated} more room(s) of type "${updatedRoom.type}".`
+        : "Room updated successfully.",
+    });
   } catch (error) {
     console.error("PATCH /rooms error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });

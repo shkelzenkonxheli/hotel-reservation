@@ -16,6 +16,14 @@ function isSameDay(a, b) {
   return a.getTime() === b.getTime();
 }
 
+function normalizeAmenities(input) {
+  if (!Array.isArray(input)) return [];
+  const clean = input
+    .map((item) => String(item || "").trim())
+    .filter(Boolean);
+  return [...new Set(clean)];
+}
+
 // Handle GET requests for this route.
 export async function GET(request) {
   try {
@@ -57,22 +65,28 @@ export async function GET(request) {
     }
 
     const roomIds = rooms.map((r) => r.id);
-    const nextDay = new Date(selectedDay);
-    nextDay.setUTCDate(selectedDay.getUTCDate() + 1);
 
-    // Check which rooms were cleaned today (based on activity_logs).
-    const cleanedLogs = await prisma.activity_logs.findMany({
+    // Read CLEAN logs so we can keep needs_cleaning until an actual CLEAN action happens.
+    const cleanLogs = await prisma.activity_logs.findMany({
       where: {
         entity: "room",
         action: "CLEAN",
         entity_id: { in: roomIds },
-        created_at: { gte: selectedDay, lt: nextDay },
       },
-      select: { entity_id: true },
+      select: { entity_id: true, created_at: true },
+      orderBy: { created_at: "desc" },
     });
-    const cleanedTodayIds = new Set(
-      cleanedLogs.map((log) => Number(log.entity_id)),
-    );
+
+    // Keep latest CLEAN timestamp per room.
+    const lastCleanAtByRoom = new Map();
+    for (const log of cleanLogs) {
+      const roomId = Number(log.entity_id);
+      if (!lastCleanAtByRoom.has(roomId)) {
+        lastCleanAtByRoom.set(roomId, new Date(log.created_at));
+      }
+    }
+
+    const needsCleaningRoomIds = [];
 
     const updatedRooms = rooms.map((room) => {
       const operationalStatus = room.status || "available";
@@ -90,6 +104,7 @@ export async function GET(request) {
 
       let activeReservation = null;
       let hasCheckoutToday = false;
+      let latestCheckoutAt = null;
 
       for (const r of room.reservations) {
         const startDay = normalizeUTC(r.start_date);
@@ -105,21 +120,36 @@ export async function GET(request) {
         if (isSameDay(selectedDay, endDay)) {
           hasCheckoutToday = true;
         }
+
+        if (endDay <= selectedDay) {
+          if (!latestCheckoutAt || endDay > latestCheckoutAt) {
+            latestCheckoutAt = endDay;
+          }
+        }
       }
 
       // ✅ current_status i thjeshtë:
       // - nëse ka rezervim aktiv -> booked
       // - përndryshe -> statusi i DB (available / needs_cleaning)
       // Derive current status for UI based on active reservation.
+      const lastCleanAt = lastCleanAtByRoom.get(room.id) || null;
+      const pendingCleaning =
+        Boolean(latestCheckoutAt) &&
+        (!lastCleanAt || lastCleanAt < latestCheckoutAt);
+
+      if (
+        operationalStatus === "available" &&
+        pendingCleaning &&
+        !activeReservation
+      ) {
+        needsCleaningRoomIds.push(room.id);
+      }
+
       const currentStatus = activeReservation
         ? "booked"
-        : operationalStatus === "needs_cleaning"
+        : operationalStatus === "needs_cleaning" || pendingCleaning
           ? "needs_cleaning"
-          : !cleanedTodayIds.has(room.id) &&
-              hasCheckoutToday &&
-              operationalStatus === "available"
-            ? "needs_cleaning"
-            : operationalStatus;
+          : operationalStatus;
 
       return {
         ...room,
@@ -130,8 +160,74 @@ export async function GET(request) {
       };
     });
 
+    if (needsCleaningRoomIds.length > 0) {
+      await prisma.rooms.updateMany({
+        where: {
+          id: { in: needsCleaningRoomIds },
+          status: "available",
+        },
+        data: { status: "needs_cleaning" },
+      });
+    }
+
     return NextResponse.json(updatedRooms);
   } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+// Handle POST requests for this route.
+export async function POST(request) {
+  try {
+    const session = await getServerSession(authOptions);
+    const { name, room_number, type, price, description, amenities } =
+      await request.json();
+
+    if (!name || !room_number || !type || price === undefined || price === "") {
+      return NextResponse.json(
+        { error: "name, room_number, type and price are required" },
+        { status: 400 },
+      );
+    }
+
+    const existingRoom = await prisma.rooms.findFirst({
+      where: { room_number, type },
+    });
+
+    if (existingRoom) {
+      return NextResponse.json(
+        { error: "Room number already exists for this type." },
+        { status: 400 },
+      );
+    }
+
+    const parsedPrice = Number(price);
+    if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
+      return NextResponse.json({ error: "Invalid price" }, { status: 400 });
+    }
+
+    const room = await prisma.rooms.create({
+      data: {
+        name: String(name).trim(),
+        room_number: String(room_number).trim(),
+        type: String(type).trim(),
+        price: parsedPrice,
+        description: description ? String(description).trim() : null,
+        amenities: normalizeAmenities(amenities),
+      },
+    });
+
+    await logActivity({
+      action: "CREATE",
+      entity: "room",
+      entity_id: room.id,
+      description: `Created room "${room.name}" (#${room.room_number})`,
+      performed_by: session?.user?.email || "system",
+    });
+
+    return NextResponse.json(room, { status: 201 });
+  } catch (error) {
+    console.error("POST /rooms error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

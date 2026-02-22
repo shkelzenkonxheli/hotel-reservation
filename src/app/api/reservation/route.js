@@ -27,6 +27,7 @@ export async function POST(request) {
     const {
       userId,
       type,
+      roomId,
       startDate,
       endDate,
       fullname,
@@ -71,26 +72,32 @@ export async function POST(request) {
       include: {
         reservations: {
           where: { cancelled_at: null, admin_hidden: false },
-          select: { start_date: true, end_date: true },
+          select: { id: true, start_date: true, end_date: true },
         },
       },
     });
 
-    const availableRoom = rooms.find((room) => {
+    const availableRooms = rooms.filter((room) => {
       if (room.status === "out_of_order") return false;
-
-      // Overlap rule: start < existing_end AND end > existing_start.
       const conflict = room.reservations.some((r) => {
-        // overlap: start < existing_end AND end > existing_start
         return start < new Date(r.end_date) && end > new Date(r.start_date);
       });
-
       return !conflict;
     });
 
+    const availableRoom =
+      roomId !== undefined && roomId !== null && roomId !== ""
+        ? availableRooms.find((room) => room.id === Number(roomId))
+        : availableRooms[0];
+
     if (!availableRoom) {
       return NextResponse.json(
-        { error: "No rooms available" },
+        {
+          error:
+            roomId !== undefined && roomId !== null && roomId !== ""
+              ? "Selected room is not available for these dates."
+              : "No rooms available",
+        },
         { status: 400 },
       );
     }
@@ -248,6 +255,7 @@ export async function GET(request) {
     }
 
     if (roomType && startDate && endDate) {
+      const includeRooms = searchParams.get("include_rooms") === "true";
       const start = parseDateOnlyToUTC(startDate);
       const end = parseDateOnlyToUTC(endDate);
       const rooms = await prisma.rooms.findMany({
@@ -258,28 +266,79 @@ export async function GET(request) {
               cancelled_at: null,
               admin_hidden: false,
             },
+            select: {
+              id: true,
+              reservation_code: true,
+              full_name: true,
+              start_date: true,
+              end_date: true,
+            },
           },
         },
       });
 
-      const availableRoom = rooms.find((room) => {
-        if (room.status === "out_of_order") return;
-        // Overlap rule: start < existing_end AND end > existing_start.
-        const conflict = room.reservations.some((res) => {
-          if (reservationId && res.id === reservationId) return false;
-          if (res.cancelled_at) return false;
-          const rStart = parseDateOnlyToUTC(
-            res.start_date.toISOString().slice(0, 10),
-          );
-          const rEnd = parseDateOnlyToUTC(
-            res.end_date.toISOString().slice(0, 10),
-          );
-          return start < rEnd && end > rStart;
-        });
-        return !conflict;
-      });
+      const availableRooms = [];
+      const unavailableRooms = [];
 
-      return NextResponse.json({ available: !!availableRoom });
+      for (const room of rooms) {
+        if (room.status === "out_of_order") {
+          unavailableRooms.push({
+            id: room.id,
+            room_number: room.room_number,
+            name: room.name,
+            reason: "Out of order",
+          });
+          continue;
+        }
+
+        const overlaps = room.reservations
+          .filter((res) => {
+            if (reservationId && res.id === reservationId) return false;
+            const rStart = parseDateOnlyToUTC(
+              res.start_date.toISOString().slice(0, 10),
+            );
+            const rEnd = parseDateOnlyToUTC(
+              res.end_date.toISOString().slice(0, 10),
+            );
+            return start < rEnd && end > rStart;
+          })
+          .sort(
+            (a, b) => new Date(a.end_date).getTime() - new Date(b.end_date).getTime(),
+          );
+
+        if (overlaps.length === 0) {
+          availableRooms.push(room);
+          continue;
+        }
+
+        const nearest = overlaps[0];
+        unavailableRooms.push({
+          id: room.id,
+          room_number: room.room_number,
+          name: room.name,
+          reason: "Booked in selected dates",
+          until: nearest.end_date,
+          reservation_id: nearest.id,
+          reservation_code: nearest.reservation_code || null,
+          guest_name: nearest.full_name || null,
+        });
+      }
+
+      if (includeRooms) {
+        return NextResponse.json({
+          available: availableRooms.length > 0,
+          availableRooms: availableRooms.map((room) => ({
+            id: room.id,
+            room_number: room.room_number,
+            name: room.name,
+            type: room.type,
+            price: room.price,
+          })),
+          unavailableRooms,
+        });
+      }
+
+      return NextResponse.json({ available: availableRooms.length > 0 });
     }
 
     return NextResponse.json([]);

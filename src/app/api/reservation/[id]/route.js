@@ -53,6 +53,7 @@ export async function PATCH(req, context) {
       phone,
       address,
       type,
+      roomId,
       guests,
       startDate,
       endDate,
@@ -99,40 +100,49 @@ export async function PATCH(req, context) {
       startDate !== existing.start_date.toISOString().split("T")[0] ||
       endDate !== existing.end_date.toISOString().split("T")[0];
 
-    let newRoomId = existing.roomId;
+    let newRoomId = existing.room_id;
 
-    if (isTypeChanged || isDatesChanged) {
-      const rooms = await prisma.rooms.findMany({
-        where: { type },
-        include: {
-          reservations: { where: { cancelled_at: null, admin_hidden: false } },
-        },
+    const rooms = await prisma.rooms.findMany({
+      where: { type },
+      include: {
+        reservations: { where: { cancelled_at: null, admin_hidden: false } },
+      },
+    });
+
+    const availableRooms = rooms.filter((room) => {
+      if (room.status === "out_of_order") return false;
+      const conflict = room.reservations.some((reservation) => {
+        if (reservation.id === existing.id) return false;
+        const rStart = parseDateOnlyToUTC(
+          reservation.start_date.toISOString().slice(0, 10),
+        );
+        const rEnd = parseDateOnlyToUTC(
+          reservation.end_date.toISOString().slice(0, 10),
+        );
+        return start < rEnd && end > rStart;
       });
+      return !conflict;
+    });
 
-      // Find any room without overlap in the new date range.
-      const availableRoom = rooms.find((room) => {
-        if (room.status === "out_of_order") return false;
-        const conflict = room.reservations.some((reservation) => {
-          if (reservation.id === existing.id) return false;
-          const rStart = parseDateOnlyToUTC(
-            reservation.start_date.toISOString().slice(0, 10),
-          );
-          const rEnd = parseDateOnlyToUTC(
-            reservation.end_date.toISOString().slice(0, 10),
-          );
-          return start < rEnd && end > rStart;
-        });
-        return !conflict;
-      });
-
-      if (!availableRoom) {
+    const hasSelectedRoom = roomId !== undefined && roomId !== null && roomId !== "";
+    if (hasSelectedRoom) {
+      const selected = availableRooms.find((room) => room.id === Number(roomId));
+      if (!selected) {
+        return NextResponse.json(
+          { error: "Selected room is not available for these dates." },
+          { status: 400 },
+        );
+      }
+      newRoomId = selected.id;
+    } else if (isTypeChanged || isDatesChanged) {
+      const fallback = availableRooms[0];
+      if (!fallback) {
         return NextResponse.json(
           { error: "No available rooms for the new type or dates." },
           { status: 400 },
         );
       }
-
-      newRoomId = availableRoom.id;
+      newRoomId = fallback.id;
     }
 
     const updated = await prisma.reservations.update({

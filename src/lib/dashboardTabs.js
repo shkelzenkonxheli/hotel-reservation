@@ -2,6 +2,7 @@ export const DASHBOARD_TABS = [
   { key: "overview", label: "Overview" },
   { key: "rooms", label: "Rooms" },
   { key: "reservations", label: "Reservations" },
+  { key: "payments", label: "Payments & Invoices" },
   { key: "users", label: "Users" },
   { key: "manageRooms", label: "Manage Rooms" },
   { key: "activityLogsTab", label: "Activity Log" },

@@ -74,6 +74,7 @@ model users {
   email_verification_expires DateTime?       @db.Timestamp(6)
   notifications              notifications[]
   reservations               reservations[]
+  expenses                   expenses[]
 }
 
 model activity_logs {
@@ -108,4 +109,20 @@ model notifications {
   created_at     DateTime      @default(now()) @db.Timestamp(6)
   reservations   reservations? @relation(fields: [reservation_id], references: [id], onUpdate: NoAction, map: "fk_notification_reservation")
   users          users?        @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "fk_notification_user")
+}
+
+model expenses {
+  id             Int       @id @default(autoincrement())
+  expense_date   DateTime  @db.Date
+  category       String    @db.VarChar(50)
+  amount         Decimal   @db.Decimal(10, 2)
+  payment_method String    @default("cash") @db.VarChar(20)
+  note           String?   @db.VarChar(255)
+  created_by_id  Int?
+  created_by     String?   @db.VarChar(100)
+  created_at     DateTime  @default(now()) @db.Timestamp(6)
+  users          users?    @relation(fields: [created_by_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+
+  @@index([expense_date])
+  @@index([category])
 }

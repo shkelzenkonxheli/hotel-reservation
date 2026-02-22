@@ -17,6 +17,8 @@ import {
   TableRow,
   TextField,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import PaymentsIcon from "@mui/icons-material/Payments";
@@ -47,6 +49,8 @@ function formatDate(value) {
 }
 
 export default function PaymentsInvoicesTab() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -194,9 +198,9 @@ export default function PaymentsInvoicesTab() {
               <Box
                 sx={{
                   display: "grid",
-                  gridTemplateColumns: { xs: "1fr", sm: "160px 170px 240px" },
+                  gridTemplateColumns: { xs: "1fr", md: "160px 170px 240px" },
                   gap: 1,
-                  width: { xs: "100%", sm: "auto" },
+                  width: { xs: "100%", md: "auto" },
                 }}
               >
                 <TextField
@@ -227,113 +231,199 @@ export default function PaymentsInvoicesTab() {
               </Box>
             }
           >
-            <TableContainer sx={{ overflowX: "auto" }}>
-              <Table size="small" sx={{ minWidth: 900 }}>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 700 }}>Invoice</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Guest</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Room</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Stay</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Total</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Paid</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Method</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Created</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700 }}>
-                      Actions
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filtered.map((r) => (
-                    <TableRow key={r.id} hover>
-                      <TableCell>
+            {isMobile ? (
+              <Stack spacing={1.1}>
+                {filtered.map((r) => (
+                  <Box
+                    key={r.id}
+                    sx={{
+                      border: "1px solid #e2e8f0",
+                      borderRadius: 2,
+                      p: 1.3,
+                      bgcolor: "white",
+                    }}
+                  >
+                    <Box display="flex" justifyContent="space-between" gap={1}>
+                      <Box>
                         <Typography fontWeight={700}>
                           {r.invoice_number || `INV-${r.id}`}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {r.reservation_code || `#${r.id}`}
+                          {r.full_name || "-"} • {r.reservation_code || `#${r.id}`}
                         </Typography>
-                      </TableCell>
-                      <TableCell>{r.full_name || "-"}</TableCell>
-                      <TableCell>{r.rooms?.room_number ? `#${r.rooms.room_number}` : "-"}</TableCell>
-                      <TableCell>
-                        {formatDate(r.start_date)} - {formatDate(r.end_date)}
-                      </TableCell>
-                      <TableCell>{formatCurrency(r.total_price)}</TableCell>
-                      <TableCell>{formatCurrency(r.amount_paid)}</TableCell>
-                      <TableCell sx={{ textTransform: "capitalize" }}>
-                        {r.payment_method || "-"}
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          size="small"
-                          label={r.payment_status || "UNPAID"}
-                          sx={{
-                            fontWeight: 700,
-                            bgcolor:
-                              String(r.payment_status).toUpperCase() === "PAID"
-                                ? "#dcfce7"
-                                : "#fef3c7",
-                            color:
-                              String(r.payment_status).toUpperCase() === "PAID"
-                                ? "#166534"
-                                : "#92400e",
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell>{formatDate(r.created_at)}</TableCell>
-                      <TableCell align="right">
-                        <Box
-                          sx={{
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            gap: 0.8,
-                            flexWrap: "wrap",
-                          }}
-                        >
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            startIcon={<VisibilityOutlinedIcon fontSize="small" />}
-                            sx={{ textTransform: "none" }}
-                            onClick={() => {
-                              setSelectedReservation(r);
-                              setDetailsOpen(true);
-                            }}
-                          >
-                            View
-                          </Button>
-                          <Button
-                            size="small"
-                            variant="contained"
-                            startIcon={<PrintOutlinedIcon fontSize="small" />}
-                            sx={{ textTransform: "none" }}
-                            onClick={() => {
-                              setSelectedReservation(r);
-                              setPrintOpen(true);
-                            }}
-                          >
-                            Print
-                          </Button>
-                        </Box>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {filtered.length === 0 ? (
+                      </Box>
+                      <Chip
+                        size="small"
+                        label={r.payment_status || "UNPAID"}
+                        sx={{
+                          fontWeight: 700,
+                          bgcolor:
+                            String(r.payment_status).toUpperCase() === "PAID"
+                              ? "#dcfce7"
+                              : "#fef3c7",
+                          color:
+                            String(r.payment_status).toUpperCase() === "PAID"
+                              ? "#166534"
+                              : "#92400e",
+                        }}
+                      />
+                    </Box>
+                    <Typography variant="body2" mt={0.8}>
+                      Stay: {formatDate(r.start_date)} - {formatDate(r.end_date)}
+                    </Typography>
+                    <Typography variant="body2">
+                      Total: {formatCurrency(r.total_price)} • Paid: {formatCurrency(r.amount_paid)}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Room: {r.rooms?.room_number ? `#${r.rooms.room_number}` : "-"} •
+                      Method: {r.payment_method || "-"}
+                    </Typography>
+                    <Box mt={1} display="flex" gap={1} flexWrap="wrap">
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<VisibilityOutlinedIcon fontSize="small" />}
+                        sx={{ textTransform: "none", flex: 1, minWidth: 120 }}
+                        onClick={() => {
+                          setSelectedReservation(r);
+                          setDetailsOpen(true);
+                        }}
+                      >
+                        View
+                      </Button>
+                      <Button
+                        size="small"
+                        variant="contained"
+                        startIcon={<PrintOutlinedIcon fontSize="small" />}
+                        sx={{ textTransform: "none", flex: 1, minWidth: 120 }}
+                        onClick={() => {
+                          setSelectedReservation(r);
+                          setPrintOpen(true);
+                        }}
+                      >
+                        Print
+                      </Button>
+                    </Box>
+                  </Box>
+                ))}
+                {filtered.length === 0 ? (
+                  <Box py={3} textAlign="center">
+                    <Typography fontWeight={700}>No invoices found</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Try changing status filter or search query.
+                    </Typography>
+                  </Box>
+                ) : null}
+              </Stack>
+            ) : (
+              <TableContainer sx={{ overflowX: "auto" }}>
+                <Table size="small" sx={{ minWidth: 900 }}>
+                  <TableHead>
                     <TableRow>
-                      <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
-                        <Typography fontWeight={700}>No invoices found</Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Try changing status filter or search query.
-                        </Typography>
+                      <TableCell sx={{ fontWeight: 700 }}>Invoice</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Guest</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Room</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Stay</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Total</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Paid</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Method</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Created</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 700 }}>
+                        Actions
                       </TableCell>
                     </TableRow>
-                  ) : null}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                  </TableHead>
+                  <TableBody>
+                    {filtered.map((r) => (
+                      <TableRow key={r.id} hover>
+                        <TableCell>
+                          <Typography fontWeight={700}>
+                            {r.invoice_number || `INV-${r.id}`}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {r.reservation_code || `#${r.id}`}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>{r.full_name || "-"}</TableCell>
+                        <TableCell>{r.rooms?.room_number ? `#${r.rooms.room_number}` : "-"}</TableCell>
+                        <TableCell>
+                          {formatDate(r.start_date)} - {formatDate(r.end_date)}
+                        </TableCell>
+                        <TableCell>{formatCurrency(r.total_price)}</TableCell>
+                        <TableCell>{formatCurrency(r.amount_paid)}</TableCell>
+                        <TableCell sx={{ textTransform: "capitalize" }}>
+                          {r.payment_method || "-"}
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            size="small"
+                            label={r.payment_status || "UNPAID"}
+                            sx={{
+                              fontWeight: 700,
+                              bgcolor:
+                                String(r.payment_status).toUpperCase() === "PAID"
+                                  ? "#dcfce7"
+                                  : "#fef3c7",
+                              color:
+                                String(r.payment_status).toUpperCase() === "PAID"
+                                  ? "#166534"
+                                  : "#92400e",
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell>{formatDate(r.created_at)}</TableCell>
+                        <TableCell align="right">
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "flex-end",
+                              gap: 0.8,
+                              flexWrap: "wrap",
+                            }}
+                          >
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              startIcon={<VisibilityOutlinedIcon fontSize="small" />}
+                              sx={{ textTransform: "none" }}
+                              onClick={() => {
+                                setSelectedReservation(r);
+                                setDetailsOpen(true);
+                              }}
+                            >
+                              View
+                            </Button>
+                            <Button
+                              size="small"
+                              variant="contained"
+                              startIcon={<PrintOutlinedIcon fontSize="small" />}
+                              sx={{ textTransform: "none" }}
+                              onClick={() => {
+                                setSelectedReservation(r);
+                                setPrintOpen(true);
+                              }}
+                            >
+                              Print
+                            </Button>
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {filtered.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
+                          <Typography fontWeight={700}>No invoices found</Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Try changing status filter or search query.
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    ) : null}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
 
             <Box
               mt={1.2}

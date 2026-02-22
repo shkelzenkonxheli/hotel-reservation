@@ -31,6 +31,7 @@ import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
 import BookOnlineIcon from "@mui/icons-material/BookOnline";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import InsightsIcon from "@mui/icons-material/Insights";
+import ReceiptIcon from "@mui/icons-material/Receipt";
 import PeopleIcon from "@mui/icons-material/People";
 import BuildCircleIcon from "@mui/icons-material/BuildCircle";
 import HistoryIcon from "@mui/icons-material/History";
@@ -39,6 +40,7 @@ import RoomsTab from "../components/Dashboard/RoomsTab";
 import ReservationsTab from "../components/Dashboard/ReservationTab";
 import PaymentsInvoicesTab from "../components/Dashboard/PaymentsInvoicesTab";
 import ReportsTab from "../components/Dashboard/ReportsTab";
+import ExpensesTab from "../components/Dashboard/ExpensesTab";
 import UsersTab from "../components/Dashboard/UserTab";
 import ManageRoomsTab from "../components/Dashboard/ManageRooms";
 import ActivityLogsTab from "../components/Dashboard/ActivityLogsTab";
@@ -95,6 +97,8 @@ export default function Dashboard() {
         <ReceiptLongIcon />
       ) : t.key === "reports" ? (
         <InsightsIcon />
+      ) : t.key === "expenses" ? (
+        <ReceiptIcon />
       ) : t.key === "users" ? (
         <PeopleIcon />
       ) : t.key === "manageRooms" ? (
@@ -375,6 +379,7 @@ export default function Dashboard() {
         {activeTab === "reservations" && <ReservationsTab />}
         {activeTab === "payments" && <PaymentsInvoicesTab />}
         {activeTab === "reports" && <ReportsTab />}
+        {activeTab === "expenses" && <ExpensesTab />}
         {activeTab === "users" && <UsersTab />}
         {activeTab === "manageRooms" && <ManageRoomsTab />}
         {activeTab === "activityLogsTab" && <ActivityLogsTab />}

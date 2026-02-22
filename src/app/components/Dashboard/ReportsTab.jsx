@@ -16,6 +16,8 @@ import {
   TableRow,
   TextField,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import BedOutlinedIcon from "@mui/icons-material/BedOutlined";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
@@ -65,6 +67,8 @@ function nightsBetween(start, end) {
 }
 
 export default function ReportsTab() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -276,7 +280,12 @@ export default function ReportsTab() {
         title="Reports"
         subtitle="Yearly performance view with monthly revenue and reservation trends."
         actions={
-          <Box display="flex" gap={1} flexWrap="wrap">
+          <Box
+            display="grid"
+            gap={1}
+            gridTemplateColumns={{ xs: "1fr", sm: "140px 1fr 1fr" }}
+            width={{ xs: "100%", sm: "auto" }}
+          >
             <TextField
               select
               size="small"
@@ -352,56 +361,106 @@ export default function ReportsTab() {
           </Box>
 
           <SectionCard title="Monthly report">
-            <TableContainer sx={{ overflowX: "auto" }}>
-              <Table size="small" sx={{ minWidth: 880 }}>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 700 }}>Month</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Reservations</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Room nights</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Revenue</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Paid</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Collection</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Revenue trend</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {monthly.map((m) => {
-                    const collection = m.revenue > 0 ? (m.paid / m.revenue) * 100 : 0;
-                    const width = maxRevenue > 0 ? (m.revenue / maxRevenue) * 100 : 0;
-                    return (
-                      <TableRow key={m.month} hover>
-                        <TableCell>{MONTHS[m.month]}</TableCell>
-                        <TableCell>{m.reservations}</TableCell>
-                        <TableCell>{m.roomNights}</TableCell>
-                        <TableCell>{money(m.revenue)}</TableCell>
-                        <TableCell>{money(m.paid)}</TableCell>
-                        <TableCell>{collection.toFixed(1)}%</TableCell>
-                        <TableCell sx={{ minWidth: 170 }}>
-                          <Box
-                            sx={{
-                              width: "100%",
-                              height: 8,
-                              borderRadius: 999,
-                              bgcolor: "#e2e8f0",
-                              overflow: "hidden",
-                            }}
-                          >
+            {isMobile ? (
+              <Stack spacing={1.1}>
+                {monthly.map((m) => {
+                  const collection = m.revenue > 0 ? (m.paid / m.revenue) * 100 : 0;
+                  const width = maxRevenue > 0 ? (m.revenue / maxRevenue) * 100 : 0;
+                  return (
+                    <Box
+                      key={m.month}
+                      sx={{
+                        border: "1px solid #e2e8f0",
+                        borderRadius: 2,
+                        p: 1.2,
+                        bgcolor: "white",
+                      }}
+                    >
+                      <Box display="flex" justifyContent="space-between" gap={1}>
+                        <Typography fontWeight={700}>{MONTHS[m.month]}</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {m.reservations} reservations
+                        </Typography>
+                      </Box>
+                      <Typography variant="body2">Revenue: {money(m.revenue)}</Typography>
+                      <Typography variant="body2">Paid: {money(m.paid)}</Typography>
+                      <Typography variant="body2">
+                        Nights: {m.roomNights} • Collection: {collection.toFixed(1)}%
+                      </Typography>
+                      <Box
+                        sx={{
+                          width: "100%",
+                          height: 8,
+                          borderRadius: 999,
+                          bgcolor: "#e2e8f0",
+                          overflow: "hidden",
+                          mt: 1,
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            width: `${width}%`,
+                            height: "100%",
+                            bgcolor: "#0ea5e9",
+                          }}
+                        />
+                      </Box>
+                    </Box>
+                  );
+                })}
+              </Stack>
+            ) : (
+              <TableContainer sx={{ overflowX: "auto" }}>
+                <Table size="small" sx={{ minWidth: 880 }}>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 700 }}>Month</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Reservations</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Room nights</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Revenue</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Paid</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Collection</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Revenue trend</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {monthly.map((m) => {
+                      const collection = m.revenue > 0 ? (m.paid / m.revenue) * 100 : 0;
+                      const width = maxRevenue > 0 ? (m.revenue / maxRevenue) * 100 : 0;
+                      return (
+                        <TableRow key={m.month} hover>
+                          <TableCell>{MONTHS[m.month]}</TableCell>
+                          <TableCell>{m.reservations}</TableCell>
+                          <TableCell>{m.roomNights}</TableCell>
+                          <TableCell>{money(m.revenue)}</TableCell>
+                          <TableCell>{money(m.paid)}</TableCell>
+                          <TableCell>{collection.toFixed(1)}%</TableCell>
+                          <TableCell sx={{ minWidth: 170 }}>
                             <Box
                               sx={{
-                                width: `${width}%`,
-                                height: "100%",
-                                bgcolor: "#0ea5e9",
+                                width: "100%",
+                                height: 8,
+                                borderRadius: 999,
+                                bgcolor: "#e2e8f0",
+                                overflow: "hidden",
                               }}
-                            />
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                            >
+                              <Box
+                                sx={{
+                                  width: `${width}%`,
+                                  height: "100%",
+                                  bgcolor: "#0ea5e9",
+                                }}
+                              />
+                            </Box>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
 
             <Box
               mt={1.2}

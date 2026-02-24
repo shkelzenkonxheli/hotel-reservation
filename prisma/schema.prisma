@@ -37,7 +37,7 @@ model reservations {
   payment_method           String?         @default("cash") @db.VarChar(20)
   notifications            notifications[]
   rooms                    rooms?          @relation(fields: [room_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  users                    users?          @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  users                    users?          @relation(fields: [user_id], references: [id], onUpdate: NoAction)
 }
 
 model rooms {
@@ -59,11 +59,6 @@ model users {
   email                      String          @unique @db.VarChar(100)
   password                   String          @db.VarChar(200)
   role                       String          @default("client") @db.VarChar(50)
-  staff_position             String?         @db.VarChar(80)
-  employment_start_date      DateTime?       @db.Date
-  employment_status          String          @default("active") @db.VarChar(30)
-  salary_type                String          @default("monthly") @db.VarChar(20)
-  base_salary                Decimal?        @db.Decimal(10, 2)
   phone                      String?         @db.VarChar(50)
   address                    String?
   created_at                 DateTime        @default(now()) @db.Timestamp(6)
@@ -72,9 +67,14 @@ model users {
   email_verified             Boolean?        @default(false)
   email_verification_token   String?         @db.VarChar(255)
   email_verification_expires DateTime?       @db.Timestamp(6)
+  base_salary                Decimal?        @db.Decimal(10, 2)
+  employment_start_date      DateTime?       @db.Date
+  employment_status          String          @default("active") @db.VarChar(30)
+  salary_type                String          @default("monthly") @db.VarChar(20)
+  staff_position             String?         @db.VarChar(80)
+  expenses                   expenses[]
   notifications              notifications[]
   reservations               reservations[]
-  expenses                   expenses[]
 }
 
 model activity_logs {
@@ -112,16 +112,16 @@ model notifications {
 }
 
 model expenses {
-  id             Int       @id @default(autoincrement())
-  expense_date   DateTime  @db.Date
-  category       String    @db.VarChar(50)
-  amount         Decimal   @db.Decimal(10, 2)
-  payment_method String    @default("cash") @db.VarChar(20)
-  note           String?   @db.VarChar(255)
+  id             Int      @id @default(autoincrement())
+  expense_date   DateTime @db.Date
+  category       String   @db.VarChar(50)
+  amount         Decimal  @db.Decimal(10, 2)
+  payment_method String   @default("cash") @db.VarChar(20)
+  note           String?  @db.VarChar(255)
   created_by_id  Int?
-  created_by     String?   @db.VarChar(100)
-  created_at     DateTime  @default(now()) @db.Timestamp(6)
-  users          users?    @relation(fields: [created_by_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  created_by     String?  @db.VarChar(100)
+  created_at     DateTime @default(now()) @db.Timestamp(6)
+  users          users?   @relation(fields: [created_by_id], references: [id], onUpdate: NoAction)
 
   @@index([expense_date])
   @@index([category])

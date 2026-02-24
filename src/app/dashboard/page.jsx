@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -52,7 +52,7 @@ const collapsedWidth = 76;
 // lartësia e AppBar-it të header-it (afërsisht 64px)
 const HEADER_HEIGHT = 64;
 
-export default function Dashboard() {
+function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const reservationId = searchParams.get("reservationId");
@@ -386,5 +386,19 @@ export default function Dashboard() {
         {activeTab === "permissions" && <PermissionsTab />}
       </Box>
     </Box>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense
+      fallback={
+        <Box className="flex justify-center items-center h-screen">
+          <CircularProgress />
+        </Box>
+      }
+    >
+      <DashboardContent />
+    </Suspense>
   );
 }

@@ -20,7 +20,6 @@ export async function POST(req) {
       roomId,
     } = await req.json();
 
-    // ✅ Minimum sanity checks (mos i lër të zbrazëta)
     if (!userEmail || !startDate || !endDate || !type) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -52,8 +51,6 @@ export async function POST(req) {
         phone: phone ?? "",
         address: address ?? "",
         guests: String(guests ?? ""),
-        // ❌ mos vendos reservation_code këtu
-        // ❌ mos u mbështet te totalPrice nga klienti (për moment po e lëmë vetëm për email UX)
         totalPrice: String(totalPrice ?? ""),
         roomName: roomName ?? "",
       },

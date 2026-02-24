@@ -59,8 +59,8 @@ export default function ReservationCard({
           bookingState === "CANCELLED"
             ? "#fee2e2"
             : bookingState === "FINISHED"
-              ? "#dcfce7"
-              : "#dbeafe",
+              ? "#fef9c3"
+              : "#dcfce7",
         border: "1px solid var(--admin-border)",
       }}
     >

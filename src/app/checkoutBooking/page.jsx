@@ -140,7 +140,7 @@ export default function CheckoutBooking() {
     return text.split("\n")[0];
   };
 
-  const SummaryCard = () => (
+  const renderSummaryCard = () => (
     <PublicCard className="p-5 md:p-6">
       <div className="aspect-[4/3] w-full overflow-hidden rounded-2xl">
         <img
@@ -227,7 +227,7 @@ export default function CheckoutBooking() {
     </PublicCard>
   );
 
-  const UserForm = () => (
+  const renderUserForm = () => (
     <PublicCard className="p-5 md:p-6">
       <div className="flex items-center justify-between mb-2">
         <Typography variant="h6" fontWeight={800}>
@@ -335,17 +335,17 @@ export default function CheckoutBooking() {
                     <DialogContent
                       sx={{ maxHeight: "70vh", overflowY: "auto", pb: 4 }}
                     >
-                      <SummaryCard />
+                      {renderSummaryCard()}
                     </DialogContent>
                   </Dialog>
                 </PublicCard>
               ) : null}
 
-              <UserForm />
+              {renderUserForm()}
             </div>
 
             <div className="hidden lg:block lg:sticky lg:top-24">
-              <SummaryCard />
+              {renderSummaryCard()}
             </div>
           </div>
         </PublicContainer>

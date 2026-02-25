@@ -13,7 +13,7 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
-
+import { useState } from "react";
 import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
@@ -40,7 +40,11 @@ export default function ProfilePage() {
   const [hasChanged, setHasChanged] = React.useState(false);
   const [avatarUrl, setAvatarUrl] = React.useState("");
   const [uploadingAvatar, setUploadingAvatar] = React.useState(false);
-
+  const [feedback, setFeedback] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
   React.useEffect(() => {
     if (session?.user) {
       setForm({
@@ -74,14 +78,22 @@ export default function ProfilePage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || "Failed to upload avatar");
         return;
       }
       setAvatarUrl(data.avatar_url || "");
       await update({ avatar_url: data.avatar_url || "" });
+      setFeedback({
+        open: true,
+        message: "Photo changed successfully",
+        severity: "success",
+      });
     } catch (error) {
       console.error(error);
-      alert("Failed to upload avatar");
+      setFeedback({
+        open: true,
+        message: "Failed to change your photo",
+        severity: "error",
+      });
     } finally {
       setUploadingAvatar(false);
       e.target.value = "";
@@ -102,10 +114,18 @@ export default function ProfilePage() {
         address: form.address,
         avatar_url: avatarUrl,
       });
-      setOpenAlert(true);
+      setFeedback({
+        open: true,
+        message: "Successfully updated profile",
+        severity: "success",
+      });
       setHasChanged(false);
     } else {
-      alert("Failed to update profile");
+      setFeedback({
+        open: true,
+        message: "Failed to update profile",
+        severity: "success",
+      });
     }
   };
 
@@ -211,7 +231,9 @@ export default function ProfilePage() {
 
                   <Divider sx={{ mb: 3 }} />
 
-                  <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
+                  <Box
+                    sx={{ display: "flex", justifyContent: "center", mb: 3 }}
+                  >
                     <Button
                       variant="outlined"
                       component="label"
@@ -228,7 +250,9 @@ export default function ProfilePage() {
                     </Button>
                   </Box>
 
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  <Box
+                    sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+                  >
                     <TextField
                       label="Full Name"
                       name="name"
@@ -300,13 +324,18 @@ export default function ProfilePage() {
                 </Box>
 
                 <Snackbar
-                  open={openAlert}
-                  autoHideDuration={3000}
-                  onClose={() => setOpenAlert(false)}
-                  anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                  open={feedback.open}
+                  autoHideDuration={4000}
+                  onClose={() => setFeedback({ ...feedback, open: false })}
+                  anchorOrigin={{ vertical: "top", horizontal: "right" }}
                 >
-                  <Alert severity="success" onClose={() => setOpenAlert(false)}>
-                    Profile updated successfully.
+                  <Alert
+                    severity={feedback.severity}
+                    variant="filled"
+                    onClose={() => setFeedback({ ...feedback, open: false })}
+                    sx={{ fontWeight: 600 }}
+                  >
+                    {feedback.message}
                   </Alert>
                 </Snackbar>
               </TabPanel>

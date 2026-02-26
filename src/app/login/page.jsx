@@ -44,13 +44,9 @@ export default function LoginPage() {
     message: "",
     severity: "success",
   });
-  const [hasLoginSuccessParam, setHasLoginSuccessParam] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
-    setHasLoginSuccessParam(params.get("login") === "success");
-  }, []);
+  const hasLoginSuccessParam =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("login") === "success";
 
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -86,7 +82,7 @@ export default function LoginPage() {
     );
   }
 
-  if (status === "authenticated") {
+  if (status === "authenticated" && !hasLoginSuccessParam && !feedback.open) {
     return null;
   }
 

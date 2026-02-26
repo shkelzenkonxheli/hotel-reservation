@@ -2,17 +2,18 @@
 
 import { useSession, signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Box,
   Button,
   CircularProgress,
   TextField,
   Typography,
-  Alert,
   Divider,
   IconButton,
   InputAdornment,
+  Alert,
+  Snackbar,
 } from "@mui/material";
 import {
   EmailOutlined,
@@ -30,6 +31,7 @@ export default function LoginPage() {
   usePageTitle("Login | Dijari Premium");
 
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, status } = useSession();
 
   const [email, setEmail] = useState("");
@@ -38,12 +40,32 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
+  const [feedback, setFeedback] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   useEffect(() => {
-    if (status === "authenticated") {
+    if (status !== "authenticated") return;
+    if (searchParams.get("login") === "success") return;
+    if (!feedback.open) {
       router.replace("/");
     }
-  }, [status, router]);
+  }, [status, router, feedback.open, searchParams]);
+
+  useEffect(() => {
+    if (searchParams.get("login") !== "success") return;
+    setFeedback({
+      open: true,
+      message: "Successfully logged in",
+      severity: "success",
+    });
+    const timer = setTimeout(() => {
+      router.replace("/");
+    }, 700);
+    return () => clearTimeout(timer);
+  }, [searchParams, router]);
 
   if (status === "loading") {
     return (
@@ -65,6 +87,7 @@ export default function LoginPage() {
   const handleLoginCredentials = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
 
     const res = await signIn("credentials", {
       email,
@@ -76,8 +99,9 @@ export default function LoginPage() {
       setError("Email is not verified. Please check your inbox.");
     } else if (res.error) {
       setError("Invalid email or password");
+    } else {
+      router.replace("/login?login=success");
     }
-    else router.push("/");
 
     setLoading(false);
   };
@@ -153,7 +177,11 @@ export default function LoginPage() {
                 variant="h4"
                 align="center"
                 fontWeight="bold"
-                sx={{ color: "#0f172a", fontSize: { xs: "1.7rem", md: "2rem" }, mt: 0.5 }}
+                sx={{
+                  color: "#0f172a",
+                  fontSize: { xs: "1.7rem", md: "2rem" },
+                  mt: 0.5,
+                }}
                 gutterBottom
               >
                 Welcome back
@@ -212,20 +240,20 @@ export default function LoginPage() {
                   }}
                 />
 
-              {error && (
-                <Alert
-                  severity={
-                    error.toLowerCase().includes("sent") ? "success" : "error"
-                  }
-                  sx={{ mt: 1 }}
-                >
-                  {error}
-                </Alert>
-              )}
+                {error && (
+                  <Alert
+                    severity={
+                      error.toLowerCase().includes("sent") ? "success" : "error"
+                    }
+                    sx={{ mt: 1 }}
+                  >
+                    {error}
+                  </Alert>
+                )}
 
-              <Button
-                fullWidth
-                variant="contained"
+                <Button
+                  fullWidth
+                  variant="contained"
                   sx={{
                     mt: 3,
                     py: 1.35,
@@ -240,25 +268,27 @@ export default function LoginPage() {
                   type="submit"
                   disabled={loading}
                 >
-                {loading ? (
-                  <CircularProgress size={26} color="inherit" />
-                ) : (
-                  "Login"
-                )}
+                  {loading ? (
+                    <CircularProgress size={26} color="inherit" />
+                  ) : (
+                    "Login"
+                  )}
+                </Button>
+              </Box>
+
+              <Button
+                fullWidth
+                variant="text"
+                sx={{ mt: 1, textTransform: "none" }}
+                onClick={handleResend}
+                disabled={resendLoading}
+              >
+                {resendLoading
+                  ? "Sending..."
+                  : "Didn't receive the link? Resend"}
               </Button>
-            </Box>
 
-            <Button
-              fullWidth
-              variant="text"
-              sx={{ mt: 1, textTransform: "none" }}
-              onClick={handleResend}
-              disabled={resendLoading}
-            >
-              {resendLoading ? "Sending..." : "Didn't receive the link? Resend"}
-            </Button>
-
-            <Divider sx={{ my: 3 }}>OR</Divider>
+              <Divider sx={{ my: 3 }}>OR</Divider>
 
               <Button
                 fullWidth
@@ -277,7 +307,7 @@ export default function LoginPage() {
                 }}
                 onClick={() =>
                   signIn("google", {
-                    callbackUrl: "/",
+                    callbackUrl: "/login?login=success",
                   })
                 }
               >
@@ -303,6 +333,21 @@ export default function LoginPage() {
           </Box>
         </PublicContainer>
       </PublicSection>
+      <Snackbar
+        open={feedback.open}
+        autoHideDuration={4000}
+        onClose={() => setFeedback({ ...feedback, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          severity={feedback.severity}
+          variant="filled"
+          onClose={() => setFeedback({ ...feedback, open: false })}
+          sx={{ fontWeight: 600 }}
+        >
+          {feedback.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

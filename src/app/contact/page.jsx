@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Alert, Box, Button, Stack, TextField, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import PublicContainer from "../components/Public/PublicContainer";
 import PublicSection from "../components/Public/PublicSection";
 import PublicCard from "../components/Public/PublicCard";
@@ -38,7 +45,6 @@ export default function ContactPage() {
       <PublicSection className="pt-10">
         <PublicContainer>
           <div className="max-w-3xl">
-            <p className="public-badge">Contact</p>
             <h1 className="text-3xl md:text-4xl font-semibold mt-3">
               Let&apos;s plan your stay
             </h1>
@@ -100,7 +106,11 @@ export default function ContactPage() {
                   <Button
                     type="submit"
                     variant="contained"
-                    sx={{ textTransform: "none", borderRadius: 2, fontWeight: 700 }}
+                    sx={{
+                      textTransform: "none",
+                      borderRadius: 2,
+                      fontWeight: 700,
+                    }}
                   >
                     Send message
                   </Button>

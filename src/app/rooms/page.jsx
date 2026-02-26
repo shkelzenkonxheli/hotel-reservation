@@ -133,7 +133,6 @@ export default function RoomsPage() {
       <PublicSection className="pt-12">
         <PublicContainer>
           <div className="text-center max-w-2xl mx-auto">
-            <p className="public-badge">Dijari Premium</p>
             <h2 className="text-3xl md:text-4xl font-semibold mt-3">
               Available room types
             </h2>
@@ -283,13 +282,9 @@ export default function RoomsPage() {
               X
             </button>
 
-            <h2 className="text-xl font-semibold mb-4">
-              {expandedRoom.name}
-            </h2>
+            <h2 className="text-xl font-semibold mb-4">{expandedRoom.name}</h2>
 
-            <p className="text-slate-600 text-sm">
-              {expandedRoom.description}
-            </p>
+            <p className="text-slate-600 text-sm">{expandedRoom.description}</p>
 
             {Array.isArray(expandedRoom.amenities) &&
             expandedRoom.amenities.length > 0 ? (

@@ -261,7 +261,7 @@ export default function ProfilePage() {
                     <TextField
                       label="Full Name"
                       name="name"
-                      value={form.name}
+                      value={user.name}
                       onChange={handleInput}
                       fullWidth
                     />

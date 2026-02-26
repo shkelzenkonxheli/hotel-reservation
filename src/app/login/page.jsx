@@ -2,7 +2,7 @@
 
 import { useSession, signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   Box,
   Button,
@@ -31,7 +31,6 @@ export default function LoginPage() {
   usePageTitle("Login | Dijari Premium");
 
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { data: session, status } = useSession();
 
   const [email, setEmail] = useState("");
@@ -45,17 +44,24 @@ export default function LoginPage() {
     message: "",
     severity: "success",
   });
+  const [hasLoginSuccessParam, setHasLoginSuccessParam] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    setHasLoginSuccessParam(params.get("login") === "success");
+  }, []);
 
   useEffect(() => {
     if (status !== "authenticated") return;
-    if (searchParams.get("login") === "success") return;
+    if (hasLoginSuccessParam) return;
     if (!feedback.open) {
       router.replace("/");
     }
-  }, [status, router, feedback.open, searchParams]);
+  }, [status, router, feedback.open, hasLoginSuccessParam]);
 
   useEffect(() => {
-    if (searchParams.get("login") !== "success") return;
+    if (!hasLoginSuccessParam) return;
     setFeedback({
       open: true,
       message: "Successfully logged in",
@@ -65,7 +71,7 @@ export default function LoginPage() {
       router.replace("/");
     }, 700);
     return () => clearTimeout(timer);
-  }, [searchParams, router]);
+  }, [hasLoginSuccessParam, router]);
 
   if (status === "loading") {
     return (

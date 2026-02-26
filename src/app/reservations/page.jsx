@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
   Box,
@@ -28,6 +28,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import PublicContainer from "../components/Public/PublicContainer";
 import PublicSection from "../components/Public/PublicSection";
 import PublicCard from "../components/Public/PublicCard";
+import usePageTitle from "../hooks/usePageTitle";
 
 const FALLBACK_IMG =
   "https://images.unsplash.com/photo-1501117716987-c8e2a5d4d3f4?auto=format&fit=crop&w=1400&q=80";
@@ -47,6 +48,9 @@ function isCompleted(endDate) {
 }
 
 export default function ReservationsPage() {
+  const pathname = usePathname();
+  usePageTitle(pathname === "/reservations" ? "My Bookings | Dijari Premium" : "");
+
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("upcoming");
@@ -214,86 +218,92 @@ export default function ReservationsPage() {
 
   return (
     <Box className="public-page min-h-screen">
-      <PublicSection className="pt-10">
+      <PublicSection className="pt-2 md:pt-4">
         <PublicContainer>
-          <div className="max-w-3xl">
-            <p className="public-badge">Your stays</p>
-            <Typography variant="h3" fontWeight={900} sx={{ mb: 0.5 }}>
+          <div className="max-w-lg">
+            <Typography
+              variant="h5"
+              fontWeight={800}
+              sx={{ mb: 0.5, fontSize: { xs: "1.45rem", md: "1.75rem" } }}
+            >
               My bookings
             </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-              Manage your reservations and travel plans.
+            <Typography variant="body2" color="text.secondary">
+              Review upcoming stays, completed bookings, and cancellations.
             </Typography>
           </div>
 
-          <Tabs
-            value={tab}
-            onChange={(_, v) => setTab(v)}
-            variant="scrollable"
-            scrollButtons="auto"
-            allowScrollButtonsMobile
-            sx={{
-              mb: 3,
-              "& .MuiTabs-indicator": { display: "none" },
-              "& .MuiTab-root": {
-                textTransform: "none",
-                fontWeight: 800,
-                borderRadius: 999,
-                minHeight: 44,
-                px: 2,
-                mr: 1,
-                bgcolor: "rgba(0,0,0,0.04)",
-              },
-              "& .Mui-selected": {
-                bgcolor: "#0ea5e9",
-                color: "white !important",
-              },
-            }}
-          >
-            <Tab
-              value="upcoming"
-              label={
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <span>Upcoming</span>
-                  <Chip
-                    size="small"
-                    label={upcoming.length}
-                    sx={{
-                      height: 22,
-                      fontWeight: 800,
-                      bgcolor:
-                        tab === "upcoming"
-                          ? "rgba(255,255,255,0.25)"
-                          : "rgba(0,0,0,0.08)",
-                      color: tab === "upcoming" ? "white" : "text.primary",
-                    }}
-                  />
-                </Stack>
-              }
-            />
-            <Tab
-              value="completed"
-              label={
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <span>Completed</span>
-                  <Chip
-                    size="small"
-                    label={completed.length}
-                    sx={{
-                      height: 22,
-                      fontWeight: 800,
-                      bgcolor:
-                        tab === "completed"
-                          ? "rgba(255,255,255,0.25)"
-                          : "rgba(0,0,0,0.08)",
-                      color: tab === "completed" ? "white" : "text.primary",
-                    }}
-                  />
-                </Stack>
-              }
-            />
-            <Tab value="cancelled" label="Cancelled" />
-          </Tabs>
+          {reservations.length > 0 ? (
+            <Tabs
+              value={tab}
+              onChange={(_, v) => setTab(v)}
+              variant="scrollable"
+              scrollButtons="auto"
+              allowScrollButtonsMobile
+              sx={{
+                mt: 2,
+                mb: 3,
+                "& .MuiTabs-indicator": { display: "none" },
+                "& .MuiTab-root": {
+                  textTransform: "none",
+                  fontWeight: 800,
+                  borderRadius: 999,
+                  minHeight: 44,
+                  px: 2,
+                  mr: 1,
+                  bgcolor: "rgba(0,0,0,0.04)",
+                },
+                "& .Mui-selected": {
+                  bgcolor: "#0ea5e9",
+                  color: "white !important",
+                },
+              }}
+            >
+              <Tab
+                value="upcoming"
+                label={
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <span>Upcoming</span>
+                    <Chip
+                      size="small"
+                      label={upcoming.length}
+                      sx={{
+                        height: 22,
+                        fontWeight: 800,
+                        bgcolor:
+                          tab === "upcoming"
+                            ? "rgba(255,255,255,0.25)"
+                            : "rgba(0,0,0,0.08)",
+                        color: tab === "upcoming" ? "white" : "text.primary",
+                      }}
+                    />
+                  </Stack>
+                }
+              />
+              <Tab
+                value="completed"
+                label={
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <span>Completed</span>
+                    <Chip
+                      size="small"
+                      label={completed.length}
+                      sx={{
+                        height: 22,
+                        fontWeight: 800,
+                        bgcolor:
+                          tab === "completed"
+                            ? "rgba(255,255,255,0.25)"
+                            : "rgba(0,0,0,0.08)",
+                        color: tab === "completed" ? "white" : "text.primary",
+                      }}
+                    />
+                  </Stack>
+                }
+              />
+              <Tab value="cancelled" label="Cancelled" />
+            </Tabs>
+          ) : null}
 
           {list.length === 0 ? (
             <PublicCard className="p-8 text-center">
@@ -305,7 +315,8 @@ export default function ReservationsPage() {
             <Stack spacing={2}>
               {list.map((r) => {
                 const roomType = r.rooms?.type;
-                const img = (roomType && typeCoverMap[roomType]) || FALLBACK_IMG;
+                const img =
+                  (roomType && typeCoverMap[roomType]) || FALLBACK_IMG;
                 const title = r.rooms?.name || "Unnamed Room";
                 const locationLine = r.rooms?.room_number
                   ? `Room #${r.rooms.room_number}`
@@ -357,7 +368,11 @@ export default function ReservationsPage() {
                               }}
                             />
 
-                            <Typography variant="h5" fontWeight={900} sx={{ mt: 1 }}>
+                            <Typography
+                              variant="h5"
+                              fontWeight={900}
+                              sx={{ mt: 1 }}
+                            >
                               {title}
                             </Typography>
 
@@ -368,7 +383,10 @@ export default function ReservationsPage() {
                               sx={{ mt: 0.5 }}
                             >
                               <LocationOnOutlinedIcon fontSize="small" />
-                              <Typography variant="body2" color="text.secondary">
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                              >
                                 {locationLine}
                               </Typography>
                             </Stack>
@@ -379,14 +397,22 @@ export default function ReservationsPage() {
                               alignItems="center"
                               sx={{ mt: 1 }}
                             >
-                              <Stack direction="row" spacing={0.75} alignItems="center">
+                              <Stack
+                                direction="row"
+                                spacing={0.75}
+                                alignItems="center"
+                              >
                                 <CalendarMonthOutlinedIcon fontSize="small" />
                                 <Typography variant="body2">
                                   {formatRange(r.start_date, r.end_date)}
                                 </Typography>
                               </Stack>
 
-                              <Stack direction="row" spacing={0.75} alignItems="center">
+                              <Stack
+                                direction="row"
+                                spacing={0.75}
+                                alignItems="center"
+                              >
                                 <GroupOutlinedIcon fontSize="small" />
                                 <Typography variant="body2">
                                   {r.guests ?? 1} Guests
@@ -492,7 +518,8 @@ export default function ReservationsPage() {
                 <b>Payment status:</b> {details.status}
               </Typography>
               <Typography variant="body2">
-                <b>Dates:</b> {formatRange(details.start_date, details.end_date)}
+                <b>Dates:</b>{" "}
+                {formatRange(details.start_date, details.end_date)}
               </Typography>
               <Typography variant="body2">
                 <b>Guests:</b> {details.guests ?? 1}

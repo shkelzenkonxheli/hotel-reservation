@@ -5,8 +5,11 @@ import { Alert, Box, Button, Stack, TextField, Typography } from "@mui/material"
 import PublicContainer from "../components/Public/PublicContainer";
 import PublicSection from "../components/Public/PublicSection";
 import PublicCard from "../components/Public/PublicCard";
+import usePageTitle from "../hooks/usePageTitle";
 
 export default function ContactPage() {
+  usePageTitle("Contact | Dijari Premium");
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");

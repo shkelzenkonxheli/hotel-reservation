@@ -25,8 +25,11 @@ import {
 import PublicContainer from "../components/Public/PublicContainer";
 import PublicSection from "../components/Public/PublicSection";
 import PublicCard from "../components/Public/PublicCard";
+import usePageTitle from "../hooks/usePageTitle";
 
 export default function RegisterPage() {
+  usePageTitle("Register | Dijari Premium");
+
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -77,7 +80,7 @@ export default function RegisterPage() {
 
       if (res.ok) {
         setMessage(
-          "A verification link was sent to your email. Please verify before signing in."
+          "A verification link was sent to your email. Please verify before signing in.",
         );
         setTimeout(() => router.push("/login"), 2000);
       } else {
@@ -101,12 +104,22 @@ export default function RegisterPage() {
         backgroundRepeat: "no-repeat",
       }}
     >
-      <PublicSection className="pt-10">
+      <PublicSection className="py-0">
         <PublicContainer>
-          <div className="max-w-md mx-auto">
+          <Box
+            sx={{
+              minHeight: { xs: "calc(100vh - 72px)", md: "calc(100vh - 84px)" },
+              display: "grid",
+              placeItems: "center",
+              py: { xs: 4, md: 6 },
+            }}
+          >
             <PublicCard
-              className="p-6 md:p-8"
-              style={{ backgroundColor: "rgba(255,255,255,0.96)" }}
+              className="w-full max-w-md p-8 md:p-9"
+              style={{
+                backgroundColor: "#ffffff",
+                boxShadow: "0 20px 48px rgba(15,23,42,0.12)",
+              }}
             >
               <Typography
                 variant="h5"
@@ -177,7 +190,9 @@ export default function RegisterPage() {
                     ),
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton onClick={() => setShowPassword(!showPassword)}>
+                        <IconButton
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
                           {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
                       </InputAdornment>
@@ -255,7 +270,7 @@ export default function RegisterPage() {
                 Continue with Google
               </Button>
             </PublicCard>
-          </div>
+          </Box>
         </PublicContainer>
       </PublicSection>
     </Box>

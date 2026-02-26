@@ -23,7 +23,6 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DashboardIcon from "@mui/icons-material/Dashboard";
-import HomeIcon from "@mui/icons-material/Home";
 import LoginIcon from "@mui/icons-material/Login";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
@@ -127,15 +126,21 @@ export default function Header() {
 
   const showDashboard = user && user.role !== "client";
   const isDashboard = pathname?.startsWith("/dashboard");
+  const isLoggedIn = Boolean(user);
+
+  const navSurface = isLoggedIn
+    ? "linear-gradient(90deg, #eef6ff 0%, #f8fbff 100%)"
+    : "#f8fafc";
+  const navBorder = isLoggedIn ? "#bfdbfe" : "#e2e8f0";
 
   return (
     <AppBar
       position="sticky"
       elevation={0}
       sx={{
-        backgroundColor: "#f8fafc",
+        background: navSurface,
         color: "#0f172a",
-        borderBottom: "1px solid #e2e8f0",
+        borderBottom: `1px solid ${navBorder}`,
       }}
     >
       <Toolbar
@@ -149,23 +154,33 @@ export default function Header() {
       >
         {/* LEFT — LOGO */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Box
-            component="img"
-            src="/hotel-images/Logo.png"
-            alt="Dijari Premium"
-            sx={{
-              width: 44,
-              height: 44,
-              borderRadius: 2,
-              objectFit: "contain",
-              backgroundColor: "#ffffff",
-              border: "1px solid #e2e8f0",
-              p: 0.5,
-            }}
-          />
+          <Link
+            href="/"
+            aria-label="Go to home"
+            style={{ display: "inline-flex", textDecoration: "none" }}
+          >
+            <Box
+              component="img"
+              src="/hotel-images/Logo.png"
+              alt="Dijari Premium"
+              sx={{
+                width: 44,
+                height: 44,
+                borderRadius: 2,
+                objectFit: "contain",
+                backgroundColor: "#ffffff",
+                border: "1px solid #e2e8f0",
+                p: 0.5,
+                cursor: "pointer",
+              }}
+            />
+          </Link>
           <Box>
             <Typography variant="subtitle1" fontWeight={800} lineHeight={1}>
-              <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
+              <Link
+                href="/"
+                style={{ color: "inherit", textDecoration: "none" }}
+              >
                 Dijari Premium
               </Link>
             </Typography>
@@ -176,42 +191,25 @@ export default function Header() {
             ) : null}
           </Box>
         </Box>
-
-        {/* CENTER — DESKTOP NAVIGATION */}
-        <Box className="hidden md:flex items-center gap-2">
-          <Button
-            component={Link}
-            href="/"
-            startIcon={<HomeIcon sx={{ fontSize: 20 }} />}
-            sx={{
-              color: "#0f172a",
-              textTransform: "none",
-              fontWeight: 600,
-              "&:hover": { backgroundColor: "#f1f5f9" },
-            }}
-          >
-            Home
-          </Button>
-
-          <Button
-            component={Link}
-            href="/contact"
-            sx={{
-              color: "#0f172a",
-              textTransform: "none",
-              fontWeight: 600,
-              "&:hover": { backgroundColor: "#f1f5f9" },
-            }}
-          >
-            Contact
-          </Button>
-        </Box>
-
         {/* RIGHT — PROFILE, NOTIFICATIONS, LOGOUT */}
         <Box
           className="hidden md:flex items-center gap-2"
           sx={{ marginLeft: "auto" }}
         >
+          {!user && (
+            <Button
+              component={Link}
+              href="/contact"
+              sx={{
+                color: "#0f172a",
+                textTransform: "none",
+                fontWeight: 600,
+                "&:hover": { backgroundColor: "#f1f5f9" },
+              }}
+            >
+              Contact
+            </Button>
+          )}
           {/* Notifications (only worker/admin) */}
           {isClient && user && user.role !== "client" && (
             <>
@@ -227,13 +225,13 @@ export default function Header() {
                     "&:hover": { backgroundColor: "#f1f5f9" },
                   }}
                 >
-                <Badge
-                  badgeContent={unreadCount}
-                  color="error"
-                  overlap="circular"
-                >
-                  <NotificationsIcon sx={{ fontSize: 20 }} />
-                </Badge>
+                  <Badge
+                    badgeContent={unreadCount}
+                    color="error"
+                    overlap="circular"
+                  >
+                    <NotificationsIcon sx={{ fontSize: 20 }} />
+                  </Badge>
                 </IconButton>
               </Tooltip>
 
@@ -460,7 +458,11 @@ export default function Header() {
                     "&:hover": { backgroundColor: "#f1f5f9" },
                   }}
                 >
-                  <Badge badgeContent={unreadCount} color="error" overlap="circular">
+                  <Badge
+                    badgeContent={unreadCount}
+                    color="error"
+                    overlap="circular"
+                  >
                     <NotificationsIcon sx={{ fontSize: 20 }} />
                   </Badge>
                 </IconButton>
@@ -484,10 +486,18 @@ export default function Header() {
                   <Typography variant="subtitle1" fontWeight="bold" mb={1}>
                     Housekeeping Alerts
                   </Typography>
-                  <Typography>Checkin Today: {summary?.checkin_today ?? 0}</Typography>
-                  <Typography>Checkouts Today: {summary?.checkout_today ?? 0}</Typography>
-                  <Typography>Needs Cleaning: {summary?.needs_cleaning ?? 0}</Typography>
-                  <Typography>Out of Order: {summary?.out_of_order ?? 0}</Typography>
+                  <Typography>
+                    Checkin Today: {summary?.checkin_today ?? 0}
+                  </Typography>
+                  <Typography>
+                    Checkouts Today: {summary?.checkout_today ?? 0}
+                  </Typography>
+                  <Typography>
+                    Needs Cleaning: {summary?.needs_cleaning ?? 0}
+                  </Typography>
+                  <Typography>
+                    Out of Order: {summary?.out_of_order ?? 0}
+                  </Typography>
 
                   <Divider sx={{ my: 1.5 }} />
 
@@ -500,25 +510,36 @@ export default function Header() {
                       No notifications
                     </Typography>
                   ) : (
-                    <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                    <Box
+                      sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+                    >
                       {notifications.slice(0, 6).map((n) => (
                         <Box
                           key={n.id}
                           sx={{
                             p: 1,
                             borderRadius: 2,
-                            bgcolor: n.is_read ? "transparent" : "rgba(212,163,115,0.18)",
-                            borderLeft: n.is_read ? "0px solid transparent" : "4px solid #d4a373",
+                            bgcolor: n.is_read
+                              ? "transparent"
+                              : "rgba(212,163,115,0.18)",
+                            borderLeft: n.is_read
+                              ? "0px solid transparent"
+                              : "4px solid #d4a373",
                             cursor: "pointer",
                           }}
                           onClick={() => {
                             closeAlerts();
                             if (n.reservation_id) {
-                              router.push(`/dashboard?reservationId=${n.reservation_id}`);
+                              router.push(
+                                `/dashboard?reservationId=${n.reservation_id}`,
+                              );
                             }
                           }}
                         >
-                          <Typography fontWeight={n.is_read ? 700 : 950} fontSize={14}>
+                          <Typography
+                            fontWeight={n.is_read ? 700 : 950}
+                            fontSize={14}
+                          >
                             {n.title}
                           </Typography>
                           <Typography variant="body2" sx={{ lineHeight: 1.25 }}>
@@ -568,18 +589,16 @@ export default function Header() {
           }}
         >
           {[
-            <MenuItem key="home" component={Link} href="/" onClick={closeMenu}>
-              Home
-            </MenuItem>,
-
-            <MenuItem
-              key="contact"
-              component={Link}
-              href="/contact"
-              onClick={closeMenu}
-            >
-              Contact
-            </MenuItem>,
+            !user && (
+              <MenuItem
+                key="contact"
+                component={Link}
+                href="/contact"
+                onClick={closeMenu}
+              >
+                Contact
+              </MenuItem>
+            ),
 
             !user && (
               <MenuItem
@@ -642,3 +661,5 @@ export default function Header() {
     </AppBar>
   );
 }
+
+

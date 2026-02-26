@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import {
   Typography,
   Box,
@@ -23,8 +25,11 @@ import ReservationsPage from "../reservations/page";
 import PublicContainer from "../components/Public/PublicContainer";
 import PublicSection from "../components/Public/PublicSection";
 import PublicCard from "../components/Public/PublicCard";
+import usePageTitle from "../hooks/usePageTitle";
 
 export default function ProfilePage() {
+  usePageTitle("Profile | Dijari Premium");
+
   const { data: session, status, update } = useSession();
 
   const [value, setValue] = React.useState("1");
@@ -39,6 +44,7 @@ export default function ProfilePage() {
 
   const [hasChanged, setHasChanged] = React.useState(false);
   const [avatarUrl, setAvatarUrl] = React.useState("");
+  const router = useRouter();
   const [uploadingAvatar, setUploadingAvatar] = React.useState(false);
   const [feedback, setFeedback] = useState({
     open: false,
@@ -143,19 +149,18 @@ export default function ProfilePage() {
     setHasChanged(false);
   };
 
+  useEffect(() => {
+    if (status === "loading") return;
+    if (!session) router.push("/");
+  }, [status, session, router]);
+
   if (status === "loading") {
     return (
       <Typography sx={{ mt: 4, textAlign: "center" }}>Loading...</Typography>
     );
   }
 
-  if (!session) {
-    return (
-      <Typography sx={{ mt: 4, textAlign: "center" }}>
-        You are not logged in.
-      </Typography>
-    );
-  }
+  if (!session) return null;
 
   const user = session.user;
 

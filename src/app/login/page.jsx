@@ -24,8 +24,11 @@ import {
 import PublicContainer from "../components/Public/PublicContainer";
 import PublicSection from "../components/Public/PublicSection";
 import PublicCard from "../components/Public/PublicCard";
+import usePageTitle from "../hooks/usePageTitle";
 
 export default function LoginPage() {
+  usePageTitle("Login | Dijari Premium");
+
   const router = useRouter();
   const { data: session, status } = useSession();
 

@@ -46,6 +46,7 @@ import ManageRoomsTab from "../components/Dashboard/ManageRooms";
 import ActivityLogsTab from "../components/Dashboard/ActivityLogsTab";
 import PermissionsTab from "../components/Dashboard/PremissionsTabs";
 import { DASHBOARD_TABS } from "@/lib/dashboardTabs";
+import usePageTitle from "../hooks/usePageTitle";
 
 const drawerWidth = 256;
 const collapsedWidth = 76;
@@ -53,6 +54,8 @@ const collapsedWidth = 76;
 const HEADER_HEIGHT = 64;
 
 function DashboardContent() {
+  usePageTitle("Dashboard | Dijari Premium");
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const reservationId = searchParams.get("reservationId");

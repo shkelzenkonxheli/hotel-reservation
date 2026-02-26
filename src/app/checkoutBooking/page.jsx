@@ -20,8 +20,11 @@ import { useSession } from "next-auth/react";
 import PublicContainer from "../components/Public/PublicContainer";
 import PublicSection from "../components/Public/PublicSection";
 import PublicCard from "../components/Public/PublicCard";
+import usePageTitle from "../hooks/usePageTitle";
 
 export default function CheckoutBooking() {
+  usePageTitle("Checkout | Dijari Premium");
+
   const { booking } = useBooking();
   const router = useRouter();
   const { data: session, status } = useSession();

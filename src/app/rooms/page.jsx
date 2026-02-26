@@ -12,6 +12,7 @@ import PublicContainer from "../components/Public/PublicContainer";
 import PublicSection from "../components/Public/PublicSection";
 import PublicCard from "../components/Public/PublicCard";
 import { useSession } from "next-auth/react";
+import usePageTitle from "../hooks/usePageTitle";
 
 function fYMD(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
@@ -21,6 +22,8 @@ function fYMD(date) {
 }
 
 export default function RoomsPage() {
+  usePageTitle("Rooms | Dijari Premium");
+
   const [roomTypes, setRoomTypes] = useState([]);
   const [showDateInput, setShowDateInput] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);

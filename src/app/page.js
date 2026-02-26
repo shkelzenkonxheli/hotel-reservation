@@ -3,8 +3,11 @@ import Link from "next/link";
 import PublicContainer from "./components/Public/PublicContainer";
 import PublicSection from "./components/Public/PublicSection";
 import PublicCard from "./components/Public/PublicCard";
+import usePageTitle from "./hooks/usePageTitle";
 
 export default function Home() {
+  usePageTitle("Home | Dijari Premium");
+
   return (
     <div className="public-page min-h-screen">
       {/* Hero */}
@@ -15,7 +18,6 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/50"></div>
         <PublicContainer className="h-full flex items-center">
           <div className="relative z-10 max-w-2xl text-white space-y-5">
-            <span className="public-badge">Dijari Premium</span>
             <h1 className="text-4xl md:text-6xl font-bold leading-tight">
               A refined stay for business and leisure
             </h1>
@@ -43,9 +45,6 @@ export default function Home() {
                 aesthetic. Every room is curated for comfort, privacy, and
                 effortless relaxation.
               </p>
-              <Link href="/rooms" className="public-button primary">
-                Explore Rooms
-              </Link>
             </div>
             <PublicCard className="p-6">
               <h3 className="text-xl font-semibold mb-2">What you get</h3>

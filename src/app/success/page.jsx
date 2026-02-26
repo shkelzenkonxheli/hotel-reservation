@@ -11,8 +11,11 @@ import {
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import usePageTitle from "../hooks/usePageTitle";
 
 export default function SuccessPage() {
+  usePageTitle("Success | Dijari Premium");
+
   const [reservation, setReservation] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();

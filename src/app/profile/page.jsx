@@ -33,7 +33,7 @@ export default function ProfilePage() {
   const { data: session, status, update } = useSession();
 
   const [value, setValue] = React.useState("1");
-  const [openAlert, setOpenAlert] = React.useState(false);
+  const [saving, setSaving] = useState(false);
 
   const [form, setForm] = React.useState({
     name: "",
@@ -53,8 +53,9 @@ export default function ProfilePage() {
   });
   React.useEffect(() => {
     if (session?.user) {
+      const fallbackName = session.user.email?.split("@")?.[0] || "User";
       setForm({
-        name: session.user.name || "",
+        name: session.user.name || fallbackName,
         phone: session.user.phone || "",
         address: session.user.address || "",
         email: session.user.email || "",
@@ -107,39 +108,45 @@ export default function ProfilePage() {
   };
 
   const handleSave = async () => {
-    const res = await fetch("/api/profile/update", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, avatar_url: avatarUrl }),
-    });
+    try {
+      setSaving(true);
+      const res = await fetch("/api/profile/update", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, avatar_url: avatarUrl }),
+      });
 
-    if (res.ok) {
-      await update({
-        name: form.name,
-        phone: form.phone,
-        address: form.address,
-        avatar_url: avatarUrl,
-      });
-      setFeedback({
-        open: true,
-        message: "Successfully updated profile",
-        severity: "success",
-      });
-      setHasChanged(false);
-    } else {
-      setFeedback({
-        open: true,
-        message: "Failed to update profile",
-        severity: "success",
-      });
+      if (res.ok) {
+        await update({
+          name: form.name,
+          phone: form.phone,
+          address: form.address,
+          avatar_url: avatarUrl,
+        });
+        setFeedback({
+          open: true,
+          message: "Successfully updated profile",
+          severity: "success",
+        });
+        setHasChanged(false);
+      } else {
+        setFeedback({
+          open: true,
+          message: "Failed to update profile",
+          severity: "error",
+        });
+      }
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleCancel = () => {
     if (!session?.user) return;
+    const fallbackName = session.user.email?.split("@")?.[0] || "User";
 
     setForm({
-      name: session.user.name || "",
+      name: session.user.name || fallbackName,
       phone: session.user.phone || "",
       address: session.user.address || "",
       email: session.user.email || "",
@@ -163,6 +170,7 @@ export default function ProfilePage() {
   if (!session) return null;
 
   const user = session.user;
+  const displayName = form.name || user.name || user.email?.split("@")?.[0] || "User";
 
   return (
     <Box className="public-page min-h-screen">
@@ -213,7 +221,7 @@ export default function ProfilePage() {
                     />
 
                     <Typography variant="h5" mt={1} fontWeight={700}>
-                      {user.name}
+                      {displayName}
                     </Typography>
 
                     <Typography variant="body2" color="text.secondary">
@@ -261,7 +269,7 @@ export default function ProfilePage() {
                     <TextField
                       label="Full Name"
                       name="name"
-                      value={user.name}
+                      value={form.name}
                       onChange={handleInput}
                       fullWidth
                     />
@@ -302,14 +310,14 @@ export default function ProfilePage() {
                     <Button
                       variant="contained"
                       onClick={handleSave}
-                      disabled={!hasChanged}
+                      disabled={!hasChanged || saving}
                       sx={{
                         borderRadius: 2,
                         textTransform: "none",
                         width: { xs: "100%", sm: "auto" },
                       }}
                     >
-                      Save changes
+                      {saving ? "Saving..." : "Save changes"}
                     </Button>
 
                     <Button

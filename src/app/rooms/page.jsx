@@ -25,6 +25,7 @@ export default function RoomsPage() {
   usePageTitle("Rooms | Dijari Premium");
 
   const [roomTypes, setRoomTypes] = useState([]);
+  const [loadingRooms, setLoadingRooms] = useState(true);
   const [showDateInput, setShowDateInput] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
 
@@ -44,9 +45,17 @@ export default function RoomsPage() {
 
   useEffect(() => {
     async function fetchRooms() {
-      const response = await fetch("/api/rooms-type");
-      const data = await response.json();
-      setRoomTypes(data);
+      try {
+        setLoadingRooms(true);
+        const response = await fetch("/api/rooms-type");
+        const data = await response.json();
+        setRoomTypes(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Failed to fetch rooms:", error);
+        setRoomTypes([]);
+      } finally {
+        setLoadingRooms(false);
+      }
     }
     fetchRooms();
   }, []);
@@ -104,6 +113,7 @@ export default function RoomsPage() {
       return;
     }
     if (!session?.user) {
+      alert("You need to login first");
       router.push("/login");
       return;
     }
@@ -130,9 +140,9 @@ export default function RoomsPage() {
 
   return (
     <div className="public-page min-h-screen">
-      <PublicSection className="pt-12">
+      <PublicSection className="!pt-4 !pb-0">
         <PublicContainer>
-          <div className="text-center max-w-2xl mx-auto">
+          <div className="text-center max-w-2xl mx-auto mb-2">
             <h2 className="text-3xl md:text-4xl font-semibold mt-3">
               Available room types
             </h2>
@@ -144,66 +154,85 @@ export default function RoomsPage() {
         </PublicContainer>
       </PublicSection>
 
-      <PublicSection className="pt-2 pb-16">
+      <PublicSection className="!pt-0 pb-16">
         <PublicContainer>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
-            {roomTypes.map((room) => (
-              <PublicCard
-                key={room.type}
-                className="overflow-hidden flex flex-col transition duration-200 hover:-translate-y-1"
-              >
-                <div className="relative h-56 w-full">
-                  <Swiper
-                    modules={[Navigation, Pagination]}
-                    navigation
-                    pagination={{ clickable: true }}
-                    className="h-full w-full cursor-pointer"
-                    onClick={() => setGalleryRoom(room)}
-                  >
-                    {room.images.map((img, i) => (
-                      <SwiperSlide key={i}>
-                        <img src={img} className="w-full h-full object-cover" />
-                      </SwiperSlide>
-                    ))}
-                  </Swiper>
-
-                  <span className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">
-                    {room.type}
-                  </span>
-                </div>
-
-                <div className="p-4 flex flex-col justify-between flex-grow">
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-900">
-                      {room.name}
-                    </h3>
-                    <p className="text-slate-500 text-sm mt-1 line-clamp-2">
-                      {getFirstLine(room.description)}
-                    </p>
-                    <button
-                      className="text-slate-700 text-sm mt-2 underline underline-offset-4 w-fit"
-                      onClick={() => setExpandedRoom(room)}
-                    >
-                      View details
-                    </button>
+          {loadingRooms ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
+              {[...Array(6)].map((_, i) => (
+                <PublicCard key={i} className="overflow-hidden animate-pulse">
+                  <div className="h-56 w-full bg-slate-200" />
+                  <div className="p-4 space-y-3">
+                    <div className="h-4 w-2/3 rounded bg-slate-200" />
+                    <div className="h-3 w-full rounded bg-slate-100" />
+                    <div className="h-3 w-5/6 rounded bg-slate-100" />
+                    <div className="h-9 w-28 rounded bg-slate-200 mt-4" />
                   </div>
+                </PublicCard>
+              ))}
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
+              {roomTypes.map((room) => (
+                <PublicCard
+                  key={room.type}
+                  className="overflow-hidden flex flex-col transition duration-200 hover:-translate-y-1"
+                >
+                  <div className="relative h-56 w-full">
+                    <Swiper
+                      modules={[Navigation, Pagination]}
+                      navigation
+                      pagination={{ clickable: true }}
+                      className="h-full w-full cursor-pointer"
+                      onClick={() => setGalleryRoom(room)}
+                    >
+                      {room.images.map((img, i) => (
+                        <SwiperSlide key={i}>
+                          <img
+                            src={img}
+                            className="w-full h-full object-cover"
+                          />
+                        </SwiperSlide>
+                      ))}
+                    </Swiper>
 
-                  <div className="flex items-center justify-between mt-5">
-                    <span className="text-slate-900 font-semibold text-sm">
-                      EUR {Number(room.price || 0).toFixed(2)} / night
+                    <span className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">
+                      {room.type}
                     </span>
-
-                    <button
-                      className="public-button primary text-sm px-4 py-2"
-                      onClick={() => handleBookClick(room)}
-                    >
-                      Book now
-                    </button>
                   </div>
-                </div>
-              </PublicCard>
-            ))}
-          </div>
+
+                  <div className="p-4 flex flex-col justify-between flex-grow">
+                    <div>
+                      <h3 className="text-lg font-semibold text-slate-900">
+                        {room.name}
+                      </h3>
+                      <p className="text-slate-500 text-sm mt-1 line-clamp-2">
+                        {getFirstLine(room.description)}
+                      </p>
+                      <button
+                        className="text-slate-700 cursor-pointer text-sm mt-2 underline underline-offset-4 w-fit"
+                        onClick={() => setExpandedRoom(room)}
+                      >
+                        View details
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between mt-5">
+                      <span className="text-slate-900 font-semibold text-sm">
+                        EUR {Number(room.price || 0).toFixed(2)} / night
+                      </span>
+
+                      <button
+                        className="public-button primary cursor-pointer text-sm px-4 py-2"
+                        onClick={() => handleBookClick(room)}
+                      >
+                        Book now
+                      </button>
+                    </div>
+                  </div>
+                </PublicCard>
+              ))}
+            </div>
+          )}
         </PublicContainer>
       </PublicSection>
 
@@ -249,7 +278,7 @@ export default function RoomsPage() {
 
             <div className="flex justify-between mt-4">
               <button
-                className="public-button ghost"
+                className="public-button ghost cursor-pointer "
                 onClick={() => {
                   setShowDateInput(false);
                   setSelectedRoom(null);
@@ -259,7 +288,7 @@ export default function RoomsPage() {
               </button>
 
               <button
-                className={`public-button primary ${
+                className={`public-button primary cursor-pointer  ${
                   !startDate || !endDate ? "opacity-60 cursor-not-allowed" : ""
                 }`}
                 onClick={checkAvailability}
@@ -276,7 +305,7 @@ export default function RoomsPage() {
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-3">
           <div className="public-card p-5 md:p-6 max-w-lg w-full relative">
             <button
-              className="absolute top-3 right-3 text-slate-500"
+              className="absolute top-3 right-3 text-slate-500 cursor-pointer "
               onClick={() => setExpandedRoom(null)}
             >
               X
@@ -307,7 +336,7 @@ export default function RoomsPage() {
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
           <div className="relative w-full max-w-4xl px-3 md:px-4">
             <button
-              className="absolute -top-10 right-0 text-white text-2xl"
+              className="absolute -top-10 right-0 text-white text-2xl cursor-pointer "
               onClick={() => setGalleryRoom(null)}
             >
               X

@@ -35,6 +35,11 @@ const theme = createTheme({
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" type="image/svg+xml" href="/hotel-images/Logo-round.svg" />
+        <link rel="shortcut icon" type="image/svg+xml" href="/hotel-images/Logo-round.svg" />
+        <link rel="apple-touch-icon" href="/hotel-images/Logo.png" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 text-gray-900`}
       >

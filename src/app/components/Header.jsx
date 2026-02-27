@@ -164,13 +164,14 @@ export default function Header() {
               src="/hotel-images/Logo.png"
               alt="Dijari Premium"
               sx={{
-                width: 44,
-                height: 44,
-                borderRadius: 2,
-                objectFit: "contain",
+                width: 42,
+                height: 42,
+                borderRadius: "50%",
+                objectFit: "cover",
                 backgroundColor: "#ffffff",
-                border: "1px solid #e2e8f0",
-                p: 0.5,
+                border: "1px solid rgba(15,23,42,0.08)",
+                boxShadow: "0 2px 10px rgba(15,23,42,0.08)",
+                p: 0.25,
                 cursor: "pointer",
               }}
             />

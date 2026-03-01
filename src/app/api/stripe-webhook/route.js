@@ -3,6 +3,8 @@ import prisma from "@/lib/prisma";
 import Stripe from "stripe";
 import { Resend } from "resend";
 import { nanoid } from "nanoid";
+import { reservationConfirmationTemplate } from "@/lib/email/reservationConfirmationTemplate";
+import { adminReservationTemplate } from "@/lib/email/adminReservationTemplate";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -45,17 +47,17 @@ export async function POST(req) {
     const session = event.data.object;
     const meta = session.metadata;
 
-    // ✅ safety: ensure actually paid
+    // Safety: ensure actually paid.
     if (session.payment_status !== "paid") {
       console.log(
-        "ℹ️ Session completed but not paid:",
+        "Session completed but not paid:",
         session.id,
         session.payment_status,
       );
       return NextResponse.json({ received: true });
     }
 
-    // ✅ idempotency: do not create twice
+    // Idempotency: do not create twice.
     const already = await prisma.reservations.findFirst({
       where: { stripe_session_id: session.id },
       select: { id: true },
@@ -63,36 +65,34 @@ export async function POST(req) {
 
     if (already) {
       console.log(
-        "↩️ Webhook replay detected, reservation already exists:",
+        "Webhook replay detected, reservation already exists:",
         already.id,
       );
       return NextResponse.json({ received: true });
     }
 
-    console.log("✅ Payment confirmed for:", session.customer_email);
+    console.log("Payment confirmed for:", session.customer_email);
 
     const user = await prisma.users.findUnique({
       where: { email: session.customer_email },
     });
 
     if (!user) {
-      console.warn("⚠️ User not found:", session.customer_email);
+      console.warn("User not found:", session.customer_email);
       return NextResponse.json({ message: "User not found" }, { status: 200 });
     }
 
-    // Load candidate rooms
     const rooms = await prisma.rooms.findMany({
       where: { type: meta.type },
       include: { reservations: true },
     });
 
-    // Find one available room
-
-    // Pick the first room without date overlap for the requested range.
     const start = parseDateOnlyToUTC(meta.startDate);
     const end = parseDateOnlyToUTC(meta.endDate);
+
     const availableRoom = rooms.find((room) => {
-      if (room.status === "out_of_order") return;
+      if (room.status === "out_of_order") return false;
+
       const conflict = room.reservations.some((reservation) => {
         if (reservation.cancelled_at) return false;
         if (reservation.admin_hidden) return false;
@@ -103,20 +103,20 @@ export async function POST(req) {
         const rEnd = parseDateOnlyToUTC(
           reservation.end_date.toISOString().slice(0, 10),
         );
+
         return start < rEnd && end > rStart;
       });
+
       return !conflict;
     });
 
     if (!availableRoom) {
-      console.error("❌ No available rooms for:", meta.type);
+      console.error("No available rooms for:", meta.type);
       return NextResponse.json({ message: "No available room found" });
     }
 
-    // Normalize total price to a numeric value.
     const totalPrice = Number(meta.totalPrice || 0);
 
-    // ✅ create reservation with payment fields
     let created;
     try {
       created = await prisma.reservations.create({
@@ -126,34 +126,28 @@ export async function POST(req) {
           user_id: user.id,
           start_date: start,
           end_date: end,
-
           status: "confirmed",
-
           full_name: meta.fullname,
           phone: meta.phone,
           address: meta.address,
           guests: parseInt(meta.guests, 10),
-
           total_price: totalPrice,
-
-          // payment tracking
           payment_method: "card",
           stripe_session_id: session.id,
           stripe_payment_intent_id: session.payment_intent ?? null,
           payment_status: "PAID",
           amount_paid: totalPrice,
           paid_at: new Date(),
-          // invoice_number: `INV-${new Date().getFullYear()}-${String(session.id).slice(-8).toUpperCase()}`, // opsionale
         },
       });
     } catch (error) {
       if (isOverlapError(error)) {
-        console.error("❌ Overlap prevented by DB constraint");
+        console.error("Overlap prevented by DB constraint");
         return NextResponse.json({ message: "No available room found" });
       }
       throw error;
     }
-    // Create a padded invoice number like INV-2026-000123.
+
     const year = new Date().getFullYear();
     const invoiceNumber = `INV-${year}-${String(created.id).padStart(6, "0")}`;
 
@@ -174,45 +168,39 @@ export async function POST(req) {
         is_read: false,
       },
     });
+
     await resend.emails.send({
       from: "Hotel Reservation <onboarding@dijaripremium.com>",
       to: session.customer_email,
       subject: "Your Reservation is Confirmed!",
-      html: `
-        <h2>Hello ${meta.fullname},</h2>
-        <p>Your reservation has been successfully confirmed.</p>
-
-        <h3>Reservation Details</h3>
-        <p><strong>Room:</strong> ${availableRoom.name}</p>
-        <p><strong>Check-in:</strong> ${meta.startDate}</p>
-        <p><strong>Check-out:</strong> ${meta.endDate}</p>
-        <p><strong>Total Price:</strong> €${meta.totalPrice}</p>
-
-        <p><strong>Reservation code:</strong> ${created.reservation_code}</p>
-
-        <br/>
-        <p>Thank you for choosing our hotel!</p>
-      `,
+      html: reservationConfirmationTemplate({
+        fullname: meta.fullname,
+        roomName: availableRoom.name,
+        startDate: meta.startDate,
+        endDate: meta.endDate,
+        totalPrice: meta.totalPrice,
+        reservationCode: created.reservation_code,
+      }),
     });
 
     await resend.emails.send({
       from: "Hotel System <onboarding@dijaripremium.com>",
       to: adminEmail,
-      subject: "📩 New Reservation Received",
-      html: `
-        <h2>New Reservation Created</h2>
-        <p><strong>Client:</strong> ${meta.fullname}</p>
-        <p><strong>Phone:</strong> ${meta.phone}</p>
-        <p><strong>Room Type:</strong> ${meta.type}</p>
-        <p><strong>Assigned Room:</strong> ${availableRoom.name}</p>
-        <p><strong>Dates:</strong> ${meta.startDate} → ${meta.endDate}</p>
-        <p><strong>Total:</strong> €${meta.totalPrice}</p>
-        <p><strong>Stripe session:</strong> ${session.id}</p>
-      `,
+      subject: "New Reservation Received",
+      html: adminReservationTemplate({
+        fullname: meta.fullname,
+        phone: meta.phone,
+        roomType: meta.type,
+        roomName: availableRoom.name,
+        startDate: meta.startDate,
+        endDate: meta.endDate,
+        totalPrice: meta.totalPrice,
+        sessionId: session.id,
+      }),
     });
 
     console.log(
-      `🏨 Reservation confirmed (#${created.id}) for ${user.email} in room #${availableRoom.id}`,
+      `Reservation confirmed (#${created.id}) for ${user.email} in room #${availableRoom.id}`,
     );
 
     return NextResponse.json({ received: true });

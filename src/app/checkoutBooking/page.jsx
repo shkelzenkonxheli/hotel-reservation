@@ -293,7 +293,6 @@ export default function CheckoutBooking() {
       <PublicSection className="pt-10">
         <PublicContainer>
           <div className="max-w-3xl">
-            <p className="public-badge">Checkout</p>
             <h2 className="text-3xl md:text-4xl font-semibold mt-3">
               Complete your booking
             </h2>
@@ -364,9 +363,7 @@ export default function CheckoutBooking() {
               X
             </button>
             <h2 className="text-xl font-semibold mb-4">{expandedRoom.name}</h2>
-            <p className="text-slate-600 text-sm">
-              {expandedRoom.description}
-            </p>
+            <p className="text-slate-600 text-sm">{expandedRoom.description}</p>
             {Array.isArray(expandedRoom.amenities) &&
             expandedRoom.amenities.length > 0 ? (
               <div className="mt-4 flex flex-wrap gap-2">

@@ -175,7 +175,7 @@ export async function POST(req) {
       },
     });
     await resend.emails.send({
-      from: "Hotel Reservation <onboarding@resend.dev>",
+      from: "Hotel Reservation <onboarding@dijaripremium.com>",
       to: session.customer_email,
       subject: "Your Reservation is Confirmed!",
       html: `
@@ -196,7 +196,7 @@ export async function POST(req) {
     });
 
     await resend.emails.send({
-      from: "Hotel System <onboarding@resend.dev>",
+      from: "Hotel System <onboarding@dijaripremium.com>",
       to: adminEmail,
       subject: "📩 New Reservation Received",
       html: `

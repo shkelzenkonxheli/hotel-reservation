@@ -371,8 +371,10 @@ function DashboardContent() {
         component="main"
         sx={{
           flexGrow: 1,
-          p: { xs: 2, md: 4 },
-          mt: { xs: 10, md: 2 },
+          px: { xs: 2, md: 4 },
+          pb: { xs: 2, md: 4 },
+          pt: { xs: 10, md: 4 },
+          mt: 0,
           bgcolor: "#f8fafc",
           minHeight: `calc(100vh - ${HEADER_HEIGHT}px)`,
         }}

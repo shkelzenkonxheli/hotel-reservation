@@ -3,7 +3,6 @@ import {
   Checkbox,
   FormControlLabel,
   Grid,
-  Paper,
   Typography,
 } from "@mui/material";
 
@@ -19,17 +18,7 @@ const TAB_DESCRIPTIONS = {
 
 export default function PermissionsGrid({ tabs, selectedTabs, onToggle }) {
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        border: "1px solid #e2e8f0",
-        borderRadius: 3,
-        p: 2,
-      }}
-    >
-      <Typography fontWeight={800} mb={1.5}>
-        Access Permissions
-      </Typography>
+    <Box>
       <Grid container spacing={1.2}>
         {tabs.map((t) => (
           <Grid item xs={12} md={6} key={t.key}>
@@ -70,6 +59,6 @@ export default function PermissionsGrid({ tabs, selectedTabs, onToggle }) {
           </Grid>
         ))}
       </Grid>
-    </Paper>
+    </Box>
   );
 }

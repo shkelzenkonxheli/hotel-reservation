@@ -173,7 +173,7 @@ export default function UsersTab() {
           subtitle="Create a user to get started."
         />
       ) : (
-        <SectionCard title="Users">
+        <SectionCard>
           {isMobile ? (
             <Box display="grid" gap={1.5}>
               {users.map((u) => (
@@ -249,7 +249,14 @@ export default function UsersTab() {
                     <TableCell sx={{ fontWeight: "bold" }} align="center">
                       Created At
                     </TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }} align="center">
+                    <TableCell
+                      sx={{
+                        fontWeight: "bold",
+                        width: 250,
+                        whiteSpace: "nowrap",
+                      }}
+                      align="right"
+                    >
                       Actions
                     </TableCell>
                   </TableRow>
@@ -277,12 +284,12 @@ export default function UsersTab() {
                             })
                           : "—"}
                       </TableCell>
-                      <TableCell align="center">
+                      <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                         <Box
                           display="flex"
-                          justifyContent="center"
+                          justifyContent="flex-end"
                           gap={1}
-                          flexWrap="wrap"
+                          flexWrap="nowrap"
                         >
                           <Button
                             variant="outlined"
@@ -292,6 +299,7 @@ export default function UsersTab() {
                               setSelectedUser(u);
                               setNewRole(u.role);
                             }}
+                            sx={{ minWidth: 132 }}
                           >
                             Change Role
                           </Button>
@@ -302,6 +310,7 @@ export default function UsersTab() {
                             startIcon={<Delete />}
                             disabled={u.role === "admin"}
                             onClick={() => handleDeleteUser(u.id)}
+                            sx={{ minWidth: 100 }}
                           >
                             Delete
                           </Button>

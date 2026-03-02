@@ -1,43 +1,33 @@
 import { Box, Button } from "@mui/material";
 
 export default function ReservationTabs({ activeTab, onChange }) {
+  const tabs = [
+    { key: "all", label: "All" },
+    { key: "upcoming", label: "Upcoming" },
+    { key: "today", label: "Today" },
+    { key: "present", label: "Present" },
+    { key: "past", label: "Past" },
+  ];
+
   return (
     <Box
       sx={{
         display: "flex",
+        flexWrap: "wrap",
         gap: 1.5,
         mb: 3,
         p: 1,
-        backgroundColor: "var(--admin-surface)",
-        border: "1px solid var(--admin-border)",
-        borderRadius: "var(--admin-radius)",
-        boxShadow: "var(--admin-shadow-sm)",
       }}
     >
-      <Button
-        variant={activeTab === "all" ? "contained" : "outlined"}
-        onClick={() => onChange("all")}
-      >
-        All
-      </Button>
-      <Button
-        variant={activeTab === "upcoming" ? "contained" : "outlined"}
-        onClick={() => onChange("upcoming")}
-      >
-        Upcoming
-      </Button>
-      <Button
-        variant={activeTab === "today" ? "contained" : "outlined"}
-        onClick={() => onChange("today")}
-      >
-        Today
-      </Button>
-      <Button
-        variant={activeTab === "past" ? "contained" : "outlined"}
-        onClick={() => onChange("past")}
-      >
-        Past
-      </Button>
+      {tabs.map((tab) => (
+        <Button
+          key={tab.key}
+          variant={activeTab === tab.key ? "contained" : "outlined"}
+          onClick={() => onChange(tab.key)}
+        >
+          {tab.label}
+        </Button>
+      ))}
     </Box>
   );
 }

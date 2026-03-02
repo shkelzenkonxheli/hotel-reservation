@@ -1,4 +1,4 @@
-import { Avatar, Box, Chip, Paper, Typography } from "@mui/material";
+import { Avatar, Box, Chip, Typography } from "@mui/material";
 
 function roleChipStyle(role) {
   if (role === "admin") {
@@ -11,31 +11,35 @@ export default function StaffProfileHeader({ selected }) {
   if (!selected) return null;
 
   return (
-    <Paper
-      elevation={0}
+    <Box
       sx={{
-        border: "1px solid #e2e8f0",
-        borderRadius: 3,
-        p: 2,
+        pb: 2.25,
       }}
     >
-      <Box display="flex" alignItems="center" gap={1.5}>
-        <Avatar src={selected.avatar_url || undefined} sx={{ width: 56, height: 56 }}>
+      <Box textAlign="center">
+        <Avatar
+          src={selected.avatar_url || undefined}
+          sx={{ width: 68, height: 68, mx: "auto", mb: 1.25 }}
+        >
           {(selected.name || selected.email || "?").slice(0, 1).toUpperCase()}
         </Avatar>
-        <Box flex={1}>
-          <Typography fontWeight={900} lineHeight={1.1}>
-            {selected.name || "No name"}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {selected.email}
-          </Typography>
-        </Box>
+        <Typography fontWeight={800} fontSize={16} lineHeight={1.15}>
+          {selected.name || "No name"}
+        </Typography>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          fontSize={13}
+          mt={0.4}
+        >
+          {selected.email}
+        </Typography>
         <Chip
           label={selected.role}
-          sx={{ fontWeight: 800, ...roleChipStyle(selected.role) }}
+          size="small"
+          sx={{ mt: 1.25, fontWeight: 800, ...roleChipStyle(selected.role) }}
         />
       </Box>
-    </Paper>
+    </Box>
   );
 }

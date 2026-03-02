@@ -151,7 +151,8 @@ export default function PermissionsTab() {
         body: JSON.stringify({
           allowed_tabs: selectedTabs,
           staff_position: selected.staff_position || "",
-          employment_start_date: toDateInput(selected.employment_start_date) || null,
+          employment_start_date:
+            toDateInput(selected.employment_start_date) || null,
           employment_status: selected.employment_status || "active",
           salary_type: selected.salary_type || "monthly",
           base_salary:
@@ -269,70 +270,79 @@ export default function PermissionsTab() {
             </Paper>
           ) : (
             <>
-              <StaffProfileHeader selected={selected} />
-              <EmploymentForm
-                selected={selected}
-                toDateInput={toDateInput}
-                updateSelectedField={updateSelectedField}
-              />
               <Paper
                 elevation={0}
                 sx={{
                   border: "1px solid #e2e8f0",
                   borderRadius: 3,
-                  p: 1.4,
-                }}
-              >
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="space-between"
-                  gap={1}
-                >
-                  <Typography fontWeight={800}>Access Permissions</Typography>
-                  <Button
-                    size="small"
-                    variant="text"
-                    onClick={() => setShowPermissions((prev) => !prev)}
-                    startIcon={
-                      showPermissions ? (
-                        <KeyboardArrowDownIcon />
-                      ) : (
-                        <KeyboardArrowRightIcon />
-                      )
-                    }
-                    sx={{ textTransform: "none", fontWeight: 700 }}
-                  >
-                    {showPermissions ? "Hide" : "Show"}
-                  </Button>
-                </Box>
-                <Collapse in={showPermissions}>
-                  <Box mt={1.2}>
-                    <PermissionsGrid
-                      tabs={DASHBOARD_TABS}
-                      selectedTabs={selectedTabs}
-                      onToggle={toggleTab}
-                    />
-                  </Box>
-                </Collapse>
-              </Paper>
-              <Paper
-                elevation={0}
-                sx={{
-                  border: "1px solid #e2e8f0",
-                  borderRadius: 3,
-                  p: 1.6,
+                  p: { xs: 2, md: 2.5 },
+                  display: "grid",
+                  gap: 2.5,
                   position: { md: "sticky" },
-                  bottom: { md: 16 },
-                  zIndex: 2,
+                  top: { md: 88 },
                   bgcolor: "white",
                 }}
               >
+                <StaffProfileHeader selected={selected} />
+
+                <EmploymentForm
+                  selected={selected}
+                  toDateInput={toDateInput}
+                  updateSelectedField={updateSelectedField}
+                />
+
                 <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="space-between"
-                  gap={2}
+                  sx={{
+                    borderTop: "1px solid #e2e8f0",
+                    pt: 2,
+                  }}
+                >
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    gap={1}
+                  >
+                    <Button
+                      size="small"
+                      variant="text"
+                      onClick={() => setShowPermissions((prev) => !prev)}
+                      startIcon={
+                        showPermissions ? (
+                          <KeyboardArrowDownIcon />
+                        ) : (
+                          <KeyboardArrowRightIcon />
+                        )
+                      }
+                      sx={{ textTransform: "none", fontWeight: 700 }}
+                    >
+                      {showPermissions
+                        ? "Hide permissions"
+                        : "Show permissions"}
+                    </Button>
+                  </Box>
+
+                  <Collapse in={showPermissions}>
+                    <Box mt={1.5}>
+                      <PermissionsGrid
+                        tabs={DASHBOARD_TABS}
+                        selectedTabs={selectedTabs}
+                        onToggle={toggleTab}
+                      />
+                    </Box>
+                  </Collapse>
+                </Box>
+
+                <Box
+                  sx={{
+                    borderTop: "1px solid #e2e8f0",
+                    pt: 2,
+                    display: "flex",
+                    alignItems: { xs: "stretch", sm: "center" },
+                    justifyContent: "space-between",
+                    gap: 2,
+                    flexDirection: { xs: "column", sm: "row" },
+                  }}
                 >
                   <Typography variant="caption" color="text.secondary">
                     Selected: {selectedTabs.length} permission(s)
@@ -341,9 +351,18 @@ export default function PermissionsTab() {
                     variant="contained"
                     onClick={save}
                     disabled={saving || !hasChanges}
-                    sx={{ borderRadius: 2, fontWeight: 800, minWidth: 140 }}
+                    sx={{
+                      borderRadius: 2,
+                      fontWeight: 800,
+                      minWidth: 140,
+                      width: { xs: "100%", sm: "auto" },
+                    }}
                   >
-                    {saving ? "Saving..." : hasChanges ? "Save Changes" : "Saved"}
+                    {saving
+                      ? "Saving..."
+                      : hasChanges
+                        ? "Save Changes"
+                        : "Saved"}
                   </Button>
                 </Box>
               </Paper>

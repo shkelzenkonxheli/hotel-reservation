@@ -208,8 +208,13 @@ export default function ManageRoomsTab() {
                   sx={{ p: 1.5, border: "1px solid #e2e8f0", borderRadius: 2 }}
                 >
                   <Box display="flex" justifyContent="space-between" gap={1}>
-                    <Typography fontWeight={700}>#{room.room_number}</Typography>
-                    <Typography sx={{ textTransform: "capitalize" }} color="text.secondary">
+                    <Typography fontWeight={700}>
+                      #{room.room_number}
+                    </Typography>
+                    <Typography
+                      sx={{ textTransform: "capitalize" }}
+                      color="text.secondary"
+                    >
                       {room.type}
                     </Typography>
                   </Box>
@@ -219,9 +224,7 @@ export default function ManageRoomsTab() {
                   <Typography variant="body2" color="text.secondary" mt={0.4}>
                     €{room.price}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" mt={0.8}>
-                    {room.description?.slice(0, 90) || "—"}
-                  </Typography>
+
                   <Box display="flex" gap={1} mt={1.2}>
                     <Button
                       fullWidth
@@ -236,7 +239,9 @@ export default function ManageRoomsTab() {
                       variant="outlined"
                       size="small"
                       color="error"
-                      onClick={() => setDeleteDialog({ open: true, roomId: room.id })}
+                      onClick={() =>
+                        setDeleteDialog({ open: true, roomId: room.id })
+                      }
                     >
                       Delete
                     </Button>
@@ -245,7 +250,11 @@ export default function ManageRoomsTab() {
               ))}
             </Box>
           ) : (
-            <TableContainer component={Paper} elevation={0} sx={{ overflowX: "auto" }}>
+            <TableContainer
+              component={Paper}
+              elevation={0}
+              sx={{ overflowX: "auto" }}
+            >
               <Table className="admin-table">
                 <TableHead>
                   <TableRow>
@@ -253,8 +262,13 @@ export default function ManageRoomsTab() {
                     <TableCell>Name</TableCell>
                     <TableCell>Type</TableCell>
                     <TableCell>Price (€)</TableCell>
-                    <TableCell>Description</TableCell>
-                    <TableCell align="center">Actions</TableCell>
+
+                    <TableCell
+                      align="right"
+                      sx={{ width: 220, whiteSpace: "nowrap" }}
+                    >
+                      Actions
+                    </TableCell>
                   </TableRow>
                 </TableHead>
 
@@ -267,10 +281,14 @@ export default function ManageRoomsTab() {
                         {room.type}
                       </TableCell>
                       <TableCell>€{room.price}</TableCell>
-                      <TableCell>{room.description?.slice(0, 60) || "—"}</TableCell>
 
-                      <TableCell align="center">
-                        <Box display="flex" gap={1} justifyContent="center" flexWrap="wrap">
+                      <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
+                        <Box
+                          display="flex"
+                          gap={1}
+                          justifyContent="flex-end"
+                          flexWrap="nowrap"
+                        >
                           <Button
                             variant="outlined"
                             size="small"

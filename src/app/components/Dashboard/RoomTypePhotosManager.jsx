@@ -132,10 +132,6 @@ export default function RoomTypePhotosManager() {
 
   return (
     <Box>
-      <Typography variant="h6" fontWeight="bold" mb={2}>
-        🖼️ Room Types Photos
-      </Typography>
-
       <Grid container spacing={2}>
         {roomTypes.map((rt) => {
           const list = imagesByType.get(rt.type) || [];

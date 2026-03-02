@@ -319,10 +319,24 @@ export default function RoomsTab() {
           <SectionCard
             title={`Apartments`}
             action={
-              <Box display="flex" gap={1} flexWrap="wrap" justifyContent="flex-end">
-                <StatusBadge label={`Booked: ${apartmentsCount.booked}`} tone="danger" />
-                <StatusBadge label={`Available: ${apartmentsCount.available}`} tone="success" />
-                <StatusBadge label={`Total: ${apartmentsCount.total}`} tone="neutral" />
+              <Box
+                display="flex"
+                gap={1}
+                flexWrap="wrap"
+                justifyContent="flex-end"
+              >
+                <StatusBadge
+                  label={`Booked: ${apartmentsCount.booked}`}
+                  tone="danger"
+                />
+                <StatusBadge
+                  label={`Available: ${apartmentsCount.available}`}
+                  tone="success"
+                />
+                <StatusBadge
+                  label={`Total: ${apartmentsCount.total}`}
+                  tone="neutral"
+                />
               </Box>
             }
           >
@@ -368,14 +382,27 @@ export default function RoomsTab() {
           <SectionCard
             title="Hotel Rooms"
             action={
-              <Box display="flex" gap={1} flexWrap="wrap" justifyContent="flex-end">
-                <StatusBadge label={`Booked: ${hotelRoomsCount.booked}`} tone="danger" />
-                <StatusBadge label={`Available: ${hotelRoomsCount.available}`} tone="success" />
-                <StatusBadge label={`Total: ${hotelRoomsCount.total}`} tone="neutral" />
+              <Box
+                display="flex"
+                gap={1}
+                flexWrap="wrap"
+                justifyContent="flex-end"
+              >
+                <StatusBadge
+                  label={`Booked: ${hotelRoomsCount.booked}`}
+                  tone="danger"
+                />
+                <StatusBadge
+                  label={`Available: ${hotelRoomsCount.available}`}
+                  tone="success"
+                />
+                <StatusBadge
+                  label={`Total: ${hotelRoomsCount.total}`}
+                  tone="neutral"
+                />
               </Box>
             }
           >
-
             <Grid container spacing={2}>
               {hotelRooms.map((room) => (
                 <Grid item xs={6} sm={4} md={3} key={room.id}>

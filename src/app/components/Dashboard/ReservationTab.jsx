@@ -217,6 +217,15 @@ export default function ReservationsTab() {
       return start === today;
     });
   }
+  if (activeTab === "present") {
+    const today = new Date().setHours(0, 0, 0, 0);
+    displayList = filtered.filter((r) => {
+      if (r.cancelled_at !== null) return false;
+      const start = new Date(r.start_date).setHours(0, 0, 0, 0);
+      const end = new Date(r.end_date).setHours(0, 0, 0, 0);
+      return start <= today && end > today;
+    });
+  }
   if (activeTab === "past") {
     const today = new Date().setHours(0, 0, 0, 0);
     displayList = filtered.filter((r) => {

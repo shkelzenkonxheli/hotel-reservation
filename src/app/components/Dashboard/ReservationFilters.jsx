@@ -27,9 +27,6 @@ export default function ReservationFilters({
         justifyContent: "space-between",
         mb: 3,
         p: 2,
-        backgroundColor: "var(--admin-surface)",
-        border: "1px solid var(--admin-border)",
-        borderRadius: 2,
       }}
     >
       <Box

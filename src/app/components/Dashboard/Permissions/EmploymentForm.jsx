@@ -1,10 +1,22 @@
-import { Box, Grid, MenuItem, Paper, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Grid,
+  MenuItem,
+  TextField,
+  Typography,
+} from "@mui/material";
 
 function FieldLabel({ text }) {
   return (
     <Typography
       variant="caption"
-      sx={{ fontSize: 11, letterSpacing: 0.5, textTransform: "uppercase", color: "#64748b", fontWeight: 700 }}
+      sx={{
+        fontSize: 11,
+        letterSpacing: 0.5,
+        textTransform: "uppercase",
+        color: "#64748b",
+        fontWeight: 700,
+      }}
     >
       {text}
     </Typography>
@@ -19,17 +31,7 @@ export default function EmploymentForm({
   if (!selected) return null;
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        border: "1px solid #e2e8f0",
-        borderRadius: 3,
-        p: 2,
-      }}
-    >
-      <Typography fontWeight={800} mb={1.5}>
-        Employment Details
-      </Typography>
+    <Box>
       <Grid container spacing={1.5}>
         <Grid item xs={12} sm={6}>
           <FieldLabel text="Position" />
@@ -38,7 +40,9 @@ export default function EmploymentForm({
             size="small"
             fullWidth
             value={selected.staff_position || ""}
-            onChange={(e) => updateSelectedField("staff_position", e.target.value)}
+            onChange={(e) =>
+              updateSelectedField("staff_position", e.target.value)
+            }
             sx={{ mt: 0.6 }}
           >
             <MenuItem value="receptionist">Receptionist</MenuItem>
@@ -57,7 +61,10 @@ export default function EmploymentForm({
             fullWidth
             value={toDateInput(selected.employment_start_date)}
             onChange={(e) =>
-              updateSelectedField("employment_start_date", e.target.value || null)
+              updateSelectedField(
+                "employment_start_date",
+                e.target.value || null,
+              )
             }
             sx={{ mt: 0.6 }}
           />
@@ -69,7 +76,9 @@ export default function EmploymentForm({
             size="small"
             fullWidth
             value={selected.employment_status || "active"}
-            onChange={(e) => updateSelectedField("employment_status", e.target.value)}
+            onChange={(e) =>
+              updateSelectedField("employment_status", e.target.value)
+            }
             sx={{ mt: 0.6 }}
           >
             <MenuItem value="active">Active</MenuItem>
@@ -107,6 +116,6 @@ export default function EmploymentForm({
           />
         </Grid>
       </Grid>
-    </Paper>
+    </Box>
   );
 }

@@ -225,7 +225,7 @@ export default function RoomsTab() {
       />
 
       {/* Filters */}
-      <SectionCard title="Filters">
+      <SectionCard>
         <Box
           display="flex"
           flexDirection={{ xs: "column", sm: "row" }}

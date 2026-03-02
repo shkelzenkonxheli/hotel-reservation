@@ -82,7 +82,7 @@ export default function activityLogTab() {
     if (actionFilter === "all") return logs;
 
     return logs.filter((log) =>
-      log.action?.toLowerCase().includes(actionFilter.toLowerCase())
+      log.action?.toLowerCase().includes(actionFilter.toLowerCase()),
     );
   }, [logs, actionFilter]);
   if (loading) {
@@ -105,7 +105,10 @@ export default function activityLogTab() {
             flexWrap="wrap"
             justifyContent="flex-end"
           >
-            <FormControl size="small" sx={{ minWidth: { xs: "100%", sm: 180 } }}>
+            <FormControl
+              size="small"
+              sx={{ minWidth: { xs: "100%", sm: 180 } }}
+            >
               <InputLabel>Action</InputLabel>
               <Select
                 label="Action"
@@ -137,7 +140,7 @@ export default function activityLogTab() {
       {filteredLogs.length === 0 ? (
         <EmptyState title="No activity logs found" />
       ) : (
-        <SectionCard title="Recent activity">
+        <SectionCard>
           {isMobile ? (
             <Box display="grid" gap={1.5}>
               {filteredLogs.map((log) => (
@@ -146,7 +149,12 @@ export default function activityLogTab() {
                   elevation={0}
                   sx={{ p: 1.5, border: "1px solid #e2e8f0", borderRadius: 2 }}
                 >
-                  <Box display="flex" justifyContent="space-between" alignItems="flex-start" gap={1}>
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="flex-start"
+                    gap={1}
+                  >
                     <Typography fontWeight={700}>{log.performed_by}</Typography>
                     <Checkbox
                       size="small"
@@ -155,7 +163,9 @@ export default function activityLogTab() {
                         if (e.target.checked) {
                           setSelectedIds((prev) => [...prev, log.id]);
                         } else {
-                          setSelectedIds((prev) => prev.filter((id) => id !== log.id));
+                          setSelectedIds((prev) =>
+                            prev.filter((id) => id !== log.id),
+                          );
                         }
                       }}
                     />
@@ -178,7 +188,12 @@ export default function activityLogTab() {
                   <Typography variant="body2" color="text.secondary" mt={0.8}>
                     {log.description || "—"}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary" mt={0.8} display="block">
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    mt={0.8}
+                    display="block"
+                  >
                     {new Date(log.created_at).toLocaleString("en-GB", {
                       day: "2-digit",
                       month: "short",
@@ -203,7 +218,8 @@ export default function activityLogTab() {
                             selectedIds.length < logs.length
                           }
                           checked={
-                            logs.length > 0 && selectedIds.length === logs.length
+                            logs.length > 0 &&
+                            selectedIds.length === logs.length
                           }
                           onChange={(e) => {
                             if (e.target.checked) {
@@ -218,7 +234,9 @@ export default function activityLogTab() {
                     <TableCell sx={{ fontWeight: "bold" }}>User</TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>Action</TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>Entity</TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>Description</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>
+                      Description
+                    </TableCell>
                     <TableCell sx={{ fontWeight: "bold" }} align="center">
                       Date
                     </TableCell>
@@ -243,7 +261,9 @@ export default function activityLogTab() {
                         />
                       </TableCell>
                       <TableCell>
-                        <Typography fontWeight={600}>{log.performed_by}</Typography>
+                        <Typography fontWeight={600}>
+                          {log.performed_by}
+                        </Typography>
                       </TableCell>
 
                       <TableCell>

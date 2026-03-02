@@ -134,7 +134,7 @@ export default function ManageRoomsTab() {
       />
 
       {!onlyWithPhotos && (
-        <SectionCard title="Filters">
+        <SectionCard>
           <Box
             display="flex"
             gap={2}

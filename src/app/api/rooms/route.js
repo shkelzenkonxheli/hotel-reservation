@@ -24,6 +24,11 @@ function normalizeAmenities(input) {
   return [...new Set(clean)];
 }
 
+function blocksRoom(status) {
+  const s = String(status || "").toLowerCase();
+  return s !== "cancelled" && s !== "completed";
+}
+
 // Handle GET requests for this route.
 export async function GET(request) {
   try {
@@ -107,6 +112,8 @@ export async function GET(request) {
       let latestCheckoutAt = null;
 
       for (const r of room.reservations) {
+        if (!blocksRoom(r.status)) continue;
+
         const startDay = normalizeUTC(r.start_date);
         const endDay = normalizeUTC(r.end_date);
 

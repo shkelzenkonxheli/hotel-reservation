@@ -25,10 +25,10 @@ export default function ReservationTable({
 }) {
   return (
     <div className="overflow-x-auto admin-card">
-      <table className="admin-table min-w-[980px]">
+      <table className="admin-table min-w-[900px]">
         <thead>
           <tr>
-            <th className="p-3 text-center">
+            <th className="px-2 py-2 text-center whitespace-nowrap text-xs">
               <Checkbox
                 size="small"
                 checked={allSelected}
@@ -36,15 +36,14 @@ export default function ReservationTable({
                 inputProps={{ "aria-label": "select all reservations" }}
               />
             </th>
-            <th className="p-3 text-center">Pin</th>
-            <th className="p-3 text-left">Code</th>
-            <th className="p-3 text-left">Guest</th>
-            <th className="p-3 text-left">Room</th>
-            <th className="p-3 text-center">Dates</th>
-            <th className="p-3 text-center">Status</th>
-            <th className="p-3 text-center">Total</th>
-            <th className="p-3 text-center">Invoice</th>
-            <th className="p-3 text-center">Actions</th>
+            <th className="px-2 py-2 text-center whitespace-nowrap text-xs">Pinned</th>
+            <th className="px-2 py-2 text-left whitespace-nowrap text-xs">Code</th>
+            <th className="px-2 py-2 text-left whitespace-nowrap text-xs">Guest</th>
+            <th className="px-2 py-2 text-left whitespace-nowrap text-xs">Room</th>
+            <th className="px-2 py-2 text-center whitespace-nowrap text-xs">Stay</th>
+            <th className="px-2 py-2 text-center whitespace-nowrap text-xs">Status</th>
+            <th className="px-2 py-2 text-center whitespace-nowrap text-xs">Total €</th>
+            <th className="px-2 py-2 text-center whitespace-nowrap text-xs">Actions</th>
           </tr>
         </thead>
 
@@ -59,7 +58,7 @@ export default function ReservationTable({
                   : "#dcfce7";
             return (
               <tr key={r.id} style={{ backgroundColor: rowBg }}>
-                <td className="p-3 text-center">
+                <td className="px-2 py-2 text-center">
                   <Checkbox
                     size="small"
                     checked={selectedIds.includes(r.id)}
@@ -67,7 +66,7 @@ export default function ReservationTable({
                     inputProps={{ "aria-label": "select reservation" }}
                   />
                 </td>
-                <td className="p-3 text-center">
+                <td className="px-2 py-2 text-center">
                   <IconButton onClick={() => onToggleFavorite(r.id)}>
                     {favorites.includes(r.id) ? (
                       <Star color="warning" />
@@ -76,16 +75,15 @@ export default function ReservationTable({
                     )}
                   </IconButton>
                 </td>
-
-                <td className="p-3 font-mono text-sm text-gray-700 whitespace-nowrap">
+                <td className="px-2 py-2 font-mono text-sm text-gray-700 whitespace-nowrap">
                   {r.reservation_code || "-"}
                 </td>
 
-                <td className="p-3 font-medium text-gray-800 whitespace-nowrap">
+                <td className="px-2 py-2 font-medium text-gray-800 whitespace-nowrap">
                   {r.full_name || "-"}
                 </td>
 
-                <td className="p-3">
+                <td className="px-2 py-2">
                   <div className="flex flex-col">
                     <span className="text-xs text-gray-600">
                       #{r.rooms?.room_number || "-"} {r.rooms?.type || "-"}
@@ -93,7 +91,7 @@ export default function ReservationTable({
                   </div>
                 </td>
 
-                <td className="p-3 text-center">
+                <td className="px-2 py-2 text-center">
                   <Box display="flex" flexDirection="column" gap={0.5}>
                     <Chip
                       size="small"
@@ -108,25 +106,13 @@ export default function ReservationTable({
                   </Box>
                 </td>
 
-                <td className="p-3 text-center">{getStatusChip(r.status)}</td>
+                <td className="px-2 py-2 text-center">{getStatusChip(r.status)}</td>
 
-                <td className="p-3 text-center font-semibold">
+                <td className="px-2 py-2 text-center font-semibold">
                   {Number(r.total_price ?? 0).toFixed(2)}
                 </td>
 
-                <td className="p-3 text-center">
-                  {r.invoice_number ? (
-                    <Chip
-                      label={r.invoice_number}
-                      size="small"
-                      sx={{ fontWeight: 600 }}
-                    />
-                  ) : (
-                    <span className="text-gray-500"></span>
-                  )}
-                </td>
-
-                <td className="p-3 text-center">
+                <td className="px-2 py-2 text-center">
                   <div className="flex items-center justify-center gap-1">
                     <Tooltip title="View details">
                       <IconButton size="small" onClick={() => onOpenDetails(r)}>

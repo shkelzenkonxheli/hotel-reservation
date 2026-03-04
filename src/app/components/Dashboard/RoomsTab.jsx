@@ -25,12 +25,18 @@ import PageHeader from "./ui/PageHeader";
 import SectionCard from "./ui/SectionCard";
 import StatusBadge from "./ui/StatusBadge";
 
+function formatLocalDateInput(date = new Date()) {
+  const d = new Date(date);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 export default function RoomsTab() {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0],
-  );
+  const [selectedDate, setSelectedDate] = useState(formatLocalDateInput());
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [filter, setFilter] = useState("all");
   const [showCalendar, setShowCalendar] = useState(false);

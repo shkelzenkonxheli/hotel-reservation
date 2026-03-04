@@ -55,6 +55,7 @@ export async function PATCH(req) {
       where: { id: Number(reservationId) },
       data: {
         cancelled_at: new Date(),
+        status: "cancelled",
         // Trim reason to a safe max length for storage.
         cancel_reason: typeof reason === "string" ? reason.slice(0, 255) : null,
       },

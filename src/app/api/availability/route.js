@@ -2,6 +2,11 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
+function blocksRoom(status) {
+  const s = String(status || "").toLowerCase();
+  return s !== "cancelled" && s !== "completed";
+}
+
 // Handle GET requests for this route.
 export async function GET(req) {
   try {
@@ -34,10 +39,14 @@ export async function GET(req) {
         room_id: true,
         start_date: true,
         end_date: true,
+        status: true,
       },
     });
 
-    return NextResponse.json({ roomCount, reservations });
+    return NextResponse.json({
+      roomCount,
+      reservations: reservations.filter((r) => blocksRoom(r.status)),
+    });
   } catch (err) {
     console.error("Availability API error:", err);
     return NextResponse.json({ roomCount: 0, reservations: [] });

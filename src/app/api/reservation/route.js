@@ -19,6 +19,29 @@ function isOverlapError(error) {
   );
 }
 
+async function syncReservationStatuses() {
+  const today = parseDateOnlyToUTC(new Date().toISOString().slice(0, 10));
+
+  // Any cancelled reservation must keep cancelled status.
+  await prisma.reservations.updateMany({
+    where: {
+      cancelled_at: { not: null },
+      NOT: { status: "cancelled" },
+    },
+    data: { status: "cancelled" },
+  });
+
+  // Finished reservations are marked completed after checkout day.
+  await prisma.reservations.updateMany({
+    where: {
+      cancelled_at: null,
+      end_date: { lte: today },
+      status: { in: ["pending", "confirmed"] },
+    },
+    data: { status: "completed" },
+  });
+}
+
 // Handle POST requests for this route.
 export async function POST(request) {
   try {
@@ -106,6 +129,7 @@ export async function POST(request) {
     const total = Number(total_price || 0);
     const payStatus = payment_status === "PAID" ? "PAID" : "UNPAID";
     const payMethod = payment_method === "card" ? "card" : "cash";
+    const reservationStatus = payStatus === "PAID" ? "confirmed" : "pending";
 
     // If unpaid, amount_paid is zero.
     const amountPaid = payStatus === "PAID" ? total : 0;
@@ -125,8 +149,7 @@ export async function POST(request) {
         start_date: start,
         end_date: end,
 
-        // walk-in zakonisht confirmed
-        status: "confirmed",
+        status: reservationStatus,
 
         full_name: fullname,
         phone,
@@ -210,6 +233,8 @@ export async function GET(request) {
       if (!session?.user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
+
+      await syncReservationStatuses();
 
       if (listAll === "true") {
         if (role !== "admin" && role !== "worker") {

@@ -4,6 +4,10 @@ import { useBooking } from "@/context/BookingContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
+  PaymentsOutlined,
+  AccountBalanceWalletOutlined,
+} from "@mui/icons-material";
+import {
   Box,
   Typography,
   TextField,
@@ -15,6 +19,8 @@ import {
   DialogContent,
   useTheme,
   useMediaQuery,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "@mui/material";
 import { useSession } from "next-auth/react";
 import PublicContainer from "../components/Public/PublicContainer";
@@ -41,6 +47,7 @@ export default function CheckoutBooking() {
   const [guests, setGuests] = useState(2);
   const [totalPrice, setTotalPrice] = useState(0);
   const [expandedRoom, setExpandedRoom] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState("card");
 
   /* ---------------- AUTH GUARD ---------------- */
   useEffect(() => {
@@ -109,29 +116,59 @@ export default function CheckoutBooking() {
 
     try {
       setLoading(true);
-      const res = await fetch("/api/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          totalPrice,
-          roomName: room.name,
-          userEmail: session.user.email,
-          type: room.type,
-          startDate,
-          endDate,
-          fullname,
-          phone,
-          address,
-          guests,
-          roomId: room.id,
-        }),
-      });
+      if (paymentMethod === "card") {
+        const res = await fetch("/api/create-checkout-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            totalPrice,
+            roomName: room.name,
+            userEmail: session.user.email,
+            type: room.type,
+            startDate,
+            endDate,
+            fullname,
+            phone,
+            address,
+            guests,
+            roomId: room.id,
+          }),
+        });
 
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-      else alert("Payment initialization failed.");
+        const data = await res.json();
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          alert("Payment initialization failed.");
+        }
+      } else {
+        const res = await fetch("/api/reservation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: room.type,
+            startDate,
+            endDate,
+            fullname,
+            phone,
+            address,
+            guests,
+            total_price: totalPrice,
+            payment_method: "cash",
+            payment_status: "UNPAID",
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data?.error || "Reservation failed.");
+          return;
+        }
+        alert("Reservation created as pending. Please pay at the hotel.");
+        router.push("/success");
+      }
     } catch (error) {
       console.error(error);
+      alert("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -266,6 +303,78 @@ export default function CheckoutBooking() {
           onChange={(e) => setGuests(Number(e.target.value))}
           helperText="Select the number of guests"
         />
+
+        <Box>
+          <Typography variant="subtitle2" fontWeight={800} sx={{ mb: 1 }}>
+            Payment method
+          </Typography>
+          <ToggleButtonGroup
+            fullWidth
+            exclusive
+            value={paymentMethod}
+            onChange={(_, value) => value && setPaymentMethod(value)}
+            size="medium"
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+              gap: 1.1,
+              "& .MuiToggleButtonGroup-grouped": {
+                border: "1px solid #dbe3ed !important",
+                borderRadius: "12px !important",
+                textTransform: "none",
+                justifyContent: "flex-start",
+                px: 1.5,
+                py: 1.2,
+                minHeight: 56,
+                fontWeight: 700,
+                color: "#334155",
+                backgroundColor: "#ffffff",
+              },
+              "& .Mui-selected": {
+                borderColor: "#0284c7 !important",
+                color: "#0369a1 !important",
+                backgroundColor: "#e0f2fe !important",
+                boxShadow: "inset 0 0 0 1px #0284c7",
+              },
+            }}
+          >
+            <ToggleButton value="card">
+              <Box display="flex" alignItems="center" gap={1}>
+                <PaymentsOutlined fontSize="small" />
+                <Box textAlign="left">
+                  <Typography fontSize={14} fontWeight={800}>
+                    Pay online
+                  </Typography>
+                  <Typography fontSize={12} color="text.secondary">
+                    Card via Stripe
+                  </Typography>
+                </Box>
+              </Box>
+            </ToggleButton>
+            <ToggleButton value="cash">
+              <Box display="flex" alignItems="center" gap={1}>
+                <AccountBalanceWalletOutlined fontSize="small" />
+                <Box textAlign="left">
+                  <Typography fontSize={14} fontWeight={800}>
+                    Pay at hotel
+                  </Typography>
+                  <Typography fontSize={12} color="text.secondary">
+                    Cash on arrival
+                  </Typography>
+                </Box>
+              </Box>
+            </ToggleButton>
+          </ToggleButtonGroup>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ mt: 1, display: "block" }}
+          >
+            {paymentMethod === "cash"
+              ? "Cash bookings are created as pending and can be confirmed by admin."
+              : "You will be redirected to secure Stripe checkout."}
+          </Typography>
+        </Box>
       </Box>
 
       <Divider sx={{ my: 3 }} />
@@ -281,7 +390,9 @@ export default function CheckoutBooking() {
         {loading ? (
           <CircularProgress size={24} color="inherit" />
         ) : (
-          "Confirm booking and pay"
+          paymentMethod === "cash"
+            ? "Confirm booking (pay at hotel)"
+            : "Confirm booking and pay"
         )}
       </Button>
     </PublicCard>

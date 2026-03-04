@@ -27,11 +27,65 @@ export async function PATCH(req, context) {
     const performedBy = session?.user?.email ?? "system";
 
     const body = await req.json();
+    const onlyPaymentFields = Object.keys(body).every((k) =>
+      ["payment_status", "payment_method", "status"].includes(k),
+    );
 
-    if (body.status && Object.keys(body).length === 1) {
+    if (body.payment_status && onlyPaymentFields) {
+      const existing = await prisma.reservations.findUnique({
+        where: { id: Number(id) },
+        select: { id: true, total_price: true },
+      });
+
+      if (!existing) {
+        return NextResponse.json(
+          { error: "Reservation not found" },
+          { status: 404 },
+        );
+      }
+
+      const nextPaymentStatus = body.payment_status === "PAID" ? "PAID" : "UNPAID";
+      const nextPaymentMethod =
+        body.payment_method === "card" || body.payment_method === "cash"
+          ? body.payment_method
+          : undefined;
+
+      const updateData = {
+        payment_status: nextPaymentStatus,
+        ...(nextPaymentMethod ? { payment_method: nextPaymentMethod } : {}),
+        ...(body.status ? { status: body.status } : {}),
+        amount_paid: nextPaymentStatus === "PAID" ? existing.total_price : 0,
+        paid_at: nextPaymentStatus === "PAID" ? new Date() : null,
+      };
+
       const updated = await prisma.reservations.update({
         where: { id: Number(id) },
-        data: { status: body.status },
+        data: updateData,
+        include: {
+          users: { select: { email: true } },
+          rooms: true,
+        },
+      });
+
+      await logActivity({
+        action: "PAYMENT_UPDATE",
+        entity: "reservation",
+        entity_id: updated.id,
+        description: `Reservation #${updated.id} payment → ${nextPaymentStatus}${body.status ? `, status → ${body.status}` : ""}`,
+        performed_by: performedBy,
+      });
+
+      return NextResponse.json(updated);
+    }
+
+    if (body.status && Object.keys(body).length === 1) {
+      const nextStatus = String(body.status).toLowerCase();
+      const updated = await prisma.reservations.update({
+        where: { id: Number(id) },
+        data: {
+          status: body.status,
+          ...(nextStatus === "cancelled" ? { cancelled_at: new Date() } : {}),
+        },
         include: {
           users: { select: { email: true } },
           rooms: true,

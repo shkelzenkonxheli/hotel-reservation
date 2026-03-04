@@ -115,6 +115,34 @@ export default function ReservationsTab() {
     }
   }
 
+  async function handlePaymentUpdate(id, paymentStatus, paymentMethod, status) {
+    try {
+      const res = await fetch(`/api/reservation/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          payment_status: paymentStatus,
+          payment_method: paymentMethod,
+          status,
+        }),
+      });
+
+      if (res.ok) {
+        const updated = await res.json();
+        setReservations((prev) =>
+          prev.map((r) => (r.id === updated.id ? updated : r)),
+        );
+      } else {
+        console.error("Failed to update payment status");
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setAnchorEl(null);
+      setSelectedReservation(null);
+    }
+  }
+
   const filtered = useMemo(() => {
     let list = reservations;
 
@@ -502,6 +530,34 @@ export default function ReservationsTab() {
             Set as {status}
           </MenuItem>
         ))}
+
+        <MenuItem divider />
+
+        <MenuItem
+          onClick={() =>
+            handlePaymentUpdate(
+              selectedReservation.id,
+              "PAID",
+              "cash",
+              "confirmed",
+            )
+          }
+        >
+          Mark cash as paid + confirm
+        </MenuItem>
+
+        <MenuItem
+          onClick={() =>
+            handlePaymentUpdate(
+              selectedReservation.id,
+              "UNPAID",
+              "cash",
+              "pending",
+            )
+          }
+        >
+          Mark as unpaid
+        </MenuItem>
       </Menu>
 
       <ReservationDetailsDialog

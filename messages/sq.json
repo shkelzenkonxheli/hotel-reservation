@@ -1,0 +1,11 @@
+{
+  "common": {
+    "language": "Gjuha",
+    "save": "Ruaj",
+    "cancel": "Anulo"
+  },
+  "checkout": {
+    "title": "Përfundo rezervimin",
+    "confirmAndPay": "Konfirmo rezervimin dhe paguaj"
+  }
+}

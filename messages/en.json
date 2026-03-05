@@ -1,0 +1,13 @@
+{
+  "common": {
+    "language": "Language",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "checkout": {
+    "title": "Complete your booking",
+    "confirmAndPay": "Confirm booking and pay"
+  }
+  
+}
+

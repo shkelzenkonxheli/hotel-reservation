@@ -19,6 +19,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { useLocale } from "next-intl";
 
 import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -33,7 +34,9 @@ export default function Header() {
   const user = session?.user;
   const router = useRouter();
   const pathname = usePathname();
-  const isMobileView = useMediaQuery("(max-width:767px)");
+  const locale = useLocale();
+  const isMobileView = useMediaQuery("(max-width:767px)", { noSsr: true });
+  const [mounted, setMounted] = useState(false);
 
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [alertsAnchor, setAlertsAnchor] = useState(null);
@@ -67,8 +70,15 @@ export default function Header() {
     signOut();
   };
 
-  // fix for hydration — detect real client
-  const isClient = typeof window !== "undefined";
+  const changeLocale = (nextLocale) => {
+    if (!nextLocale || nextLocale === locale) return;
+    document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=31536000; samesite=lax`;
+    router.refresh();
+  };
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   async function loadNotifications() {
     try {
@@ -85,7 +95,7 @@ export default function Header() {
 
   // SSE unread count (only worker/admin)
   useEffect(() => {
-    if (!isClient || !user || user.role === "client") return;
+    if (!mounted || !user || user.role === "client") return;
 
     const es = new EventSource("/api/notifications/stream");
     es.addEventListener("unread", (event) => {
@@ -104,7 +114,7 @@ export default function Header() {
       es.close();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isClient, user?.role, alertsAnchor]);
+  }, [mounted, user?.role, alertsAnchor]);
 
   const openAlerts = async (e) => {
     setAlertsAnchor(e.currentTarget);
@@ -197,6 +207,53 @@ export default function Header() {
           className="hidden md:flex items-center gap-2"
           sx={{ marginLeft: "auto" }}
         >
+          <Box
+            sx={{
+              display: "inline-flex",
+              border: "1px solid #cbd5e1",
+              borderRadius: 2,
+              overflow: "hidden",
+              mr: 0.5,
+            }}
+          >
+            <Button
+              onClick={() => changeLocale("sq")}
+              sx={{
+                minWidth: 46,
+                height: 34,
+                borderRadius: 0,
+                textTransform: "none",
+                fontWeight: 700,
+                fontSize: 12,
+                color: locale === "sq" ? "#ffffff" : "#334155",
+                backgroundColor: locale === "sq" ? "#0f172a" : "transparent",
+                "&:hover": {
+                  backgroundColor: locale === "sq" ? "#0f172a" : "#f1f5f9",
+                },
+              }}
+            >
+              SQ
+            </Button>
+            <Button
+              onClick={() => changeLocale("en")}
+              sx={{
+                minWidth: 46,
+                height: 34,
+                borderRadius: 0,
+                textTransform: "none",
+                fontWeight: 700,
+                fontSize: 12,
+                color: locale === "en" ? "#ffffff" : "#334155",
+                backgroundColor: locale === "en" ? "#0f172a" : "transparent",
+                "&:hover": {
+                  backgroundColor: locale === "en" ? "#0f172a" : "#f1f5f9",
+                },
+              }}
+            >
+              EN
+            </Button>
+          </Box>
+
           {!user && (
             <Button
               component={Link}
@@ -212,7 +269,7 @@ export default function Header() {
             </Button>
           )}
           {/* Notifications (only worker/admin) */}
-          {isClient && user && user.role !== "client" && (
+          {mounted && user && user.role !== "client" && (
             <>
               <Tooltip title="Notifications">
                 <IconButton
@@ -328,7 +385,7 @@ export default function Header() {
           )}
 
           {/* User section */}
-          {isClient && user ? (
+          {mounted && user ? (
             <>
               <Button
                 onClick={(e) => setUserAnchor(e.currentTarget)}
@@ -445,7 +502,7 @@ export default function Header() {
             gap: 1,
           }}
         >
-          {isClient && user && user.role !== "client" && (
+          {mounted && user && user.role !== "client" && (
             <>
               <Tooltip title="Notifications">
                 <IconButton
@@ -589,6 +646,56 @@ export default function Header() {
             },
           }}
         >
+          <Box
+            sx={{
+              px: 1.5,
+              pt: 1,
+              pb: 0.5,
+              display: "flex",
+              gap: 1,
+              alignItems: "center",
+            }}
+          >
+            <Typography variant="caption" color="text.secondary">
+              Language
+            </Typography>
+            <Button
+              size="small"
+              onClick={() => changeLocale("sq")}
+              sx={{
+                minWidth: 42,
+                textTransform: "none",
+                fontSize: 12,
+                fontWeight: 700,
+                color: locale === "sq" ? "#ffffff" : "#334155",
+                backgroundColor: locale === "sq" ? "#0f172a" : "#f1f5f9",
+                "&:hover": {
+                  backgroundColor: locale === "sq" ? "#0f172a" : "#e2e8f0",
+                },
+              }}
+            >
+              SQ
+            </Button>
+            <Button
+              size="small"
+              onClick={() => changeLocale("en")}
+              sx={{
+                minWidth: 42,
+                textTransform: "none",
+                fontSize: 12,
+                fontWeight: 700,
+                color: locale === "en" ? "#ffffff" : "#334155",
+                backgroundColor: locale === "en" ? "#0f172a" : "#f1f5f9",
+                "&:hover": {
+                  backgroundColor: locale === "en" ? "#0f172a" : "#e2e8f0",
+                },
+              }}
+            >
+              EN
+            </Button>
+          </Box>
+          <Divider />
+
           {[
             !user && (
               <MenuItem

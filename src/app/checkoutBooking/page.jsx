@@ -1,5 +1,5 @@
 "use client";
-
+import { useTranslations } from "next-intl";
 import { useBooking } from "@/context/BookingContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -29,6 +29,7 @@ import PublicCard from "../components/Public/PublicCard";
 import usePageTitle from "../hooks/usePageTitle";
 
 export default function CheckoutBooking() {
+  const t = useTranslations("checkout");
   usePageTitle("Checkout | Dijari Premium");
 
   const { booking } = useBooking();
@@ -389,10 +390,10 @@ export default function CheckoutBooking() {
       >
         {loading ? (
           <CircularProgress size={24} color="inherit" />
+        ) : paymentMethod === "cash" ? (
+          "Confirm booking (pay at hotel)"
         ) : (
-          paymentMethod === "cash"
-            ? "Confirm booking (pay at hotel)"
-            : "Confirm booking and pay"
+          t("confirmAndPay")
         )}
       </Button>
     </PublicCard>
@@ -405,7 +406,7 @@ export default function CheckoutBooking() {
         <PublicContainer>
           <div className="max-w-3xl">
             <h2 className="text-3xl md:text-4xl font-semibold mt-3">
-              Complete your booking
+              {t("title")}
             </h2>
             <p className="text-sm md:text-base text-slate-500 mt-2">
               Review your stay details and confirm guest information.

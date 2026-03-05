@@ -54,6 +54,283 @@
       "pendingCreated": "Reservation created as pending. Please pay at the hotel.",
       "genericError": "Something went wrong. Please try again."
     }
+  },
+  "success": {
+    "metaTitle": "Success | Dijari Premium",
+    "title": "Payment Successful!",
+    "subtitle": "Your booking has been confirmed. A confirmation email has been sent.",
+    "bookingDetails": "Booking details:",
+    "room": "Room",
+    "checkIn": "Check-in",
+    "checkOut": "Check-out",
+    "guests": "Guests",
+    "total": "Total",
+    "noReservation": "No recent reservation found.",
+    "backHome": "Back to Home"
+  },
+  "login": {
+    "metaTitle": "Login | Dijari Premium",
+    "title": "Welcome back",
+    "subtitle": "Sign in to access your account",
+    "or": "OR",
+    "noAccount": "Don't have an account?",
+    "fields": {
+      "email": "Email",
+      "password": "Password"
+    },
+    "buttons": {
+      "login": "Login",
+      "sending": "Sending...",
+      "resend": "Didn't receive the link? Resend",
+      "google": "Continue with Google",
+      "register": "Register"
+    },
+    "messages": {
+      "loginSuccess": "Successfully logged in",
+      "verificationSent": "Verification email sent. Check your inbox."
+    },
+    "errors": {
+      "emailNotVerified": "Email is not verified. Please check your inbox.",
+      "invalidCredentials": "Invalid email or password",
+      "enterEmailForResend": "Enter your email to resend verification.",
+      "resendFailed": "Failed to resend verification email."
+    }
+  },
+  "register": {
+    "metaTitle": "Register | Dijari Premium",
+    "title": "Create an account",
+    "subtitle": "Fill in your details to register",
+    "or": "Or",
+    "haveAccount": "Already have an account?",
+    "fields": {
+      "fullName": "Full Name",
+      "email": "Email",
+      "password": "Password"
+    },
+    "buttons": {
+      "register": "Register",
+      "login": "Login",
+      "google": "Continue with Google"
+    },
+    "messages": {
+      "verificationSent": "A verification link was sent to your email. Please verify before signing in."
+    },
+    "errors": {
+      "invalidEmail": "Please enter a valid email address.",
+      "weakPassword": "Password must be at least 8 characters long, include one uppercase letter and one number.",
+      "registerFailed": "Registration failed.",
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+  "rooms": {
+    "metaTitle": "Rooms | Dijari Premium",
+    "title": "Available room types",
+    "subtitle": "Choose the space that matches your stay. Confirm your dates and book in minutes.",
+    "night": "night",
+    "selectDates": "Select dates",
+    "buttons": {
+      "viewDetails": "View details",
+      "bookNow": "Book now",
+      "cancel": "Cancel",
+      "continue": "Continue",
+      "close": "X"
+    },
+    "alerts": {
+      "selectDates": "Please select both start and end dates.",
+      "minimumNight": "Minimum one night",
+      "loginFirst": "You need to login first",
+      "notAvailable": "Room is not available for the selected dates."
+    }
+  },
+  "contact": {
+    "metaTitle": "Contact | Dijari Premium",
+    "title": "Let's plan your stay",
+    "subtitle": "Send us your request and our team will assist you with rooms, booking details, and special arrangements.",
+    "feedback": {
+      "required": "Please fill in all required fields.",
+      "openingMail": "Your email app is opening. We will get back to you shortly."
+    },
+    "mail": {
+      "subjectPrefix": "Contact request from",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "message": "Message"
+    },
+    "form": {
+      "title": "Send a message",
+      "requiredNote": "Fields marked with * are required.",
+      "fullName": "Full Name *",
+      "email": "Email *",
+      "phoneOptional": "Phone (optional)",
+      "message": "Message *",
+      "send": "Send message"
+    },
+    "details": {
+      "title": "Contact details",
+      "subtitle": "Reach us directly any time.",
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Address"
+    },
+    "response": {
+      "title": "Response time",
+      "standard": "Standard requests: within 2-4 hours.",
+      "urgent": "Booking urgent support: same day."
+    }
+  },
+  "profile": {
+    "metaTitle": "Profile | Dijari Premium",
+    "loading": "Loading...",
+    "tabs": {
+      "profile": "Profile",
+      "reservations": "Reservations"
+    },
+    "roles": {
+      "admin": "Admin",
+      "worker": "Worker",
+      "guest": "Guest"
+    },
+    "fields": {
+      "fullName": "Full Name",
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Address"
+    },
+    "buttons": {
+      "uploading": "Uploading...",
+      "changePhoto": "Change photo",
+      "saving": "Saving...",
+      "saveChanges": "Save changes",
+      "cancel": "Cancel"
+    },
+    "messages": {
+      "photoChanged": "Photo changed successfully",
+      "photoFailed": "Failed to change your photo",
+      "profileUpdated": "Successfully updated profile",
+      "profileUpdateFailed": "Failed to update profile"
+    }
+  },
+  "reservations": {
+    "metaTitle": "My Bookings | Dijari Premium",
+    "title": "My bookings",
+    "subtitle": "Review upcoming stays, completed bookings, and cancellations.",
+    "tabs": {
+      "upcoming": "Upcoming",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "empty": "No bookings here.",
+    "room": "Room",
+    "hotel": "Hotel",
+    "unnamedRoom": "Unnamed Room",
+    "guests": "Guests",
+    "total": "Total",
+    "buttons": {
+      "viewDetails": "View details",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "details": {
+      "title": "Booking details",
+      "paymentStatus": "Payment status",
+      "dates": "Dates",
+      "guests": "Guests",
+      "total": "Total",
+      "created": "Created"
+    },
+    "deleteDialog": {
+      "title": "Delete reservation?",
+      "line1": "Are you sure you want to remove this reservation from your list?",
+      "line2": "This action cannot be undone."
+    },
+    "cancelDialog": {
+      "title": "Cancel reservation?",
+      "line1": "Are you sure you want to cancel this reservation?",
+      "reasonLabel": "Reason (optional)",
+      "reasonPlaceholder": "Change of plans...",
+      "keepBooking": "Keep booking",
+      "cancelBooking": "Cancel booking"
+    },
+    "alerts": {
+      "deleteFailed": "Failed to delete",
+      "cancelFailed": "Failed to cancel",
+      "networkError": "Network error"
+    }
+  },
+  "header": {
+    "language": "Language",
+    "contact": "Contact",
+    "notifications": "Notifications",
+    "reservationNotifications": "Reservation Notifications",
+    "noNotifications": "No notifications",
+    "account": "Account",
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register",
+    "housekeeping": {
+      "title": "Housekeeping Alerts",
+      "checkinToday": "Checkin Today",
+      "checkoutsToday": "Checkouts Today",
+      "needsCleaning": "Needs Cleaning",
+      "outOfOrder": "Out of Order"
+    }
+  },
+  "home": {
+    "metaTitle": "Home | Dijari Premium",
+    "hero": {
+      "title": "A refined stay for business and leisure",
+      "subtitle": "Premium apartments in Ulqin with a practical location, sea-view stays, and a calm hospitality experience close to the coast.",
+      "cta": "View Rooms"
+    },
+    "intro": {
+      "title": "Designed for relaxed stays in Ulqin",
+      "description": "Dijari Premium combines a calm apartment-style stay with a practical location in Ulqin. It is suited for guests who want easy access to the coast, a peaceful atmosphere, and a modern, well-kept space to return to.",
+      "listTitle": "What you get",
+      "items": [
+        "Comfortable apartments with a premium, private feel",
+        "Sea-view and poolside experience across selected stays",
+        "Convenient access to beaches, dining, and city routes",
+        "A practical base for both short trips and longer stays"
+      ]
+    },
+    "experience": {
+      "title": "A stay shaped by sea views, quiet comfort, and easy access around Ulqin",
+      "subtitle": "From poolside moments to open views and a location that keeps you close to the coast, Dijari Premium is designed for guests who want both relaxation and convenience in one place.",
+      "cards": [
+        {
+          "title": "Sea-view apartments",
+          "description": "Wake up to open Adriatic views and calm private terraces in Ulqin."
+        },
+        {
+          "title": "Poolside mornings",
+          "description": "A relaxed setting for long summer days and quiet evening breaks."
+        },
+        {
+          "title": "Comfort near everything",
+          "description": "Well connected to the beach, city centre, and key points around Ulqin."
+        }
+      ]
+    },
+    "features": {
+      "cards": [
+        {
+          "title": "Comfort",
+          "desc": "Thoughtful interiors, calm rooms, and a stay that feels private and easy."
+        },
+        {
+          "title": "Location",
+          "desc": "A convenient Ulqin location near the coast, beaches, and everyday essentials."
+        },
+        {
+          "title": "Experience",
+          "desc": "Sea views, pool moments, and a more elevated holiday atmosphere."
+        }
+      ]
+    },
+    "footer": "All rights reserved."
   }
 }
 

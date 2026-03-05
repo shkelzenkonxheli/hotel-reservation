@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
@@ -33,11 +34,11 @@ import usePageTitle from "../hooks/usePageTitle";
 const FALLBACK_IMG =
   "https://images.unsplash.com/photo-1501117716987-c8e2a5d4d3f4?auto=format&fit=crop&w=1400&q=80";
 
-function formatRange(start, end) {
+function formatRange(start, end, locale) {
   const s = new Date(start);
   const e = new Date(end);
   const opts = { month: "short", day: "2-digit", year: "numeric" };
-  return `${s.toLocaleDateString(undefined, opts)} - ${e.toLocaleDateString(undefined, opts)}`;
+  return `${s.toLocaleDateString(locale, opts)} - ${e.toLocaleDateString(locale, opts)}`;
 }
 
 function isCompleted(endDate) {
@@ -49,7 +50,9 @@ function isCompleted(endDate) {
 
 export default function ReservationsPage() {
   const pathname = usePathname();
-  usePageTitle(pathname === "/reservations" ? "My Bookings | Dijari Premium" : "");
+  const t = useTranslations("reservations");
+  const locale = useLocale();
+  usePageTitle(pathname === "/reservations" ? t("metaTitle") : "");
 
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -130,13 +133,13 @@ export default function ReservationsPage() {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        alert(err.error || "Failed to delete");
+        alert(err.error || t("alerts.deleteFailed"));
         return;
       }
       setReservations((prev) => prev.filter((x) => x.id !== reservationId));
     } catch (e) {
       console.error(e);
-      alert("Network error");
+      alert(t("alerts.networkError"));
     }
   }
 
@@ -151,7 +154,7 @@ export default function ReservationsPage() {
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        alert(data.error || "Failed to cancel");
+        alert(data.error || t("alerts.cancelFailed"));
         return false;
       }
 
@@ -170,7 +173,7 @@ export default function ReservationsPage() {
       return true;
     } catch (e) {
       console.error(e);
-      alert("Network error");
+      alert(t("alerts.networkError"));
       return false;
     }
   }
@@ -226,10 +229,10 @@ export default function ReservationsPage() {
               fontWeight={800}
               sx={{ mb: 0.5, fontSize: { xs: "1.45rem", md: "1.75rem" } }}
             >
-              My bookings
+              {t("title")}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Review upcoming stays, completed bookings, and cancellations.
+              {t("subtitle")}
             </Typography>
           </div>
 
@@ -263,7 +266,7 @@ export default function ReservationsPage() {
                 value="upcoming"
                 label={
                   <Stack direction="row" spacing={1} alignItems="center">
-                    <span>Upcoming</span>
+                    <span>{t("tabs.upcoming")}</span>
                     <Chip
                       size="small"
                       label={upcoming.length}
@@ -284,7 +287,7 @@ export default function ReservationsPage() {
                 value="completed"
                 label={
                   <Stack direction="row" spacing={1} alignItems="center">
-                    <span>Completed</span>
+                    <span>{t("tabs.completed")}</span>
                     <Chip
                       size="small"
                       label={completed.length}
@@ -301,14 +304,14 @@ export default function ReservationsPage() {
                   </Stack>
                 }
               />
-              <Tab value="cancelled" label="Cancelled" />
+              <Tab value="cancelled" label={t("tabs.cancelled")} />
             </Tabs>
           ) : null}
 
           {list.length === 0 ? (
             <PublicCard className="p-8 text-center">
               <Typography variant="h6" fontWeight={800}>
-                No bookings here.
+                {t("empty")}
               </Typography>
             </PublicCard>
           ) : (
@@ -317,10 +320,10 @@ export default function ReservationsPage() {
                 const roomType = r.rooms?.type;
                 const img =
                   (roomType && typeCoverMap[roomType]) || FALLBACK_IMG;
-                const title = r.rooms?.name || "Unnamed Room";
+                const title = r.rooms?.name || t("unnamedRoom");
                 const locationLine = r.rooms?.room_number
-                  ? `Room #${r.rooms.room_number}`
-                  : r.rooms?.type || "Hotel";
+                  ? `${t("room")} #${r.rooms.room_number}`
+                  : r.rooms?.type || t("hotel");
 
                 return (
                   <PublicCard key={r.id} className="overflow-hidden">
@@ -355,10 +358,10 @@ export default function ReservationsPage() {
                             <Chip
                               label={
                                 tab === "upcoming"
-                                  ? "Upcoming"
+                                  ? t("tabs.upcoming")
                                   : tab === "completed"
-                                    ? "Completed"
-                                    : "Cancelled"
+                                    ? t("tabs.completed")
+                                    : t("tabs.cancelled")
                               }
                               size="small"
                               sx={{
@@ -404,7 +407,7 @@ export default function ReservationsPage() {
                               >
                                 <CalendarMonthOutlinedIcon fontSize="small" />
                                 <Typography variant="body2">
-                                  {formatRange(r.start_date, r.end_date)}
+                                  {formatRange(r.start_date, r.end_date, locale)}
                                 </Typography>
                               </Stack>
 
@@ -415,7 +418,7 @@ export default function ReservationsPage() {
                               >
                                 <GroupOutlinedIcon fontSize="small" />
                                 <Typography variant="body2">
-                                  {r.guests ?? 1} Guests
+                                  {r.guests ?? 1} {t("guests")}
                                 </Typography>
                               </Stack>
                             </Stack>
@@ -429,7 +432,7 @@ export default function ReservationsPage() {
                             }}
                           >
                             <Typography variant="body2" color="text.secondary">
-                              Total
+                              {t("total")}
                             </Typography>
                             <Typography variant="h6" fontWeight={900}>
                               EUR {Number(r.total_price ?? 0).toFixed(2)}
@@ -447,7 +450,7 @@ export default function ReservationsPage() {
                                 width: { xs: "100%", sm: "auto" },
                               }}
                             >
-                              View details
+                              {t("buttons.viewDetails")}
                             </Button>
                             <Button
                               variant="outlined"
@@ -464,7 +467,7 @@ export default function ReservationsPage() {
                                 width: { xs: "100%", sm: "auto" },
                               }}
                             >
-                              Cancel
+                              {t("buttons.cancel")}
                             </Button>
 
                             <Button
@@ -479,7 +482,7 @@ export default function ReservationsPage() {
                                 width: { xs: "100%", sm: "auto" },
                               }}
                             >
-                              Delete
+                              {t("buttons.delete")}
                             </Button>
                           </Box>
                         </Stack>
@@ -499,7 +502,7 @@ export default function ReservationsPage() {
         PaperProps={{ sx: { borderRadius: 3, width: 640, maxWidth: "95vw" } }}
       >
         <DialogTitle sx={{ pr: 6, fontWeight: 900 }}>
-          Booking details
+          {t("details.title")}
           <IconButton
             onClick={() => setDetails(null)}
             sx={{ position: "absolute", right: 10, top: 10 }}
@@ -511,26 +514,26 @@ export default function ReservationsPage() {
           {details && (
             <Stack spacing={1.1}>
               <Typography variant="h6" fontWeight={900}>
-                {details.rooms?.name || "Unnamed Room"}
+                {details.rooms?.name || t("unnamedRoom")}
               </Typography>
               <Divider />
               <Typography variant="body2">
-                <b>Payment status:</b> {details.status}
+                <b>{t("details.paymentStatus")}:</b> {details.status}
               </Typography>
               <Typography variant="body2">
-                <b>Dates:</b>{" "}
-                {formatRange(details.start_date, details.end_date)}
+                <b>{t("details.dates")}:</b>{" "}
+                {formatRange(details.start_date, details.end_date, locale)}
               </Typography>
               <Typography variant="body2">
-                <b>Guests:</b> {details.guests ?? 1}
+                <b>{t("details.guests")}:</b> {details.guests ?? 1}
               </Typography>
               <Typography variant="body2">
-                <b>Total:</b> EUR {Number(details.total_price ?? 0).toFixed(2)}
+                <b>{t("details.total")}:</b> EUR {Number(details.total_price ?? 0).toFixed(2)}
               </Typography>
               <Typography variant="body2">
-                <b>Created:</b>{" "}
+                <b>{t("details.created")}:</b>{" "}
                 {details.created_at
-                  ? new Date(details.created_at).toLocaleString()
+                  ? new Date(details.created_at).toLocaleString(locale)
                   : "-"}
               </Typography>
             </Stack>
@@ -539,13 +542,13 @@ export default function ReservationsPage() {
       </Dialog>
 
       <Dialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
-        <DialogTitle fontWeight={800}>Delete reservation?</DialogTitle>
+        <DialogTitle fontWeight={800}>{t("deleteDialog.title")}</DialogTitle>
 
         <DialogContent>
           <Typography>
-            Are you sure you want to remove this reservation from your list?
+            {t("deleteDialog.line1")}
             <br />
-            <b>This action cannot be undone.</b>
+            <b>{t("deleteDialog.line2")}</b>
           </Typography>
         </DialogContent>
 
@@ -554,7 +557,7 @@ export default function ReservationsPage() {
             onClick={() => setDeleteTarget(null)}
             sx={{ textTransform: "none" }}
           >
-            Cancel
+            {t("buttons.cancel")}
           </Button>
 
           <Button
@@ -566,25 +569,25 @@ export default function ReservationsPage() {
               setDeleteTarget(null);
             }}
           >
-            Delete
+            {t("buttons.delete")}
           </Button>
         </DialogActions>
       </Dialog>
 
       <Dialog open={!!cancelTarget} onClose={() => setCancelTarget(null)}>
-        <DialogTitle fontWeight={800}>Cancel reservation?</DialogTitle>
+        <DialogTitle fontWeight={800}>{t("cancelDialog.title")}</DialogTitle>
 
         <DialogContent>
           <Typography sx={{ mb: 2 }}>
-            Are you sure you want to cancel this reservation?
+            {t("cancelDialog.line1")}
           </Typography>
 
           <TextField
-            label="Reason (optional)"
+            label={t("cancelDialog.reasonLabel")}
             fullWidth
             value={cancelReason}
             onChange={(e) => setCancelReason(e.target.value)}
-            placeholder="Change of plans..."
+            placeholder={t("cancelDialog.reasonPlaceholder")}
           />
         </DialogContent>
 
@@ -593,7 +596,7 @@ export default function ReservationsPage() {
             onClick={() => setCancelTarget(null)}
             sx={{ textTransform: "none" }}
           >
-            Keep booking
+            {t("cancelDialog.keepBooking")}
           </Button>
 
           <Button
@@ -605,7 +608,7 @@ export default function ReservationsPage() {
               if (ok) setCancelTarget(null);
             }}
           >
-            Cancel booking
+            {t("cancelDialog.cancelBooking")}
           </Button>
         </DialogActions>
       </Dialog>

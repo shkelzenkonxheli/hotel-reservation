@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
@@ -22,7 +23,8 @@ function fYMD(date) {
 }
 
 export default function RoomsPage() {
-  usePageTitle("Rooms | Dijari Premium");
+  const t = useTranslations("rooms");
+  usePageTitle(t("metaTitle"));
 
   const [roomTypes, setRoomTypes] = useState([]);
   const [loadingRooms, setLoadingRooms] = useState(true);
@@ -105,15 +107,15 @@ export default function RoomsPage() {
 
   const checkAvailability = async () => {
     if (!startDate || !endDate) {
-      alert("Please select both start and end dates.");
+      alert(t("alerts.selectDates"));
       return;
     }
     if (startDate === endDate) {
-      alert("Minimum one night");
+      alert(t("alerts.minimumNight"));
       return;
     }
     if (!session?.user) {
-      alert("You need to login first");
+      alert(t("alerts.loginFirst"));
       router.push("/login");
       return;
     }
@@ -123,7 +125,7 @@ export default function RoomsPage() {
     const data = await res.json();
 
     if (!data.available) {
-      alert("Room is not available for the selected dates.");
+      alert(t("alerts.notAvailable"));
       return;
     }
 
@@ -144,11 +146,10 @@ export default function RoomsPage() {
         <PublicContainer>
           <div className="text-center max-w-2xl mx-auto mb-2">
             <h2 className="text-3xl md:text-4xl font-semibold mt-3">
-              Available room types
+              {t("title")}
             </h2>
             <p className="text-sm md:text-base text-slate-500 mt-2">
-              Choose the space that matches your stay. Confirm your dates and
-              book in minutes.
+              {t("subtitle")}
             </p>
           </div>
         </PublicContainer>
@@ -212,20 +213,21 @@ export default function RoomsPage() {
                         className="text-slate-700 cursor-pointer text-sm mt-2 underline underline-offset-4 w-fit"
                         onClick={() => setExpandedRoom(room)}
                       >
-                        View details
+                        {t("buttons.viewDetails")}
                       </button>
                     </div>
 
                     <div className="flex items-center justify-between mt-5">
                       <span className="text-slate-900 font-semibold text-sm">
-                        EUR {Number(room.price || 0).toFixed(2)} / night
+                        EUR {Number(room.price || 0).toFixed(2)} /{" "}
+                        {t("night")}
                       </span>
 
                       <button
                         className="public-button primary cursor-pointer text-sm px-4 py-2"
                         onClick={() => handleBookClick(room)}
                       >
-                        Book now
+                        {t("buttons.bookNow")}
                       </button>
                     </div>
                   </div>
@@ -239,7 +241,7 @@ export default function RoomsPage() {
       {showDateInput && selectedRoom && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50 p-3">
           <div className="public-card p-4 md:p-6 w-full max-w-[420px]">
-            <h3 className="text-lg font-semibold text-center">Select dates</h3>
+            <h3 className="text-lg font-semibold text-center">{t("selectDates")}</h3>
 
             <Calendar
               selectRange={true}
@@ -284,7 +286,7 @@ export default function RoomsPage() {
                   setSelectedRoom(null);
                 }}
               >
-                Cancel
+                {t("buttons.cancel")}
               </button>
 
               <button
@@ -294,7 +296,7 @@ export default function RoomsPage() {
                 onClick={checkAvailability}
                 disabled={!startDate || !endDate}
               >
-                Continue
+                {t("buttons.continue")}
               </button>
             </div>
           </div>
@@ -308,7 +310,7 @@ export default function RoomsPage() {
               className="absolute top-3 right-3 text-slate-500 cursor-pointer "
               onClick={() => setExpandedRoom(null)}
             >
-              X
+              {t("buttons.close")}
             </button>
 
             <h2 className="text-xl font-semibold mb-4">{expandedRoom.name}</h2>
@@ -339,7 +341,7 @@ export default function RoomsPage() {
               className="absolute -top-10 right-0 text-white text-2xl cursor-pointer "
               onClick={() => setGalleryRoom(null)}
             >
-              X
+              {t("buttons.close")}
             </button>
 
             <Swiper

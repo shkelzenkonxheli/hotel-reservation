@@ -54,5 +54,282 @@
       "pendingCreated": "Rezervimi u krijua si pending. Ju lutem paguani ne hotel.",
       "genericError": "Ndodhi nje gabim. Ju lutem provoni perseri."
     }
+  },
+  "success": {
+    "metaTitle": "Suksesi | Dijari Premium",
+    "title": "Pagesa u krye me sukses!",
+    "subtitle": "Rezervimi juaj u konfirmua. Nje email konfirmimi eshte derguar.",
+    "bookingDetails": "Detajet e rezervimit:",
+    "room": "Dhoma",
+    "checkIn": "Check-in",
+    "checkOut": "Check-out",
+    "guests": "Mysafiret",
+    "total": "Totali",
+    "noReservation": "Nuk u gjet rezervim i fundit.",
+    "backHome": "Kthehu ne Home"
+  },
+  "login": {
+    "metaTitle": "Hyrja | Dijari Premium",
+    "title": "Mire se u ktheve",
+    "subtitle": "Hyr ne llogarine tende",
+    "or": "OSE",
+    "noAccount": "Nuk ke llogari?",
+    "fields": {
+      "email": "Email",
+      "password": "Fjalekalimi"
+    },
+    "buttons": {
+      "login": "Hyr",
+      "sending": "Duke derguar...",
+      "resend": "Nuk e more linkun? Ridergo",
+      "google": "Vazhdo me Google",
+      "register": "Regjistrohu"
+    },
+    "messages": {
+      "loginSuccess": "U kyqe me sukses",
+      "verificationSent": "Email-i i verifikimit u dergua. Kontrollo inbox."
+    },
+    "errors": {
+      "emailNotVerified": "Email-i nuk eshte i verifikuar. Kontrollo inbox.",
+      "invalidCredentials": "Email ose fjalekalim i pavlefshem",
+      "enterEmailForResend": "Shkruaj email-in per ridergim te verifikimit.",
+      "resendFailed": "Ridergimi i email-it te verifikimit deshtoi."
+    }
+  },
+  "register": {
+    "metaTitle": "Regjistrimi | Dijari Premium",
+    "title": "Krijo nje llogari",
+    "subtitle": "Ploteso te dhenat per t'u regjistruar",
+    "or": "Ose",
+    "haveAccount": "Ke tashme llogari?",
+    "fields": {
+      "fullName": "Emri i plote",
+      "email": "Email",
+      "password": "Fjalekalimi"
+    },
+    "buttons": {
+      "register": "Regjistrohu",
+      "login": "Hyr",
+      "google": "Vazhdo me Google"
+    },
+    "messages": {
+      "verificationSent": "Linku i verifikimit u dergua ne email. Verifiko para hyrjes."
+    },
+    "errors": {
+      "invalidEmail": "Ju lutem shkruani nje email te vlefshem.",
+      "weakPassword": "Fjalekalimi duhet te kete te pakten 8 karaktere, nje shkronje te madhe dhe nje numer.",
+      "registerFailed": "Regjistrimi deshtoi.",
+      "generic": "Ndodhi nje gabim. Ju lutem provoni perseri."
+    }
+  },
+  "rooms": {
+    "metaTitle": "Dhomat | Dijari Premium",
+    "title": "Llojet e dhomave te lira",
+    "subtitle": "Zgjidh hapesiren qe pershtatet me qendrimin tend. Konfirmo datat dhe rezervo shpejt.",
+    "night": "nate",
+    "selectDates": "Zgjidh datat",
+    "buttons": {
+      "viewDetails": "Shiko detajet",
+      "bookNow": "Rezervo tani",
+      "cancel": "Anulo",
+      "continue": "Vazhdo",
+      "close": "X"
+    },
+    "alerts": {
+      "selectDates": "Ju lutem zgjidhni daten e fillimit dhe te perfundimit.",
+      "minimumNight": "Minimumi nje nate",
+      "loginFirst": "Duhet te kyqesh fillimisht",
+      "notAvailable": "Dhoma nuk eshte e lire per datat e zgjedhura."
+    }
+  },
+  "contact": {
+    "metaTitle": "Kontakti | Dijari Premium",
+    "title": "Ta planifikojme qendrimin tuaj",
+    "subtitle": "Na dergoni kerkesen dhe ekipi yne do t'ju ndihmoje me dhomat, detajet e rezervimit dhe kerkesat speciale.",
+    "feedback": {
+      "required": "Ju lutem plotesoni te gjitha fushat e detyrueshme.",
+      "openingMail": "Aplikacioni i email-it po hapet. Do t'ju kontaktojme shpejt."
+    },
+    "mail": {
+      "subjectPrefix": "Kerkese kontakti nga",
+      "name": "Emri",
+      "email": "Email",
+      "phone": "Telefoni",
+      "message": "Mesazhi"
+    },
+    "form": {
+      "title": "Dergo mesazh",
+      "requiredNote": "Fushat me * jane te detyrueshme.",
+      "fullName": "Emri i plote *",
+      "email": "Email *",
+      "phoneOptional": "Telefoni (opsional)",
+      "message": "Mesazhi *",
+      "send": "Dergo mesazh"
+    },
+    "details": {
+      "title": "Detajet e kontaktit",
+      "subtitle": "Na kontaktoni direkt ne cdo kohe.",
+      "email": "Email",
+      "phone": "Telefoni",
+      "address": "Adresa"
+    },
+    "response": {
+      "title": "Koha e pergjigjes",
+      "standard": "Kerkesat standarde: brenda 2-4 oreve.",
+      "urgent": "Mbeshtejtje urgjente per rezervim: brenda dites."
+    }
+  },
+  "profile": {
+    "metaTitle": "Profili | Dijari Premium",
+    "loading": "Duke u ngarkuar...",
+    "tabs": {
+      "profile": "Profili",
+      "reservations": "Rezervimet"
+    },
+    "roles": {
+      "admin": "Admin",
+      "worker": "Punetor",
+      "guest": "Mysafir"
+    },
+    "fields": {
+      "fullName": "Emri i plote",
+      "email": "Email",
+      "phone": "Telefoni",
+      "address": "Adresa"
+    },
+    "buttons": {
+      "uploading": "Duke ngarkuar...",
+      "changePhoto": "Ndrysho foton",
+      "saving": "Duke ruajtur...",
+      "saveChanges": "Ruaj ndryshimet",
+      "cancel": "Anulo"
+    },
+    "messages": {
+      "photoChanged": "Fotoja u ndryshua me sukses",
+      "photoFailed": "Ndryshimi i fotos deshtoi",
+      "profileUpdated": "Profili u perditesua me sukses",
+      "profileUpdateFailed": "Perditesimi i profilit deshtoi"
+    }
+  },
+  "reservations": {
+    "metaTitle": "Rezervimet e mia | Dijari Premium",
+    "title": "Rezervimet e mia",
+    "subtitle": "Shiko qendrimet e ardhshme, rezervimet e perfunduara dhe anullimet.",
+    "tabs": {
+      "upcoming": "Ne vazhdim",
+      "completed": "Perfunduara",
+      "cancelled": "Anulluara"
+    },
+    "empty": "Nuk ka rezervime ketu.",
+    "room": "Dhoma",
+    "hotel": "Hoteli",
+    "unnamedRoom": "Dhome pa emer",
+    "guests": "Mysafire",
+    "total": "Totali",
+    "buttons": {
+      "viewDetails": "Shiko detajet",
+      "cancel": "Anulo",
+      "delete": "Fshij"
+    },
+    "details": {
+      "title": "Detajet e rezervimit",
+      "paymentStatus": "Statusi i pageses",
+      "dates": "Datat",
+      "guests": "Mysafiret",
+      "total": "Totali",
+      "created": "Krijuar"
+    },
+    "deleteDialog": {
+      "title": "Te fshihet rezervimi?",
+      "line1": "A je i sigurt qe deshiron ta heqesh kete rezervim nga lista?",
+      "line2": "Ky veprim nuk mund te kthehet mbrapa."
+    },
+    "cancelDialog": {
+      "title": "Te anulohet rezervimi?",
+      "line1": "A je i sigurt qe deshiron ta anulosh kete rezervim?",
+      "reasonLabel": "Arsyeja (opsionale)",
+      "reasonPlaceholder": "Ndryshim plani...",
+      "keepBooking": "Mbaje rezervimin",
+      "cancelBooking": "Anulo rezervimin"
+    },
+    "alerts": {
+      "deleteFailed": "Fshirja deshtoi",
+      "cancelFailed": "Anulimi deshtoi",
+      "networkError": "Gabim ne rrjet"
+    }
+  },
+  "header": {
+    "language": "Gjuha",
+    "contact": "Kontakti",
+    "notifications": "Njoftimet",
+    "reservationNotifications": "Njoftimet e rezervimeve",
+    "noNotifications": "Nuk ka njoftime",
+    "account": "Llogaria",
+    "dashboard": "Paneli",
+    "profile": "Profili",
+    "logout": "Dil",
+    "login": "Hyr",
+    "register": "Regjistrohu",
+    "housekeeping": {
+      "title": "Njoftime Housekeeping",
+      "checkinToday": "Checkin sot",
+      "checkoutsToday": "Checkout sot",
+      "needsCleaning": "Per pastrim",
+      "outOfOrder": "Jashte funksionit"
+    }
+  },
+  "home": {
+    "metaTitle": "Home | Dijari Premium",
+    "hero": {
+      "title": "Qendrim i rafinuar per pune dhe pushim",
+      "subtitle": "Apartamente premium ne Ulqin me lokacion praktik, pamje nga deti dhe eksperience te qete mikpritjeje prane bregdetit.",
+      "cta": "Shiko dhomat"
+    },
+    "intro": {
+      "title": "Projektuar per qendrime te qeta ne Ulqin",
+      "description": "Dijari Premium kombinon qendrimin e qete ne stil apartamenti me lokacion praktik ne Ulqin. E pershtatshme per mysafire qe duan akses te lehte ne bregdet, atmosfere te qete dhe hapesire moderne ku kthehen me kenaqesi.",
+      "listTitle": "Cfare perfiton",
+      "items": [
+        "Apartamente komode me ndjesi private premium",
+        "Eksperience me pamje deti dhe zones pishine ne qendrime te zgjedhura",
+        "Akses i lehte ne plazh, restorante dhe rruge kryesore",
+        "Baze praktike si per udhetime te shkurtra ashtu edhe per qendrime me te gjata"
+      ]
+    },
+    "experience": {
+      "title": "Qendrim i formuar nga pamja e detit, qetesia dhe levizja e lehte ne Ulqin",
+      "subtitle": "Nga momentet te pishina deri te pamjet e hapura dhe lokacioni afer bregdetit, Dijari Premium eshte projektuar per mysafire qe duan relaks dhe komoditet ne nje vend.",
+      "cards": [
+        {
+          "title": "Apartamente me pamje deti",
+          "description": "Zgjohu me pamje te Adriatikut dhe terasa private te qeta ne Ulqin."
+        },
+        {
+          "title": "Mengjese prane pishines",
+          "description": "Ambient i relaksuar per dite te gjata vere dhe mbremje te qeta."
+        },
+        {
+          "title": "Komoditet afer cdo gjeje",
+          "description": "I lidhur mire me plazhin, qendren e qytetit dhe pikat kryesore ne Ulqin."
+        }
+      ]
+    },
+    "features": {
+      "cards": [
+        {
+          "title": "Komoditet",
+          "desc": "Interier i menduar mire, dhoma te qeta dhe qendrim me ndjesi private."
+        },
+        {
+          "title": "Lokacion",
+          "desc": "Lokacion i pershtatshem ne Ulqin prane bregdetit, plazheve dhe sherbimeve te perditshme."
+        },
+        {
+          "title": "Eksperience",
+          "desc": "Pamje deti, momente ne pishine dhe atmosfere pushimi me nivel me te larte."
+        }
+      ]
+    },
+    "footer": "Te gjitha te drejtat e rezervuara."
   }
 }

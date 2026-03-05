@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { signIn } from "next-auth/react";
 import {
   Box,
@@ -28,7 +29,8 @@ import PublicCard from "../components/Public/PublicCard";
 import usePageTitle from "../hooks/usePageTitle";
 
 export default function RegisterPage() {
-  usePageTitle("Register | Dijari Premium");
+  const t = useTranslations("register");
+  usePageTitle(t("metaTitle"));
 
   const router = useRouter();
   const [name, setName] = useState("");
@@ -43,7 +45,7 @@ export default function RegisterPage() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailRegex.test(email)) {
-      setError("Please enter a valid email address.");
+      setError(t("errors.invalidEmail"));
       return false;
     }
 
@@ -51,7 +53,7 @@ export default function RegisterPage() {
 
     if (!strongPassword.test(password)) {
       setError(
-        "Password must be at least 8 characters long, include one uppercase letter and one number.",
+        t("errors.weakPassword"),
       );
       return false;
     }
@@ -79,15 +81,13 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage(
-          "A verification link was sent to your email. Please verify before signing in.",
-        );
+        setMessage(t("messages.verificationSent"));
         setTimeout(() => router.push("/login"), 2000);
       } else {
-        setError(data.message || "Registration failed.");
+        setError(data.message || t("errors.registerFailed"));
       }
     } catch (err) {
-      setError("Something went wrong. Please try again.");
+      setError(t("errors.generic"));
     } finally {
       setLoading(false);
     }
@@ -128,7 +128,7 @@ export default function RegisterPage() {
                 sx={{ color: "#0ea5e9" }}
                 gutterBottom
               >
-                Create an account
+                {t("title")}
               </Typography>
               <Typography
                 variant="body2"
@@ -136,12 +136,12 @@ export default function RegisterPage() {
                 color="text.secondary"
                 mb={3}
               >
-                Fill in your details to register
+                {t("subtitle")}
               </Typography>
 
               <Box component="form" onSubmit={handleSubmit}>
                 <TextField
-                  label="Full Name"
+                  label={t("fields.fullName")}
                   fullWidth
                   required
                   variant="outlined"
@@ -157,7 +157,7 @@ export default function RegisterPage() {
                   }}
                 />
                 <TextField
-                  label="Email"
+                  label={t("fields.email")}
                   type="email"
                   fullWidth
                   required
@@ -174,7 +174,7 @@ export default function RegisterPage() {
                   }}
                 />
                 <TextField
-                  label="Password"
+                  label={t("fields.password")}
                   type={showPassword ? "text" : "password"}
                   fullWidth
                   required
@@ -228,7 +228,7 @@ export default function RegisterPage() {
                   {loading ? (
                     <CircularProgress size={26} color="inherit" />
                   ) : (
-                    "Register"
+                    t("buttons.register")
                   )}
                 </Button>
               </Box>
@@ -239,17 +239,17 @@ export default function RegisterPage() {
                 mt={3}
                 color="text.secondary"
               >
-                Already have an account?{" "}
+                {t("haveAccount")}{" "}
                 <Typography
                   component="span"
                   sx={{ cursor: "pointer", color: "#0ea5e9", fontWeight: 700 }}
                   onClick={() => router.push("/login")}
                 >
-                  Login
+                  {t("buttons.login")}
                 </Typography>
               </Typography>
 
-              <Divider sx={{ my: 2 }}>Or</Divider>
+              <Divider sx={{ my: 2 }}>{t("or")}</Divider>
 
               <Button
                 fullWidth
@@ -267,7 +267,7 @@ export default function RegisterPage() {
                   })
                 }
               >
-                Continue with Google
+                {t("buttons.google")}
               </Button>
             </PublicCard>
           </Box>

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -28,7 +29,8 @@ import PublicCard from "../components/Public/PublicCard";
 import usePageTitle from "../hooks/usePageTitle";
 
 export default function ProfilePage() {
-  usePageTitle("Profile | Dijari Premium");
+  const t = useTranslations("profile");
+  usePageTitle(t("metaTitle"));
 
   const { data: session, status, update } = useSession();
 
@@ -91,14 +93,14 @@ export default function ProfilePage() {
       await update({ avatar_url: data.avatar_url || "" });
       setFeedback({
         open: true,
-        message: "Photo changed successfully",
+        message: t("messages.photoChanged"),
         severity: "success",
       });
     } catch (error) {
       console.error(error);
       setFeedback({
         open: true,
-        message: "Failed to change your photo",
+        message: t("messages.photoFailed"),
         severity: "error",
       });
     } finally {
@@ -125,14 +127,14 @@ export default function ProfilePage() {
         });
         setFeedback({
           open: true,
-          message: "Successfully updated profile",
+          message: t("messages.profileUpdated"),
           severity: "success",
         });
         setHasChanged(false);
       } else {
         setFeedback({
           open: true,
-          message: "Failed to update profile",
+          message: t("messages.profileUpdateFailed"),
           severity: "error",
         });
       }
@@ -163,7 +165,7 @@ export default function ProfilePage() {
 
   if (status === "loading") {
     return (
-      <Typography sx={{ mt: 4, textAlign: "center" }}>Loading...</Typography>
+      <Typography sx={{ mt: 4, textAlign: "center" }}>{t("loading")}</Typography>
     );
   }
 
@@ -201,8 +203,8 @@ export default function ProfilePage() {
                     },
                   }}
                 >
-                  <Tab label="Profile" value="1" />
-                  <Tab label="Reservations" value="2" />
+                  <Tab label={t("tabs.profile")} value="1" />
+                  <Tab label={t("tabs.reservations")} value="2" />
                 </TabList>
               </Box>
 
@@ -231,10 +233,10 @@ export default function ProfilePage() {
                     <Chip
                       label={
                         user.role === "admin"
-                          ? "Admin"
+                          ? t("roles.admin")
                           : user.role === "worker"
-                            ? "Worker"
-                            : "Guest"
+                            ? t("roles.worker")
+                            : t("roles.guest")
                       }
                       color="primary"
                       size="small"
@@ -253,7 +255,7 @@ export default function ProfilePage() {
                       disabled={uploadingAvatar}
                       sx={{ textTransform: "none", borderRadius: 2 }}
                     >
-                      {uploadingAvatar ? "Uploading..." : "Change photo"}
+                      {uploadingAvatar ? t("buttons.uploading") : t("buttons.changePhoto")}
                       <input
                         hidden
                         type="file"
@@ -267,7 +269,7 @@ export default function ProfilePage() {
                     sx={{ display: "flex", flexDirection: "column", gap: 2 }}
                   >
                     <TextField
-                      label="Full Name"
+                      label={t("fields.fullName")}
                       name="name"
                       value={form.name}
                       onChange={handleInput}
@@ -275,7 +277,7 @@ export default function ProfilePage() {
                     />
 
                     <TextField
-                      label="Email"
+                      label={t("fields.email")}
                       name="email"
                       value={form.email}
                       fullWidth
@@ -283,7 +285,7 @@ export default function ProfilePage() {
                     />
 
                     <TextField
-                      label="Phone"
+                      label={t("fields.phone")}
                       name="phone"
                       value={form.phone}
                       onChange={handleInput}
@@ -291,7 +293,7 @@ export default function ProfilePage() {
                     />
 
                     <TextField
-                      label="Address"
+                      label={t("fields.address")}
                       name="address"
                       value={form.address}
                       onChange={handleInput}
@@ -317,7 +319,7 @@ export default function ProfilePage() {
                         width: { xs: "100%", sm: "auto" },
                       }}
                     >
-                      {saving ? "Saving..." : "Save changes"}
+                      {saving ? t("buttons.saving") : t("buttons.saveChanges")}
                     </Button>
 
                     <Button
@@ -331,7 +333,7 @@ export default function ProfilePage() {
                         width: { xs: "100%", sm: "auto" },
                       }}
                     >
-                      Cancel
+                      {t("buttons.cancel")}
                     </Button>
                   </Box>
                 </Box>

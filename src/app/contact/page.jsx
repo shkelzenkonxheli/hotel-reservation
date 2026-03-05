@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Alert,
   Box,
@@ -15,7 +16,8 @@ import PublicCard from "../components/Public/PublicCard";
 import usePageTitle from "../hooks/usePageTitle";
 
 export default function ContactPage() {
-  usePageTitle("Contact | Dijari Premium");
+  const t = useTranslations("contact");
+  usePageTitle(t("metaTitle"));
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -27,17 +29,17 @@ export default function ContactPage() {
     e.preventDefault();
 
     if (!name || !email || !message) {
-      setFeedback("Please fill in all required fields.");
+      setFeedback(t("feedback.required"));
       return;
     }
 
-    const subject = encodeURIComponent(`Contact request from ${name}`);
+    const subject = encodeURIComponent(`${t("mail.subjectPrefix")} ${name}`);
     const body = encodeURIComponent(
-      `Name: ${name}\nEmail: ${email}\nPhone: ${phone || "-"}\n\nMessage:\n${message}`,
+      `${t("mail.name")}: ${name}\n${t("mail.email")}: ${email}\n${t("mail.phone")}: ${phone || "-"}\n\n${t("mail.message")}:\n${message}`,
     );
 
     window.location.href = `mailto:info@dijaripremium.com?subject=${subject}&body=${body}`;
-    setFeedback("Your email app is opening. We will get back to you shortly.");
+    setFeedback(t("feedback.openingMail"));
   };
 
   return (
@@ -46,27 +48,26 @@ export default function ContactPage() {
         <PublicContainer>
           <div className="max-w-3xl">
             <h1 className="text-3xl md:text-4xl font-semibold mt-3">
-              Let&apos;s plan your stay
+              {t("title")}
             </h1>
             <p className="text-sm md:text-base text-slate-500 mt-2">
-              Send us your request and our team will assist you with rooms,
-              booking details, and special arrangements.
+              {t("subtitle")}
             </p>
           </div>
 
           <div className="mt-8 grid gap-6 lg:grid-cols-[1.15fr_0.85fr] items-start">
             <PublicCard className="p-5 md:p-6">
               <Typography variant="h6" fontWeight={800} mb={1}>
-                Send a message
+                {t("form.title")}
               </Typography>
               <Typography variant="body2" color="text.secondary" mb={2}>
-                Fields marked with * are required.
+                {t("form.requiredNote")}
               </Typography>
 
               {feedback ? (
                 <Alert
                   severity={
-                    feedback.includes("required") ? "warning" : "success"
+                    feedback === t("feedback.required") ? "warning" : "success"
                   }
                   sx={{ mb: 2 }}
                 >
@@ -77,26 +78,26 @@ export default function ContactPage() {
               <Box component="form" onSubmit={handleSubmit}>
                 <Stack spacing={2}>
                   <TextField
-                    label="Full Name *"
+                    label={t("form.fullName")}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     fullWidth
                   />
                   <TextField
-                    label="Email *"
+                    label={t("form.email")}
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     fullWidth
                   />
                   <TextField
-                    label="Phone (optional)"
+                    label={t("form.phoneOptional")}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     fullWidth
                   />
                   <TextField
-                    label="Message *"
+                    label={t("form.message")}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     multiline
@@ -112,7 +113,7 @@ export default function ContactPage() {
                       fontWeight: 700,
                     }}
                   >
-                    Send message
+                    {t("form.send")}
                   </Button>
                 </Stack>
               </Box>
@@ -121,32 +122,32 @@ export default function ContactPage() {
             <div className="space-y-6">
               <PublicCard className="p-5 md:p-6">
                 <Typography variant="h6" fontWeight={800} mb={1}>
-                  Contact details
+                  {t("details.title")}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" mb={2}>
-                  Reach us directly any time.
+                  {t("details.subtitle")}
                 </Typography>
                 <Stack spacing={1}>
                   <Typography>
-                    <b>Email:</b> info@dijaripremium.com
+                    <b>{t("details.email")}:</b> info@dijaripremium.com
                   </Typography>
                   <Typography>
-                    <b>Phone:</b> +383 44 123 456
+                    <b>{t("details.phone")}:</b> +383 44 123 456
                   </Typography>
                   <Typography>
-                    <b>Address:</b> Prishtina, Kosovo
+                    <b>{t("details.address")}:</b> Prishtina, Kosovo
                   </Typography>
                 </Stack>
               </PublicCard>
 
               <PublicCard className="p-5 md:p-6">
                 <Typography variant="h6" fontWeight={800} mb={1}>
-                  Response time
+                  {t("response.title")}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Standard requests: within 2-4 hours.
+                  {t("response.standard")}
                   <br />
-                  Booking urgent support: same day.
+                  {t("response.urgent")}
                 </Typography>
               </PublicCard>
             </div>

@@ -1,5 +1,7 @@
 "use client";
+
 import { useEffect, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import {
   Box,
   Typography,
@@ -14,7 +16,9 @@ import { useSession } from "next-auth/react";
 import usePageTitle from "../hooks/usePageTitle";
 
 export default function SuccessPage() {
-  usePageTitle("Success | Dijari Premium");
+  const t = useTranslations("success");
+  const locale = useLocale();
+  usePageTitle(t("metaTitle"));
 
   const [reservation, setReservation] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -36,9 +40,8 @@ export default function SuccessPage() {
 
       try {
         const resv = await fetch(
-          `/api/reservation?latest=true&userId=${session.user.id}`
+          `/api/reservation?latest=true&userId=${session.user.id}`,
         );
-
         const data = await resv.json();
 
         if (resv.ok && data) {
@@ -90,10 +93,10 @@ export default function SuccessPage() {
           sx={{ color: "#16a34a", fontSize: 80, mb: 2 }}
         />
         <Typography variant="h4" fontWeight="bold" gutterBottom>
-          Payment Successful!
+          {t("title")}
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-          Your booking has been confirmed. A confirmation email has been sent.
+          {t("subtitle")}
         </Typography>
 
         {reservation ? (
@@ -107,33 +110,32 @@ export default function SuccessPage() {
             }}
           >
             <Typography variant="subtitle1" fontWeight="bold">
-              Booking Details:
+              {t("bookingDetails")}
             </Typography>
             <Typography variant="body2">
-              <strong>Room:</strong> {reservation.rooms?.name}
-            </Typography>
-
-            <Typography variant="body2">
-              <strong>Check-in:</strong>{" "}
-              {new Date(reservation.start_date).toLocaleDateString()}
+              <strong>{t("room")}:</strong> {reservation.rooms?.name}
             </Typography>
             <Typography variant="body2">
-              <strong>Check-out:</strong>{" "}
-              {new Date(reservation.end_date).toLocaleDateString()}
+              <strong>{t("checkIn")}:</strong>{" "}
+              {new Date(reservation.start_date).toLocaleDateString(locale)}
             </Typography>
             <Typography variant="body2">
-              <strong>Guests:</strong> {reservation.guests}
+              <strong>{t("checkOut")}:</strong>{" "}
+              {new Date(reservation.end_date).toLocaleDateString(locale)}
+            </Typography>
+            <Typography variant="body2">
+              <strong>{t("guests")}:</strong> {reservation.guests}
             </Typography>
             <Typography variant="body2" sx={{ mt: 1 }}>
-              <strong>Total:</strong>{" "}
+              <strong>{t("total")}:</strong>{" "}
               <span style={{ color: "#16a34a", fontWeight: 600 }}>
-                €{reservation.total_price}
+                EUR {reservation.total_price}
               </span>
             </Typography>
           </CardContent>
         ) : (
           <Typography variant="body2" color="text.secondary">
-            No recent reservation found.
+            {t("noReservation")}
           </Typography>
         )}
 
@@ -151,7 +153,7 @@ export default function SuccessPage() {
           }}
           onClick={() => router.push("/")}
         >
-          Back to Home
+          {t("backHome")}
         </Button>
       </Card>
     </Box>

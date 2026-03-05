@@ -19,7 +19,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -30,6 +30,7 @@ import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 
 export default function Header() {
+  const t = useTranslations("header");
   const { data: session } = useSession();
   const user = session?.user;
   const router = useRouter();
@@ -53,11 +54,8 @@ export default function Header() {
 
   const closeAlerts = async () => {
     setAlertsAnchor(null);
-
     try {
       await fetch("/api/notifications", { method: "PATCH" });
-
-      // ✅ update UI menjëherë
       setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
       setUnreadCount(0);
     } catch (err) {
@@ -93,7 +91,6 @@ export default function Header() {
     }
   }
 
-  // SSE unread count (only worker/admin)
   useEffect(() => {
     if (!mounted || !user || user.role === "client") return;
 
@@ -106,13 +103,8 @@ export default function Header() {
         loadNotifications();
       }
     });
-    es.onerror = () => {
-      es.close();
-    };
-
-    return () => {
-      es.close();
-    };
+    es.onerror = () => es.close();
+    return () => es.close();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted, user?.role, alertsAnchor]);
 
@@ -162,7 +154,6 @@ export default function Header() {
           gap: 2,
         }}
       >
-        {/* LEFT — LOGO */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <Link
             href="/"
@@ -197,12 +188,12 @@ export default function Header() {
             </Typography>
             {isDashboard ? (
               <Typography variant="caption" color="text.secondary">
-                Dashboard
+                {t("dashboard")}
               </Typography>
             ) : null}
           </Box>
         </Box>
-        {/* RIGHT — PROFILE, NOTIFICATIONS, LOGOUT */}
+
         <Box
           className="hidden md:flex items-center gap-2"
           sx={{ marginLeft: "auto" }}
@@ -265,13 +256,13 @@ export default function Header() {
                 "&:hover": { backgroundColor: "#f1f5f9" },
               }}
             >
-              Contact
+              {t("contact")}
             </Button>
           )}
-          {/* Notifications (only worker/admin) */}
+
           {mounted && user && user.role !== "client" && (
             <>
-              <Tooltip title="Notifications">
+              <Tooltip title={t("notifications")}>
                 <IconButton
                   onClick={openAlerts}
                   sx={{
@@ -307,34 +298,31 @@ export default function Header() {
                 }}
               >
                 <Box sx={{ p: 2, width: 320 }}>
-                  {/* Housekeeping */}
                   <Typography variant="subtitle1" fontWeight="bold" mb={1}>
-                    🧹 Housekeeping Alerts
+                    {t("housekeeping.title")}
                   </Typography>
                   <Typography>
-                    🚪 Checkin Today: {summary?.checkin_today ?? 0}
-                  </Typography>
-
-                  <Typography>
-                    🚪 Checkouts Today: {summary?.checkout_today ?? 0}
+                    {t("housekeeping.checkinToday")}: {summary?.checkin_today ?? 0}
                   </Typography>
                   <Typography>
-                    🧼 Needs Cleaning: {summary?.needs_cleaning ?? 0}
+                    {t("housekeeping.checkoutsToday")}: {summary?.checkout_today ?? 0}
                   </Typography>
                   <Typography>
-                    ⚠️ Out of Order: {summary?.out_of_order ?? 0}
+                    {t("housekeeping.needsCleaning")}: {summary?.needs_cleaning ?? 0}
+                  </Typography>
+                  <Typography>
+                    {t("housekeeping.outOfOrder")}: {summary?.out_of_order ?? 0}
                   </Typography>
 
                   <Divider sx={{ my: 1.5 }} />
 
-                  {/* Reservation Notifications */}
                   <Typography variant="subtitle1" fontWeight="bold" mb={1}>
-                    🔔 Reservation Notifications
+                    {t("reservationNotifications")}
                   </Typography>
 
                   {notifications.length === 0 ? (
                     <Typography variant="body2" color="text.secondary">
-                      No notifications
+                      {t("noNotifications")}
                     </Typography>
                   ) : (
                     <Box
@@ -384,7 +372,6 @@ export default function Header() {
             </>
           )}
 
-          {/* User section */}
           {mounted && user ? (
             <>
               <Button
@@ -415,7 +402,7 @@ export default function Header() {
                   "&:hover": { backgroundColor: "#f1f5f9" },
                 }}
               >
-                {user.name || "Account"}
+                {user.name || t("account")}
               </Button>
 
               <Menu
@@ -439,7 +426,7 @@ export default function Header() {
                     }}
                   >
                     <DashboardIcon sx={{ fontSize: 18, mr: 1 }} />
-                    Dashboard
+                    {t("dashboard")}
                   </MenuItem>
                 )}
                 <MenuItem
@@ -449,7 +436,7 @@ export default function Header() {
                   }}
                 >
                   <PersonOutlineIcon sx={{ fontSize: 18, mr: 1 }} />
-                  Profile
+                  {t("profile")}
                 </MenuItem>
                 <Divider />
                 <MenuItem
@@ -460,7 +447,7 @@ export default function Header() {
                   sx={{ color: "#b91c1c" }}
                 >
                   <LogoutIcon sx={{ fontSize: 18, mr: 1 }} />
-                  Logout
+                  {t("logout")}
                 </MenuItem>
               </Menu>
             </>
@@ -476,7 +463,7 @@ export default function Header() {
                   fontWeight: 600,
                 }}
               >
-                Login
+                {t("login")}
               </Button>
               <Button
                 component={Link}
@@ -488,13 +475,12 @@ export default function Header() {
                   fontWeight: 600,
                 }}
               >
-                Register
+                {t("register")}
               </Button>
             </>
           )}
         </Box>
 
-        {/* MOBILE MENU BUTTON */}
         <Box
           sx={{
             display: { xs: "flex", md: "none" },
@@ -504,7 +490,7 @@ export default function Header() {
         >
           {mounted && user && user.role !== "client" && (
             <>
-              <Tooltip title="Notifications">
+              <Tooltip title={t("notifications")}>
                 <IconButton
                   onClick={openAlerts}
                   sx={{
@@ -542,30 +528,30 @@ export default function Header() {
               >
                 <Box sx={{ p: 2, width: { xs: 280, sm: 320 } }}>
                   <Typography variant="subtitle1" fontWeight="bold" mb={1}>
-                    Housekeeping Alerts
+                    {t("housekeeping.title")}
                   </Typography>
                   <Typography>
-                    Checkin Today: {summary?.checkin_today ?? 0}
+                    {t("housekeeping.checkinToday")}: {summary?.checkin_today ?? 0}
                   </Typography>
                   <Typography>
-                    Checkouts Today: {summary?.checkout_today ?? 0}
+                    {t("housekeeping.checkoutsToday")}: {summary?.checkout_today ?? 0}
                   </Typography>
                   <Typography>
-                    Needs Cleaning: {summary?.needs_cleaning ?? 0}
+                    {t("housekeeping.needsCleaning")}: {summary?.needs_cleaning ?? 0}
                   </Typography>
                   <Typography>
-                    Out of Order: {summary?.out_of_order ?? 0}
+                    {t("housekeeping.outOfOrder")}: {summary?.out_of_order ?? 0}
                   </Typography>
 
                   <Divider sx={{ my: 1.5 }} />
 
                   <Typography variant="subtitle1" fontWeight="bold" mb={1}>
-                    Reservation Notifications
+                    {t("reservationNotifications")}
                   </Typography>
 
                   {notifications.length === 0 ? (
                     <Typography variant="body2" color="text.secondary">
-                      No notifications
+                      {t("noNotifications")}
                     </Typography>
                   ) : (
                     <Box
@@ -632,7 +618,6 @@ export default function Header() {
           </IconButton>
         </Box>
 
-        {/* MOBILE DROPDOWN MENU */}
         <Menu
           anchorEl={menuAnchor}
           open={Boolean(menuAnchor)}
@@ -657,7 +642,7 @@ export default function Header() {
             }}
           >
             <Typography variant="caption" color="text.secondary">
-              Language
+              {t("language")}
             </Typography>
             <Button
               size="small"
@@ -704,10 +689,9 @@ export default function Header() {
                 href="/contact"
                 onClick={closeMenu}
               >
-                Contact
+                {t("contact")}
               </MenuItem>
             ),
-
             !user && (
               <MenuItem
                 key="login"
@@ -715,10 +699,9 @@ export default function Header() {
                 href="/login"
                 onClick={closeMenu}
               >
-                Login
+                {t("login")}
               </MenuItem>
             ),
-
             !user && (
               <MenuItem
                 key="register"
@@ -726,10 +709,9 @@ export default function Header() {
                 href="/register"
                 onClick={closeMenu}
               >
-                Register
+                {t("register")}
               </MenuItem>
             ),
-
             user && user.role !== "client" && (
               <MenuItem
                 key="dashboard"
@@ -737,10 +719,9 @@ export default function Header() {
                 href="/dashboard"
                 onClick={closeMenu}
               >
-                Dashboard
+                {t("dashboard")}
               </MenuItem>
             ),
-
             user && (
               <MenuItem
                 key="profile"
@@ -748,10 +729,9 @@ export default function Header() {
                 href="/profile"
                 onClick={closeMenu}
               >
-                Profile
+                {t("profile")}
               </MenuItem>
             ),
-
             user && (
               <MenuItem
                 key="logout"
@@ -760,7 +740,7 @@ export default function Header() {
                   logout();
                 }}
               >
-                Logout
+                {t("logout")}
               </MenuItem>
             ),
           ].filter(Boolean)}
@@ -769,5 +749,3 @@ export default function Header() {
     </AppBar>
   );
 }
-
-

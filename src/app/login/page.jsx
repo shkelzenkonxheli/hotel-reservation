@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession, signIn } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -28,7 +29,8 @@ import PublicCard from "../components/Public/PublicCard";
 import usePageTitle from "../hooks/usePageTitle";
 
 export default function LoginPage() {
-  usePageTitle("Login | Dijari Premium");
+  const t = useTranslations("login");
+  usePageTitle(t("metaTitle"));
 
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -44,9 +46,13 @@ export default function LoginPage() {
     message: "",
     severity: "success",
   });
-  const hasLoginSuccessParam =
-    typeof window !== "undefined" &&
-    new URLSearchParams(window.location.search).get("login") === "success";
+  const [hasLoginSuccessParam, setHasLoginSuccessParam] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const ok = new URLSearchParams(window.location.search).get("login");
+    setHasLoginSuccessParam(ok === "success");
+  }, []);
 
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -60,14 +66,14 @@ export default function LoginPage() {
     if (!hasLoginSuccessParam) return;
     setFeedback({
       open: true,
-      message: "Successfully logged in",
+      message: t("messages.loginSuccess"),
       severity: "success",
     });
     const timer = setTimeout(() => {
       router.replace("/");
     }, 700);
     return () => clearTimeout(timer);
-  }, [hasLoginSuccessParam, router]);
+  }, [hasLoginSuccessParam, router, t]);
 
   if (status === "loading") {
     return (
@@ -98,9 +104,9 @@ export default function LoginPage() {
     });
 
     if (res.error === "EMAIL_NOT_VERIFIED") {
-      setError("Email is not verified. Please check your inbox.");
+      setError(t("errors.emailNotVerified"));
     } else if (res.error) {
-      setError("Invalid email or password");
+      setError(t("errors.invalidCredentials"));
     } else {
       router.replace("/login?login=success");
     }
@@ -110,7 +116,7 @@ export default function LoginPage() {
 
   const handleResend = async () => {
     if (!email) {
-      setError("Enter your email to resend verification.");
+      setError(t("errors.enterEmailForResend"));
       return;
     }
     try {
@@ -122,12 +128,12 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Failed to resend verification email.");
+        setError(data.error || t("errors.resendFailed"));
         return;
       }
-      setError("Verification email sent. Check your inbox.");
+      setError(t("messages.verificationSent"));
     } catch (err) {
-      setError("Failed to resend verification email.");
+      setError(t("errors.resendFailed"));
     } finally {
       setResendLoading(false);
     }
@@ -186,7 +192,7 @@ export default function LoginPage() {
                 }}
                 gutterBottom
               >
-                Welcome back
+                {t("title")}
               </Typography>
               <Typography
                 variant="body2"
@@ -194,12 +200,12 @@ export default function LoginPage() {
                 align="center"
                 mb={3.2}
               >
-                Sign in to access your account
+                {t("subtitle")}
               </Typography>
 
               <Box component="form" onSubmit={handleLoginCredentials}>
                 <TextField
-                  label="Email"
+                  label={t("fields.email")}
                   fullWidth
                   required
                   margin="normal"
@@ -216,7 +222,7 @@ export default function LoginPage() {
                 />
 
                 <TextField
-                  label="Password"
+                  label={t("fields.password")}
                   fullWidth
                   required
                   margin="normal"
@@ -273,7 +279,7 @@ export default function LoginPage() {
                   {loading ? (
                     <CircularProgress size={26} color="inherit" />
                   ) : (
-                    "Login"
+                    t("buttons.login")
                   )}
                 </Button>
               </Box>
@@ -286,11 +292,11 @@ export default function LoginPage() {
                 disabled={resendLoading}
               >
                 {resendLoading
-                  ? "Sending..."
-                  : "Didn't receive the link? Resend"}
+                  ? t("buttons.sending")
+                  : t("buttons.resend")}
               </Button>
 
-              <Divider sx={{ my: 3 }}>OR</Divider>
+              <Divider sx={{ my: 3 }}>{t("or")}</Divider>
 
               <Button
                 fullWidth
@@ -313,7 +319,7 @@ export default function LoginPage() {
                   })
                 }
               >
-                Continue with Google
+                {t("buttons.google")}
               </Button>
 
               <Typography
@@ -322,13 +328,13 @@ export default function LoginPage() {
                 mt={3}
                 color="text.secondary"
               >
-                Don't have an account?{" "}
+                {t("noAccount")}{" "}
                 <Typography
                   component="span"
                   sx={{ cursor: "pointer", fontWeight: 700, color: "#0ea5e9" }}
                   onClick={() => router.push("/register")}
                 >
-                  Register
+                  {t("buttons.register")}
                 </Typography>
               </Typography>
             </PublicCard>

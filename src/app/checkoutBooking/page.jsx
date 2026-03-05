@@ -30,7 +30,7 @@ import usePageTitle from "../hooks/usePageTitle";
 
 export default function CheckoutBooking() {
   const t = useTranslations("checkout");
-  usePageTitle("Checkout | Dijari Premium");
+  usePageTitle(t("metaTitle"));
 
   const { booking } = useBooking();
   const router = useRouter();
@@ -111,7 +111,7 @@ export default function CheckoutBooking() {
   /* ---------------- SUBMIT ---------------- */
   const handleBookClick = async () => {
     if (!fullname || !phone || !address) {
-      alert("Please fill in all fields.");
+      alert(t("alerts.fillAllFields"));
       return;
     }
 
@@ -140,7 +140,7 @@ export default function CheckoutBooking() {
         if (data.url) {
           window.location.href = data.url;
         } else {
-          alert("Payment initialization failed.");
+          alert(t("alerts.paymentInitFailed"));
         }
       } else {
         const res = await fetch("/api/reservation", {
@@ -161,15 +161,15 @@ export default function CheckoutBooking() {
         });
         const data = await res.json();
         if (!res.ok) {
-          alert(data?.error || "Reservation failed.");
+          alert(data?.error || t("alerts.reservationFailed"));
           return;
         }
-        alert("Reservation created as pending. Please pay at the hotel.");
+        alert(t("alerts.pendingCreated"));
         router.push("/success");
       }
     } catch (error) {
       console.error(error);
-      alert("Something went wrong. Please try again.");
+      alert(t("alerts.genericError"));
     } finally {
       setLoading(false);
     }
@@ -214,7 +214,7 @@ export default function CheckoutBooking() {
           className="text-slate-700 text-sm mt-2 underline underline-offset-4"
           onClick={() => setExpandedRoom(room)}
         >
-          View details
+          {t("viewDetails")}
         </button>
       </div>
 
@@ -222,15 +222,15 @@ export default function CheckoutBooking() {
 
       <div className="space-y-2">
         <div className="flex items-center justify-between text-sm text-slate-600">
-          <span>Check-in</span>
+          <span>{t("summary.checkIn")}</span>
           <span className="font-semibold text-slate-900">{startDate}</span>
         </div>
         <div className="flex items-center justify-between text-sm text-slate-600">
-          <span>Check-out</span>
+          <span>{t("summary.checkOut")}</span>
           <span className="font-semibold text-slate-900">{endDate}</span>
         </div>
         <div className="flex items-center justify-between text-sm text-slate-600">
-          <span>Nights</span>
+          <span>{t("summary.nights")}</span>
           <span className="font-semibold text-slate-900">{nights}</span>
         </div>
       </div>
@@ -239,11 +239,11 @@ export default function CheckoutBooking() {
 
       <div className="space-y-2">
         <Typography variant="subtitle2" fontWeight={700}>
-          Price breakdown
+          {t("summary.priceBreakdown")}
         </Typography>
         <div className="flex items-center justify-between text-sm text-slate-600">
           <span>
-            EUR {nightlyRate.toFixed(2)} x {nights} nights
+            EUR {nightlyRate.toFixed(2)} x {nights} {t("summary.nightsLower")}
           </span>
           <span className="font-semibold text-slate-900">
             EUR {(nightlyRate * nights).toFixed(2)}
@@ -254,7 +254,7 @@ export default function CheckoutBooking() {
       <div className="mt-4 rounded-xl bg-slate-50 px-4 py-3">
         <div className="flex items-center justify-between">
           <Typography variant="subtitle1" fontWeight={800}>
-            Total
+            {t("summary.total")}
           </Typography>
           <Typography variant="h6" fontWeight={900} color="success.main">
             EUR {totalFormatted}
@@ -263,7 +263,7 @@ export default function CheckoutBooking() {
       </div>
 
       <p className="mt-4 text-xs text-slate-500">
-        Secure checkout. Your details are protected.
+        {t("summary.secureNote")}
       </p>
     </PublicCard>
   );
@@ -272,42 +272,42 @@ export default function CheckoutBooking() {
     <PublicCard className="p-5 md:p-6">
       <div className="flex items-center justify-between mb-2">
         <Typography variant="h6" fontWeight={800}>
-          Guest information
+          {t("form.guestInformation")}
         </Typography>
-        <span className="text-xs text-slate-500">Required fields</span>
+        <span className="text-xs text-slate-500">{t("form.requiredFields")}</span>
       </div>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <TextField
-          label="Full Name"
+          label={t("form.fullName")}
           value={fullname}
           onChange={(e) => setFullname(e.target.value)}
-          helperText="Enter the name on the booking"
+          helperText={t("form.fullNameHelper")}
         />
         <TextField
-          label="Phone"
+          label={t("form.phone")}
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          helperText="We may contact you for check-in updates"
+          helperText={t("form.phoneHelper")}
         />
         <TextField
-          label="Address"
+          label={t("form.address")}
           value={address}
           onChange={(e) => setAddress(e.target.value)}
-          helperText="Billing or contact address"
+          helperText={t("form.addressHelper")}
         />
         <TextField
-          label="Guests"
+          label={t("form.guests")}
           type="number"
           inputProps={{ min: 1 }}
           value={guests}
           onChange={(e) => setGuests(Number(e.target.value))}
-          helperText="Select the number of guests"
+          helperText={t("form.guestsHelper")}
         />
 
         <Box>
           <Typography variant="subtitle2" fontWeight={800} sx={{ mb: 1 }}>
-            Payment method
+            {t("form.paymentMethod")}
           </Typography>
           <ToggleButtonGroup
             fullWidth
@@ -344,10 +344,10 @@ export default function CheckoutBooking() {
                 <PaymentsOutlined fontSize="small" />
                 <Box textAlign="left">
                   <Typography fontSize={14} fontWeight={800}>
-                    Pay online
+                    {t("payment.onlineTitle")}
                   </Typography>
                   <Typography fontSize={12} color="text.secondary">
-                    Card via Stripe
+                    {t("payment.onlineSubtitle")}
                   </Typography>
                 </Box>
               </Box>
@@ -357,10 +357,10 @@ export default function CheckoutBooking() {
                 <AccountBalanceWalletOutlined fontSize="small" />
                 <Box textAlign="left">
                   <Typography fontSize={14} fontWeight={800}>
-                    Pay at hotel
+                    {t("payment.cashTitle")}
                   </Typography>
                   <Typography fontSize={12} color="text.secondary">
-                    Cash on arrival
+                    {t("payment.cashSubtitle")}
                   </Typography>
                 </Box>
               </Box>
@@ -372,8 +372,8 @@ export default function CheckoutBooking() {
             sx={{ mt: 1, display: "block" }}
           >
             {paymentMethod === "cash"
-              ? "Cash bookings are created as pending and can be confirmed by admin."
-              : "You will be redirected to secure Stripe checkout."}
+              ? t("payment.cashNote")
+              : t("payment.cardNote")}
           </Typography>
         </Box>
       </Box>
@@ -391,7 +391,7 @@ export default function CheckoutBooking() {
         {loading ? (
           <CircularProgress size={24} color="inherit" />
         ) : paymentMethod === "cash" ? (
-          "Confirm booking (pay at hotel)"
+          t("confirmCash")
         ) : (
           t("confirmAndPay")
         )}
@@ -409,7 +409,7 @@ export default function CheckoutBooking() {
               {t("title")}
             </h2>
             <p className="text-sm md:text-base text-slate-500 mt-2">
-              Review your stay details and confirm guest information.
+              {t("subtitle")}
             </p>
           </div>
 
@@ -421,13 +421,13 @@ export default function CheckoutBooking() {
                     {room.name}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {startDate} to {endDate} ({nights} nights)
+                    {startDate} {t("mobile.to")} {endDate} ({nights} {t("summary.nightsLower")})
                   </Typography>
 
                   <Divider sx={{ my: 2 }} />
 
                   <Typography fontWeight="bold" color="success.main">
-                    Total: EUR {totalFormatted}
+                    {t("summary.total")}: EUR {totalFormatted}
                   </Typography>
 
                   <Button
@@ -436,7 +436,7 @@ export default function CheckoutBooking() {
                     variant="outlined"
                     onClick={() => setOpenDetails(true)}
                   >
-                    View booking summary
+                    {t("mobile.viewSummary")}
                   </Button>
 
                   <Dialog
@@ -445,7 +445,7 @@ export default function CheckoutBooking() {
                     fullWidth
                     maxWidth="sm"
                   >
-                    <DialogTitle>Booking summary</DialogTitle>
+                    <DialogTitle>{t("mobile.bookingSummary")}</DialogTitle>
                     <DialogContent
                       sx={{ maxHeight: "70vh", overflowY: "auto", pb: 4 }}
                     >
@@ -472,7 +472,7 @@ export default function CheckoutBooking() {
               className="absolute top-3 right-3 text-slate-500"
               onClick={() => setExpandedRoom(null)}
             >
-              X
+              {t("close")}
             </button>
             <h2 className="text-xl font-semibold mb-4">{expandedRoom.name}</h2>
             <p className="text-slate-600 text-sm">{expandedRoom.description}</p>

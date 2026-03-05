@@ -5,9 +5,55 @@
     "cancel": "Cancel"
   },
   "checkout": {
+    "metaTitle": "Checkout | Dijari Premium",
     "title": "Complete your booking",
-    "confirmAndPay": "Confirm booking and pay"
+    "subtitle": "Review your stay details and confirm guest information.",
+    "confirmAndPay": "Confirm booking and pay",
+    "confirmCash": "Confirm booking (pay at hotel)",
+    "viewDetails": "View details",
+    "close": "Close",
+    "summary": {
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
+      "nights": "Nights",
+      "nightsLower": "nights",
+      "priceBreakdown": "Price breakdown",
+      "total": "Total",
+      "secureNote": "Secure checkout. Your details are protected."
+    },
+    "form": {
+      "guestInformation": "Guest information",
+      "requiredFields": "Required fields",
+      "fullName": "Full Name",
+      "fullNameHelper": "Enter the name on the booking",
+      "phone": "Phone",
+      "phoneHelper": "We may contact you for check-in updates",
+      "address": "Address",
+      "addressHelper": "Billing or contact address",
+      "guests": "Guests",
+      "guestsHelper": "Select the number of guests",
+      "paymentMethod": "Payment method"
+    },
+    "payment": {
+      "onlineTitle": "Pay online",
+      "onlineSubtitle": "Card via Stripe",
+      "cashTitle": "Pay at hotel",
+      "cashSubtitle": "Cash on arrival",
+      "cashNote": "Cash bookings are created as pending and can be confirmed by admin.",
+      "cardNote": "You will be redirected to secure Stripe checkout."
+    },
+    "mobile": {
+      "to": "to",
+      "viewSummary": "View booking summary",
+      "bookingSummary": "Booking summary"
+    },
+    "alerts": {
+      "fillAllFields": "Please fill in all fields.",
+      "paymentInitFailed": "Payment initialization failed.",
+      "reservationFailed": "Reservation failed.",
+      "pendingCreated": "Reservation created as pending. Please pay at the hotel.",
+      "genericError": "Something went wrong. Please try again."
+    }
   }
-  
 }
 

@@ -5,7 +5,54 @@
     "cancel": "Anulo"
   },
   "checkout": {
-    "title": "Përfundo rezervimin",
-    "confirmAndPay": "Konfirmo rezervimin dhe paguaj"
+    "metaTitle": "Checkout | Dijari Premium",
+    "title": "Perfundo rezervimin",
+    "subtitle": "Rishiko detajet e qendrimit dhe konfirmo te dhenat e mysafirit.",
+    "confirmAndPay": "Konfirmo rezervimin dhe paguaj",
+    "confirmCash": "Konfirmo rezervimin (paguaj ne hotel)",
+    "viewDetails": "Shiko detajet",
+    "close": "Mbyll",
+    "summary": {
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
+      "nights": "Netet",
+      "nightsLower": "nete",
+      "priceBreakdown": "Detajet e cmimit",
+      "total": "Totali",
+      "secureNote": "Checkout i sigurt. Te dhenat tuaja jane te mbrojtura."
+    },
+    "form": {
+      "guestInformation": "Te dhenat e mysafirit",
+      "requiredFields": "Fushat e detyrueshme",
+      "fullName": "Emri i plote",
+      "fullNameHelper": "Shkruaj emrin e rezervimit",
+      "phone": "Telefoni",
+      "phoneHelper": "Mund t'ju kontaktojme per check-in",
+      "address": "Adresa",
+      "addressHelper": "Adresa e kontaktit ose faturimit",
+      "guests": "Mysafiret",
+      "guestsHelper": "Zgjidh numrin e mysafireve",
+      "paymentMethod": "Menyra e pageses"
+    },
+    "payment": {
+      "onlineTitle": "Paguaj online",
+      "onlineSubtitle": "Kartele me Stripe",
+      "cashTitle": "Paguaj ne hotel",
+      "cashSubtitle": "Cash ne mbrritje",
+      "cashNote": "Rezervimet me cash krijohen si pending dhe konfirmohen nga admini.",
+      "cardNote": "Do te ridrejtohesh ne Stripe checkout te sigurt."
+    },
+    "mobile": {
+      "to": "deri",
+      "viewSummary": "Shiko permbledhjen",
+      "bookingSummary": "Permbledhja e rezervimit"
+    },
+    "alerts": {
+      "fillAllFields": "Ju lutem plotesoni te gjitha fushat.",
+      "paymentInitFailed": "Inicializimi i pageses deshtoi.",
+      "reservationFailed": "Rezervimi deshtoi.",
+      "pendingCreated": "Rezervimi u krijua si pending. Ju lutem paguani ne hotel.",
+      "genericError": "Ndodhi nje gabim. Ju lutem provoni perseri."
+    }
   }
 }

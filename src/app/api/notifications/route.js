@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
+import { requireRole } from "@/lib/authz";
+import { requireSameOrigin } from "@/lib/security";
 
 // Handle GET requests for this route.
 export async function GET(request) {
@@ -29,7 +31,13 @@ export async function GET(request) {
   return NextResponse.json(notifications);
 }
 // Handle PATCH requests for this route.
-export async function PATCH() {
+export async function PATCH(req) {
+  const originError = requireSameOrigin(req);
+  if (originError) return originError;
+
+  const { error } = await requireRole(["admin", "worker"]);
+  if (error) return error;
+
   await prisma.notifications.updateMany({
     where: { is_read: false },
     data: { is_read: true },

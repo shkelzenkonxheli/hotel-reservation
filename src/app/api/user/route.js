@@ -3,6 +3,9 @@ import prisma from "../../../../lib/prisma";
 import bcrypt from "bcryptjs";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
+import { requireSameOrigin } from "@/lib/security";
+import { logActivity } from "../../../../lib/activityLogger";
+import { isValidEmail, normalizeEmail, toSafeString } from "@/lib/validators";
 
 // Handle GET requests for this route.
 export async function GET(req) {
@@ -44,6 +47,9 @@ export async function GET(req) {
 // Handle PATCH requests for this route.
 export async function PATCH(request) {
   try {
+    const originError = requireSameOrigin(request);
+    if (originError) return originError;
+
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== "admin") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -64,6 +70,15 @@ export async function PATCH(request) {
       where: { id: Number(userId) },
       data: { role: newRole },
     });
+
+    await logActivity({
+      action: "UPDATE",
+      entity: "user",
+      entity_id: Number(userId),
+      description: `Changed user role to "${newRole}"`,
+      performed_by: session.user.email || "system",
+    });
+
     return NextResponse.json(updatedUser);
   } catch (error) {
     console.error("Patch error", error);
@@ -72,6 +87,9 @@ export async function PATCH(request) {
 }
 // Handle POST requests for this route.
 export async function POST(req) {
+  const originError = requireSameOrigin(req);
+  if (originError) return originError;
+
   const { name, email, password, role } = await req.json();
 
   try {
@@ -86,8 +104,12 @@ export async function POST(req) {
         { status: 400 },
       );
     }
+    const normalizedEmail = normalizeEmail(email);
+    if (!isValidEmail(normalizedEmail)) {
+      return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
+    }
     const existingUser = await prisma.users.findUnique({
-      where: { email },
+      where: { email: normalizedEmail },
     });
 
     if (existingUser) {
@@ -101,12 +123,21 @@ export async function POST(req) {
 
     const user = await prisma.users.create({
       data: {
-        name,
-        email,
+        name: toSafeString(name, 120),
+        email: normalizedEmail,
         password: hashedPassrod,
         role: role || "client",
       },
     });
+
+    await logActivity({
+      action: "CREATE",
+      entity: "user",
+      entity_id: user.id,
+      description: `Created user "${user.email}" with role "${user.role}"`,
+      performed_by: session.user.email || "system",
+    });
+
     return NextResponse.json(user);
   } catch (error) {
     return NextResponse.json({ error: "Mising Fields" }, { status: 400 });
@@ -115,6 +146,9 @@ export async function POST(req) {
 // Handle DELETE requests for this route.
 export async function DELETE(req) {
   try {
+    const originError = requireSameOrigin(req);
+    if (originError) return originError;
+
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== "admin") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -143,6 +177,14 @@ export async function DELETE(req) {
 
     await prisma.users.delete({
       where: { id: Number(userId) },
+    });
+
+    await logActivity({
+      action: "DELETE",
+      entity: "user",
+      entity_id: Number(userId),
+      description: `Deleted user "${user.email}"`,
+      performed_by: session.user.email || "system",
     });
 
     return NextResponse.json({ message: "User deleted successfully" });

@@ -3,10 +3,15 @@ import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { DASHBOARD_TABS } from "@/lib/dashboardTabs";
+import { requireSameOrigin } from "@/lib/security";
+import { logActivity } from "../../../../../../lib/activityLogger";
 
 const ALL_TABS = DASHBOARD_TABS.map((t) => t.key);
 
 export async function PATCH(req, { params }) {
+  const originError = requireSameOrigin(req);
+  if (originError) return originError;
+
   const session = await getServerSession(authOptions);
   if (!session?.user || session.user.role !== "admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -89,6 +94,14 @@ export async function PATCH(req, { params }) {
       base_salary: true,
       employment_start_date: true,
     },
+  });
+
+  await logActivity({
+    action: "UPDATE",
+    entity: "user_permissions",
+    entity_id: userId,
+    description: `Updated staff permissions and employment details`,
+    performed_by: session.user.email || "system",
   });
 
   return NextResponse.json(updated);

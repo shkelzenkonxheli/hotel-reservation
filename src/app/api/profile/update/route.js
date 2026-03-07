@@ -2,9 +2,13 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
+import { requireSameOrigin } from "@/lib/security";
 
 // Handle PATCH requests for this route.
 export async function PATCH(req) {
+  const originError = requireSameOrigin(req);
+  if (originError) return originError;
+
   const session = await getServerSession(authOptions);
 
   if (!session) {

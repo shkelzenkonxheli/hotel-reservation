@@ -1,11 +1,35 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/route";
+import { rateLimit } from "@/lib/rateLimit";
+import { requireSameOrigin } from "@/lib/security";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Handle POST requests for this route.
 export async function POST(req) {
   try {
+    const originError = requireSameOrigin(req);
+    if (originError) return originError;
+
+    const rl = rateLimit(req, {
+      scope: "create-checkout-session",
+      limit: 15,
+      windowMs: 10 * 60 * 1000,
+    });
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "Too many attempts. Please try again later." },
+        { status: 429, headers: { "Retry-After": String(rl.retryAfterSec) } },
+      );
+    }
+
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const {
       totalPrice,
       roomName,
@@ -37,9 +61,15 @@ export async function POST(req) {
       );
     }
 
-    const session = await stripe.checkout.sessions.create({
+    const normalizedUserEmail = String(userEmail || "").toLowerCase().trim();
+    const sessionEmail = String(session.user.email).toLowerCase().trim();
+    if (normalizedUserEmail !== sessionEmail) {
+      return NextResponse.json({ error: "Invalid user context" }, { status: 403 });
+    }
+
+    const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
-      customer_email: userEmail,
+      customer_email: sessionEmail,
       client_reference_id: String(roomId ?? userEmail),
 
       metadata: {
@@ -72,7 +102,7 @@ export async function POST(req) {
       // expires_at: Math.floor(Date.now() / 1000) + 60 * 30,
     });
 
-    return NextResponse.json({ url: session.url });
+    return NextResponse.json({ url: checkoutSession.url });
   } catch (error) {
     console.error("Stripe error:", error);
     return NextResponse.json(

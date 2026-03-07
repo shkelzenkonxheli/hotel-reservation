@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { logActivity } from "../../../../lib/activityLogger";
 import { authOptions } from "../auth/[...nextauth]/route";
+import { requireSameOrigin } from "@/lib/security";
 
 // Normalize any date to UTC midnight (date-only comparisons).
 function normalizeUTC(date) {
@@ -186,7 +187,14 @@ export async function GET(request) {
 // Handle POST requests for this route.
 export async function POST(request) {
   try {
+    const originError = requireSameOrigin(request);
+    if (originError) return originError;
+
     const session = await getServerSession(authOptions);
+    if (!session?.user || (session.user.role !== "admin" && session.user.role !== "worker")) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const { name, room_number, type, price, description, amenities } =
       await request.json();
 
@@ -248,8 +256,14 @@ export async function POST(request) {
 // Handle PATCH requests for this route.
 export async function PATCH(request) {
   try {
+    const originError = requireSameOrigin(request);
+    if (originError) return originError;
+
     const { room_id, action } = await request.json();
     const session = await getServerSession(authOptions);
+    if (!session?.user || (session.user.role !== "admin" && session.user.role !== "worker")) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     if (!room_id || !action) {
       return NextResponse.json(

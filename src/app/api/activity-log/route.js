@@ -1,9 +1,14 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { requireRole } from "@/lib/authz";
+import { requireSameOrigin } from "@/lib/security";
 
 // Handle GET requests for this route.
 export async function GET() {
   try {
+    const { error } = await requireRole(["admin", "worker"]);
+    if (error) return error;
+
     const logs = await prisma.activity_logs.findMany({
       orderBy: { created_at: "desc" },
     });
@@ -19,6 +24,12 @@ export async function GET() {
 // Handle DELETE requests for this route.
 export async function DELETE(req) {
   try {
+    const originError = requireSameOrigin(req);
+    if (originError) return originError;
+
+    const { error } = await requireRole(["admin"]);
+    if (error) return error;
+
     const { ids } = await req.json();
     if (!Array.isArray(ids) || ids.length === 0) {
       return NextResponse.json({ error: "No ids provided" }, { status: 400 });

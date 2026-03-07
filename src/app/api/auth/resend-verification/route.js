@@ -2,15 +2,38 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { Resend } from "resend";
 import crypto from "crypto";
+import { rateLimit } from "@/lib/rateLimit";
+import { requireSameOrigin } from "@/lib/security";
+import { isValidEmail, normalizeEmail } from "@/lib/validators";
 
 export async function POST(req) {
   try {
+    const originError = requireSameOrigin(req);
+    if (originError) return originError;
+
+    const rl = rateLimit(req, {
+      scope: "auth-resend-verification",
+      limit: 6,
+      windowMs: 10 * 60 * 1000,
+    });
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "Too many attempts. Please try again later." },
+        { status: 429, headers: { "Retry-After": String(rl.retryAfterSec) } },
+      );
+    }
+
     const { email } = await req.json();
     if (!email) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    const user = await prisma.users.findUnique({ where: { email } });
+    const normalizedEmail = normalizeEmail(email);
+    if (!isValidEmail(normalizedEmail)) {
+      return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
+    }
+
+    const user = await prisma.users.findUnique({ where: { email: normalizedEmail } });
 
     if (!user) {
       return NextResponse.json({ message: "If the email exists, we sent a link." });
@@ -37,7 +60,7 @@ export async function POST(req) {
 
     await resend.emails.send({
       from: "Dijari Premium <onboarding@resend.dev>",
-      to: email,
+      to: normalizedEmail,
       subject: "Verify your email",
       html: `
         <h2>Email Verification</h2>

@@ -1,11 +1,20 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { requireRole } from "@/lib/authz";
+import { requireSameOrigin } from "@/lib/security";
+import { logActivity } from "../../../../lib/activityLogger";
 
 export const runtime = "nodejs";
 
 // Handle POST requests for this route.
 export async function POST(req) {
   try {
+    const originError = requireSameOrigin(req);
+    if (originError) return originError;
+
+    const { session, error } = await requireRole(["admin", "worker"]);
+    if (error) return error;
+
     const body = await req.json();
     const { type, url } = body;
 
@@ -37,6 +46,14 @@ export async function POST(req) {
         order: nextOrder,
         isCover: count === 0,
       },
+    });
+
+    await logActivity({
+      action: "CREATE",
+      entity: "room_image",
+      entity_id: created.id,
+      description: `Added image for room type "${type}"`,
+      performed_by: session.user.email || "system",
     });
 
     return NextResponse.json(created);

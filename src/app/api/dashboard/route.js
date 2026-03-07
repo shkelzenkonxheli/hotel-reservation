@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { requireRole } from "@/lib/authz";
 
 function utcDateOnly(d = new Date()) {
   return new Date(
@@ -10,6 +11,9 @@ function utcDateOnly(d = new Date()) {
 // Handle GET requests for this route.
 export async function GET() {
   try {
+    const { error } = await requireRole(["admin", "worker"]);
+    if (error) return error;
+
     // ================= DATES (UTC DATE-ONLY) =================
     const today = utcDateOnly(); // 00:00 UTC
     // Compute the next day boundary for "today" range queries.

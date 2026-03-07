@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { logActivity } from "../../../../lib/activityLogger";
+import { requireSameOrigin } from "@/lib/security";
 
 function parseDateOnlyToUTC(dateStr) {
   const [y, m, d] = String(dateStr || "")
@@ -66,6 +67,9 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
+    const originError = requireSameOrigin(request);
+    if (originError) return originError;
+
     const session = await getServerSession(authOptions);
     const role = session?.user?.role;
     if (!session?.user || (role !== "admin" && role !== "worker")) {

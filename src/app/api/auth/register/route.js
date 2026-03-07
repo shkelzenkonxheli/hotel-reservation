@@ -3,10 +3,33 @@ import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { Resend } from "resend";
 import crypto from "crypto";
+import { rateLimit } from "@/lib/rateLimit";
+import { requireSameOrigin } from "@/lib/security";
+import {
+  isStrongPassword,
+  isValidEmail,
+  normalizeEmail,
+  toSafeString,
+} from "@/lib/validators";
 
 // Handle POST requests for this route.
 export async function POST(req) {
   try {
+    const originError = requireSameOrigin(req);
+    if (originError) return originError;
+
+    const rl = rateLimit(req, {
+      scope: "auth-register",
+      limit: 5,
+      windowMs: 10 * 60 * 1000,
+    });
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { message: "Too many attempts. Please try again later." },
+        { status: 429, headers: { "Retry-After": String(rl.retryAfterSec) } },
+      );
+    }
+
     const { name, email, password } = await req.json();
 
     if (!name || !email || !password) {
@@ -16,7 +39,29 @@ export async function POST(req) {
       );
     }
 
-    const existingUser = await prisma.users.findUnique({ where: { email } });
+    if (!isValidEmail(email)) {
+      return NextResponse.json(
+        { message: "Invalid email format" },
+        { status: 400 },
+      );
+    }
+
+    if (!isStrongPassword(password)) {
+      return NextResponse.json(
+        {
+          message:
+            "Password must be at least 8 characters and include one uppercase letter and one number.",
+        },
+        { status: 400 },
+      );
+    }
+
+    const normalizedEmail = normalizeEmail(email);
+    const safeName = toSafeString(name, 120);
+
+    const existingUser = await prisma.users.findUnique({
+      where: { email: normalizedEmail },
+    });
     if (existingUser) {
       return NextResponse.json(
         { message: "User already exists" },
@@ -32,8 +77,8 @@ export async function POST(req) {
 
     const user = await prisma.users.create({
       data: {
-        name,
-        email,
+        name: safeName,
+        email: normalizedEmail,
         password: hashedPassword,
         role: "client",
         email_verified: false,
@@ -49,7 +94,7 @@ export async function POST(req) {
 
     await resend.emails.send({
       from: "Dijari Premium <onboarding@resend.dev>",
-      to: email,
+      to: normalizedEmail,
       subject: "Verify your email",
       html: `
         <h2>Welcome, ${name}!</h2>

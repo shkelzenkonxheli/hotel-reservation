@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { logActivity } from "../../../../../lib/activityLogger";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
+import { requireSameOrigin } from "@/lib/security";
 
 // Convert YYYY-MM-DD to a UTC midnight Date for day-precision comparisons.
 function parseDateOnlyToUTC(dateStr) {
@@ -21,6 +22,9 @@ function isOverlapError(error) {
 // Handle PATCH requests for this route.
 export async function PATCH(req, context) {
   try {
+    const originError = requireSameOrigin(req);
+    if (originError) return originError;
+
     const params = await context.params;
     const { id } = params;
     const session = await getServerSession(authOptions);
@@ -242,6 +246,9 @@ export async function PATCH(req, context) {
 }
 // Handle DELETE requests for this route.
 export async function DELETE(req, { params }) {
+  const originError = requireSameOrigin(req);
+  if (originError) return originError;
+
   const session = await getServerSession(authOptions);
   const { id } = params;
 

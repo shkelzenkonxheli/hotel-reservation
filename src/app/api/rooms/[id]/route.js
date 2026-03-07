@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { logActivity } from "../../../../../lib/activityLogger";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
+import { requireSameOrigin } from "@/lib/security";
 
 function normalizeAmenities(input) {
   if (!Array.isArray(input)) return [];
@@ -14,6 +15,9 @@ function normalizeAmenities(input) {
 // Handle PATCH requests for this route.
 export async function PATCH(request, context) {
   try {
+    const originError = requireSameOrigin(request);
+    if (originError) return originError;
+
     const { id } = await context.params;
     // Parse route param to a numeric ID.
     const roomId = parseInt(id);
@@ -29,6 +33,9 @@ export async function PATCH(request, context) {
     } =
       await request.json();
     const session = await getServerSession(authOptions);
+    if (!session?.user || (session.user.role !== "admin" && session.user.role !== "worker")) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     const existingRoom = await prisma.rooms.findFirst({
       where: {
@@ -98,8 +105,14 @@ export async function PATCH(request, context) {
 // Handle DELETE requests for this route.
 export async function DELETE(req, { params }) {
   try {
+    const originError = requireSameOrigin(req);
+    if (originError) return originError;
+
     const { id } = await params;
     const session = await getServerSession(authOptions);
+    if (!session?.user || (session.user.role !== "admin" && session.user.role !== "worker")) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     if (isNaN(id)) {
       return NextResponse.json({ error: "Invalid room ID" }, { status: 400 });

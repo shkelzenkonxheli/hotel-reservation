@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { requireRole } from "@/lib/authz";
 
 // Handle GET requests for this route.
 export async function GET() {
   try {
+    const { error } = await requireRole(["admin", "worker"]);
+    if (error) return error;
+
     const today = new Date();
     // Strip time to compare dates at day precision.
     const todayOnly = new Date(

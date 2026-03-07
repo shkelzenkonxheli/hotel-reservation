@@ -3,6 +3,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { requireSameOrigin } from "@/lib/security";
+
+const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB
+const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp", "image/jpg"]);
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
@@ -13,6 +17,9 @@ const s3 = new S3Client({
 });
 
 export async function POST(req) {
+  const originError = requireSameOrigin(req);
+  if (originError) return originError;
+
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
@@ -26,11 +33,17 @@ export async function POST(req) {
     if (!file) {
       return NextResponse.json({ error: "Missing file" }, { status: 400 });
     }
+    if (!ALLOWED_MIME.has(file.type)) {
+      return NextResponse.json({ error: "Invalid file type" }, { status: 400 });
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json({ error: "File too large" }, { status: 400 });
+    }
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const safeName = file.name.replace(/\s+/g, "-");
+    const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "-");
     const key = `avatars/user-${session.user.id}/${Date.now()}-${safeName}`;
 
     await s3.send(

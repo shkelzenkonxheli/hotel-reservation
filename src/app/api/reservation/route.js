@@ -4,6 +4,8 @@ import { nanoid } from "nanoid";
 import { logActivity } from "../../../../lib/activityLogger";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
+import { rateLimit } from "@/lib/rateLimit";
+import { requireSameOrigin } from "@/lib/security";
 
 // Convert YYYY-MM-DD to a UTC midnight Date for day-precision comparisons.
 function parseDateOnlyToUTC(dateStr) {
@@ -45,6 +47,21 @@ async function syncReservationStatuses() {
 // Handle POST requests for this route.
 export async function POST(request) {
   try {
+    const originError = requireSameOrigin(request);
+    if (originError) return originError;
+
+    const rl = rateLimit(request, {
+      scope: "reservation-post",
+      limit: 20,
+      windowMs: 10 * 60 * 1000,
+    });
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "Too many attempts. Please try again later." },
+        { status: 429, headers: { "Retry-After": String(rl.retryAfterSec) } },
+      );
+    }
+
     const session = await getServerSession(authOptions);
 
     const {

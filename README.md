@@ -1,4 +1,4 @@
-X`X# Hotel Reservation and Management System
+# Hotel Reservation and Management System
 
 Full-stack hotel/apartment booking platform built with Next.js, PostgreSQL, Prisma, NextAuth, Stripe, and AWS S3.
 
@@ -103,8 +103,8 @@ Set these in `.env` (local) and Vercel Project Settings (production):
 - `NEXT_PUBLIC_BASE_URL`
 - `AWS_REGION`
 - `AWS_S3_BUCKET`
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`
+- `AWS_ACCESS_KEY_`
+- `AWS_SECRET_KEY_`
 
 ## Stripe Setup
 
@@ -177,6 +177,32 @@ In Vercel:
 - Rotate exposed API keys immediately
 - Use separate test/live Stripe keys
 - Restrict cloud DB and S3 credentials
+
+## Production Security Checklist (Go-Live)
+
+- [ ] `NEXTAUTH_URL` and `NEXT_PUBLIC_BASE_URL` use `https://` production domain
+- [ ] All secrets exist only in Vercel env vars (not in git history)
+- [ ] Stripe keys/webhook are production keys on production environment
+- [ ] Google OAuth redirect URIs match production and localhost exactly
+- [ ] Database backups are automated and restore test is verified
+- [ ] S3 bucket policy is least-privilege for app upload needs only
+- [ ] Rate limits and origin checks are enabled on mutating APIs
+- [ ] Admin/worker routes are protected with role checks server-side
+- [ ] Monitoring/logging is enabled (build, runtime, webhook, API errors)
+- [ ] Team has incident plan (who rotates keys, restores DB, disables payments)
+
+## Security Smoke Test (Manual, 10 min)
+
+1. Unauthenticated user calls admin API (`/api/user`, `/api/dashboard`) -> gets `401/403`.
+2. Client user calls admin API -> gets `403`.
+3. Cross-origin POST simulation (wrong `Origin`) on mutating API -> gets `403`.
+4. Brute attempts on `/api/auth/login` -> eventually gets `429`.
+5. Brute attempts on `/api/auth/register` -> eventually gets `429`.
+6. Upload invalid file type/oversized file -> gets `400`.
+7. Upload API by client/guest -> gets `403`.
+8. Stripe checkout with mismatched session email -> gets `403`.
+9. Reservation cancel/hide by non-owner -> gets `403`.
+10. Activity logs show admin critical actions (role change/user create-delete/image changes).
 
 ## Scripts
 

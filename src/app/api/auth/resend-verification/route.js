@@ -4,7 +4,6 @@ import { Resend } from "resend";
 import crypto from "crypto";
 import { rateLimit } from "@/lib/rateLimit";
 import { requireSameOrigin } from "@/lib/security";
-import { isValidEmail, normalizeEmail } from "@/lib/validators";
 
 export async function POST(req) {
   try {
@@ -28,15 +27,23 @@ export async function POST(req) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    const normalizedEmail = normalizeEmail(email);
-    if (!isValidEmail(normalizedEmail)) {
-      return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
+    const normalizedEmail = String(email).toLowerCase().trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(normalizedEmail)) {
+      return NextResponse.json(
+        { error: "Invalid email format" },
+        { status: 400 },
+      );
     }
 
-    const user = await prisma.users.findUnique({ where: { email: normalizedEmail } });
+    const user = await prisma.users.findUnique({
+      where: { email: normalizedEmail },
+    });
 
     if (!user) {
-      return NextResponse.json({ message: "If the email exists, we sent a link." });
+      return NextResponse.json({
+        message: "If the email exists, we sent a link.",
+      });
     }
 
     if (user.email_verified) {
@@ -59,7 +66,7 @@ export async function POST(req) {
     const verifyUrl = `${baseUrl}/api/auth/verify-email?token=${verifyToken}`;
 
     await resend.emails.send({
-      from: "Dijari Premium <onboarding@resend.dev>",
+      from: "Hotel Reservation <onboarding@dijaripremium.com>",
       to: normalizedEmail,
       subject: "Verify your email",
       html: `

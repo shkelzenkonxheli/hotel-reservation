@@ -126,10 +126,9 @@ function DashboardContent() {
     if (status === "loading") return;
 
     if (!session?.user) {
-      router.push("/login");
+      router.replace("/login");
     } else if (session.user.role === "client") {
-      alert("You dont have permission to access dashboard");
-      router.push("/");
+      router.replace("/");
     }
   }, [session, status, router]);
 
@@ -163,6 +162,8 @@ function DashboardContent() {
   }
 
   if (!session?.user) return null;
+  if (session.user.role === "client") return null;
+  if (visibleTabs.length === 0) return null;
 
   const drawer = (
     <Box

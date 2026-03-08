@@ -20,6 +20,8 @@ import {
   MenuItem,
   TextField,
   useMediaQuery,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
 import PageHeader from "./ui/PageHeader";
@@ -40,6 +42,15 @@ export default function UsersTab() {
     password: "",
     role: "client",
   });
+  const [feedback, setFeedback] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  const notify = (message, severity = "success") => {
+    setFeedback({ open: true, message, severity });
+  };
 
   useEffect(() => {
     fetchUsers();
@@ -85,18 +96,20 @@ export default function UsersTab() {
           prev.map((u) => (u.id === updated.id ? updated : u)),
         );
         setSelectedUser(null);
+        notify("User role updated successfully.");
       } else {
-        alert("Failed to update role");
+        notify("Failed to update role.", "error");
       }
     } catch (err) {
       console.error(err);
+      notify("Network error while updating role.", "error");
     }
   }
   async function handleAddUser() {
     const { name, email, password, role } = newUser;
 
     if (!name || !email || !password) {
-      alert("Please fill all required fields");
+      notify("Please fill all required fields.", "warning");
       return;
     }
     try {
@@ -110,12 +123,14 @@ export default function UsersTab() {
         setAddOpen(false);
         setNewUser({ name: "", email: "", password: "", role: "client" });
         fetchUsers();
+        notify("User created successfully.");
       } else {
         const data = await res.json();
-        alert(data.error || "Failed to create User");
+        notify(data.error || "Failed to create user.", "error");
       }
     } catch (err) {
       console.log(err);
+      notify("Network error while creating user.", "error");
     }
   }
   async function handleDeleteUser(userId) {
@@ -134,13 +149,15 @@ export default function UsersTab() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.error || "Failed to delete user");
+        notify(data.error || "Failed to delete user.", "error");
         return;
       }
 
       fetchUsers();
+      notify("User deleted successfully.");
     } catch (err) {
       console.error(err);
+      notify("Network error while deleting user.", "error");
     }
   }
 
@@ -412,6 +429,21 @@ export default function UsersTab() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar
+        open={feedback.open}
+        autoHideDuration={3500}
+        onClose={() => setFeedback((f) => ({ ...f, open: false }))}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          severity={feedback.severity}
+          variant="filled"
+          onClose={() => setFeedback((f) => ({ ...f, open: false }))}
+        >
+          {feedback.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

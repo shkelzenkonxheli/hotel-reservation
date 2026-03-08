@@ -53,6 +53,7 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
   const [customAmenity, setCustomAmenity] = useState("");
   const [amenityOptions, setAmenityOptions] = useState(DEFAULT_AMENITIES);
   const [applyToType, setApplyToType] = useState(false);
+  const [inlineError, setInlineError] = useState("");
 
   const selectedAmenities = useMemo(
     () => (Array.isArray(formData.amenities) ? formData.amenities : []),
@@ -127,13 +128,14 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
   }, []);
 
   async function handleSubmit() {
+    setInlineError("");
     if (
       !formData.name ||
       !formData.room_number ||
       !formData.type ||
       !formData.price
     ) {
-      alert("Please fill in all required fields.");
+      setInlineError("Please fill in all required fields.");
       return;
     }
 
@@ -153,21 +155,22 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
 
       if (res.ok) {
         const data = await res.json();
-        if (mode === "edit" && applyToType) {
-          alert(
-            data?.message ||
-              "Updated this room and all rooms of the selected type.",
-          );
-        }
-        onSaved();
+        const successMessage =
+          mode === "edit" && applyToType
+            ? data?.message ||
+              "Updated this room and all rooms of the selected type."
+            : mode === "edit"
+              ? "Room updated successfully."
+              : "Room created successfully.";
+        onSaved(successMessage, "success");
         onClose();
       } else {
         const data = await res.json();
-        alert("Error: " + (data.error || "Unknown error"));
+        setInlineError(data.error || "Unknown error");
       }
     } catch (err) {
       console.error(err);
-      alert("Something went wrong");
+      setInlineError("Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -383,6 +386,12 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
               Applies name, price, short description and amenities to all rooms with this type.
             </Typography>
           </Box>
+        ) : null}
+
+        {inlineError ? (
+          <Typography mt={2} color="error" variant="body2">
+            {inlineError}
+          </Typography>
         ) : null}
       </DialogContent>
 

@@ -295,9 +295,29 @@ export async function PATCH(request) {
       return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
 
-    const updated = await prisma.rooms.update({
-      where: { id: Number(room_id) },
-      data: { status: nextStatus },
+    const roomIdNum = Number(room_id);
+    const updated = await prisma.$transaction(async (tx) => {
+      const updatedRoom = await tx.rooms.update({
+        where: { id: roomIdNum },
+        data: { status: nextStatus },
+      });
+
+      // If staff marks a room as CLEAN, close all past stays for that room.
+      // This prevents old confirmed/pending stays from forcing needs_cleaning again.
+      if (action === "CLEAN") {
+        await tx.reservations.updateMany({
+          where: {
+            room_id: roomIdNum,
+            cancelled_at: null,
+            admin_hidden: false,
+            status: { in: ["pending", "confirmed"] },
+            end_date: { lte: new Date() },
+          },
+          data: { status: "completed" },
+        });
+      }
+
+      return updatedRoom;
     });
 
     await logActivity({

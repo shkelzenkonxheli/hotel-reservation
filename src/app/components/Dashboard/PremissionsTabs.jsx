@@ -36,6 +36,7 @@ export default function PermissionsTab() {
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
+  const [feedback, setFeedback] = useState("");
   const [mobileStaffOpen, setMobileStaffOpen] = useState(true);
   const [showPermissions, setShowPermissions] = useState(false);
 
@@ -83,6 +84,7 @@ export default function PermissionsTab() {
   const pickUser = (u) => {
     setSelected(u);
     setMobileStaffOpen(false);
+    setFeedback("");
     const tabs = Array.isArray(u.allowed_tabs) ? u.allowed_tabs : [];
     setInitialTabs(tabs);
     setInitialProfile({
@@ -143,6 +145,7 @@ export default function PermissionsTab() {
     if (!selected) return;
     setSaving(true);
     setError("");
+    setFeedback("");
 
     try {
       const res = await fetch(`/api/user/${selected.id}/allowed-tabs`, {
@@ -182,6 +185,7 @@ export default function PermissionsTab() {
             ? String(updated.base_salary)
             : "",
       });
+      setFeedback("Changes saved successfully.");
     } catch (e) {
       setError(e.message || "Failed to save permissions");
     } finally {
@@ -205,6 +209,11 @@ export default function PermissionsTab() {
       {error ? (
         <Box mt={1}>
           <Alert severity="error">{error}</Alert>
+        </Box>
+      ) : null}
+      {feedback ? (
+        <Box mt={1}>
+          <Alert severity="success">{feedback}</Alert>
         </Box>
       ) : null}
 

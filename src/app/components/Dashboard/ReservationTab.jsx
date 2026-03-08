@@ -9,6 +9,8 @@ import {
   Typography,
   Box,
   Button,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { DoneAll } from "@mui/icons-material";
@@ -45,10 +47,18 @@ export default function ReservationsTab() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [detailsReservation, setDetailsReservation] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
+  const [feedback, setFeedback] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const reservationIdParam = searchParams.get("reservationId");
+  const notify = (message, severity = "success") => {
+    setFeedback({ open: true, message, severity });
+  };
 
   const openDetails = (r) => {
     setDetailsReservation(r);
@@ -84,9 +94,11 @@ export default function ReservationsTab() {
         setReservations(data);
       } else {
         console.error("Error fetching reservations", data.error);
+        notify(data.error || "Failed to load reservations.", "error");
       }
     } catch (error) {
       console.error("Network error:", error);
+      notify("Network error while loading reservations.", "error");
     } finally {
       setLoading(false);
     }
@@ -104,11 +116,15 @@ export default function ReservationsTab() {
         setReservations((prev) =>
           prev.map((r) => (r.id === updated.id ? updated : r)),
         );
+        notify("Reservation status updated.");
       } else {
+        const data = await res.json().catch(() => ({}));
         console.error("Failed to update status");
+        notify(data.error || "Failed to update status.", "error");
       }
     } catch (err) {
       console.error(err);
+      notify("Network error while updating status.", "error");
     } finally {
       setAnchorEl(null);
       setSelectedReservation(null);
@@ -132,11 +148,15 @@ export default function ReservationsTab() {
         setReservations((prev) =>
           prev.map((r) => (r.id === updated.id ? updated : r)),
         );
+        notify("Payment info updated.");
       } else {
+        const data = await res.json().catch(() => ({}));
         console.error("Failed to update payment status");
+        notify(data.error || "Failed to update payment info.", "error");
       }
     } catch (err) {
       console.error(err);
+      notify("Network error while updating payment info.", "error");
     } finally {
       setAnchorEl(null);
       setSelectedReservation(null);
@@ -180,13 +200,16 @@ export default function ReservationsTab() {
         method: "DELETE",
       });
       if (res.ok) {
-        alert("Reservation successfully deleted!");
-        fetchReservations();
+        notify("Reservation deleted successfully.");
+        await fetchReservations();
       } else {
+        const data = await res.json().catch(() => ({}));
         console.error("Failed to delete reservation");
+        notify(data.error || "Failed to delete reservation.", "error");
       }
     } catch (err) {
       console.error(err);
+      notify("Network error while deleting reservation.", "error");
     } finally {
       setDeleteDialog({ open: false, id: null });
     }
@@ -197,15 +220,22 @@ export default function ReservationsTab() {
     if (!confirm(`Delete ${selectedIds.length} reservations?`)) return;
 
     try {
-      await fetch("/api/reservation/bulk", {
+      const res = await fetch("/api/reservation/bulk", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ids: selectedIds }),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        notify(data.error || "Failed to delete selected reservations.", "error");
+        return;
+      }
       setSelectedIds([]);
-      fetchReservations();
+      notify("Selected reservations deleted.");
+      await fetchReservations();
     } catch (err) {
       console.error(err);
+      notify("Network error while deleting selected reservations.", "error");
     }
   }
 
@@ -420,13 +450,19 @@ export default function ReservationsTab() {
       <ReservationForm
         open={openModal}
         onClose={() => setOpenModal(false)}
-        onSuccess={fetchReservations}
+        onSuccess={() => {
+          notify("Reservation saved successfully.");
+          fetchReservations();
+        }}
         mode="create"
       />
       <ReservationForm
         open={editOpen}
         onClose={() => setEditOpen(false)}
-        onSuccess={fetchReservations}
+        onSuccess={() => {
+          notify("Reservation updated successfully.");
+          fetchReservations();
+        }}
         mode="edit"
         reservation={editData}
       />
@@ -587,6 +623,21 @@ export default function ReservationsTab() {
           onClose={() => setPrintReservation(null)}
         />
       )}
+
+      <Snackbar
+        open={feedback.open}
+        autoHideDuration={3200}
+        onClose={() => setFeedback((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          severity={feedback.severity}
+          variant="filled"
+          onClose={() => setFeedback((prev) => ({ ...prev, open: false }))}
+        >
+          {feedback.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

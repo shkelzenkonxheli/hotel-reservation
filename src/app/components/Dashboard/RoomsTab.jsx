@@ -17,6 +17,8 @@ import {
   TextField,
   MenuItem,
   Tooltip,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { CleaningServices, Close, MeetingRoom } from "@mui/icons-material";
 import Calendar from "react-calendar";
@@ -40,6 +42,13 @@ export default function RoomsTab() {
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [filter, setFilter] = useState("all");
   const [showCalendar, setShowCalendar] = useState(false);
+  const [feedback, setFeedback] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+  const notify = (message, severity = "success") =>
+    setFeedback({ open: true, message, severity });
 
   useEffect(() => {
     fetchRooms();
@@ -69,11 +78,12 @@ export default function RoomsTab() {
     });
 
     if (res.ok) {
-      fetchRooms();
+      await fetchRooms();
       setSelectedRoom(null);
+      notify("Room marked as cleaned.");
     } else {
       const e = await res.json();
-      alert(e.error || "Error cleaning room");
+      notify(e.error || "Error cleaning room", "error");
     }
   }
   async function handleRoomStatus(room_id) {
@@ -86,9 +96,10 @@ export default function RoomsTab() {
     if (res.ok) {
       fetchRooms();
       setSelectedRoom(null);
+      notify("Room status updated.");
     } else {
       const e = await res.json();
-      alert(e.error || "Error changing status");
+      notify(e.error || "Error changing status", "error");
     }
   }
 
@@ -600,6 +611,20 @@ export default function RoomsTab() {
           </DialogActions>
         </Dialog>
       )}
+      <Snackbar
+        open={feedback.open}
+        autoHideDuration={3500}
+        onClose={() => setFeedback((f) => ({ ...f, open: false }))}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          severity={feedback.severity}
+          variant="filled"
+          onClose={() => setFeedback((f) => ({ ...f, open: false }))}
+        >
+          {feedback.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

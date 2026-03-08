@@ -220,12 +220,20 @@ export default function ReservationForm({
 
   const handleSubmit = async () => {
     if (!fullname || !phone || !type || !roomId || !startDate || !endDate) {
-      alert("Please fill all required fields.");
+      setFeedback({
+        open: true,
+        message: "Please fill all required fields.",
+        severity: "warning",
+      });
       return;
     }
 
     if (isAvailable === false) {
-      alert("No rooms available for these dates.");
+      setFeedback({
+        open: true,
+        message: "No rooms available for these dates.",
+        severity: "error",
+      });
       return;
     }
 
@@ -261,20 +269,11 @@ export default function ReservationForm({
     }
 
     if (res.ok) {
-      setFeedback({
-        open: true,
-        message:
-          mode === "create"
-            ? "Reservation created successfully"
-            : "Reservation updated successfully",
-        severity: "success",
-      });
       await fetch("/api/rooms?include=true");
       if (mode === "create") {
         resetForm();
       }
       onClose();
-      setTimeout(() => onClose(), 600);
       if (onSuccess) onSuccess();
     } else {
       const data = await res.json();

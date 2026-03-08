@@ -18,6 +18,8 @@ import {
   Select,
   MenuItem,
   useMediaQuery,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { Delete } from "@mui/icons-material";
 import { useMemo } from "react";
@@ -32,6 +34,13 @@ export default function activityLogTab() {
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState([]);
   const [actionFilter, setActionFilter] = useState("all");
+  const [feedback, setFeedback] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+  const notify = (message, severity = "success") =>
+    setFeedback({ open: true, message, severity });
   useEffect(() => {
     fetchLogs();
   }, []);
@@ -62,10 +71,10 @@ export default function activityLogTab() {
 
     if (res.ok) {
       setSelectedIds([]);
-      alert("Successfully deleted");
+      notify("Logs deleted successfully.");
       fetchLogs();
     } else {
-      alert("Failed to delete logs");
+      notify("Failed to delete logs.", "error");
     }
   }
 
@@ -308,6 +317,20 @@ export default function activityLogTab() {
           )}
         </SectionCard>
       )}
+      <Snackbar
+        open={feedback.open}
+        autoHideDuration={3500}
+        onClose={() => setFeedback((f) => ({ ...f, open: false }))}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          severity={feedback.severity}
+          variant="filled"
+          onClose={() => setFeedback((f) => ({ ...f, open: false }))}
+        >
+          {feedback.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

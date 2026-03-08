@@ -13,6 +13,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
@@ -25,6 +27,15 @@ export default function RoomTypePhotosManager() {
 
   const [openType, setOpenType] = useState(null);
   const [busyType, setBusyType] = useState(null);
+  const [feedback, setFeedback] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  const notify = (message, severity = "success") => {
+    setFeedback({ open: true, message, severity });
+  };
 
   async function fetchAll() {
     setLoading(true);
@@ -42,6 +53,7 @@ export default function RoomTypePhotosManager() {
       console.error(e);
       setRoomTypes([]);
       setImages([]);
+      notify("Failed to load room photos.", "error");
     } finally {
       setLoading(false);
     }
@@ -79,7 +91,7 @@ export default function RoomTypePhotosManager() {
         const upRes = await fetch("/api/upload", { method: "POST", body: fd });
         const upData = await upRes.json();
         if (!upRes.ok) {
-          alert(upData?.details || upData?.error || "Upload failed");
+          notify(upData?.details || upData?.error || "Upload failed", "error");
           return;
         }
 
@@ -90,14 +102,15 @@ export default function RoomTypePhotosManager() {
         });
         const saveData = await saveRes.json();
         if (!saveRes.ok) {
-          alert(saveData?.error || "Save failed");
+          notify(saveData?.error || "Save failed", "error");
           return;
         }
 
         await fetchAll();
+        notify("Photo uploaded successfully.");
       } catch (e) {
         console.error(e);
-        alert("Something went wrong");
+        notify("Something went wrong.", "error");
       } finally {
         setBusyType(null);
       }
@@ -111,13 +124,14 @@ export default function RoomTypePhotosManager() {
       const res = await fetch(`/api/room-images/${id}`, { method: "DELETE" });
       const data = await res.json();
       if (!res.ok) {
-        alert(data?.error || "Delete failed");
+        notify(data?.error || "Delete failed", "error");
         return;
       }
       await fetchAll();
+      notify("Photo deleted successfully.");
     } catch (e) {
       console.error(e);
-      alert("Something went wrong");
+      notify("Something went wrong.", "error");
     }
   }
 
@@ -219,7 +233,7 @@ export default function RoomTypePhotosManager() {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle>Manage photos — {openType}</DialogTitle>
+        <DialogTitle>Manage photos - {openType}</DialogTitle>
 
         <DialogContent dividers>
           <Box display="flex" gap={2} flexWrap="wrap">
@@ -310,6 +324,21 @@ export default function RoomTypePhotosManager() {
           </Button>
         </DialogActions>
       </Dialog>
+      <Snackbar
+        open={feedback.open}
+        autoHideDuration={3200}
+        onClose={() => setFeedback((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          severity={feedback.severity}
+          variant="filled"
+          onClose={() => setFeedback((prev) => ({ ...prev, open: false }))}
+        >
+          {feedback.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
+

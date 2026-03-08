@@ -25,6 +25,8 @@ import {
   FormControlLabel,
   Switch,
   useMediaQuery,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import PageHeader from "./ui/PageHeader";
 import SectionCard from "./ui/SectionCard";
@@ -49,6 +51,13 @@ export default function ManageRoomsTab() {
     open: false,
     roomId: null,
   });
+  const [feedback, setFeedback] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+  const notify = (message, severity = "success") =>
+    setFeedback({ open: true, message, severity });
 
   useEffect(() => {
     fetchRooms();
@@ -85,11 +94,13 @@ export default function ManageRoomsTab() {
       });
       if (res.ok) {
         fetchRooms();
+        notify("Room deleted successfully.");
       } else {
-        alert("Failed to delete room");
+        notify("Failed to delete room.", "error");
       }
     } catch (err) {
       console.error(err);
+      notify("Network error while deleting room.", "error");
     } finally {
       setDeleteDialog({ open: false, roomId: null });
     }
@@ -350,9 +361,27 @@ export default function ManageRoomsTab() {
           mode={mode}
           room={selectedRoom}
           onClose={() => setMode(null)}
-          onSaved={fetchRooms}
+          onSaved={(message, severity = "success") => {
+            fetchRooms();
+            notify(message || "Saved successfully.", severity);
+          }}
         />
       )}
+
+      <Snackbar
+        open={feedback.open}
+        autoHideDuration={3500}
+        onClose={() => setFeedback((f) => ({ ...f, open: false }))}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          severity={feedback.severity}
+          variant="filled"
+          onClose={() => setFeedback((f) => ({ ...f, open: false }))}
+        >
+          {feedback.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

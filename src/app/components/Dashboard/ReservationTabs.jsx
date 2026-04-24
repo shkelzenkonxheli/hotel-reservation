@@ -1,12 +1,14 @@
 import { Box, Button } from "@mui/material";
+import { useTranslations } from "next-intl";
 
 export default function ReservationTabs({ activeTab, onChange }) {
+  const t = useTranslations("dashboard.reservations.tabs");
   const tabs = [
-    { key: "all", label: "All" },
-    { key: "upcoming", label: "Upcoming" },
-    { key: "today", label: "Today" },
-    { key: "present", label: "Present" },
-    { key: "past", label: "Past" },
+    { key: "all", label: t("all") },
+    { key: "upcoming", label: t("upcoming") },
+    { key: "today", label: t("today") },
+    { key: "present", label: t("present") },
+    { key: "past", label: t("past") },
   ];
 
   return (

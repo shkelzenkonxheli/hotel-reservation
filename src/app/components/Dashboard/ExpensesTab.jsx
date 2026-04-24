@@ -1,6 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Alert,
   Box,
@@ -59,6 +60,7 @@ function dateFmt(value) {
 }
 
 export default function ExpensesTab() {
+  const t = useTranslations("dashboard.expenses");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [rows, setRows] = useState([]);
@@ -89,10 +91,10 @@ export default function ExpensesTab() {
 
       const res = await fetch(`/api/expenses?${params.toString()}`);
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Failed to load expenses");
+      if (!res.ok) throw new Error(data?.error || t("errors.loadFailed"));
       setRows(Array.isArray(data) ? data : []);
     } catch (e) {
-      setError(e.message || "Failed to load expenses");
+      setError(e.message || t("errors.loadFailed"));
     } finally {
       setLoading(false);
     }
@@ -135,14 +137,14 @@ export default function ExpensesTab() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Failed to create expense");
+      if (!res.ok) throw new Error(data?.error || t("errors.createFailed"));
 
       setAmount("");
       setNote("");
-      setFeedback("Expense added successfully");
+      setFeedback(t("feedback.added"));
       fetchExpenses();
     } catch (e) {
-      setError(e.message || "Failed to add expense");
+      setError(e.message || t("errors.createFailed"));
     } finally {
       setSaving(false);
     }
@@ -151,8 +153,8 @@ export default function ExpensesTab() {
   return (
     <Stack spacing={2.5}>
       <PageHeader
-        title="Expenses"
-        subtitle="Track operational costs and salary payouts in one place."
+        title={t("title")}
+        subtitle={t("subtitle")}
       />
 
       {error ? <Alert severity="error">{error}</Alert> : null}
@@ -164,39 +166,39 @@ export default function ExpensesTab() {
         gridTemplateColumns={{ xs: "1fr", sm: "repeat(2,1fr)", xl: "repeat(4,1fr)" }}
       >
         <StatCard
-          title="Entries"
+          title={t("cards.entries")}
           value={totals.count}
           icon={<WalletIcon fontSize="small" />}
           tone="#0284c7"
         />
         <StatCard
-          title="Total expenses"
+          title={t("cards.totalExpenses")}
           value={money(totals.total)}
           icon={<TrendingDownIcon fontSize="small" />}
           tone="#dc2626"
         />
         <StatCard
-          title="Salary payouts"
+          title={t("cards.salaryPayouts")}
           value={money(totals.salary)}
           icon={<GroupIcon fontSize="small" />}
           tone="#7c3aed"
         />
         <StatCard
-          title="Operational"
+          title={t("cards.operational")}
           value={money(totals.nonSalary)}
           icon={<PaidIcon fontSize="small" />}
           tone="#d97706"
         />
       </Box>
 
-      <SectionCard title="Add expense">
+      <SectionCard title={t("sections.addExpense")}>
         <Box
           display="grid"
           gap={1.2}
           gridTemplateColumns={{ xs: "1fr", md: "repeat(2,1fr)", lg: "repeat(3,1fr)" }}
         >
           <TextField
-            label="Date"
+            label={t("fields.date")}
             type="date"
             value={expenseDate}
             onChange={(e) => setExpenseDate(e.target.value)}
@@ -204,18 +206,18 @@ export default function ExpensesTab() {
           />
           <TextField
             select
-            label="Category"
+            label={t("fields.category")}
             value={category}
             onChange={(e) => setCategory(e.target.value)}
           >
             {CATEGORY_OPTIONS.map((c) => (
               <MenuItem key={c.value} value={c.value}>
-                {c.label}
+                {t(`categories.${c.value}`)}
               </MenuItem>
             ))}
           </TextField>
           <TextField
-            label="Amount (EUR)"
+            label={t("fields.amount")}
             type="number"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
@@ -223,18 +225,18 @@ export default function ExpensesTab() {
           />
           <TextField
             select
-            label="Payment method"
+            label={t("fields.paymentMethod")}
             value={paymentMethod}
             onChange={(e) => setPaymentMethod(e.target.value)}
           >
             {PAYMENT_OPTIONS.map((p) => (
               <MenuItem key={p.value} value={p.value}>
-                {p.label}
+                {t(`paymentMethods.${p.value}`)}
               </MenuItem>
             ))}
           </TextField>
           <TextField
-            label="Note"
+            label={t("fields.note")}
             value={note}
             onChange={(e) => setNote(e.target.value)}
             sx={{ gridColumn: { xs: "1", lg: "span 2" } }}
@@ -247,13 +249,13 @@ export default function ExpensesTab() {
             disabled={saving || !expenseDate || !amount}
             sx={{ textTransform: "none", fontWeight: 700 }}
           >
-            {saving ? "Saving..." : "Add expense"}
+            {saving ? t("actions.saving") : t("actions.addExpense")}
           </Button>
         </Box>
       </SectionCard>
 
       <SectionCard
-        title="Expense list"
+        title={t("sections.expenseList")}
         action={
           <Box
             sx={{
@@ -264,7 +266,7 @@ export default function ExpensesTab() {
             }}
           >
             <TextField
-              label="Month"
+              label={t("fields.month")}
               type="month"
               size="small"
               InputLabelProps={{ shrink: true }}
@@ -273,15 +275,15 @@ export default function ExpensesTab() {
             />
             <TextField
               select
-              label="Category"
+              label={t("fields.category")}
               size="small"
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
             >
-              <MenuItem value="all">All categories</MenuItem>
+              <MenuItem value="all">{t("filters.allCategories")}</MenuItem>
               {CATEGORY_OPTIONS.map((c) => (
                 <MenuItem key={c.value} value={c.value}>
-                  {c.label}
+                  {t(`categories.${c.value}`)}
                 </MenuItem>
               ))}
             </TextField>
@@ -307,45 +309,46 @@ export default function ExpensesTab() {
                 <Box display="flex" justifyContent="space-between" gap={1}>
                   <Chip
                     size="small"
-                    label={r.category}
+                    label={t(`categories.${r.category}`)}
                     sx={{ textTransform: "capitalize" }}
                   />
                   <Typography fontWeight={700}>{money(r.amount)}</Typography>
                 </Box>
                 <Typography variant="body2" mt={0.6}>
-                  Date: {dateFmt(r.expense_date)}
+                  {t("fields.date")}: {dateFmt(r.expense_date)}
                 </Typography>
                 <Typography variant="body2">
-                  Method: {String(r.payment_method || "").replace("_", " ")}
+                  {t("fields.paymentMethod")}:{" "}
+                  {t(`paymentMethods.${String(r.payment_method || "").toLowerCase()}`)}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  By: {r.created_by || "-"} • {dateFmt(r.created_at)}
+                  {t("fields.createdBy")}: {r.created_by || "-"} • {dateFmt(r.created_at)}
                 </Typography>
                 {r.note ? (
                   <Typography variant="body2" mt={0.3}>
-                    Note: {r.note}
+                    {t("fields.note")}: {r.note}
                   </Typography>
                 ) : null}
               </Box>
             ))}
             {rows.length === 0 ? (
               <Box py={3} textAlign="center">
-                <Typography fontWeight={700}>No expenses found</Typography>
+                <Typography fontWeight={700}>{t("empty")}</Typography>
               </Box>
             ) : null}
           </Stack>
         ) : (
           <TableContainer sx={{ overflowX: "auto" }}>
             <Table size="small" sx={{ minWidth: 860 }}>
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 700 }}>Date</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Category</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Amount</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Payment</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Note</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Created by</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Created at</TableCell>
+                <TableHead>
+                  <TableRow>
+                  <TableCell sx={{ fontWeight: 700 }}>{t("table.date")}</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>{t("table.category")}</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>{t("table.amount")}</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>{t("table.payment")}</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>{t("table.note")}</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>{t("table.createdBy")}</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>{t("table.createdAt")}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -355,13 +358,13 @@ export default function ExpensesTab() {
                     <TableCell>
                       <Chip
                         size="small"
-                        label={r.category}
+                        label={t(`categories.${r.category}`)}
                         sx={{ textTransform: "capitalize" }}
                       />
                     </TableCell>
                     <TableCell>{money(r.amount)}</TableCell>
                     <TableCell sx={{ textTransform: "capitalize" }}>
-                      {String(r.payment_method || "").replace("_", " ")}
+                      {t(`paymentMethods.${String(r.payment_method || "").toLowerCase()}`)}
                     </TableCell>
                     <TableCell>{r.note || "-"}</TableCell>
                     <TableCell>{r.created_by || "-"}</TableCell>
@@ -371,7 +374,7 @@ export default function ExpensesTab() {
                 {rows.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
-                      <Typography fontWeight={700}>No expenses found</Typography>
+                      <Typography fontWeight={700}>{t("empty")}</Typography>
                     </TableCell>
                   </TableRow>
                 ) : null}
@@ -383,3 +386,4 @@ export default function ExpensesTab() {
     </Stack>
   );
 }
+

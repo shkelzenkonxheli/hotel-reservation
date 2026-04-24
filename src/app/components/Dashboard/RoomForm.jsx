@@ -1,6 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogActions,
@@ -32,6 +33,7 @@ const DEFAULT_AMENITIES = [
 ];
 
 export default function RoomForm({ mode, room, onClose, onSaved }) {
+  const t = useTranslations("dashboard.roomForm");
   const initialState = {
     name: "",
     room_number: "",
@@ -47,7 +49,7 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
   const [roomTypeOptions, setRoomTypeOptions] = useState([]);
   const [typesLoading, setTypesLoading] = useState(false);
 
-  // ✅ suggestions
+  // âœ… suggestions
   const [roomsLoading, setRoomsLoading] = useState(false);
   const [roomNameOptions, setRoomNameOptions] = useState([]);
   const [customAmenity, setCustomAmenity] = useState("");
@@ -60,7 +62,7 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
     [formData.amenities],
   );
 
-  // ✅ keep form in sync when edit room changes
+  // âœ… keep form in sync when edit room changes
   useEffect(() => {
     setFormData(
       room || {
@@ -89,7 +91,7 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
         const res = await fetch("/api/rooms-type");
         const data = await res.json();
 
-        // nxjerr vetëm type string
+        // nxjerr vetÃ«m type string
         const types = data.map((t) => t.type).filter(Boolean);
 
         setRoomTypeOptions([...new Set(types)]);
@@ -103,7 +105,7 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
     loadRoomTypes();
   }, []);
 
-  // ✅ load existing rooms for name suggestions
+  // âœ… load existing rooms for name suggestions
   useEffect(() => {
     async function loadRoomNames() {
       try {
@@ -111,15 +113,15 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
         const res = await fetch("/api/rooms");
         const data = await res.json();
 
-        // data mund të jetë array ose {rooms: [...]}
+        // data mund tÃ« jetÃ« array ose {rooms: [...]}
         const list = Array.isArray(data) ? data : data?.rooms || [];
 
-        // nxjerr vetëm emrat unik
+        // nxjerr vetÃ«m emrat unik
         const names = [...new Set(list.map((r) => r?.name).filter(Boolean))];
 
         setRoomNameOptions(names);
       } catch (e) {
-        console.error("Failed to load room names", e);
+        console.error(t("errors.loadRoomNames"), e);
       } finally {
         setRoomsLoading(false);
       }
@@ -135,7 +137,7 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
       !formData.type ||
       !formData.price
     ) {
-      setInlineError("Please fill in all required fields.");
+      setInlineError(t("errors.required"));
       return;
     }
 
@@ -158,19 +160,19 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
         const successMessage =
           mode === "edit" && applyToType
             ? data?.message ||
-              "Updated this room and all rooms of the selected type."
+              t("messages.updatedType")
             : mode === "edit"
-              ? "Room updated successfully."
-              : "Room created successfully.";
+              ? t("messages.updated")
+              : t("messages.created");
         onSaved(successMessage, "success");
         onClose();
       } else {
         const data = await res.json();
-        setInlineError(data.error || "Unknown error");
+        setInlineError(data.error || t("errors.unknown"));
       }
     } catch (err) {
       console.error(err);
-      setInlineError("Something went wrong");
+      setInlineError(t("errors.generic"));
     } finally {
       setLoading(false);
     }
@@ -206,11 +208,11 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
   return (
     <Dialog open={true} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle className="font-bold text-gray-800">
-        {mode === "edit" ? " Edit Room" : " Add New Room"}
+        {mode === "edit" ? t("title.edit") : t("title.add")}
       </DialogTitle>
 
       <DialogContent dividers className="py-4">
-        {/* ✅ Room Name with suggestions */}
+        {/* âœ… Room Name with suggestions */}
         <Autocomplete
           freeSolo
           options={roomNameOptions}
@@ -221,14 +223,14 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
             setFormData((prev) => ({ ...prev, name: newValue || "" }));
           }}
           onInputChange={(e, newInputValue) => {
-            // kur shkruan me tastaturë
+            // kur shkruan me tastaturÃ«
             setFormData((prev) => ({ ...prev, name: newInputValue }));
           }}
           renderInput={(params) => (
             <TextField
               {...params}
               fullWidth
-              label="Room Name"
+              label={t("fields.roomName")}
               variant="outlined"
               margin="normal"
               InputProps={{
@@ -248,7 +250,7 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
 
         <TextField
           fullWidth
-          label="Room Number"
+          label={t("fields.roomNumber")}
           variant="outlined"
           value={formData.room_number}
           margin="normal"
@@ -272,7 +274,7 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
             <TextField
               {...params}
               fullWidth
-              label="Room Type"
+              label={t("fields.roomType")}
               variant="outlined"
               margin="normal"
               InputProps={{
@@ -292,7 +294,7 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
 
         <TextField
           fullWidth
-          label="Price (€)"
+          label={t("fields.price")}
           type="number"
           variant="outlined"
           margin="normal"
@@ -304,12 +306,12 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
 
         <TextField
           fullWidth
-          label="Short Marketing Description"
+          label={t("fields.description")}
           variant="outlined"
           multiline
           rows={2}
           margin="normal"
-          placeholder="e.g. Modern sea-view room ideal for couples."
+          placeholder={t("placeholders.description")}
           value={formData.description}
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, description: e.target.value }))
@@ -318,7 +320,7 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
 
         <Box mt={2}>
           <Typography variant="subtitle2" fontWeight={700} mb={1}>
-            Amenities
+            {t("sections.amenities")}
           </Typography>
 
           <FormGroup>
@@ -342,7 +344,7 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
             <TextField
               fullWidth
               size="small"
-              label="Add custom amenity"
+              label={t("fields.customAmenity")}
               value={customAmenity}
               onChange={(e) => setCustomAmenity(e.target.value)}
               onKeyDown={(e) => {
@@ -353,7 +355,7 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
               }}
             />
             <Button variant="outlined" onClick={addCustomAmenity}>
-              Add
+              {t("actions.addAmenity")}
             </Button>
           </Box>
 
@@ -380,10 +382,10 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
                   onChange={(e) => setApplyToType(e.target.checked)}
                 />
               }
-              label="Apply shared fields to all rooms of this type"
+              label={t("applyToType.title")}
             />
             <Typography variant="caption" color="text.secondary" display="block" ml={4}>
-              Applies name, price, short description and amenities to all rooms with this type.
+              {t("applyToType.description")}
             </Typography>
           </Box>
         ) : null}
@@ -397,7 +399,7 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
 
       <DialogActions className="px-6 py-3">
         <Button onClick={onClose} color="inherit">
-          Cancel
+          {t("actions.cancel")}
         </Button>
         <Button
           onClick={handleSubmit}
@@ -406,12 +408,13 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
           disabled={loading}
         >
           {loading
-            ? "Saving..."
+            ? t("actions.saving")
             : mode === "edit"
-            ? "Save Changes"
-            : "Add Room"}
+            ? t("actions.save")
+            : t("actions.add")}
         </Button>
       </DialogActions>
     </Dialog>
   );
 }
+

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import RoomForm from "./RoomForm";
 import RoomTypePhotosManager from "./RoomTypePhotosManager";
 import {
@@ -33,6 +34,7 @@ import SectionCard from "./ui/SectionCard";
 import EmptyState from "./ui/EmptyState";
 
 export default function ManageRoomsTab() {
+  const t = useTranslations("dashboard.manageRooms");
   const isMobile = useMediaQuery("(max-width:900px)");
   const [loading, setLoading] = useState(true);
   const [rooms, setRooms] = useState([]);
@@ -94,13 +96,13 @@ export default function ManageRoomsTab() {
       });
       if (res.ok) {
         fetchRooms();
-        notify("Room deleted successfully.");
+        notify(t("messages.deleted"));
       } else {
-        notify("Failed to delete room.", "error");
+        notify(t("messages.deleteFailed"), "error");
       }
     } catch (err) {
       console.error(err);
-      notify("Network error while deleting room.", "error");
+      notify(t("messages.deleteNetworkError"), "error");
     } finally {
       setDeleteDialog({ open: false, roomId: null });
     }
@@ -129,8 +131,8 @@ export default function ManageRoomsTab() {
   return (
     <Box className="admin-page">
       <PageHeader
-        title="Manage Rooms"
-        subtitle="Create, edit, and manage inventory."
+        title={t("title")}
+        subtitle={t("subtitle")}
         actions={
           <FormControlLabel
             control={
@@ -139,7 +141,7 @@ export default function ManageRoomsTab() {
                 onChange={(e) => setOnlyWithPhotos(e.target.checked)}
               />
             }
-            label="Only rooms with photos"
+            label={t("onlyWithPhotos")}
           />
         }
       />
@@ -154,7 +156,7 @@ export default function ManageRoomsTab() {
             justifyContent="space-between"
           >
             <TextField
-              label="Search rooms..."
+              label={t("search")}
               variant="outlined"
               size="small"
               value={search}
@@ -170,7 +172,7 @@ export default function ManageRoomsTab() {
             >
               {roomTypeOptions.map((type) => (
                 <MenuItem key={type} value={type}>
-                  {type === "all" ? "All Room Types" : type}
+                  {type === "all" ? t("allRoomTypes") : type}
                 </MenuItem>
               ))}
             </Select>
@@ -181,9 +183,9 @@ export default function ManageRoomsTab() {
               size="small"
               sx={{ minWidth: { xs: "100%", sm: 140 } }}
             >
-              <MenuItem value="all">All Types</MenuItem>
-              <MenuItem value="hotel">Hotel</MenuItem>
-              <MenuItem value="apartment">Apartment</MenuItem>
+              <MenuItem value="all">{t("allTypes")}</MenuItem>
+              <MenuItem value="hotel">{t("hotel")}</MenuItem>
+              <MenuItem value="apartment">{t("apartment")}</MenuItem>
             </Select>
 
             <Button
@@ -191,7 +193,7 @@ export default function ManageRoomsTab() {
               onClick={handleAdd}
               sx={{ width: { xs: "100%", sm: "auto" } }}
             >
-              Add Room
+              {t("addRoom")}
             </Button>
           </Box>
         </SectionCard>
@@ -203,13 +205,13 @@ export default function ManageRoomsTab() {
       ) : loading ? (
         <Box textAlign="center" py={6}>
           <CircularProgress />
-          <Typography mt={2}>Loading rooms...</Typography>
+          <Typography mt={2}>{t("loading")}</Typography>
         </Box>
       ) : (
         /* ✅ VIEW 2: Rooms table (CRUD) */
-        <SectionCard title="Rooms">
+        <SectionCard title={t("roomsSection")}>
           {filteredRooms.length === 0 ? (
-            <EmptyState title="No rooms found" />
+            <EmptyState title={t("empty")} />
           ) : isMobile ? (
             <Box display="grid" gap={1.5}>
               {filteredRooms.map((room) => (
@@ -243,7 +245,7 @@ export default function ManageRoomsTab() {
                       size="small"
                       onClick={() => handleEdit(room)}
                     >
-                      Edit
+                      {t("edit")}
                     </Button>
                     <Button
                       fullWidth
@@ -254,7 +256,7 @@ export default function ManageRoomsTab() {
                         setDeleteDialog({ open: true, roomId: room.id })
                       }
                     >
-                      Delete
+                      {t("delete")}
                     </Button>
                   </Box>
                 </Paper>
@@ -269,16 +271,16 @@ export default function ManageRoomsTab() {
               <Table className="admin-table">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Room #</TableCell>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Type</TableCell>
-                    <TableCell>Price (€)</TableCell>
+                    <TableCell>{t("table.roomNumber")}</TableCell>
+                    <TableCell>{t("table.name")}</TableCell>
+                    <TableCell>{t("table.type")}</TableCell>
+                    <TableCell>{t("table.price")}</TableCell>
 
                     <TableCell
                       align="right"
                       sx={{ width: 220, whiteSpace: "nowrap" }}
                     >
-                      Actions
+                      {t("table.actions")}
                     </TableCell>
                   </TableRow>
                 </TableHead>
@@ -307,7 +309,7 @@ export default function ManageRoomsTab() {
                             onClick={() => handleEdit(room)}
                             sx={{ minWidth: 92 }}
                           >
-                            Edit
+                            {t("edit")}
                           </Button>
 
                           <Button
@@ -319,7 +321,7 @@ export default function ManageRoomsTab() {
                             }
                             sx={{ minWidth: 92 }}
                           >
-                            Delete
+                            {t("delete")}
                           </Button>
                         </Box>
                       </TableCell>
@@ -337,21 +339,20 @@ export default function ManageRoomsTab() {
         open={deleteDialog.open}
         onClose={() => setDeleteDialog({ open: false, roomId: null })}
       >
-        <DialogTitle>Delete Room</DialogTitle>
+        <DialogTitle>{t("deleteDialog.title")}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete this room? This action cannot be
-            undone.
+            {t("deleteDialog.description")}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button
             onClick={() => setDeleteDialog({ open: false, roomId: null })}
           >
-            Cancel
+            {t("cancel")}
           </Button>
           <Button color="error" onClick={handleDeleteRoom}>
-            Delete
+            {t("delete")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -363,7 +364,7 @@ export default function ManageRoomsTab() {
           onClose={() => setMode(null)}
           onSaved={(message, severity = "success") => {
             fetchRooms();
-            notify(message || "Saved successfully.", severity);
+            notify(message || t("messages.saved"), severity);
           }}
         />
       )}

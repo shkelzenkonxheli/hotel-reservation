@@ -4,10 +4,6 @@ import { useBooking } from "@/context/BookingContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  PaymentsOutlined,
-  AccountBalanceWalletOutlined,
-} from "@mui/icons-material";
-import {
   Box,
   Typography,
   TextField,
@@ -19,8 +15,6 @@ import {
   DialogContent,
   useTheme,
   useMediaQuery,
-  ToggleButton,
-  ToggleButtonGroup,
 } from "@mui/material";
 import { useSession } from "next-auth/react";
 import PublicContainer from "../components/Public/PublicContainer";
@@ -48,7 +42,6 @@ export default function CheckoutBooking() {
   const [guests, setGuests] = useState(2);
   const [totalPrice, setTotalPrice] = useState(0);
   const [expandedRoom, setExpandedRoom] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState("card");
 
   /* ---------------- AUTH GUARD ---------------- */
   useEffect(() => {
@@ -117,56 +110,29 @@ export default function CheckoutBooking() {
 
     try {
       setLoading(true);
-      if (paymentMethod === "card") {
-        const res = await fetch("/api/create-checkout-session", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            totalPrice,
-            roomName: room.name,
-            userEmail: session.user.email,
-            type: room.type,
-            startDate,
-            endDate,
-            fullname,
-            phone,
-            address,
-            guests,
-            roomId: room.id,
-          }),
-        });
-
-        const data = await res.json();
-        if (data.url) {
-          window.location.href = data.url;
-        } else {
-          alert(t("alerts.paymentInitFailed"));
-        }
-      } else {
-        const res = await fetch("/api/reservation", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            type: room.type,
-            startDate,
-            endDate,
-            fullname,
-            phone,
-            address,
-            guests,
-            total_price: totalPrice,
-            payment_method: "cash",
-            payment_status: "UNPAID",
-          }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          alert(data?.error || t("alerts.reservationFailed"));
-          return;
-        }
-        alert(t("alerts.pendingCreated"));
-        router.push("/success");
+      const res = await fetch("/api/reservation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: room.type,
+          startDate,
+          endDate,
+          fullname,
+          phone,
+          address,
+          guests,
+          total_price: totalPrice,
+          payment_method: "cash",
+          payment_status: "UNPAID",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data?.error || t("alerts.reservationFailed"));
+        return;
       }
+      alert(t("alerts.pendingCreated"));
+      router.push("/success");
     } catch (error) {
       console.error(error);
       alert(t("alerts.genericError"));
@@ -262,9 +228,7 @@ export default function CheckoutBooking() {
         </div>
       </div>
 
-      <p className="mt-4 text-xs text-slate-500">
-        {t("summary.secureNote")}
-      </p>
+      <p className="mt-4 text-xs text-slate-500">{t("summary.secureNote")}</p>
     </PublicCard>
   );
 
@@ -274,7 +238,9 @@ export default function CheckoutBooking() {
         <Typography variant="h6" fontWeight={800}>
           {t("form.guestInformation")}
         </Typography>
-        <span className="text-xs text-slate-500">{t("form.requiredFields")}</span>
+        <span className="text-xs text-slate-500">
+          {t("form.requiredFields")}
+        </span>
       </div>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -305,77 +271,6 @@ export default function CheckoutBooking() {
           helperText={t("form.guestsHelper")}
         />
 
-        <Box>
-          <Typography variant="subtitle2" fontWeight={800} sx={{ mb: 1 }}>
-            {t("form.paymentMethod")}
-          </Typography>
-          <ToggleButtonGroup
-            fullWidth
-            exclusive
-            value={paymentMethod}
-            onChange={(_, value) => value && setPaymentMethod(value)}
-            size="medium"
-            sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-              gap: 1.1,
-              "& .MuiToggleButtonGroup-grouped": {
-                border: "1px solid #dbe3ed !important",
-                borderRadius: "12px !important",
-                textTransform: "none",
-                justifyContent: "flex-start",
-                px: 1.5,
-                py: 1.2,
-                minHeight: 56,
-                fontWeight: 700,
-                color: "#334155",
-                backgroundColor: "#ffffff",
-              },
-              "& .Mui-selected": {
-                borderColor: "#0284c7 !important",
-                color: "#0369a1 !important",
-                backgroundColor: "#e0f2fe !important",
-                boxShadow: "inset 0 0 0 1px #0284c7",
-              },
-            }}
-          >
-            <ToggleButton value="card">
-              <Box display="flex" alignItems="center" gap={1}>
-                <PaymentsOutlined fontSize="small" />
-                <Box textAlign="left">
-                  <Typography fontSize={14} fontWeight={800}>
-                    {t("payment.onlineTitle")}
-                  </Typography>
-                  <Typography fontSize={12} color="text.secondary">
-                    {t("payment.onlineSubtitle")}
-                  </Typography>
-                </Box>
-              </Box>
-            </ToggleButton>
-            <ToggleButton value="cash">
-              <Box display="flex" alignItems="center" gap={1}>
-                <AccountBalanceWalletOutlined fontSize="small" />
-                <Box textAlign="left">
-                  <Typography fontSize={14} fontWeight={800}>
-                    {t("payment.cashTitle")}
-                  </Typography>
-                  <Typography fontSize={12} color="text.secondary">
-                    {t("payment.cashSubtitle")}
-                  </Typography>
-                </Box>
-              </Box>
-            </ToggleButton>
-          </ToggleButtonGroup>
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ mt: 1, display: "block" }}
-          >
-            {paymentMethod === "cash"
-              ? t("payment.cashNote")
-              : t("payment.cardNote")}
-          </Typography>
-        </Box>
       </Box>
 
       <Divider sx={{ my: 3 }} />
@@ -390,10 +285,8 @@ export default function CheckoutBooking() {
       >
         {loading ? (
           <CircularProgress size={24} color="inherit" />
-        ) : paymentMethod === "cash" ? (
-          t("confirmCash")
         ) : (
-          t("confirmAndPay")
+          t("confirmCash")
         )}
       </Button>
     </PublicCard>
@@ -421,7 +314,8 @@ export default function CheckoutBooking() {
                     {room.name}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {startDate} {t("mobile.to")} {endDate} ({nights} {t("summary.nightsLower")})
+                    {startDate} {t("mobile.to")} {endDate} ({nights}{" "}
+                    {t("summary.nightsLower")})
                   </Typography>
 
                   <Divider sx={{ my: 2 }} />

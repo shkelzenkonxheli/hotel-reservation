@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Accordion,
   AccordionDetails,
@@ -24,6 +25,7 @@ import EmploymentForm from "./Permissions/EmploymentForm";
 import PermissionsGrid from "./Permissions/PermissionsGrid";
 
 export default function PermissionsTab() {
+  const t = useTranslations("dashboard.permissions");
   const toDateInput = (value) => {
     if (!value) return "";
     if (typeof value === "string") return value.slice(0, 10);
@@ -58,10 +60,10 @@ export default function PermissionsTab() {
         const res = await fetch("/api/user?roles=admin,worker");
         const data = await res.json();
 
-        if (!res.ok) throw new Error(data?.error || "Failed to load users");
+        if (!res.ok) throw new Error(data?.error || t("messages.loadUsersFailed"));
         setUsers(Array.isArray(data) ? data : []);
       } catch (e) {
-        setError(e.message || "Failed to load users");
+        setError(e.message || t("messages.loadUsersFailed"));
       } finally {
         setLoadingUsers(false);
       }
@@ -166,7 +168,7 @@ export default function PermissionsTab() {
       });
 
       const updated = await res.json();
-      if (!res.ok) throw new Error(updated?.error || "Failed to save");
+      if (!res.ok) throw new Error(updated?.error || t("messages.saveFailed"));
 
       setUsers((prev) =>
         prev.map((u) => (u.id === updated.id ? { ...u, ...updated } : u)),
@@ -185,9 +187,9 @@ export default function PermissionsTab() {
             ? String(updated.base_salary)
             : "",
       });
-      setFeedback("Changes saved successfully.");
+      setFeedback(t("messages.saved"));
     } catch (e) {
-      setError(e.message || "Failed to save permissions");
+      setError(e.message || t("messages.saveFailed"));
     } finally {
       setSaving(false);
     }
@@ -196,11 +198,11 @@ export default function PermissionsTab() {
   return (
     <Box className="admin-page">
       <PageHeader
-        title="Permissions"
-        subtitle="Manage staff access and employment profile in one place."
+        title={t("title")}
+        subtitle={t("subtitle")}
         actions={
           <Chip
-            label={`${users.length} staff`}
+            label={t("staffCount", { count: users.length })}
             sx={{ bgcolor: "rgba(14,165,233,0.14)", fontWeight: 700 }}
           />
         }
@@ -225,7 +227,7 @@ export default function PermissionsTab() {
           sx={{ border: "1px solid #e2e8f0", borderRadius: 3 }}
         >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography fontWeight={800}>Staff</Typography>
+            <Typography fontWeight={800}>{t("staff")}</Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ p: 0 }}>
             <StaffList
@@ -270,10 +272,9 @@ export default function PermissionsTab() {
               }}
             >
               <Box textAlign="center">
-                <Typography fontWeight={800}>No user selected</Typography>
+                <Typography fontWeight={800}>{t("noUserSelected")}</Typography>
                 <Typography variant="body2" color="text.secondary" mt={0.5}>
-                  Select a staff member to edit employment details and access
-                  permissions.
+                  {t("selectStaffMember")}
                 </Typography>
               </Box>
             </Paper>
@@ -326,8 +327,8 @@ export default function PermissionsTab() {
                       sx={{ textTransform: "none", fontWeight: 700 }}
                     >
                       {showPermissions
-                        ? "Hide permissions"
-                        : "Show permissions"}
+                        ? t("hidePermissions")
+                        : t("showPermissions")}
                     </Button>
                   </Box>
 
@@ -354,7 +355,7 @@ export default function PermissionsTab() {
                   }}
                 >
                   <Typography variant="caption" color="text.secondary">
-                    Selected: {selectedTabs.length} permission(s)
+                    {t("selectedPermissions", { count: selectedTabs.length })}
                   </Typography>
                   <Button
                     variant="contained"
@@ -366,12 +367,12 @@ export default function PermissionsTab() {
                       minWidth: 140,
                       width: { xs: "100%", sm: "auto" },
                     }}
-                  >
+                    >
                     {saving
-                      ? "Saving..."
+                      ? t("saving")
                       : hasChanges
-                        ? "Save Changes"
-                        : "Saved"}
+                        ? t("saveChanges")
+                        : t("saved")}
                   </Button>
                 </Box>
               </Paper>

@@ -1,6 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Alert,
   Box,
@@ -49,6 +50,7 @@ function formatDate(value) {
 }
 
 export default function PaymentsInvoicesTab() {
+  const t = useTranslations("dashboard.payments");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [rows, setRows] = useState([]);
@@ -71,14 +73,14 @@ export default function PaymentsInvoicesTab() {
         const res = await fetch("/api/reservation?list=true");
         const data = await res.json();
         if (!res.ok) {
-          throw new Error(data?.error || "Failed to load invoices");
+          throw new Error(data?.error || t("errors.loadFailed"));
         }
         if (active) {
           setRows(Array.isArray(data) ? data : []);
         }
       } catch (e) {
         if (active) {
-          setError(e.message || "Failed to load invoices");
+          setError(e.message || t("errors.loadFailed"));
         }
       } finally {
         if (active) setLoading(false);
@@ -149,8 +151,8 @@ export default function PaymentsInvoicesTab() {
   return (
     <Stack spacing={2.5}>
       <PageHeader
-        title="Payments & Invoices"
-        subtitle="Track invoice status, paid amounts, and pending balances."
+        title={t("title")}
+        subtitle={t("subtitle")}
       />
 
       {error ? <Alert severity="error">{error}</Alert> : null}
@@ -167,25 +169,25 @@ export default function PaymentsInvoicesTab() {
             gridTemplateColumns={{ xs: "1fr", sm: "repeat(2,1fr)", lg: "repeat(4,1fr)" }}
           >
             <StatCard
-              title="Invoices"
+              title={t("cards.invoices")}
               value={metrics.totalInvoices}
               icon={<ReceiptLongIcon fontSize="small" />}
               tone="#0ea5e9"
             />
             <StatCard
-              title="Paid"
+              title={t("cards.paid")}
               value={metrics.paidCount}
               icon={<PaymentsIcon fontSize="small" />}
               tone="#10b981"
             />
             <StatCard
-              title="Pending"
+              title={t("cards.pending")}
               value={metrics.pendingCount}
               icon={<PendingActionsIcon fontSize="small" />}
               tone="#f59e0b"
             />
             <StatCard
-              title="Collected"
+              title={t("cards.collected")}
               value={formatCurrency(metrics.paidAmount)}
               icon={<AccountBalanceWalletIcon fontSize="small" />}
               tone="#0f766e"
@@ -193,7 +195,7 @@ export default function PaymentsInvoicesTab() {
           </Box>
 
           <SectionCard
-            title="Invoice list"
+            title={t("sections.invoiceList")}
             action={
               <Box
                 sx={{
@@ -210,21 +212,21 @@ export default function PaymentsInvoicesTab() {
                   onChange={(e) => setStatusFilter(e.target.value)}
                   sx={{ minWidth: 160 }}
                 >
-                  <MenuItem value="all">All statuses</MenuItem>
-                  <MenuItem value="PAID">Paid</MenuItem>
-                  <MenuItem value="UNPAID">Unpaid</MenuItem>
+                  <MenuItem value="all">{t("filters.allStatuses")}</MenuItem>
+                  <MenuItem value="PAID">{t("filters.paid")}</MenuItem>
+                  <MenuItem value="UNPAID">{t("filters.unpaid")}</MenuItem>
                 </TextField>
                 <TextField
                   size="small"
                   type="month"
-                  label="Month"
+                  label={t("filters.month")}
                   InputLabelProps={{ shrink: true }}
                   value={monthFilter}
                   onChange={(e) => setMonthFilter(e.target.value)}
                 />
                 <TextField
                   size="small"
-                  placeholder="Search invoice / guest / phone"
+                  placeholder={t("filters.searchPlaceholder")}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
@@ -269,14 +271,14 @@ export default function PaymentsInvoicesTab() {
                       />
                     </Box>
                     <Typography variant="body2" mt={0.8}>
-                      Stay: {formatDate(r.start_date)} - {formatDate(r.end_date)}
+                      {t("fields.stay")}: {formatDate(r.start_date)} - {formatDate(r.end_date)}
                     </Typography>
                     <Typography variant="body2">
-                      Total: {formatCurrency(r.total_price)} • Paid: {formatCurrency(r.amount_paid)}
+                      {t("fields.total")}: {formatCurrency(r.total_price)} • {t("fields.paid")}: {formatCurrency(r.amount_paid)}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Room: {r.rooms?.room_number ? `#${r.rooms.room_number}` : "-"} •
-                      Method: {r.payment_method || "-"}
+                      {t("fields.room")}: {r.rooms?.room_number ? `#${r.rooms.room_number}` : "-"} •{" "}
+                      {t("fields.method")}: {r.payment_method || "-"}
                     </Typography>
                     <Box mt={1} display="flex" gap={1} flexWrap="wrap">
                       <Button
@@ -289,7 +291,7 @@ export default function PaymentsInvoicesTab() {
                           setDetailsOpen(true);
                         }}
                       >
-                        View
+                        {t("actions.view")}
                       </Button>
                       <Button
                         size="small"
@@ -301,16 +303,16 @@ export default function PaymentsInvoicesTab() {
                           setPrintOpen(true);
                         }}
                       >
-                        Print
+                        {t("actions.print")}
                       </Button>
                     </Box>
                   </Box>
                 ))}
                 {filtered.length === 0 ? (
                   <Box py={3} textAlign="center">
-                    <Typography fontWeight={700}>No invoices found</Typography>
+                    <Typography fontWeight={700}>{t("empty.title")}</Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Try changing status filter or search query.
+                      {t("empty.subtitle")}
                     </Typography>
                   </Box>
                 ) : null}
@@ -320,17 +322,17 @@ export default function PaymentsInvoicesTab() {
                 <Table size="small" sx={{ minWidth: 900 }}>
                   <TableHead>
                     <TableRow>
-                      <TableCell sx={{ fontWeight: 700 }}>Invoice</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>Guest</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>Room</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>Stay</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>Total</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>Paid</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>Method</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>Created</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>{t("table.invoice")}</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>{t("table.guest")}</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>{t("table.room")}</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>{t("table.stay")}</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>{t("table.total")}</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>{t("table.paid")}</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>{t("table.method")}</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>{t("table.status")}</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>{t("table.created")}</TableCell>
                       <TableCell align="right" sx={{ fontWeight: 700 }}>
-                        Actions
+                        {t("table.actions")}
                       </TableCell>
                     </TableRow>
                   </TableHead>
@@ -392,7 +394,7 @@ export default function PaymentsInvoicesTab() {
                                 setDetailsOpen(true);
                               }}
                             >
-                              View
+                              {t("actions.view")}
                             </Button>
                             <Button
                               size="small"
@@ -404,7 +406,7 @@ export default function PaymentsInvoicesTab() {
                                 setPrintOpen(true);
                               }}
                             >
-                              Print
+                              {t("actions.print")}
                             </Button>
                           </Box>
                         </TableCell>
@@ -413,9 +415,9 @@ export default function PaymentsInvoicesTab() {
                     {filtered.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
-                          <Typography fontWeight={700}>No invoices found</Typography>
+                          <Typography fontWeight={700}>{t("empty.title")}</Typography>
                           <Typography variant="body2" color="text.secondary">
-                            Try changing status filter or search query.
+                            {t("empty.subtitle")}
                           </Typography>
                         </TableCell>
                       </TableRow>
@@ -433,10 +435,10 @@ export default function PaymentsInvoicesTab() {
               flexWrap="wrap"
             >
               <Typography variant="caption" color="text.secondary">
-                Showing {filtered.length} invoice(s)
+                {t("summary.showing", { count: filtered.length })}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                Pending balance: {formatCurrency(metrics.pendingAmount)}
+                {t("summary.pendingBalance")}: {formatCurrency(metrics.pendingAmount)}
               </Typography>
             </Box>
           </SectionCard>
@@ -460,3 +462,4 @@ export default function PaymentsInvoicesTab() {
     </Stack>
   );
 }
+

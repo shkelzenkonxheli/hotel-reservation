@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Box,
   Card,
@@ -20,6 +21,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 
 export default function RoomTypePhotosManager() {
+  const t = useTranslations("dashboard.roomPhotos");
   const [loading, setLoading] = useState(true);
   const [roomTypes, setRoomTypes] = useState([]);
   const [images, setImages] = useState([]);
@@ -53,7 +55,7 @@ export default function RoomTypePhotosManager() {
       console.error(e);
       setRoomTypes([]);
       setImages([]);
-      notify("Failed to load room photos.", "error");
+      notify(t("errors.load"), "error");
     } finally {
       setLoading(false);
     }
@@ -91,7 +93,7 @@ export default function RoomTypePhotosManager() {
         const upRes = await fetch("/api/upload", { method: "POST", body: fd });
         const upData = await upRes.json();
         if (!upRes.ok) {
-          notify(upData?.details || upData?.error || "Upload failed", "error");
+          notify(upData?.details || upData?.error || t("errors.upload"), "error");
           return;
         }
 
@@ -102,15 +104,15 @@ export default function RoomTypePhotosManager() {
         });
         const saveData = await saveRes.json();
         if (!saveRes.ok) {
-          notify(saveData?.error || "Save failed", "error");
+          notify(saveData?.error || t("errors.save"), "error");
           return;
         }
 
         await fetchAll();
-        notify("Photo uploaded successfully.");
+        notify(t("messages.uploaded"));
       } catch (e) {
         console.error(e);
-        notify("Something went wrong.", "error");
+        notify(t("errors.generic"), "error");
       } finally {
         setBusyType(null);
       }
@@ -124,14 +126,14 @@ export default function RoomTypePhotosManager() {
       const res = await fetch(`/api/room-images/${id}`, { method: "DELETE" });
       const data = await res.json();
       if (!res.ok) {
-        notify(data?.error || "Delete failed", "error");
+        notify(data?.error || t("errors.delete"), "error");
         return;
       }
       await fetchAll();
-      notify("Photo deleted successfully.");
+      notify(t("messages.deleted"));
     } catch (e) {
       console.error(e);
-      notify("Something went wrong.", "error");
+      notify(t("errors.generic"), "error");
     }
   }
 
@@ -139,7 +141,7 @@ export default function RoomTypePhotosManager() {
     return (
       <Box textAlign="center" py={6}>
         <CircularProgress />
-        <Typography mt={2}>Loading room types...</Typography>
+        <Typography mt={2}>{t("loading")}</Typography>
       </Box>
     );
   }
@@ -160,7 +162,7 @@ export default function RoomTypePhotosManager() {
                     {rt.name || rt.type}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" mb={1}>
-                    {count} photo{count === 1 ? "" : "s"}
+                    {t("photoCount", { count })}
                   </Typography>
 
                   <Box display="flex" gap={1} mb={1}>
@@ -195,7 +197,7 @@ export default function RoomTypePhotosManager() {
                           fontSize: 12,
                         }}
                       >
-                        No photos yet
+                        {t("noPhotosYet")}
                       </Box>
                     )}
                   </Box>
@@ -208,7 +210,7 @@ export default function RoomTypePhotosManager() {
                       disabled={busyType === rt.type}
                       onClick={() => uploadForType(rt.type)}
                     >
-                      {busyType === rt.type ? "Uploading..." : "Add photo"}
+                      {busyType === rt.type ? t("actions.uploading") : t("actions.addPhoto")}
                     </Button>
 
                     <Button
@@ -217,7 +219,7 @@ export default function RoomTypePhotosManager() {
                       disabled={count === 0}
                       onClick={() => setOpenType(rt.type)}
                     >
-                      Manage
+                      {t("actions.manage")}
                     </Button>
                   </Box>
                 </CardContent>
@@ -233,7 +235,7 @@ export default function RoomTypePhotosManager() {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle>Manage photos - {openType}</DialogTitle>
+        <DialogTitle>{t("dialog.managePhotos", { type: openType })}</DialogTitle>
 
         <DialogContent dividers>
           <Box display="flex" gap={2} flexWrap="wrap">
@@ -267,7 +269,7 @@ export default function RoomTypePhotosManager() {
                   py={0.5}
                 >
                   <Typography variant="caption" color="text.secondary">
-                    order: {img.order}
+                    {t("dialog.order")}: {img.order}
                   </Typography>
                   <IconButton
                     size="small"
@@ -282,7 +284,7 @@ export default function RoomTypePhotosManager() {
 
             {(imagesByType.get(openType) || []).length === 0 && (
               <Typography color="text.secondary">
-                No photos for this type yet.
+                {t("dialog.noPhotosForType")}
               </Typography>
             )}
           </Box>
@@ -290,9 +292,9 @@ export default function RoomTypePhotosManager() {
 
         <DialogActions>
           <Button onClick={() => uploadForType(openType)} variant="contained">
-            Add photo
+            {t("actions.addPhoto")}
           </Button>
-          <Button onClick={() => setOpenType(null)}>Close</Button>
+          <Button onClick={() => setOpenType(null)}>{t("dialog.close")}</Button>
         </DialogActions>
       </Dialog>
       <Dialog
@@ -320,7 +322,7 @@ export default function RoomTypePhotosManager() {
         </DialogContent>
         <DialogActions sx={{ bgcolor: "black" }}>
           <Button variant="contained" onClick={() => setPreviewUrl(null)}>
-            Close
+            {t("dialog.close")}
           </Button>
         </DialogActions>
       </Dialog>

@@ -6,21 +6,20 @@ import {
   DialogTitle,
   Button,
 } from "@mui/material";
+import { useTranslations } from "next-intl";
 
 export default function ReservationDeleteDialog({ open, onClose, onConfirm }) {
+  const t = useTranslations("dashboard.reservations.deleteDialog");
   return (
     <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Delete Reservation</DialogTitle>
+      <DialogTitle>{t("title")}</DialogTitle>
       <DialogContent>
-        <DialogContentText>
-          Are you sure you want to delete this reservation? This action cannot
-          be undone.
-        </DialogContentText>
+        <DialogContentText>{t("description")}</DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose}>{t("cancel")}</Button>
         <Button color="error" onClick={onConfirm}>
-          Delete
+          {t("delete")}
         </Button>
       </DialogActions>
     </Dialog>

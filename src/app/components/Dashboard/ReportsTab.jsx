@@ -1,6 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Alert,
   Box,
@@ -29,21 +30,6 @@ import PageHeader from "./ui/PageHeader";
 import SectionCard from "./ui/SectionCard";
 import StatCard from "./ui/StatCard";
 
-const MONTHS = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
-
 function money(value) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -67,12 +53,27 @@ function nightsBetween(start, end) {
 }
 
 export default function ReportsTab() {
+  const t = useTranslations("dashboard.reports");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
+  const monthLabels = [
+    t("months.jan"),
+    t("months.feb"),
+    t("months.mar"),
+    t("months.apr"),
+    t("months.may"),
+    t("months.jun"),
+    t("months.jul"),
+    t("months.aug"),
+    t("months.sep"),
+    t("months.oct"),
+    t("months.nov"),
+    t("months.dec"),
+  ];
 
   useEffect(() => {
     let active = true;
@@ -82,10 +83,10 @@ export default function ReportsTab() {
         setError("");
         const res = await fetch("/api/reservation?list=true");
         const data = await res.json();
-        if (!res.ok) throw new Error(data?.error || "Failed to load reports");
+        if (!res.ok) throw new Error(data?.error || t("errors.loadFailed"));
         if (active) setRows(Array.isArray(data) ? data : []);
       } catch (e) {
-        if (active) setError(e.message || "Failed to load reports");
+        if (active) setError(e.message || t("errors.loadFailed"));
       } finally {
         if (active) setLoading(false);
       }
@@ -162,18 +163,18 @@ export default function ReportsTab() {
 
   const exportCsv = () => {
     const headers = [
-      "Month",
-      "Reservations",
-      "Room Nights",
-      "Revenue",
-      "Paid",
-      "Collection %",
+      t("table.month"),
+      t("table.reservations"),
+      t("table.roomNights"),
+      t("table.revenue"),
+      t("table.paid"),
+      t("table.collection"),
     ];
 
     const rowsCsv = monthly.map((m) => {
       const collection = m.revenue > 0 ? (m.paid / m.revenue) * 100 : 0;
       return [
-        MONTHS[m.month],
+        monthLabels[m.month],
         m.reservations,
         m.roomNights,
         Number(m.revenue || 0).toFixed(2),
@@ -183,13 +184,13 @@ export default function ReportsTab() {
     });
 
     rowsCsv.push([]);
-    rowsCsv.push(["Year", yearFilter]);
-    rowsCsv.push(["Total Reservations", totals.reservations]);
-    rowsCsv.push(["Total Room Nights", totals.roomNights]);
-    rowsCsv.push(["Total Revenue", Number(totals.revenue || 0).toFixed(2)]);
-    rowsCsv.push(["Total Paid", Number(totals.paid || 0).toFixed(2)]);
-    rowsCsv.push(["Cancellations", totals.cancellations]);
-    rowsCsv.push(["Collection Rate %", totals.collectionRate.toFixed(2)]);
+    rowsCsv.push([t("csv.year"), yearFilter]);
+    rowsCsv.push([t("csv.totalReservations"), totals.reservations]);
+    rowsCsv.push([t("csv.totalRoomNights"), totals.roomNights]);
+    rowsCsv.push([t("csv.totalRevenue"), Number(totals.revenue || 0).toFixed(2)]);
+    rowsCsv.push([t("csv.totalPaid"), Number(totals.paid || 0).toFixed(2)]);
+    rowsCsv.push([t("csv.cancellations"), totals.cancellations]);
+    rowsCsv.push([t("csv.collectionRate"), totals.collectionRate.toFixed(2)]);
 
     const escapeCell = (value) => `"${String(value ?? "").replace(/"/g, '""')}"`;
     const csv = [headers, ...rowsCsv]
@@ -200,7 +201,7 @@ export default function ReportsTab() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `reports-${yearFilter}.csv`;
+    link.download = `${t("filePrefix")}-${yearFilter}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -219,7 +220,7 @@ export default function ReportsTab() {
         const collection = m.revenue > 0 ? (m.paid / m.revenue) * 100 : 0;
         return `
           <tr>
-            <td style="padding:8px;border:1px solid #e2e8f0;">${MONTHS[m.month]}</td>
+            <td style="padding:8px;border:1px solid #e2e8f0;">${monthLabels[m.month]}</td>
             <td style="padding:8px;border:1px solid #e2e8f0;text-align:right;">${m.reservations}</td>
             <td style="padding:8px;border:1px solid #e2e8f0;text-align:right;">${m.roomNights}</td>
             <td style="padding:8px;border:1px solid #e2e8f0;text-align:right;">${Number(m.revenue || 0).toFixed(2)} EUR</td>
@@ -233,28 +234,28 @@ export default function ReportsTab() {
     container.innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:16px;">
         <div>
-          <h2 style="margin:0 0 4px 0;">Dijari Premium - Annual Report</h2>
-          <p style="margin:0;color:#475569;">Year: ${yearFilter}</p>
+          <h2 style="margin:0 0 4px 0;">Dijari Premium - ${t("pdf.title")}</h2>
+          <p style="margin:0;color:#475569;">${t("pdf.year")}: ${yearFilter}</p>
         </div>
-        <p style="margin:0;color:#64748b;">Generated: ${new Date().toLocaleString()}</p>
+        <p style="margin:0;color:#64748b;">${t("pdf.generated")}: ${new Date().toLocaleString()}</p>
       </div>
 
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;">
-        <div style="border:1px solid #e2e8f0;border-radius:8px;padding:10px;"><b>Reservations:</b> ${totals.reservations}</div>
-        <div style="border:1px solid #e2e8f0;border-radius:8px;padding:10px;"><b>Room Nights:</b> ${totals.roomNights}</div>
-        <div style="border:1px solid #e2e8f0;border-radius:8px;padding:10px;"><b>Revenue:</b> ${Number(totals.revenue || 0).toFixed(2)} EUR</div>
-        <div style="border:1px solid #e2e8f0;border-radius:8px;padding:10px;"><b>Collection Rate:</b> ${totals.collectionRate.toFixed(1)}%</div>
+        <div style="border:1px solid #e2e8f0;border-radius:8px;padding:10px;"><b>${t("table.reservations")}:</b> ${totals.reservations}</div>
+        <div style="border:1px solid #e2e8f0;border-radius:8px;padding:10px;"><b>${t("table.roomNights")}:</b> ${totals.roomNights}</div>
+        <div style="border:1px solid #e2e8f0;border-radius:8px;padding:10px;"><b>${t("table.revenue")}:</b> ${Number(totals.revenue || 0).toFixed(2)} EUR</div>
+        <div style="border:1px solid #e2e8f0;border-radius:8px;padding:10px;"><b>${t("pdf.collectionRate")}:</b> ${totals.collectionRate.toFixed(1)}%</div>
       </div>
 
       <table style="width:100%;border-collapse:collapse;font-size:12px;">
         <thead>
           <tr style="background:#f8fafc;">
-            <th style="padding:8px;border:1px solid #e2e8f0;text-align:left;">Month</th>
-            <th style="padding:8px;border:1px solid #e2e8f0;text-align:right;">Reservations</th>
-            <th style="padding:8px;border:1px solid #e2e8f0;text-align:right;">Room nights</th>
-            <th style="padding:8px;border:1px solid #e2e8f0;text-align:right;">Revenue</th>
-            <th style="padding:8px;border:1px solid #e2e8f0;text-align:right;">Paid</th>
-            <th style="padding:8px;border:1px solid #e2e8f0;text-align:right;">Collection</th>
+            <th style="padding:8px;border:1px solid #e2e8f0;text-align:left;">${t("table.month")}</th>
+            <th style="padding:8px;border:1px solid #e2e8f0;text-align:right;">${t("table.reservations")}</th>
+            <th style="padding:8px;border:1px solid #e2e8f0;text-align:right;">${t("table.roomNights")}</th>
+            <th style="padding:8px;border:1px solid #e2e8f0;text-align:right;">${t("table.revenue")}</th>
+            <th style="padding:8px;border:1px solid #e2e8f0;text-align:right;">${t("table.paid")}</th>
+            <th style="padding:8px;border:1px solid #e2e8f0;text-align:right;">${t("table.collection")}</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
@@ -265,7 +266,7 @@ export default function ReportsTab() {
     await html2pdf()
       .set({
         margin: 10,
-        filename: `reports-${yearFilter}.pdf`,
+        filename: `${t("filePrefix")}-${yearFilter}.pdf`,
         html2canvas: { scale: 2 },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
       })
@@ -277,8 +278,8 @@ export default function ReportsTab() {
   return (
     <Stack spacing={2.5}>
       <PageHeader
-        title="Reports"
-        subtitle="Yearly performance view with monthly revenue and reservation trends."
+        title={t("title")}
+        subtitle={t("subtitle")}
         actions={
           <Box
             display="grid"
@@ -306,7 +307,7 @@ export default function ReportsTab() {
               startIcon={<DownloadOutlinedIcon fontSize="small" />}
               sx={{ textTransform: "none", fontWeight: 700 }}
             >
-              Export CSV
+              {t("actions.exportCsv")}
             </Button>
             <Button
               variant="contained"
@@ -315,7 +316,7 @@ export default function ReportsTab() {
               startIcon={<PictureAsPdfOutlinedIcon fontSize="small" />}
               sx={{ textTransform: "none", fontWeight: 700 }}
             >
-              Export PDF
+              {t("actions.exportPdf")}
             </Button>
           </Box>
         }
@@ -335,32 +336,32 @@ export default function ReportsTab() {
             gridTemplateColumns={{ xs: "1fr", sm: "repeat(2,1fr)", xl: "repeat(4,1fr)" }}
           >
             <StatCard
-              title="Reservations"
+              title={t("cards.reservations")}
               value={totals.reservations}
               icon={<EventAvailableOutlinedIcon fontSize="small" />}
               tone="#0284c7"
             />
             <StatCard
-              title="Room Nights"
+              title={t("cards.roomNights")}
               value={totals.roomNights}
               icon={<BedOutlinedIcon fontSize="small" />}
               tone="#7c3aed"
             />
             <StatCard
-              title="Revenue"
+              title={t("cards.revenue")}
               value={money(totals.revenue)}
               icon={<AccountBalanceWalletOutlinedIcon fontSize="small" />}
               tone="#0f766e"
             />
             <StatCard
-              title="Avg Booking"
+              title={t("cards.avgBooking")}
               value={money(totals.avgBookingValue)}
               icon={<PriceCheckOutlinedIcon fontSize="small" />}
               tone="#d97706"
             />
           </Box>
 
-          <SectionCard title="Monthly report">
+          <SectionCard title={t("sections.monthlyReport")}>
             {isMobile ? (
               <Stack spacing={1.1}>
                 {monthly.map((m) => {
@@ -377,15 +378,19 @@ export default function ReportsTab() {
                       }}
                     >
                       <Box display="flex" justifyContent="space-between" gap={1}>
-                        <Typography fontWeight={700}>{MONTHS[m.month]}</Typography>
+                        <Typography fontWeight={700}>{monthLabels[m.month]}</Typography>
                         <Typography variant="body2" color="text.secondary">
-                          {m.reservations} reservations
+                          {t("mobile.reservations", { count: m.reservations })}
                         </Typography>
                       </Box>
-                      <Typography variant="body2">Revenue: {money(m.revenue)}</Typography>
-                      <Typography variant="body2">Paid: {money(m.paid)}</Typography>
                       <Typography variant="body2">
-                        Nights: {m.roomNights} • Collection: {collection.toFixed(1)}%
+                        {t("table.revenue")}: {money(m.revenue)}
+                      </Typography>
+                      <Typography variant="body2">
+                        {t("table.paid")}: {money(m.paid)}
+                      </Typography>
+                      <Typography variant="body2">
+                        {t("mobile.nights")}: {m.roomNights} • {t("table.collection")}: {collection.toFixed(1)}%
                       </Typography>
                       <Box
                         sx={{
@@ -414,13 +419,13 @@ export default function ReportsTab() {
                 <Table size="small" sx={{ minWidth: 880 }}>
                   <TableHead>
                     <TableRow>
-                      <TableCell sx={{ fontWeight: 700 }}>Month</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>Reservations</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>Room nights</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>Revenue</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>Paid</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>Collection</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>Revenue trend</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>{t("table.month")}</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>{t("table.reservations")}</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>{t("table.roomNights")}</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>{t("table.revenue")}</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>{t("table.paid")}</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>{t("table.collection")}</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>{t("table.revenueTrend")}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -429,7 +434,7 @@ export default function ReportsTab() {
                       const width = maxRevenue > 0 ? (m.revenue / maxRevenue) * 100 : 0;
                       return (
                         <TableRow key={m.month} hover>
-                          <TableCell>{MONTHS[m.month]}</TableCell>
+                          <TableCell>{monthLabels[m.month]}</TableCell>
                           <TableCell>{m.reservations}</TableCell>
                           <TableCell>{m.roomNights}</TableCell>
                           <TableCell>{money(m.revenue)}</TableCell>
@@ -470,10 +475,10 @@ export default function ReportsTab() {
               flexWrap="wrap"
             >
               <Typography variant="caption" color="text.secondary">
-                Cancellations: {totals.cancellations}
+                {t("footer.cancellations")}: {totals.cancellations}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                Collection rate: {totals.collectionRate.toFixed(1)}%
+                {t("footer.collectionRate")}: {totals.collectionRate.toFixed(1)}%
               </Typography>
             </Box>
           </SectionCard>
@@ -482,3 +487,4 @@ export default function ReportsTab() {
     </Stack>
   );
 }
+

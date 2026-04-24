@@ -1,4 +1,5 @@
 import { Avatar, Box, Chip, Typography } from "@mui/material";
+import { useTranslations } from "next-intl";
 
 function roleChipStyle(role) {
   if (role === "admin") {
@@ -8,6 +9,7 @@ function roleChipStyle(role) {
 }
 
 export default function StaffProfileHeader({ selected }) {
+  const t = useTranslations("dashboard.permissions");
   if (!selected) return null;
 
   return (
@@ -24,7 +26,7 @@ export default function StaffProfileHeader({ selected }) {
           {(selected.name || selected.email || "?").slice(0, 1).toUpperCase()}
         </Avatar>
         <Typography fontWeight={800} fontSize={16} lineHeight={1.15}>
-          {selected.name || "No name"}
+          {selected.name || t("noName")}
         </Typography>
         <Typography
           variant="body2"

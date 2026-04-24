@@ -5,6 +5,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { useTranslations } from "next-intl";
 
 function FieldLabel({ text }) {
   return (
@@ -28,13 +29,14 @@ export default function EmploymentForm({
   toDateInput,
   updateSelectedField,
 }) {
+  const t = useTranslations("dashboard.permissions");
   if (!selected) return null;
 
   return (
     <Box>
       <Grid container spacing={1.5}>
         <Grid item xs={12} sm={6}>
-          <FieldLabel text="Position" />
+          <FieldLabel text={t("employment.position")} />
           <TextField
             select
             size="small"
@@ -45,16 +47,16 @@ export default function EmploymentForm({
             }
             sx={{ mt: 0.6 }}
           >
-            <MenuItem value="receptionist">Receptionist</MenuItem>
-            <MenuItem value="cleaner">Cleaner</MenuItem>
-            <MenuItem value="manager">Manager</MenuItem>
-            <MenuItem value="maintenance">Maintenance</MenuItem>
-            <MenuItem value="accountant">Accountant</MenuItem>
-            <MenuItem value="other">Other</MenuItem>
+            <MenuItem value="receptionist">{t("positions.receptionist")}</MenuItem>
+            <MenuItem value="cleaner">{t("positions.cleaner")}</MenuItem>
+            <MenuItem value="manager">{t("positions.manager")}</MenuItem>
+            <MenuItem value="maintenance">{t("positions.maintenance")}</MenuItem>
+            <MenuItem value="accountant">{t("positions.accountant")}</MenuItem>
+            <MenuItem value="other">{t("positions.other")}</MenuItem>
           </TextField>
         </Grid>
         <Grid item xs={12} sm={6}>
-          <FieldLabel text="Start Date" />
+          <FieldLabel text={t("employment.startDate")} />
           <TextField
             type="date"
             size="small"
@@ -70,7 +72,7 @@ export default function EmploymentForm({
           />
         </Grid>
         <Grid item xs={12} sm={4}>
-          <FieldLabel text="Employment Status" />
+          <FieldLabel text={t("employment.employmentStatus")} />
           <TextField
             select
             size="small"
@@ -81,12 +83,12 @@ export default function EmploymentForm({
             }
             sx={{ mt: 0.6 }}
           >
-            <MenuItem value="active">Active</MenuItem>
-            <MenuItem value="inactive">Inactive</MenuItem>
+            <MenuItem value="active">{t("employment.active")}</MenuItem>
+            <MenuItem value="inactive">{t("employment.inactive")}</MenuItem>
           </TextField>
         </Grid>
         <Grid item xs={12} sm={4}>
-          <FieldLabel text="Salary Type" />
+          <FieldLabel text={t("employment.salaryType")} />
           <TextField
             select
             size="small"
@@ -95,12 +97,12 @@ export default function EmploymentForm({
             onChange={(e) => updateSelectedField("salary_type", e.target.value)}
             sx={{ mt: 0.6 }}
           >
-            <MenuItem value="monthly">Monthly</MenuItem>
-            <MenuItem value="hourly">Hourly</MenuItem>
+            <MenuItem value="monthly">{t("employment.monthly")}</MenuItem>
+            <MenuItem value="hourly">{t("employment.hourly")}</MenuItem>
           </TextField>
         </Grid>
         <Grid item xs={12} sm={4}>
-          <FieldLabel text="Base Salary" />
+          <FieldLabel text={t("employment.baseSalary")} />
           <TextField
             type="number"
             size="small"

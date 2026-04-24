@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import {
   Box,
   Typography,
@@ -30,6 +31,7 @@ import StatusBadge from "./ui/StatusBadge";
 import EmptyState from "./ui/EmptyState";
 
 export default function UsersTab() {
+  const t = useTranslations("dashboard.users");
   const isMobile = useMediaQuery("(max-width:900px)");
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -61,9 +63,10 @@ export default function UsersTab() {
       const res = await fetch("/api/user");
       const data = await res.json();
       if (res.ok) setUsers(data);
-      else console.error("Error fetching users:", data.error);
+      else notify(data?.error || t("messages.loadFailed"), "error");
     } catch (error) {
       console.error("Network error:", error);
+      notify(t("messages.loadNetworkError"), "error");
     } finally {
       setLoading(false);
     }
@@ -82,6 +85,11 @@ export default function UsersTab() {
     }
   };
 
+  const getRoleLabel = (role) => {
+    const normalized = String(role || "").toLowerCase();
+    return t.has(`roles.${normalized}`) ? t(`roles.${normalized}`) : role;
+  };
+
   async function handleRoleUpdate() {
     if (!selectedUser || !newRole) return;
     try {
@@ -96,20 +104,20 @@ export default function UsersTab() {
           prev.map((u) => (u.id === updated.id ? updated : u)),
         );
         setSelectedUser(null);
-        notify("User role updated successfully.");
+        notify(t("messages.roleUpdated"));
       } else {
-        notify("Failed to update role.", "error");
+        notify(t("messages.roleUpdateFailed"), "error");
       }
     } catch (err) {
       console.error(err);
-      notify("Network error while updating role.", "error");
+      notify(t("messages.roleUpdateNetworkError"), "error");
     }
   }
   async function handleAddUser() {
-    const { name, email, password, role } = newUser;
+    const { name, email, password } = newUser;
 
     if (!name || !email || !password) {
-      notify("Please fill all required fields.", "warning");
+      notify(t("messages.requiredFields"), "warning");
       return;
     }
     try {
@@ -123,20 +131,18 @@ export default function UsersTab() {
         setAddOpen(false);
         setNewUser({ name: "", email: "", password: "", role: "client" });
         fetchUsers();
-        notify("User created successfully.");
+        notify(t("messages.created"));
       } else {
         const data = await res.json();
-        notify(data.error || "Failed to create user.", "error");
+        notify(data.error || t("messages.createFailed"), "error");
       }
     } catch (err) {
       console.log(err);
-      notify("Network error while creating user.", "error");
+      notify(t("messages.createNetworkError"), "error");
     }
   }
   async function handleDeleteUser(userId) {
-    const confirm = window.confirm(
-      "Are you sure you want to delete this user?",
-    );
+    const confirm = window.confirm(t("messages.confirmDelete"));
     if (!confirm) return;
 
     try {
@@ -149,15 +155,15 @@ export default function UsersTab() {
       const data = await res.json();
 
       if (!res.ok) {
-        notify(data.error || "Failed to delete user.", "error");
+        notify(data.error || t("messages.deleteFailed"), "error");
         return;
       }
 
       fetchUsers();
-      notify("User deleted successfully.");
+      notify(t("messages.deleted"));
     } catch (err) {
       console.error(err);
-      notify("Network error while deleting user.", "error");
+      notify(t("messages.deleteNetworkError"), "error");
     }
   }
 
@@ -171,23 +177,23 @@ export default function UsersTab() {
   return (
     <Box className="admin-page">
       <PageHeader
-        title="Users"
-        subtitle="Manage staff and access levels."
+        title={t("title")}
+        subtitle={t("subtitle")}
         actions={
           <Button
             variant="contained"
             onClick={() => setAddOpen(true)}
             sx={{ width: { xs: "100%", sm: "auto" } }}
           >
-            + Add User
+            {t("actions.addUser")}
           </Button>
         }
       />
 
       {users.length === 0 ? (
         <EmptyState
-          title="No users found"
-          subtitle="Create a user to get started."
+          title={t("empty.title")}
+          subtitle={t("empty.subtitle")}
         />
       ) : (
         <SectionCard>
@@ -201,7 +207,10 @@ export default function UsersTab() {
                 >
                   <Box display="flex" justifyContent="space-between" gap={1}>
                     <Typography fontWeight={700}>{u.name}</Typography>
-                    <StatusBadge label={u.role} tone={getRoleTone(u.role)} />
+                    <StatusBadge
+                      label={getRoleLabel(u.role)}
+                      tone={getRoleTone(u.role)}
+                    />
                   </Box>
                   <Typography variant="body2" color="text.secondary" mt={0.4}>
                     {u.email}
@@ -212,7 +221,7 @@ export default function UsersTab() {
                     mt={0.6}
                     display="block"
                   >
-                    Created:{" "}
+                    {t("fields.createdAt")}:{" "}
                     {u.created_at
                       ? new Date(u.created_at).toLocaleString("en-GB", {
                           day: "2-digit",
@@ -234,7 +243,7 @@ export default function UsersTab() {
                         setNewRole(u.role);
                       }}
                     >
-                      Change Role
+                      {t("actions.changeRole")}
                     </Button>
                     <Button
                       fullWidth
@@ -245,7 +254,7 @@ export default function UsersTab() {
                       disabled={u.role === "admin"}
                       onClick={() => handleDeleteUser(u.id)}
                     >
-                      Delete
+                      {t("actions.delete")}
                     </Button>
                   </Box>
                 </Paper>
@@ -260,11 +269,17 @@ export default function UsersTab() {
               <Table className="admin-table">
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: "bold" }}>Name</TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>Email</TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>Role</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>
+                      {t("fields.name")}
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>
+                      {t("fields.email")}
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>
+                      {t("fields.role")}
+                    </TableCell>
                     <TableCell sx={{ fontWeight: "bold" }} align="center">
-                      Created At
+                      {t("fields.createdAt")}
                     </TableCell>
                     <TableCell
                       sx={{
@@ -274,7 +289,7 @@ export default function UsersTab() {
                       }}
                       align="right"
                     >
-                      Actions
+                      {t("fields.actions")}
                     </TableCell>
                   </TableRow>
                 </TableHead>
@@ -286,7 +301,7 @@ export default function UsersTab() {
                       <TableCell>{u.email}</TableCell>
                       <TableCell>
                         <StatusBadge
-                          label={u.role}
+                          label={getRoleLabel(u.role)}
                           tone={getRoleTone(u.role)}
                         />
                       </TableCell>
@@ -318,7 +333,7 @@ export default function UsersTab() {
                             }}
                             sx={{ minWidth: 132 }}
                           >
-                            Change Role
+                            {t("actions.changeRole")}
                           </Button>
                           <Button
                             variant="outlined"
@@ -329,7 +344,7 @@ export default function UsersTab() {
                             onClick={() => handleDeleteUser(u.id)}
                             sx={{ minWidth: 100 }}
                           >
-                            Delete
+                            {t("actions.delete")}
                           </Button>
                         </Box>
                       </TableCell>
@@ -345,32 +360,34 @@ export default function UsersTab() {
       {/* Dialog për ndërrimin e rolit */}
       {selectedUser && (
         <Dialog open={!!selectedUser} onClose={() => setSelectedUser(null)}>
-          <DialogTitle>Change Role</DialogTitle>
+          <DialogTitle>{t("roleDialog.title")}</DialogTitle>
           <DialogContent dividers>
             <Typography mb={2}>
-              Update role for <strong>{selectedUser.name}</strong> (
+              {t("roleDialog.description")} <strong>{selectedUser.name}</strong> (
               {selectedUser.email})
             </Typography>
             <TextField
               select
               fullWidth
-              label="Select new role"
+              label={t("roleDialog.select")}
               value={newRole}
               onChange={(e) => setNewRole(e.target.value)}
             >
-              <MenuItem value="admin">Admin</MenuItem>
-              <MenuItem value="worker">Worker</MenuItem>
-              <MenuItem value="client">Client</MenuItem>
+              <MenuItem value="admin">{t("roles.admin")}</MenuItem>
+              <MenuItem value="worker">{t("roles.worker")}</MenuItem>
+              <MenuItem value="client">{t("roles.client")}</MenuItem>
             </TextField>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setSelectedUser(null)}>Cancel</Button>
+            <Button onClick={() => setSelectedUser(null)}>
+              {t("actions.cancel")}
+            </Button>
             <Button
               variant="contained"
               onClick={handleRoleUpdate}
               color="primary"
             >
-              Save
+              {t("actions.save")}
             </Button>
           </DialogActions>
         </Dialog>
@@ -381,18 +398,18 @@ export default function UsersTab() {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>Add New User</DialogTitle>
+        <DialogTitle>{t("addDialog.title")}</DialogTitle>
         <DialogContent dividers>
           <Box display="flex" flexDirection={"column"} gap={2}>
             <TextField
-              label="Name"
+              label={t("fields.name")}
               value={newUser.name}
               type="email"
               onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
               fullWidth
             />
             <TextField
-              label="Email"
+              label={t("fields.email")}
               value={newUser.email}
               onChange={(e) =>
                 setNewUser({ ...newUser, email: e.target.value })
@@ -400,7 +417,7 @@ export default function UsersTab() {
               fullWidth
             />
             <TextField
-              label="Passord"
+              label={t("fields.password")}
               type="password"
               value={newUser.password}
               onChange={(e) =>
@@ -409,23 +426,22 @@ export default function UsersTab() {
               fullWidth
             />
             <TextField
-              label="Role"
+              label={t("fields.role")}
               value={newUser.role}
               select
               onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
               fullWidth
             >
-              <MenuItem value="admin">Admin</MenuItem>
-              <MenuItem value="worker">Worker</MenuItem>
-              <MenuItem value="client">Client</MenuItem>
+              <MenuItem value="admin">{t("roles.admin")}</MenuItem>
+              <MenuItem value="worker">{t("roles.worker")}</MenuItem>
+              <MenuItem value="client">{t("roles.client")}</MenuItem>
             </TextField>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setAddOpen(false)}> Cancel</Button>
+          <Button onClick={() => setAddOpen(false)}>{t("actions.cancel")}</Button>
           <Button variant="contained" onClick={handleAddUser}>
-            {" "}
-            Create User
+            {t("actions.create")}
           </Button>
         </DialogActions>
       </Dialog>

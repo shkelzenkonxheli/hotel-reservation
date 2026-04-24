@@ -10,6 +10,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { useTranslations } from "next-intl";
 
 function roleChipStyle(role) {
   if (role === "admin") {
@@ -26,6 +27,7 @@ export default function StaffList({
   onSearchChange,
   onPickUser,
 }) {
+  const t = useTranslations("dashboard.permissions");
   return (
     <Paper
       elevation={0}
@@ -36,16 +38,16 @@ export default function StaffList({
       }}
     >
       <Box px={2} py={1.5} borderBottom="1px solid #edf2f7">
-        <Typography fontWeight={800}>Staff</Typography>
+        <Typography fontWeight={800}>{t("staff")}</Typography>
         <Typography variant="caption" color="text.secondary">
-          Select a member to manage access and employment details
+          {t("staffHelper")}
         </Typography>
         <TextField
           size="small"
           fullWidth
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Search staff"
+          placeholder={t("searchPlaceholder")}
           sx={{ mt: 1.2 }}
         />
       </Box>
@@ -77,7 +79,7 @@ export default function StaffList({
         ) : filteredUsers.length === 0 ? (
           <Box px={2} py={3}>
             <Typography variant="body2" color="text.secondary">
-              No staff found.
+              {t("noStaffFound")}
             </Typography>
           </Box>
         ) : (

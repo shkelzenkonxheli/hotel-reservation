@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Box, Typography, Grid, Paper, LinearProgress, Chip } from "@mui/material";
 import {
   People,
@@ -14,6 +15,7 @@ import PageHeader from "./ui/PageHeader";
 import StatCard from "./ui/StatCard";
 
 export default function OverviewTab() {
+  const t = useTranslations("dashboard.overview");
   const [stats, setStats] = useState(null);
   const [loadError, setLoadError] = useState("");
 
@@ -27,19 +29,19 @@ export default function OverviewTab() {
       const res = await fetch("/api/dashboard");
       const data = await res.json();
       if (!res.ok) {
-        setLoadError(data?.error || "Failed to load dashboard metrics");
+        setLoadError(data?.error || t("errors.loadFailed"));
         return;
       }
       setStats(data);
     } catch {
-      setLoadError("Failed to load dashboard metrics");
+      setLoadError(t("errors.loadFailed"));
     }
   }
 
   if (!stats && !loadError) {
     return (
       <Typography textAlign="center" color="text.secondary">
-        Loading overview...
+        {t("loading")}
       </Typography>
     );
   }
@@ -54,43 +56,43 @@ export default function OverviewTab() {
 
   const cards = [
     {
-      title: "Total Users",
+      title: t("cards.totalUsers"),
       value: stats?.totalUsers ?? 0,
       icon: <People sx={{ fontSize: 22 }} />,
       tone: "#2563eb",
     },
     {
-      title: "Total Reservations",
+      title: t("cards.totalReservations"),
       value: stats?.totalReservation ?? 0,
       icon: <BookOnline sx={{ fontSize: 22 }} />,
       tone: "#16a34a",
     },
     {
-      title: "Total Earnings",
+      title: t("cards.totalEarnings"),
       value: currency.format(Number(stats?.totalEarnings || 0)),
       icon: <Euro sx={{ fontSize: 22 }} />,
       tone: "#f59e0b",
     },
     {
-      title: "Today Check-ins",
+      title: t("cards.todayCheckins"),
       value: stats?.todayCheckins ?? 0,
       icon: <Login sx={{ fontSize: 22 }} />,
       tone: "#0ea5e9",
     },
     {
-      title: "Upcoming Reservations",
+      title: t("cards.upcomingReservations"),
       value: stats?.upcomingReservations ?? 0,
       icon: <EventAvailable sx={{ fontSize: 22 }} />,
       tone: "#7c3aed",
     },
     {
-      title: "Revenue Today",
+      title: t("cards.revenueToday"),
       value: currency.format(Number(stats?.revenueToday || 0)),
       icon: <Euro sx={{ fontSize: 22 }} />,
       tone: "#22c55e",
     },
     {
-      title: "Occupancy",
+      title: t("cards.occupancy"),
       value: `${occupancy}%`,
       icon: <Hotel sx={{ fontSize: 22 }} />,
       tone: "#dc2626",
@@ -102,12 +104,12 @@ export default function OverviewTab() {
   return (
     <Box className="admin-page">
       <PageHeader
-        title="Overview"
-        subtitle="Daily operational and financial dashboard."
+        title={t("title")}
+        subtitle={t("subtitle")}
         actions={
           <Chip
             size="small"
-            label={`Occupancy ${occupancy}%`}
+            label={t("occupancyChip", { value: occupancy })}
             sx={{
               fontWeight: 700,
               bgcolor: "rgba(2,132,199,0.14)",
@@ -136,7 +138,7 @@ export default function OverviewTab() {
       <Box display="grid" gap={3}>
         <Box>
           <Typography fontWeight={800} mb={1.2}>
-            Primary KPIs
+            {t("sections.primaryKpis")}
           </Typography>
           <Grid container spacing={2.4}>
             {primaryCards.map((card) => (
@@ -154,7 +156,7 @@ export default function OverviewTab() {
 
         <Box>
           <Typography fontWeight={800} mb={1.2}>
-            Operational Snapshot
+            {t("sections.operationalSnapshot")}
           </Typography>
           <Grid container spacing={2.4}>
             <Grid item xs={12} lg={8}>
@@ -164,7 +166,7 @@ export default function OverviewTab() {
                 sx={{ borderColor: "#e7edf4", boxShadow: "none" }}
               >
                 <Box className="admin-card-header">
-                  <Typography fontWeight={800}>Today Snapshot</Typography>
+                  <Typography fontWeight={800}>{t("sections.todaySnapshot")}</Typography>
                 </Box>
                 <Box className="admin-card-body">
                   <Box
@@ -174,7 +176,7 @@ export default function OverviewTab() {
                   >
                     <Box>
                       <Typography variant="caption" color="text.secondary">
-                        Check-ins
+                        {t("snapshot.checkIns")}
                       </Typography>
                       <Typography variant="h6" fontWeight={800}>
                         {stats?.todayCheckins ?? 0}
@@ -182,7 +184,7 @@ export default function OverviewTab() {
                     </Box>
                     <Box>
                       <Typography variant="caption" color="text.secondary">
-                        Upcoming
+                        {t("snapshot.upcoming")}
                       </Typography>
                       <Typography variant="h6" fontWeight={800}>
                         {stats?.upcomingReservations ?? 0}
@@ -190,7 +192,7 @@ export default function OverviewTab() {
                     </Box>
                     <Box>
                       <Typography variant="caption" color="text.secondary">
-                        Revenue
+                        {t("snapshot.revenue")}
                       </Typography>
                       <Typography variant="h6" fontWeight={800}>
                         {currency.format(Number(stats?.revenueToday || 0))}
@@ -208,11 +210,11 @@ export default function OverviewTab() {
                 sx={{ borderColor: "#e7edf4", boxShadow: "none" }}
               >
                 <Box className="admin-card-header">
-                  <Typography fontWeight={800}>Occupancy Health</Typography>
+                  <Typography fontWeight={800}>{t("sections.occupancyHealth")}</Typography>
                 </Box>
                 <Box className="admin-card-body">
                   <Typography variant="caption" color="text.secondary">
-                    Current occupancy
+                    {t("snapshot.currentOccupancy")}
                   </Typography>
                   <Typography variant="h5" fontWeight={900} sx={{ mb: 1.2 }}>
                     {occupancy}%

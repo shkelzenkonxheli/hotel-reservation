@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server";
-import Stripe from "stripe";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
-import { rateLimit } from "@/lib/rateLimit";
-import { requireSameOrigin } from "@/lib/security";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Handle POST requests for this route.
-export async function POST(req) {
+export async function POST() {
+  return NextResponse.json(
+    {
+      error:
+        "Online payment is currently disabled. Please reserve now and pay in cash at the hotel.",
+    },
+    { status: 410 },
+  );
+}
+
+export async function POST_DISABLED(req) {
   try {
     const originError = requireSameOrigin(req);
     if (originError) return originError;

@@ -1,14 +1,4 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
-import Stripe from "stripe";
-import { Resend } from "resend";
-import { nanoid } from "nanoid";
-import { reservationConfirmationTemplate } from "@/lib/email/reservationConfirmationTemplate";
-import { adminReservationTemplate } from "@/lib/email/adminReservationTemplate";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-const adminEmail = "shkonxheli@gmail.com";
 
 // Convert YYYY-MM-DD to a UTC midnight Date for day-precision comparisons.
 function parseDateOnlyToUTC(dateStr) {
@@ -29,7 +19,14 @@ export const config = {
 };
 
 // Handle POST requests for this route.
-export async function POST(req) {
+export async function POST() {
+  return NextResponse.json(
+    { error: "Stripe webhook is disabled because online payments are inactive." },
+    { status: 410 },
+  );
+}
+
+export async function POST_DISABLED(req) {
   const sig = req.headers.get("stripe-signature");
   const rawBody = await req.text();
 

@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import {
   CircularProgress,
@@ -26,6 +27,7 @@ import PrintReceipt from "./PrintReceipt";
 import PageHeader from "./ui/PageHeader";
 
 export default function ReservationsTab() {
+  const t = useTranslations("dashboard.reservations");
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -94,11 +96,11 @@ export default function ReservationsTab() {
         setReservations(data);
       } else {
         console.error("Error fetching reservations", data.error);
-        notify(data.error || "Failed to load reservations.", "error");
+        notify(data.error || t("messages.loadFailed"), "error");
       }
     } catch (error) {
       console.error("Network error:", error);
-      notify("Network error while loading reservations.", "error");
+      notify(t("messages.loadNetworkError"), "error");
     } finally {
       setLoading(false);
     }
@@ -116,15 +118,15 @@ export default function ReservationsTab() {
         setReservations((prev) =>
           prev.map((r) => (r.id === updated.id ? updated : r)),
         );
-        notify("Reservation status updated.");
+        notify(t("messages.statusUpdated"));
       } else {
         const data = await res.json().catch(() => ({}));
         console.error("Failed to update status");
-        notify(data.error || "Failed to update status.", "error");
+        notify(data.error || t("messages.statusUpdateFailed"), "error");
       }
     } catch (err) {
       console.error(err);
-      notify("Network error while updating status.", "error");
+      notify(t("messages.statusUpdateNetworkError"), "error");
     } finally {
       setAnchorEl(null);
       setSelectedReservation(null);
@@ -148,15 +150,15 @@ export default function ReservationsTab() {
         setReservations((prev) =>
           prev.map((r) => (r.id === updated.id ? updated : r)),
         );
-        notify("Payment info updated.");
+        notify(t("messages.paymentUpdated"));
       } else {
         const data = await res.json().catch(() => ({}));
         console.error("Failed to update payment status");
-        notify(data.error || "Failed to update payment info.", "error");
+        notify(data.error || t("messages.paymentUpdateFailed"), "error");
       }
     } catch (err) {
       console.error(err);
-      notify("Network error while updating payment info.", "error");
+      notify(t("messages.paymentUpdateNetworkError"), "error");
     } finally {
       setAnchorEl(null);
       setSelectedReservation(null);
@@ -200,16 +202,16 @@ export default function ReservationsTab() {
         method: "DELETE",
       });
       if (res.ok) {
-        notify("Reservation deleted successfully.");
+        notify(t("messages.deleted"));
         await fetchReservations();
       } else {
         const data = await res.json().catch(() => ({}));
         console.error("Failed to delete reservation");
-        notify(data.error || "Failed to delete reservation.", "error");
+        notify(data.error || t("messages.deleteFailed"), "error");
       }
     } catch (err) {
       console.error(err);
-      notify("Network error while deleting reservation.", "error");
+      notify(t("messages.deleteNetworkError"), "error");
     } finally {
       setDeleteDialog({ open: false, id: null });
     }
@@ -217,7 +219,7 @@ export default function ReservationsTab() {
 
   async function handleBulkDelete() {
     if (selectedIds.length === 0) return;
-    if (!confirm(`Delete ${selectedIds.length} reservations?`)) return;
+    if (!confirm(t("messages.bulkDeleteConfirm", { count: selectedIds.length }))) return;
 
     try {
       const res = await fetch("/api/reservation/bulk", {
@@ -227,15 +229,15 @@ export default function ReservationsTab() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        notify(data.error || "Failed to delete selected reservations.", "error");
+        notify(data.error || t("messages.bulkDeleteFailed"), "error");
         return;
       }
       setSelectedIds([]);
-      notify("Selected reservations deleted.");
+      notify(t("messages.bulkDeleted"));
       await fetchReservations();
     } catch (err) {
       console.error(err);
-      notify("Network error while deleting selected reservations.", "error");
+      notify(t("messages.bulkDeleteNetworkError"), "error");
     }
   }
 
@@ -299,7 +301,7 @@ export default function ReservationsTab() {
       case "pending":
         return (
           <Chip
-            label="Pending"
+            label={t("statuses.pending")}
             size="small"
             sx={{
               backgroundColor: "#fef9c3",
@@ -311,7 +313,7 @@ export default function ReservationsTab() {
       case "confirmed":
         return (
           <Chip
-            label="Confirmed"
+            label={t("statuses.confirmed")}
             size="small"
             sx={{
               backgroundColor: "#dbeafe",
@@ -324,7 +326,7 @@ export default function ReservationsTab() {
         return (
           <Chip
             icon={<DoneAll sx={{ color: "#16a34a" }} />}
-            label="Completed"
+            label={t("statuses.completed")}
             size="small"
             sx={{
               backgroundColor: "#dcfce7",
@@ -336,7 +338,7 @@ export default function ReservationsTab() {
       case "cancelled":
         return (
           <Chip
-            label="Cancelled"
+            label={t("statuses.cancelled")}
             size="small"
             sx={{
               backgroundColor: "#fee2e2",
@@ -402,12 +404,12 @@ export default function ReservationsTab() {
   return (
     <div className="admin-page">
       <PageHeader
-        title="Reservations"
-        subtitle="Track bookings, statuses, and payments."
+        title={t("title")}
+        subtitle={t("subtitle")}
         actions={
           <Box display="flex" gap={1} flexWrap="wrap">
             <Chip
-              label={`Total: ${totals.total}`}
+              label={t("summary.total", { count: totals.total })}
               size="small"
               sx={{
                 backgroundColor: "#e0f2fe",
@@ -416,7 +418,7 @@ export default function ReservationsTab() {
               }}
             />
             <Chip
-              label={`Active: ${totals.active}`}
+              label={t("summary.active", { count: totals.active })}
               size="small"
               sx={{
                 backgroundColor: "#dcfce7",
@@ -425,7 +427,7 @@ export default function ReservationsTab() {
               }}
             />
             <Chip
-              label={`Finished: ${totals.finished}`}
+              label={t("summary.finished", { count: totals.finished })}
               size="small"
               sx={{
                 backgroundColor: "#fef9c3",
@@ -451,7 +453,7 @@ export default function ReservationsTab() {
         open={openModal}
         onClose={() => setOpenModal(false)}
         onSuccess={() => {
-          notify("Reservation saved successfully.");
+          notify(t("messages.saved"));
           fetchReservations();
         }}
         mode="create"
@@ -460,7 +462,7 @@ export default function ReservationsTab() {
         open={editOpen}
         onClose={() => setEditOpen(false)}
         onSuccess={() => {
-          notify("Reservation updated successfully.");
+          notify(t("messages.updated"));
           fetchReservations();
         }}
         mode="edit"
@@ -485,7 +487,7 @@ export default function ReservationsTab() {
           }}
         >
           <Typography fontWeight={600}>
-            Selected: {selectedIds.length}
+            {t("selected", { count: selectedIds.length })}
           </Typography>
           <Button
             color="error"
@@ -493,13 +495,13 @@ export default function ReservationsTab() {
             onClick={handleBulkDelete}
             sx={{ width: { xs: "100%", sm: "auto" } }}
           >
-            Delete Selected
+            {t("deleteSelected")}
           </Button>
         </Box>
       ) : null}
 
       {displayList.length === 0 ? (
-        <p className="text-center text-gray-500">No reservations found.</p>
+        <p className="text-center text-gray-500">{t("empty")}</p>
       ) : isMobile ? (
         <ReservationListMobile
           reservations={displayList}
@@ -550,20 +552,22 @@ export default function ReservationsTab() {
             setAnchorEl(null);
           }}
         >
-          Edit Reservation
+          {t("menu.editReservation")}
         </MenuItem>
 
         <MenuItem divider />
 
-        {["Pending", "Confirmed", "Completed", "Cancelled"].map((status) => (
+        {["pending", "confirmed", "completed", "cancelled"].map((status) => (
           <MenuItem
             key={status}
             onClick={() => {
-              handleStatusChange(selectedReservation.id, status.toLowerCase());
+              handleStatusChange(selectedReservation.id, status);
               setAnchorEl(null);
             }}
           >
-            Set as {status}
+            {t("menu.setAs", {
+              status: t(`statuses.${status}`),
+            })}
           </MenuItem>
         ))}
 
@@ -579,7 +583,7 @@ export default function ReservationsTab() {
             )
           }
         >
-          Mark cash as paid + confirm
+          {t("menu.markCashPaidAndConfirm")}
         </MenuItem>
 
         <MenuItem
@@ -592,7 +596,7 @@ export default function ReservationsTab() {
             )
           }
         >
-          Mark as unpaid
+          {t("menu.markAsUnpaid")}
         </MenuItem>
       </Menu>
 

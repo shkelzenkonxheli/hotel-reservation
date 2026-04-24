@@ -8,7 +8,6 @@
     "metaTitle": "Checkout | Dijari Premium",
     "title": "Complete your booking",
     "subtitle": "Review your stay details and confirm guest information.",
-    "confirmAndPay": "Confirm booking and pay",
     "confirmCash": "Confirm booking (pay at hotel)",
     "viewDetails": "View details",
     "close": "Close",
@@ -35,12 +34,11 @@
       "paymentMethod": "Payment method"
     },
     "payment": {
-      "onlineTitle": "Pay online",
-      "onlineSubtitle": "Card via Stripe",
-      "cashTitle": "Pay at hotel",
-      "cashSubtitle": "Cash on arrival",
+      "cashOnlyTitle": "Pay at hotel",
+      "cashOnlySubtitle": "Cash payment on arrival",
+      "cashOnlyBadge": "Cash only for this season",
       "cashNote": "Cash bookings are created as pending and can be confirmed by admin.",
-      "cardNote": "You will be redirected to secure Stripe checkout."
+      "arrivalNote": "Online payment is currently disabled."
     },
     "mobile": {
       "to": "to",
@@ -49,7 +47,6 @@
     },
     "alerts": {
       "fillAllFields": "Please fill in all fields.",
-      "paymentInitFailed": "Payment initialization failed.",
       "reservationFailed": "Reservation failed.",
       "pendingCreated": "Reservation created as pending. Please pay at the hotel.",
       "genericError": "Something went wrong. Please try again."
@@ -57,8 +54,8 @@
   },
   "success": {
     "metaTitle": "Success | Dijari Premium",
-    "title": "Payment Successful!",
-    "subtitle": "Your booking has been confirmed. A confirmation email has been sent.",
+    "title": "Reservation received",
+    "subtitle": "Your booking request has been created. Payment will be completed in cash at the hotel.",
     "bookingDetails": "Booking details:",
     "room": "Room",
     "checkIn": "Check-in",
@@ -278,6 +275,689 @@
       "outOfOrder": "Out of Order"
     }
   },
+  "dashboard": {
+    "metaTitle": "Dashboard | Dijari Premium",
+    "tabs": {
+      "overview": "Overview",
+      "rooms": "Rooms",
+      "reservations": "Reservations",
+      "payments": "Payments & Invoices",
+      "reports": "Reports",
+      "expenses": "Expenses",
+      "users": "Users",
+      "manageRooms": "Manage Rooms",
+      "activityLogsTab": "Activity Log",
+      "permissions": "Permissions"
+    },
+    "shell": {
+      "adminPanel": "Admin Panel",
+      "workerPanel": "Worker Panel",
+      "expandSidebar": "Expand sidebar",
+      "collapseSidebar": "Collapse sidebar",
+      "copyright": "Hotel Management",
+      "mobileTitle": "Dashboard"
+    },
+    "overview": {
+      "title": "Overview",
+      "subtitle": "Daily operational and financial dashboard.",
+      "loading": "Loading overview...",
+      "occupancyChip": "Occupancy {value}%",
+      "errors": {
+        "loadFailed": "Failed to load dashboard metrics"
+      },
+      "cards": {
+        "totalUsers": "Total Users",
+        "totalReservations": "Total Reservations",
+        "totalEarnings": "Total Earnings",
+        "todayCheckins": "Today Check-ins",
+        "upcomingReservations": "Upcoming Reservations",
+        "revenueToday": "Revenue Today",
+        "occupancy": "Occupancy"
+      },
+      "sections": {
+        "primaryKpis": "Primary KPIs",
+        "operationalSnapshot": "Operational Snapshot",
+        "todaySnapshot": "Today Snapshot",
+        "occupancyHealth": "Occupancy Health"
+      },
+      "snapshot": {
+        "checkIns": "Check-ins",
+        "upcoming": "Upcoming",
+        "revenue": "Revenue",
+        "currentOccupancy": "Current occupancy"
+      }
+    },
+    "rooms": {
+      "title": "Rooms",
+      "subtitle": "Live occupancy and housekeeping status.",
+      "badges": {
+        "booked": "Booked: {count}",
+        "available": "Available: {count}",
+        "total": "Total: {count}"
+      },
+      "filters": {
+        "date": "Date",
+        "status": "Status",
+        "all": "All",
+        "available": "Available",
+        "booked": "Booked",
+        "needsCleaning": "Needs Cleaning"
+      },
+      "sections": {
+        "apartments": "Apartments",
+        "hotelRooms": "Hotel Rooms"
+      },
+      "messages": {
+        "confirmClean": "Mark this room as cleaned?",
+        "cleaned": "Room marked as cleaned.",
+        "cleanError": "Error cleaning room",
+        "statusUpdated": "Room status updated.",
+        "statusError": "Error changing status"
+      },
+      "dialog": {
+        "roomTitle": "Room {room}",
+        "markAvailable": "Mark Available",
+        "outOfOrder": "Out of Order",
+        "noActiveReservation": "No active reservation.",
+        "cleanRoom": "Clean Room",
+        "hideCalendar": "Hide Calendar",
+        "showCalendar": "Show Calendar",
+        "close": "Close",
+        "fields": {
+          "guest": "Guest",
+          "phone": "Phone",
+          "checkIn": "Check-in",
+          "checkOut": "Check-out",
+          "status": "Status",
+          "total": "Total"
+        }
+      }
+    },
+    "reservations": {
+      "title": "Reservations",
+      "subtitle": "Track bookings, statuses, and payments.",
+      "selected": "Selected: {count}",
+      "deleteSelected": "Delete Selected",
+      "empty": "No reservations found.",
+      "summary": {
+        "total": "Total: {count}",
+        "active": "Active: {count}",
+        "finished": "Finished: {count}"
+      },
+      "tabs": {
+        "all": "All",
+        "upcoming": "Upcoming",
+        "today": "Today",
+        "present": "Present",
+        "past": "Past"
+      },
+      "filters": {
+        "search": "Search (Name or Email)",
+        "status": "Status",
+        "type": "Type",
+        "addNew": "+ Add New",
+        "options": {
+          "all": "All",
+          "pending": "Pending",
+          "confirmed": "Confirmed",
+          "completed": "Completed",
+          "cancelled": "Cancelled",
+          "hotel": "Hotel",
+          "apartment": "Apartment"
+        }
+      },
+      "statuses": {
+        "pending": "Pending",
+        "confirmed": "Confirmed",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "menu": {
+        "editReservation": "Edit Reservation",
+        "setAs": "Set as {status}",
+        "markCashPaidAndConfirm": "Mark cash as paid + confirm",
+        "markAsUnpaid": "Mark as unpaid"
+      },
+      "messages": {
+        "loadFailed": "Failed to load reservations.",
+        "loadNetworkError": "Network error while loading reservations.",
+        "statusUpdated": "Reservation status updated.",
+        "statusUpdateFailed": "Failed to update status.",
+        "statusUpdateNetworkError": "Network error while updating status.",
+        "paymentUpdated": "Payment info updated.",
+        "paymentUpdateFailed": "Failed to update payment info.",
+        "paymentUpdateNetworkError": "Network error while updating payment info.",
+        "deleted": "Reservation deleted successfully.",
+        "deleteFailed": "Failed to delete reservation.",
+        "deleteNetworkError": "Network error while deleting reservation.",
+        "bulkDeleteConfirm": "Delete {count} reservations?",
+        "bulkDeleted": "Selected reservations deleted.",
+        "bulkDeleteFailed": "Failed to delete selected reservations.",
+        "bulkDeleteNetworkError": "Network error while deleting selected reservations.",
+        "saved": "Reservation saved successfully.",
+        "updated": "Reservation updated successfully."
+      },
+      "table": {
+        "selectAll": "Select all reservations",
+        "selectOne": "Select reservation",
+        "pinned": "Pinned",
+        "code": "Code",
+        "guest": "Guest",
+        "room": "Room",
+        "stay": "Stay",
+        "status": "Status",
+        "total": "Total",
+        "actions": "Actions",
+        "checkIn": "IN",
+        "checkOut": "OUT",
+        "tooltips": {
+          "viewDetails": "View details",
+          "printReceipt": "Print receipt",
+          "deleteReservation": "Delete reservation"
+        }
+      },
+      "detailsDialog": {
+        "title": "Reservation details",
+        "subtitle": "Review guest, stay, and payment information.",
+        "sections": {
+          "guest": "Guest",
+          "stay": "Stay",
+          "booking": "Booking",
+          "payment": "Payment",
+          "cancellation": "Cancellation"
+        },
+        "fields": {
+          "name": "Name",
+          "email": "Email",
+          "phone": "Phone",
+          "address": "Address",
+          "room": "Room",
+          "dates": "Dates",
+          "guests": "Guests",
+          "code": "Code",
+          "invoice": "Invoice",
+          "status": "Status",
+          "payment": "Payment",
+          "total": "Total",
+          "paid": "Paid",
+          "paidAt": "Paid at",
+          "cancelledAt": "Cancelled at",
+          "reason": "Reason"
+        },
+        "close": "Close"
+      },
+      "deleteDialog": {
+        "title": "Delete Reservation",
+        "description": "Are you sure you want to delete this reservation? This action cannot be undone.",
+        "cancel": "Cancel",
+        "delete": "Delete"
+      },
+      "reasonDialog": {
+        "title": "Cancellation Details",
+        "reservation": "Reservation",
+        "guest": "Guest",
+        "cancelledAt": "Cancelled at",
+        "reason": "Reason",
+        "noReason": "No reason provided.",
+        "close": "Close"
+      }
+    },
+    "manageRooms": {
+      "title": "Manage Rooms",
+      "subtitle": "Create, edit, and manage inventory.",
+      "onlyWithPhotos": "Only rooms with photos",
+      "search": "Search rooms...",
+      "allRoomTypes": "All Room Types",
+      "allTypes": "All Types",
+      "hotel": "Hotel",
+      "apartment": "Apartment",
+      "addRoom": "Add Room",
+      "loading": "Loading rooms...",
+      "roomsSection": "Rooms",
+      "empty": "No rooms found",
+      "edit": "Edit",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "table": {
+        "roomNumber": "Room #",
+        "name": "Name",
+        "type": "Type",
+        "price": "Price (EUR)",
+        "actions": "Actions"
+      },
+      "deleteDialog": {
+        "title": "Delete Room",
+        "description": "Are you sure you want to delete this room? This action cannot be undone."
+      },
+      "messages": {
+        "deleted": "Room deleted successfully.",
+        "deleteFailed": "Failed to delete room.",
+        "deleteNetworkError": "Network error while deleting room.",
+        "saved": "Saved successfully."
+      }
+    },
+    "permissions": {
+      "title": "Permissions",
+      "subtitle": "Manage staff access and employment profile in one place.",
+      "staffCount": "{count} staff",
+      "staff": "Staff",
+      "staffHelper": "Select a member to manage access and employment details",
+      "searchPlaceholder": "Search staff",
+      "noStaffFound": "No staff found.",
+      "noName": "No name",
+      "noUserSelected": "No user selected",
+      "selectStaffMember": "Select a staff member to edit employment details and access permissions.",
+      "hidePermissions": "Hide permissions",
+      "showPermissions": "Show permissions",
+      "selectedPermissions": "Selected: {count} permission(s)",
+      "saving": "Saving...",
+      "saveChanges": "Save Changes",
+      "saved": "Saved",
+      "accessThisSection": "Access this section",
+      "messages": {
+        "loadUsersFailed": "Failed to load users",
+        "saveFailed": "Failed to save permissions",
+        "saved": "Changes saved successfully."
+      },
+      "employment": {
+        "position": "Position",
+        "startDate": "Start Date",
+        "employmentStatus": "Employment Status",
+        "salaryType": "Salary Type",
+        "baseSalary": "Base Salary",
+        "active": "Active",
+        "inactive": "Inactive",
+        "monthly": "Monthly",
+        "hourly": "Hourly"
+      },
+      "positions": {
+        "receptionist": "Receptionist",
+        "cleaner": "Cleaner",
+        "manager": "Manager",
+        "maintenance": "Maintenance",
+        "accountant": "Accountant",
+        "other": "Other"
+      },
+      "tabLabels": {
+        "overview": "Overview",
+        "rooms": "Rooms",
+        "reservations": "Reservations",
+        "payments": "Payments & Invoices",
+        "reports": "Reports",
+        "expenses": "Expenses",
+        "users": "Users",
+        "manageRooms": "Manage Rooms",
+        "activityLogsTab": "Activity Log",
+        "permissions": "Permissions"
+      },
+      "tabDescriptions": {
+        "overview": "Access dashboard overview metrics",
+        "rooms": "View and manage room status",
+        "reservations": "Create and update reservations",
+        "payments": "Review invoices and payment records",
+        "reports": "Access reporting insights",
+        "expenses": "Track business expenses",
+        "users": "Manage staff users",
+        "manageRooms": "Edit room details and images",
+        "activityLogsTab": "View activity history",
+        "permissions": "Manage staff permissions"
+      }
+    },
+    "activityLogs": {
+      "title": "Activity Log",
+      "subtitle": "Audit trail of system actions.",
+      "empty": "No activity logs found",
+      "deleteSelected": "Delete ({count})",
+      "filters": {
+        "action": "Action",
+        "all": "All",
+        "create": "Create",
+        "update": "Update",
+        "delete": "Delete",
+        "clean": "Clean"
+      },
+      "table": {
+        "selectAll": "Select all",
+        "user": "User",
+        "action": "Action",
+        "entity": "Entity",
+        "description": "Description",
+        "date": "Date",
+        "emptyDescription": "-"
+      },
+      "messages": {
+        "confirmDelete": "Delete {count} logs",
+        "deleted": "Logs deleted successfully.",
+        "deleteFailed": "Failed to delete logs."
+      }
+    },
+    "users": {
+      "title": "Users",
+      "subtitle": "Manage staff and access levels.",
+      "actions": {
+        "addUser": "+ Add User",
+        "changeRole": "Change Role",
+        "delete": "Delete",
+        "cancel": "Cancel",
+        "save": "Save",
+        "create": "Create User"
+      },
+      "empty": {
+        "title": "No users found",
+        "subtitle": "Create a user to get started."
+      },
+      "fields": {
+        "name": "Name",
+        "email": "Email",
+        "role": "Role",
+        "password": "Password",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      },
+      "roles": {
+        "admin": "Admin",
+        "worker": "Worker",
+        "client": "Client"
+      },
+      "roleDialog": {
+        "title": "Change Role",
+        "description": "Update role for",
+        "select": "Select new role"
+      },
+      "addDialog": {
+        "title": "Add New User"
+      },
+      "messages": {
+        "loadFailed": "Failed to load users.",
+        "loadNetworkError": "Network error while loading users.",
+        "roleUpdated": "User role updated successfully.",
+        "roleUpdateFailed": "Failed to update role.",
+        "roleUpdateNetworkError": "Network error while updating role.",
+        "requiredFields": "Please fill all required fields.",
+        "created": "User created successfully.",
+        "createFailed": "Failed to create user.",
+        "createNetworkError": "Network error while creating user.",
+        "confirmDelete": "Are you sure you want to delete this user?",
+        "deleted": "User deleted successfully.",
+        "deleteFailed": "Failed to delete user.",
+        "deleteNetworkError": "Network error while deleting user."
+      }
+    },
+    "payments": {
+      "title": "Payments & Invoices",
+      "subtitle": "Track invoice status, paid amounts, and pending balances.",
+      "errors": {
+        "loadFailed": "Failed to load invoices."
+      },
+      "cards": {
+        "invoices": "Invoices",
+        "paid": "Paid",
+        "pending": "Pending",
+        "collected": "Collected"
+      },
+      "sections": {
+        "invoiceList": "Invoice List"
+      },
+      "filters": {
+        "allStatuses": "All statuses",
+        "paid": "Paid",
+        "unpaid": "Unpaid",
+        "month": "Month",
+        "searchPlaceholder": "Search invoice / guest / phone"
+      },
+      "fields": {
+        "stay": "Stay",
+        "total": "Total",
+        "paid": "Paid",
+        "room": "Room",
+        "method": "Method"
+      },
+      "actions": {
+        "view": "View",
+        "print": "Print"
+      },
+      "empty": {
+        "title": "No invoices found",
+        "subtitle": "Try changing status filter or search query."
+      },
+      "table": {
+        "invoice": "Invoice",
+        "guest": "Guest",
+        "room": "Room",
+        "stay": "Stay",
+        "total": "Total",
+        "paid": "Paid",
+        "method": "Method",
+        "status": "Status",
+        "created": "Created",
+        "actions": "Actions"
+      },
+      "summary": {
+        "showing": "Showing {count} invoice(s)",
+        "pendingBalance": "Pending balance"
+      }
+    },
+    "reports": {
+      "title": "Reports",
+      "subtitle": "Yearly performance view with monthly revenue and reservation trends.",
+      "filePrefix": "reports",
+      "errors": {
+        "loadFailed": "Failed to load reports."
+      },
+      "actions": {
+        "exportCsv": "Export CSV",
+        "exportPdf": "Export PDF"
+      },
+      "cards": {
+        "reservations": "Reservations",
+        "roomNights": "Room Nights",
+        "revenue": "Revenue",
+        "avgBooking": "Avg Booking"
+      },
+      "sections": {
+        "monthlyReport": "Monthly Report"
+      },
+      "months": {
+        "jan": "Jan",
+        "feb": "Feb",
+        "mar": "Mar",
+        "apr": "Apr",
+        "may": "May",
+        "jun": "Jun",
+        "jul": "Jul",
+        "aug": "Aug",
+        "sep": "Sep",
+        "oct": "Oct",
+        "nov": "Nov",
+        "dec": "Dec"
+      },
+      "mobile": {
+        "reservations": "{count} reservations",
+        "nights": "Nights"
+      },
+      "table": {
+        "month": "Month",
+        "reservations": "Reservations",
+        "roomNights": "Room nights",
+        "revenue": "Revenue",
+        "paid": "Paid",
+        "collection": "Collection",
+        "revenueTrend": "Revenue trend"
+      },
+      "footer": {
+        "cancellations": "Cancellations",
+        "collectionRate": "Collection rate"
+      },
+      "csv": {
+        "year": "Year",
+        "totalReservations": "Total Reservations",
+        "totalRoomNights": "Total Room Nights",
+        "totalRevenue": "Total Revenue",
+        "totalPaid": "Total Paid",
+        "cancellations": "Cancellations",
+        "collectionRate": "Collection Rate %"
+      },
+      "pdf": {
+        "title": "Annual Report",
+        "year": "Year",
+        "generated": "Generated",
+        "collectionRate": "Collection Rate"
+      }
+    },
+    "expenses": {
+      "title": "Expenses",
+      "subtitle": "Track operational costs and salary payouts in one place.",
+      "errors": {
+        "loadFailed": "Failed to load expenses.",
+        "createFailed": "Failed to add expense."
+      },
+      "feedback": {
+        "added": "Expense added successfully."
+      },
+      "cards": {
+        "entries": "Entries",
+        "totalExpenses": "Total expenses",
+        "salaryPayouts": "Salary payouts",
+        "operational": "Operational"
+      },
+      "sections": {
+        "addExpense": "Add Expense",
+        "expenseList": "Expense List"
+      },
+      "fields": {
+        "date": "Date",
+        "category": "Category",
+        "amount": "Amount (EUR)",
+        "paymentMethod": "Payment method",
+        "note": "Note",
+        "month": "Month",
+        "createdBy": "Created by"
+      },
+      "actions": {
+        "saving": "Saving...",
+        "addExpense": "Add expense"
+      },
+      "filters": {
+        "allCategories": "All categories"
+      },
+      "categories": {
+        "utilities": "Utilities",
+        "maintenance": "Maintenance",
+        "supplies": "Supplies",
+        "salary": "Salary",
+        "marketing": "Marketing",
+        "other": "Other"
+      },
+      "paymentMethods": {
+        "cash": "Cash",
+        "card": "Card",
+        "bank_transfer": "Bank transfer"
+      },
+      "empty": "No expenses found",
+      "table": {
+        "date": "Date",
+        "category": "Category",
+        "amount": "Amount",
+        "payment": "Payment",
+        "note": "Note",
+        "createdBy": "Created by",
+        "createdAt": "Created at"
+      }
+    },
+    "roomForm": {
+      "title": {
+        "edit": "Edit Room",
+        "add": "Add New Room"
+      },
+      "fields": {
+        "roomName": "Room Name",
+        "roomNumber": "Room Number",
+        "roomType": "Room Type",
+        "price": "Price (EUR)",
+        "description": "Short Marketing Description",
+        "customAmenity": "Add custom amenity"
+      },
+      "placeholders": {
+        "description": "e.g. Modern sea-view room ideal for couples."
+      },
+      "sections": {
+        "amenities": "Amenities"
+      },
+      "applyToType": {
+        "title": "Apply shared fields to all rooms of this type",
+        "description": "Applies name, price, short description and amenities to all rooms with this type."
+      },
+      "actions": {
+        "addAmenity": "Add",
+        "cancel": "Cancel",
+        "saving": "Saving...",
+        "save": "Save Changes",
+        "add": "Add Room"
+      },
+      "errors": {
+        "loadRoomNames": "Failed to load room names",
+        "required": "Please fill in all required fields.",
+        "unknown": "Unknown error",
+        "generic": "Something went wrong"
+      },
+      "messages": {
+        "updatedType": "Updated this room and all rooms of the selected type.",
+        "updated": "Room updated successfully.",
+        "created": "Room created successfully."
+      }
+    },
+    "roomPhotos": {
+      "loading": "Loading room types...",
+      "photoCount": "{count} photo(s)",
+      "noPhotosYet": "No photos yet",
+      "actions": {
+        "uploading": "Uploading...",
+        "addPhoto": "Add photo",
+        "manage": "Manage"
+      },
+      "dialog": {
+        "managePhotos": "Manage photos - {type}",
+        "order": "Order",
+        "noPhotosForType": "No photos for this type yet.",
+        "close": "Close"
+      },
+      "errors": {
+        "load": "Failed to load room photos.",
+        "upload": "Upload failed",
+        "save": "Save failed",
+        "delete": "Delete failed",
+        "generic": "Something went wrong."
+      },
+      "messages": {
+        "uploaded": "Photo uploaded successfully.",
+        "deleted": "Photo deleted successfully."
+      }
+    },
+    "printReceipt": {
+      "invoice": "Invoice",
+      "guestStay": "Guest & Stay Information",
+      "paymentDetails": "Payment details",
+      "totalAmount": "Total amount",
+      "scanToVerify": "Scan to verify invoice",
+      "thankYou": "Thank you for choosing Dijari Premium Hotel",
+      "generated": "This invoice is system-generated.",
+      "fields": {
+        "guestName": "Guest name",
+        "email": "Email",
+        "phone": "Phone",
+        "room": "Room",
+        "checkIn": "Check-in",
+        "checkOut": "Check-out",
+        "paymentMethod": "Payment method",
+        "paymentStatus": "Payment status",
+        "paidAt": "Paid at"
+      },
+      "actions": {
+        "downloadPdf": "Download PDF",
+        "print": "Print"
+      }
+    }
+  },
   "home": {
     "metaTitle": "Home | Dijari Premium",
     "hero": {
@@ -333,4 +1013,3 @@
     "footer": "All rights reserved."
   }
 }
-

@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Box,
   Typography,
@@ -29,6 +30,7 @@ import StatusBadge from "./ui/StatusBadge";
 import EmptyState from "./ui/EmptyState";
 
 export default function activityLogTab() {
+  const t = useTranslations("dashboard.activityLogs");
   const isMobile = useMediaQuery("(max-width:900px)");
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +63,7 @@ export default function activityLogTab() {
     }
   }
   async function handleBulkDelete() {
-    if (!confirm(`Delete ${selectedIds.length} logs`)) return;
+    if (!confirm(t("messages.confirmDelete", { count: selectedIds.length }))) return;
 
     const res = await fetch("/api/activity-log", {
       method: "DELETE",
@@ -71,10 +73,10 @@ export default function activityLogTab() {
 
     if (res.ok) {
       setSelectedIds([]);
-      notify("Logs deleted successfully.");
+      notify(t("messages.deleted"));
       fetchLogs();
     } else {
-      notify("Failed to delete logs.", "error");
+      notify(t("messages.deleteFailed"), "error");
     }
   }
 
@@ -104,8 +106,8 @@ export default function activityLogTab() {
   return (
     <Box className="admin-page">
       <PageHeader
-        title="Activity Log"
-        subtitle="Audit trail of system actions."
+        title={t("title")}
+        subtitle={t("subtitle")}
         actions={
           <Box
             display="flex"
@@ -118,17 +120,17 @@ export default function activityLogTab() {
               size="small"
               sx={{ minWidth: { xs: "100%", sm: 180 } }}
             >
-              <InputLabel>Action</InputLabel>
+              <InputLabel>{t("filters.action")}</InputLabel>
               <Select
-                label="Action"
+                label={t("filters.action")}
                 value={actionFilter}
                 onChange={(e) => setActionFilter(e.target.value)}
               >
-                <MenuItem value="all">All</MenuItem>
-                <MenuItem value="CREATE">Create</MenuItem>
-                <MenuItem value="UPDATE">Update</MenuItem>
-                <MenuItem value="DELETE">Delete</MenuItem>
-                <MenuItem value="CLEAN">Clean</MenuItem>
+                <MenuItem value="all">{t("filters.all")}</MenuItem>
+                <MenuItem value="CREATE">{t("filters.create")}</MenuItem>
+                <MenuItem value="UPDATE">{t("filters.update")}</MenuItem>
+                <MenuItem value="DELETE">{t("filters.delete")}</MenuItem>
+                <MenuItem value="CLEAN">{t("filters.clean")}</MenuItem>
               </Select>
             </FormControl>
             {selectedIds.length > 0 && (
@@ -139,7 +141,7 @@ export default function activityLogTab() {
                 startIcon={<Delete />}
                 sx={{ width: { xs: "100%", sm: "auto" } }}
               >
-                Delete ({selectedIds.length})
+                {t("deleteSelected", { count: selectedIds.length })}
               </Button>
             )}
           </Box>
@@ -147,7 +149,7 @@ export default function activityLogTab() {
       />
 
       {filteredLogs.length === 0 ? (
-        <EmptyState title="No activity logs found" />
+        <EmptyState title={t("empty")} />
       ) : (
         <SectionCard>
           {isMobile ? (
@@ -195,7 +197,7 @@ export default function activityLogTab() {
                     <StatusBadge label={log.entity} tone="neutral" />
                   </Box>
                   <Typography variant="body2" color="text.secondary" mt={0.8}>
-                    {log.description || "—"}
+                    {log.description || t("table.emptyDescription")}
                   </Typography>
                   <Typography
                     variant="caption"
@@ -220,7 +222,7 @@ export default function activityLogTab() {
                 <TableHead>
                   <TableRow>
                     <TableCell padding="checkbox">
-                      <Tooltip title="Select all">
+                      <Tooltip title={t("table.selectAll")}>
                         <Checkbox
                           indeterminate={
                             selectedIds.length > 0 &&
@@ -240,14 +242,20 @@ export default function activityLogTab() {
                         />
                       </Tooltip>
                     </TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>User</TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>Action</TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>Entity</TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>
-                      Description
+                      {t("table.user")}
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>
+                      {t("table.action")}
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>
+                      {t("table.entity")}
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>
+                      {t("table.description")}
                     </TableCell>
                     <TableCell sx={{ fontWeight: "bold" }} align="center">
-                      Date
+                      {t("table.date")}
                     </TableCell>
                   </TableRow>
                 </TableHead>
@@ -296,7 +304,7 @@ export default function activityLogTab() {
 
                       <TableCell>
                         <Typography variant="body2">
-                          {log.description || "—"}
+                          {log.description || t("table.emptyDescription")}
                         </Typography>
                       </TableCell>
 
@@ -334,3 +342,4 @@ export default function activityLogTab() {
     </Box>
   );
 }
+

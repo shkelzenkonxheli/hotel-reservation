@@ -1,6 +1,7 @@
-"use client";
+﻿"use client";
 
 import { Suspense, useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -50,11 +51,12 @@ import usePageTitle from "../hooks/usePageTitle";
 
 const drawerWidth = 256;
 const collapsedWidth = 76;
-// lartësia e AppBar-it të header-it (afërsisht 64px)
+// lartÃ«sia e AppBar-it tÃ« header-it (afÃ«rsisht 64px)
 const HEADER_HEIGHT = 64;
 
 function DashboardContent() {
-  usePageTitle("Dashboard | Dijari Premium");
+  const t = useTranslations("dashboard");
+  usePageTitle(t("metaTitle"));
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -87,28 +89,29 @@ function DashboardContent() {
   }, [collapsed]);
 
   const user = session?.user ?? null;
-  const tabs = DASHBOARD_TABS.map((t) => ({
-    ...t,
+  const tabs = DASHBOARD_TABS.map((tab) => ({
+    ...tab,
+    label: t(`tabs.${tab.labelKey}`),
     icon:
-      t.key === "overview" ? (
+      tab.key === "overview" ? (
         <DashboardIcon />
-      ) : t.key === "rooms" ? (
+      ) : tab.key === "rooms" ? (
         <MeetingRoomIcon />
-      ) : t.key === "reservations" ? (
+      ) : tab.key === "reservations" ? (
         <BookOnlineIcon />
-      ) : t.key === "payments" ? (
+      ) : tab.key === "payments" ? (
         <ReceiptLongIcon />
-      ) : t.key === "reports" ? (
+      ) : tab.key === "reports" ? (
         <InsightsIcon />
-      ) : t.key === "expenses" ? (
+      ) : tab.key === "expenses" ? (
         <ReceiptIcon />
-      ) : t.key === "users" ? (
+      ) : tab.key === "users" ? (
         <PeopleIcon />
-      ) : t.key === "manageRooms" ? (
+      ) : tab.key === "manageRooms" ? (
         <BuildCircleIcon />
-      ) : t.key === "activityLogsTab" ? (
+      ) : tab.key === "activityLogsTab" ? (
         <HistoryIcon />
-      ) : t.key === "permissions" ? (
+      ) : tab.key === "permissions" ? (
         <SecurityIcon />
       ) : null,
   }));
@@ -148,7 +151,7 @@ function DashboardContent() {
     const allowedKeys = visibleTabs.map((t) => t.key);
 
     if (!allowedKeys.includes(activeTab)) {
-      setActiveTab(allowedKeys[0]); // tab i parë i lejuar
+      setActiveTab(allowedKeys[0]); // tab i parÃ« i lejuar
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.role, JSON.stringify(user?.allowed_tabs)]);
@@ -198,7 +201,9 @@ function DashboardContent() {
         {!collapsed ? (
           <Box>
             <Typography fontWeight={700} color="white">
-              {user.role === "admin" ? "Admin Panel" : "Worker Panel"}
+              {user.role === "admin"
+                ? t("shell.adminPanel")
+                : t("shell.workerPanel")}
             </Typography>
             <Typography variant="caption" color="#94a3b8">
               {user.name}
@@ -217,7 +222,9 @@ function DashboardContent() {
               height: 32,
               "&:hover": { backgroundColor: "rgba(255,255,255,0.06)" },
             }}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label={
+              collapsed ? t("shell.expandSidebar") : t("shell.collapseSidebar")
+            }
           >
             {collapsed ? (
               <ChevronRightIcon sx={{ fontSize: 18 }} />
@@ -288,7 +295,7 @@ function DashboardContent() {
         <Box sx={{ mt: "auto", px: 2, pb: 2 }}>
           <Divider sx={{ borderColor: "rgba(255,255,255,0.06)", mb: 2 }} />
           <Typography variant="caption" color="#94a3b8">
-            © Hotel Management
+            © {t("shell.copyright")}
           </Typography>
         </Box>
       ) : null}
@@ -311,7 +318,7 @@ function DashboardContent() {
       >
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           <Typography variant="subtitle1" fontWeight={700}>
-            Dashboard
+            {t("shell.mobileTitle")}
           </Typography>
           <IconButton
             onClick={handleDrawerToggle}
@@ -358,7 +365,7 @@ function DashboardContent() {
             width: collapsed ? collapsedWidth : drawerWidth,
             bgcolor: "#0f172a",
             color: "#e2e8f0",
-            top: HEADER_HEIGHT, // KJO E ZGJIDH: nis poshtë header-it
+            top: HEADER_HEIGHT, // KJO E ZGJIDH: nis poshtÃ« header-it
             height: `calc(100% - ${HEADER_HEIGHT}px)`,
             transition: "width 200ms ease",
           },
@@ -367,7 +374,7 @@ function DashboardContent() {
         {drawer}
       </Drawer>
 
-      {/* PËRMBAJTJA KRYESORE */}
+      {/* PÃ‹RMBAJTJA KRYESORE */}
       <Box
         component="main"
         sx={{
@@ -408,3 +415,5 @@ export default function DashboardPage() {
     </Suspense>
   );
 }
+
+

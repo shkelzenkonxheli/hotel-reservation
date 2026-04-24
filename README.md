@@ -1,10 +1,10 @@
 # Hotel Reservation and Management System
 
-Full-stack hotel/apartment booking platform built with Next.js, PostgreSQL, Prisma, NextAuth, Stripe, and AWS S3.
+Full-stack hotel/apartment booking platform built with Next.js, PostgreSQL, Prisma, NextAuth, and AWS S3.
 
 ## Features
 
-- Public booking flow with Stripe Checkout
+- Public booking flow with cash payment at arrival
 - Availability checks with date overlap protection
 - Dashboard for admin/worker:
   - Overview
@@ -32,7 +32,6 @@ Full-stack hotel/apartment booking platform built with Next.js, PostgreSQL, Pris
 - Prisma ORM
 - PostgreSQL
 - NextAuth
-- Stripe
 - AWS S3
 
 ## Project Structure
@@ -97,35 +96,11 @@ Set these in `.env` (local) and Vercel Project Settings (production):
 - `NEXTAUTH_SECRET`
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
-- `STRIPE_SECRET_KEY`
-- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
-- `STRIPE_WEBHOOK_SECRET`
 - `NEXT_PUBLIC_BASE_URL`
 - `AWS_REGION`
 - `AWS_S3_BUCKET`
 - `AWS_ACCESS_KEY_`
 - `AWS_SECRET_KEY_`
-
-## Stripe Setup
-
-### Checkout API
-
-`/api/create-checkout-session` expects valid:
-
-- `STRIPE_SECRET_KEY`
-- `NEXT_PUBLIC_BASE_URL` (must include `https://` in production)
-
-### Webhook
-
-Create Stripe webhook destination:
-
-- `https://<your-domain>/api/stripe-webhook`
-
-Subscribe at least to:
-
-- `checkout.session.completed`
-
-Set `STRIPE_WEBHOOK_SECRET` from Stripe endpoint signing secret.
 
 ## Google OAuth Setup
 
@@ -149,7 +124,6 @@ In Vercel:
 5. Deploy and verify:
    - login (credentials + Google)
    - booking checkout
-   - webhook updates reservation
    - dashboard tabs load correctly
 
 ## Common Issues
@@ -160,12 +134,6 @@ In Vercel:
   - `https://<domain>/api/auth/callback/google`
 - Ensure `NEXTAUTH_URL` uses same domain.
 
-### Stripe `url_invalid` for `success_url`
-
-- `NEXT_PUBLIC_BASE_URL` is missing or invalid.
-- Must be full URL with scheme, for example:
-  - `https://hotel-dijaripremium.vercel.app`
-
 ### Build error with `useSearchParams` in `/dashboard`
 
 - Dashboard page uses a `Suspense` wrapper around component using `useSearchParams`.
@@ -175,14 +143,12 @@ In Vercel:
 
 - Never commit `.env`
 - Rotate exposed API keys immediately
-- Use separate test/live Stripe keys
 - Restrict cloud DB and S3 credentials
 
 ## Production Security Checklist (Go-Live)
 
 - [ ] `NEXTAUTH_URL` and `NEXT_PUBLIC_BASE_URL` use `https://` production domain
 - [ ] All secrets exist only in Vercel env vars (not in git history)
-- [ ] Stripe keys/webhook are production keys on production environment
 - [ ] Google OAuth redirect URIs match production and localhost exactly
 - [ ] Database backups are automated and restore test is verified
 - [ ] S3 bucket policy is least-privilege for app upload needs only
@@ -200,9 +166,8 @@ In Vercel:
 5. Brute attempts on `/api/auth/register` -> eventually gets `429`.
 6. Upload invalid file type/oversized file -> gets `400`.
 7. Upload API by client/guest -> gets `403`.
-8. Stripe checkout with mismatched session email -> gets `403`.
-9. Reservation cancel/hide by non-owner -> gets `403`.
-10. Activity logs show admin critical actions (role change/user create-delete/image changes).
+8. Reservation cancel/hide by non-owner -> gets `403`.
+9. Activity logs show admin critical actions (role change/user create-delete/image changes).
 
 ## Scripts
 

@@ -1,6 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import {
   Box,
   Grid,
@@ -36,6 +37,7 @@ function formatLocalDateInput(date = new Date()) {
 }
 
 export default function RoomsTab() {
+  const t = useTranslations("dashboard.rooms");
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(formatLocalDateInput());
@@ -60,7 +62,7 @@ export default function RoomsTab() {
       const res = await fetch(`/api/rooms?include=true&date=${selectedDate}`);
       const data = await res.json();
       setRooms(data);
-      console.log("📦 Rooms received:", data);
+      console.log("ðŸ“¦ Rooms received:", data);
     } catch (error) {
       console.error("Error fetching rooms:", error);
     } finally {
@@ -69,7 +71,7 @@ export default function RoomsTab() {
   }
 
   async function handleCleanRoom(room_id) {
-    if (!confirm("Mark this room as cleaned?")) return;
+    if (!confirm(t("messages.confirmClean"))) return;
 
     const res = await fetch("/api/rooms", {
       method: "PATCH",
@@ -80,10 +82,10 @@ export default function RoomsTab() {
     if (res.ok) {
       await fetchRooms();
       setSelectedRoom(null);
-      notify("Room marked as cleaned.");
+      notify(t("messages.cleaned"));
     } else {
       const e = await res.json();
-      notify(e.error || "Error cleaning room", "error");
+      notify(e.error || t("messages.cleanError"), "error");
     }
   }
   async function handleRoomStatus(room_id) {
@@ -96,10 +98,10 @@ export default function RoomsTab() {
     if (res.ok) {
       fetchRooms();
       setSelectedRoom(null);
-      notify("Room status updated.");
+      notify(t("messages.statusUpdated"));
     } else {
       const e = await res.json();
-      notify(e.error || "Error changing status", "error");
+      notify(e.error || t("messages.statusError"), "error");
     }
   }
 
@@ -150,7 +152,7 @@ export default function RoomsTab() {
   const hotelRoomsCount = countByStatus(hotelRooms);
   const totalCount = countByStatus(filteredRooms);
 
-  // Ngjyros ditët e rezervuara në calendar
+  // Ngjyros ditÃ«t e rezervuara nÃ« calendar
   function tileClassName({ date, view }) {
     if (!selectedRoom || view !== "month") return "";
 
@@ -160,7 +162,7 @@ export default function RoomsTab() {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-    // Normalizo ditën e qelizës
+    // Normalizo ditÃ«n e qelizÃ«s
     const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
     // Past dates (para dites se sotme)
@@ -185,35 +187,35 @@ export default function RoomsTab() {
       );
       const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
 
-      // 1️⃣ BOOKED: d falls inside (start ≤ d < end)
+      // 1ï¸âƒ£ BOOKED: d falls inside (start â‰¤ d < end)
       if (d >= startDay && d < endDay) {
         isBooked = true;
         break;
       }
 
-      // 2️⃣ Check-out day (d == end)
+      // 2ï¸âƒ£ Check-out day (d == end)
       if (d.getTime() === endDay.getTime()) {
         isCheckout = true;
       }
 
-      // 3️⃣ Check-in day (d == start)
+      // 3ï¸âƒ£ Check-in day (d == start)
       if (d.getTime() === startDay.getTime()) {
         isCheckin = true;
       }
     }
 
-    // 🟥 if this date is check-out & check-in at the same date → it's ACTUALLY booked
+    // ðŸŸ¥ if this date is check-out & check-in at the same date â†’ it's ACTUALLY booked
     if (isCheckout && isCheckin) {
       return "booked-day";
     }
 
-    // 🟥 Booked
+    // ðŸŸ¥ Booked
     if (isBooked) return "booked-day";
 
-    // 🟣 Checkout day (only if NOT booked and NOT check-in)
+    // ðŸŸ£ Checkout day (only if NOT booked and NOT check-in)
     if (isCheckout) return "checkout-day";
 
-    // 🟢 Otherwise → free & future
+    // ðŸŸ¢ Otherwise â†’ free & future
     return "available-day";
   }
 
@@ -227,16 +229,22 @@ export default function RoomsTab() {
   return (
     <Box className="admin-page">
       <PageHeader
-        title="Rooms"
-        subtitle="Live occupancy and housekeeping status."
+        title={t("title")}
+        subtitle={t("subtitle")}
         actions={
           <Box className="flex items-center gap-2 flex-wrap">
-            <StatusBadge label={`Booked: ${totalCount.booked}`} tone="danger" />
             <StatusBadge
-              label={`Available: ${totalCount.available}`}
+              label={t("badges.booked", { count: totalCount.booked })}
+              tone="danger"
+            />
+            <StatusBadge
+              label={t("badges.available", { count: totalCount.available })}
               tone="success"
             />
-            <StatusBadge label={`Total: ${totalCount.total}`} tone="neutral" />
+            <StatusBadge
+              label={t("badges.total", { count: totalCount.total })}
+              tone="neutral"
+            />
           </Box>
         }
       />
@@ -259,7 +267,7 @@ export default function RoomsTab() {
             width={{ xs: "100%", sm: "auto" }}
           >
             <Typography fontWeight="600" color="text.secondary">
-              Date
+              {t("filters.date")}
             </Typography>
 
             <TextField
@@ -279,11 +287,11 @@ export default function RoomsTab() {
           {/* Status filter */}
           <Box display="flex" alignItems="center" gap={2} flexWrap="wrap">
             <Typography fontWeight="600" color="text.secondary">
-              Status
+              {t("filters.status")}
             </Typography>
 
             <Chip
-              label="All"
+              label={t("filters.all")}
               clickable
               onClick={() => setFilter("all")}
               color={filter === "all" ? "primary" : "default"}
@@ -291,7 +299,7 @@ export default function RoomsTab() {
             />
 
             <Chip
-              label="Available"
+              label={t("filters.available")}
               clickable
               onClick={() => setFilter("available")}
               sx={{
@@ -303,7 +311,7 @@ export default function RoomsTab() {
             />
 
             <Chip
-              label="Booked"
+              label={t("filters.booked")}
               clickable
               onClick={() => setFilter("booked")}
               sx={{
@@ -315,7 +323,7 @@ export default function RoomsTab() {
             />
 
             <Chip
-              label="Needs Cleaning"
+              label={t("filters.needsCleaning")}
               clickable
               onClick={() => setFilter("needs_cleaning")}
               sx={{
@@ -331,10 +339,10 @@ export default function RoomsTab() {
       </SectionCard>
 
       <Grid container spacing={3}>
-        {/* 🏢 Apartments */}
+        {/* ðŸ¢ Apartments */}
         <Grid item xs={12} md={6}>
           <SectionCard
-            title={`Apartments`}
+            title={t("sections.apartments")}
             action={
               <Box
                 display="flex"
@@ -343,15 +351,17 @@ export default function RoomsTab() {
                 justifyContent="flex-end"
               >
                 <StatusBadge
-                  label={`Booked: ${apartmentsCount.booked}`}
+                  label={t("badges.booked", { count: apartmentsCount.booked })}
                   tone="danger"
                 />
                 <StatusBadge
-                  label={`Available: ${apartmentsCount.available}`}
+                  label={t("badges.available", {
+                    count: apartmentsCount.available,
+                  })}
                   tone="success"
                 />
                 <StatusBadge
-                  label={`Total: ${apartmentsCount.total}`}
+                  label={t("badges.total", { count: apartmentsCount.total })}
                   tone="neutral"
                 />
               </Box>
@@ -394,10 +404,10 @@ export default function RoomsTab() {
           </SectionCard>
         </Grid>
 
-        {/* 🏨 Hotel Rooms */}
+        {/* ðŸ¨ Hotel Rooms */}
         <Grid item xs={12} md={6}>
           <SectionCard
-            title="Hotel Rooms"
+            title={t("sections.hotelRooms")}
             action={
               <Box
                 display="flex"
@@ -406,15 +416,17 @@ export default function RoomsTab() {
                 justifyContent="flex-end"
               >
                 <StatusBadge
-                  label={`Booked: ${hotelRoomsCount.booked}`}
+                  label={t("badges.booked", { count: hotelRoomsCount.booked })}
                   tone="danger"
                 />
                 <StatusBadge
-                  label={`Available: ${hotelRoomsCount.available}`}
+                  label={t("badges.available", {
+                    count: hotelRoomsCount.available,
+                  })}
                   tone="success"
                 />
                 <StatusBadge
-                  label={`Total: ${hotelRoomsCount.total}`}
+                  label={t("badges.total", { count: hotelRoomsCount.total })}
                   tone="neutral"
                 />
               </Box>
@@ -473,13 +485,13 @@ export default function RoomsTab() {
               justifyContent: "space-between",
               alignItems: { xs: "stretch", sm: "center" },
               gap: 1.2,
-              pr: 6, // i jep hapësirë që X të mos afrohet te butoni
+              pr: 6, // i jep hapÃ«sirÃ« qÃ« X tÃ« mos afrohet te butoni
               position: "relative",
             }}
           >
             {/* TITULLI */}
             <Typography variant="h6" component="div" fontWeight="bold">
-              Room {selectedRoom.room.room_number}
+              {t("dialog.roomTitle", { room: selectedRoom.room.room_number })}
             </Typography>
 
             {/* BUTONI OUT OF ORDER */}
@@ -511,8 +523,8 @@ export default function RoomsTab() {
               }}
             >
               {selectedRoom.room.current_status === "out_of_order"
-                ? "✔ Mark Available"
-                : "⛔ Out of Order"}
+                ? t("dialog.markAvailable")
+                : t("dialog.outOfOrder")}
             </Button>
 
             {/* CLOSE BUTTON */}
@@ -535,26 +547,30 @@ export default function RoomsTab() {
             {selectedRoom.reservation ? (
               <>
                 <Typography>
-                  <strong>Guest:</strong> {selectedRoom.reservation.full_name}
+                  <strong>{t("dialog.fields.guest")}:</strong>{" "}
+                  {selectedRoom.reservation.full_name}
                 </Typography>
                 <Typography>
-                  <strong>Phone:</strong> {selectedRoom.reservation.phone}
+                  <strong>{t("dialog.fields.phone")}:</strong>{" "}
+                  {selectedRoom.reservation.phone}
                 </Typography>
                 <Typography>
-                  <strong>Check-in:</strong>{" "}
+                  <strong>{t("dialog.fields.checkIn")}:</strong>{" "}
                   {new Date(
                     selectedRoom.reservation.start_date,
                   ).toLocaleDateString()}
                 </Typography>
                 <Typography>
-                  <strong>Check-out:</strong>{" "}
+                  <strong>{t("dialog.fields.checkOut")}:</strong>{" "}
                   {new Date(
                     selectedRoom.reservation.end_date,
                   ).toLocaleDateString()}
                 </Typography>
 
                 <Box display="flex" alignItems="center" gap={1} mt={1}>
-                  <Typography fontWeight="bold">Status:</Typography>
+                  <Typography fontWeight="bold">
+                    {t("dialog.fields.status")}:
+                  </Typography>
                   <Chip
                     label={selectedRoom.reservation.status}
                     color="warning"
@@ -563,12 +579,13 @@ export default function RoomsTab() {
                 </Box>
 
                 <Typography variant="h6" mt={2}>
-                  💰 Total: {selectedRoom.reservation.total_price} €
+                  {t("dialog.fields.total")}:{" "}
+                  {selectedRoom.reservation.total_price} €
                 </Typography>
               </>
             ) : (
               <Typography color="text.secondary">
-                No active reservation.
+                {t("dialog.noActiveReservation")}
               </Typography>
             )}
 
@@ -584,22 +601,22 @@ export default function RoomsTab() {
                     "&:hover": { bgcolor: "#eab308" },
                   }}
                 >
-                  Clean Room
+                  {t("dialog.cleanRoom")}
                 </Button>
               </Box>
             )}
 
-            {/* Button për të shfaqur/fshirë calendarin */}
+            {/* Button pÃ«r tÃ« shfaqur/fshirÃ« calendarin */}
             <Box mt={3}>
               <Button
                 variant="outlined"
                 onClick={() => setShowCalendar((prev) => !prev)}
               >
-                {showCalendar ? "Hide Calendar" : "Show Calendar"}
+                {showCalendar ? t("dialog.hideCalendar") : t("dialog.showCalendar")}
               </Button>
             </Box>
 
-            {/* Calendar opcional – për TË GJITHA dhomat */}
+            {/* Calendar opcional â€“ pÃ«r TÃ‹ GJITHA dhomat */}
             {showCalendar && (
               <Box mt={2} sx={{ overflowX: "auto" }}>
                 <Calendar tileClassName={tileClassName} />
@@ -607,7 +624,7 @@ export default function RoomsTab() {
             )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setSelectedRoom(null)}>Close</Button>
+            <Button onClick={() => setSelectedRoom(null)}>{t("dialog.close")}</Button>
           </DialogActions>
         </Dialog>
       )}
@@ -628,3 +645,4 @@ export default function RoomsTab() {
     </Box>
   );
 }
+

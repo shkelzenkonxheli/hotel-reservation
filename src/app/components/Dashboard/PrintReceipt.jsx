@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +28,7 @@ function Row({ label, value }) {
 }
 
 export default function PrintReceipt({ reservation, onClose }) {
+  const t = useTranslations("dashboard.printReceipt");
   const handlePrint = () => window.print();
 
   const handleDownloadPDF = async () => {
@@ -73,7 +75,7 @@ export default function PrintReceipt({ reservation, onClose }) {
                 sx={{ fontWeight: 700 }}
               />
               <Typography variant="caption" display="block" mt={1}>
-                Invoice
+                {t("invoice")}
               </Typography>
               <Typography fontWeight={700}>
                 {reservation.invoice_number || reservation.reservation_code}
@@ -86,19 +88,19 @@ export default function PrintReceipt({ reservation, onClose }) {
           {/* GUEST & STAY INFO */}
           <Box>
             <Typography fontWeight={700} mb={1}>
-              Guest & Stay Information
+              {t("guestStay")}
             </Typography>
 
-            <Row label="Guest name" value={reservation.full_name} />
-            <Row label="Email" value={reservation.users?.email || "-"} />
-            <Row label="Phone" value={reservation.phone} />
-            <Row label="Room" value={reservation.rooms?.name || "-"} />
+            <Row label={t("fields.guestName")} value={reservation.full_name} />
+            <Row label={t("fields.email")} value={reservation.users?.email || "-"} />
+            <Row label={t("fields.phone")} value={reservation.phone} />
+            <Row label={t("fields.room")} value={reservation.rooms?.name || "-"} />
             <Row
-              label="Check-in"
+              label={t("fields.checkIn")}
               value={new Date(reservation.start_date).toLocaleDateString()}
             />
             <Row
-              label="Check-out"
+              label={t("fields.checkOut")}
               value={new Date(reservation.end_date).toLocaleDateString()}
             />
           </Box>
@@ -108,16 +110,16 @@ export default function PrintReceipt({ reservation, onClose }) {
           {/* PAYMENT */}
           <Box>
             <Typography fontWeight={700} mb={1}>
-              Payment details
+              {t("paymentDetails")}
             </Typography>
 
             <Row
-              label="Payment method"
+              label={t("fields.paymentMethod")}
               value={reservation.payment_method?.toUpperCase() || "-"}
             />
-            <Row label="Payment status" value={reservation.payment_status} />
+            <Row label={t("fields.paymentStatus")} value={reservation.payment_status} />
             <Row
-              label="Paid at"
+              label={t("fields.paidAt")}
               value={
                 reservation.paid_at
                   ? new Date(reservation.paid_at).toLocaleString()
@@ -142,7 +144,7 @@ export default function PrintReceipt({ reservation, onClose }) {
             }}
           >
             <Typography fontWeight={800} fontSize={18}>
-              Total amount
+              {t("totalAmount")}
             </Typography>
             <Typography fontWeight={800} fontSize={22}>
               €{Number(reservation.total_price).toFixed(2)}
@@ -156,7 +158,7 @@ export default function PrintReceipt({ reservation, onClose }) {
               size={90}
             />
             <Typography variant="caption" color="text.secondary" mt={1}>
-              Scan to verify invoice
+              {t("scanToVerify")}
             </Typography>
           </Box>
 
@@ -168,19 +170,19 @@ export default function PrintReceipt({ reservation, onClose }) {
             mt={4}
             display="block"
           >
-            Thank you for choosing Dijari Premium Hotel
+            {t("thankYou")}
             <br />
-            This invoice is system-generated.
+            {t("generated")}
           </Typography>
         </Box>
 
         {/* ACTIONS (NO PRINT) */}
         <Box display="flex" gap={2} mt={3} className="no-print">
           <Button fullWidth variant="outlined" onClick={handleDownloadPDF}>
-            Download PDF
+            {t("actions.downloadPdf")}
           </Button>
           <Button fullWidth variant="contained" onClick={handlePrint}>
-            Print
+            {t("actions.print")}
           </Button>
         </Box>
       </DialogContent>

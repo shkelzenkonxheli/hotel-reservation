@@ -6,36 +6,38 @@ import {
   DialogTitle,
   Button,
 } from "@mui/material";
+import { useTranslations } from "next-intl";
 
 export default function ReservationReasonDialog({
   reservation,
   open,
   onClose,
 }) {
+  const t = useTranslations("dashboard.reservations.reasonDialog");
   return (
     <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Cancellation Details</DialogTitle>
+      <DialogTitle>{t("title")}</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          <b>Reservation:</b> #{reservation?.id}
+          <b>{t("reservation")}:</b> #{reservation?.id}
           <br />
-          <b>Guest:</b> {reservation?.full_name || "-"}
+          <b>{t("guest")}:</b> {reservation?.full_name || "-"}
           <br />
-          <b>Cancelled at:</b>{" "}
+          <b>{t("cancelledAt")}:</b>{" "}
           {reservation?.cancelled_at
             ? new Date(reservation.cancelled_at).toLocaleString()
             : "-"}
           <br />
           <br />
-          <b>Reason:</b>{" "}
+          <b>{t("reason")}:</b>{" "}
           {reservation?.cancel_reason?.trim()
             ? reservation.cancel_reason
-            : "No reason provided."}
+            : t("noReason")}
         </DialogContentText>
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose}>Close</Button>
+        <Button onClick={onClose}>{t("close")}</Button>
       </DialogActions>
     </Dialog>
   );

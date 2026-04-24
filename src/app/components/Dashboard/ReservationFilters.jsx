@@ -7,6 +7,7 @@ import {
   MenuItem,
   Button,
 } from "@mui/material";
+import { useTranslations } from "next-intl";
 
 export default function ReservationFilters({
   search,
@@ -17,6 +18,7 @@ export default function ReservationFilters({
   onTypeFilterChange,
   onAddNew,
 }) {
+  const t = useTranslations("dashboard.reservations.filters");
   return (
     <Box
       sx={{
@@ -38,7 +40,7 @@ export default function ReservationFilters({
         }}
       >
         <TextField
-          label="Search (Name or Email)"
+          label={t("search")}
           variant="outlined"
           size="small"
           value={search}
@@ -47,30 +49,30 @@ export default function ReservationFilters({
         />
 
         <FormControl size="small" sx={{ minWidth: { xs: "100%", sm: 140 } }}>
-          <InputLabel>Status</InputLabel>
+          <InputLabel>{t("status")}</InputLabel>
           <Select
             value={statusFilter}
-            label="Status"
+            label={t("status")}
             onChange={(e) => onStatusFilterChange(e.target.value)}
           >
-            <MenuItem value="all">All</MenuItem>
-            <MenuItem value="pending">Pending</MenuItem>
-            <MenuItem value="confirmed">Confirmed</MenuItem>
-            <MenuItem value="completed">Completed</MenuItem>
-            <MenuItem value="cancelled">Cancelled</MenuItem>
+            <MenuItem value="all">{t("options.all")}</MenuItem>
+            <MenuItem value="pending">{t("options.pending")}</MenuItem>
+            <MenuItem value="confirmed">{t("options.confirmed")}</MenuItem>
+            <MenuItem value="completed">{t("options.completed")}</MenuItem>
+            <MenuItem value="cancelled">{t("options.cancelled")}</MenuItem>
           </Select>
         </FormControl>
 
         <FormControl size="small" sx={{ minWidth: { xs: "100%", sm: 140 } }}>
-          <InputLabel>Type</InputLabel>
+          <InputLabel>{t("type")}</InputLabel>
           <Select
             value={typeFilter}
-            label="Type"
+            label={t("type")}
             onChange={(e) => onTypeFilterChange(e.target.value)}
           >
-            <MenuItem value="all">All</MenuItem>
-            <MenuItem value="hotel">Hotel</MenuItem>
-            <MenuItem value="apartment">Apartment</MenuItem>
+            <MenuItem value="all">{t("options.all")}</MenuItem>
+            <MenuItem value="hotel">{t("options.hotel")}</MenuItem>
+            <MenuItem value="apartment">{t("options.apartment")}</MenuItem>
           </Select>
         </FormControl>
       </Box>
@@ -86,7 +88,7 @@ export default function ReservationFilters({
         }}
         onClick={onAddNew}
       >
-        + Add New
+        {t("addNew")}
       </Button>
     </Box>
   );

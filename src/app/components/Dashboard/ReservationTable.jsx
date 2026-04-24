@@ -1,4 +1,5 @@
-import { Box, Chip, IconButton, Tooltip, Checkbox } from "@mui/material";
+﻿import { Box, Chip, IconButton, Tooltip, Checkbox } from "@mui/material";
+import { useTranslations } from "next-intl";
 import {
   MoreVert,
   Delete,
@@ -23,6 +24,7 @@ export default function ReservationTable({
   onSelectAll,
   allSelected,
 }) {
+  const t = useTranslations("dashboard.reservations.table");
   return (
     <div className="overflow-x-auto admin-card">
       <table className="admin-table min-w-[900px]">
@@ -33,17 +35,17 @@ export default function ReservationTable({
                 size="small"
                 checked={allSelected}
                 onChange={(e) => onSelectAll(e.target.checked)}
-                inputProps={{ "aria-label": "select all reservations" }}
+                inputProps={{ "aria-label": t("selectAll") }}
               />
             </th>
-            <th className="px-2 py-2 text-center whitespace-nowrap text-xs">Pinned</th>
-            <th className="px-2 py-2 text-left whitespace-nowrap text-xs">Code</th>
-            <th className="px-2 py-2 text-left whitespace-nowrap text-xs">Guest</th>
-            <th className="px-2 py-2 text-left whitespace-nowrap text-xs">Room</th>
-            <th className="px-2 py-2 text-center whitespace-nowrap text-xs">Stay</th>
-            <th className="px-2 py-2 text-center whitespace-nowrap text-xs">Status</th>
-            <th className="px-2 py-2 text-center whitespace-nowrap text-xs">Total €</th>
-            <th className="px-2 py-2 text-center whitespace-nowrap text-xs">Actions</th>
+            <th className="px-2 py-2 text-center whitespace-nowrap text-xs">{t("pinned")}</th>
+            <th className="px-2 py-2 text-left whitespace-nowrap text-xs">{t("code")}</th>
+            <th className="px-2 py-2 text-left whitespace-nowrap text-xs">{t("guest")}</th>
+            <th className="px-2 py-2 text-left whitespace-nowrap text-xs">{t("room")}</th>
+            <th className="px-2 py-2 text-center whitespace-nowrap text-xs">{t("stay")}</th>
+            <th className="px-2 py-2 text-center whitespace-nowrap text-xs">{t("status")}</th>
+            <th className="px-2 py-2 text-center whitespace-nowrap text-xs">{t("total")}</th>
+            <th className="px-2 py-2 text-center whitespace-nowrap text-xs">{t("actions")}</th>
           </tr>
         </thead>
 
@@ -63,7 +65,7 @@ export default function ReservationTable({
                     size="small"
                     checked={selectedIds.includes(r.id)}
                     onChange={() => onToggleSelect(r.id)}
-                    inputProps={{ "aria-label": "select reservation" }}
+                    inputProps={{ "aria-label": t("selectOne") }}
                   />
                 </td>
                 <td className="px-2 py-2 text-center">
@@ -95,12 +97,12 @@ export default function ReservationTable({
                   <Box display="flex" flexDirection="column" gap={0.5}>
                     <Chip
                       size="small"
-                      label={`IN: ${new Date(r.start_date).toLocaleDateString()}`}
+                      label={`${t("checkIn")}: ${new Date(r.start_date).toLocaleDateString()}`}
                       sx={{ background: "#ecfeff", color: "#155e75" }}
                     />
                     <Chip
                       size="small"
-                      label={`OUT: ${new Date(r.end_date).toLocaleDateString()}`}
+                      label={`${t("checkOut")}: ${new Date(r.end_date).toLocaleDateString()}`}
                       sx={{ background: "#fff7ed", color: "#9a3412" }}
                     />
                   </Box>
@@ -114,7 +116,7 @@ export default function ReservationTable({
 
                 <td className="px-2 py-2 text-center">
                   <div className="flex items-center justify-center gap-1">
-                    <Tooltip title="View details">
+                    <Tooltip title={t("tooltips.viewDetails")}>
                       <IconButton size="small" onClick={() => onOpenDetails(r)}>
                         <BookOnline />
                       </IconButton>
@@ -124,13 +126,13 @@ export default function ReservationTable({
                       <MoreVert />
                     </IconButton>
 
-                    <Tooltip title="Print receipt">
+                    <Tooltip title={t("tooltips.printReceipt")}>
                       <IconButton size="small" onClick={() => onPrint(r)}>
                         <PrintIcon />
                       </IconButton>
                     </Tooltip>
 
-                    <Tooltip title="Delete reservation">
+                    <Tooltip title={t("tooltips.deleteReservation")}>
                       <IconButton
                         size="small"
                         color="error"
@@ -149,3 +151,4 @@ export default function ReservationTable({
     </div>
   );
 }
+

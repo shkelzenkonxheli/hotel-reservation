@@ -8,7 +8,6 @@
     "metaTitle": "Checkout | Dijari Premium",
     "title": "Perfundo rezervimin",
     "subtitle": "Rishiko detajet e qendrimit dhe konfirmo te dhenat e mysafirit.",
-    "confirmAndPay": "Konfirmo rezervimin dhe paguaj",
     "confirmCash": "Konfirmo rezervimin (paguaj ne hotel)",
     "viewDetails": "Shiko detajet",
     "close": "Mbyll",
@@ -35,12 +34,11 @@
       "paymentMethod": "Menyra e pageses"
     },
     "payment": {
-      "onlineTitle": "Paguaj online",
-      "onlineSubtitle": "Kartele me Stripe",
-      "cashTitle": "Paguaj ne hotel",
-      "cashSubtitle": "Cash ne mbrritje",
+      "cashOnlyTitle": "Paguaj ne hotel",
+      "cashOnlySubtitle": "Pagese cash ne mbrritje",
+      "cashOnlyBadge": "Vetem cash per kete sezon",
       "cashNote": "Rezervimet me cash krijohen si pending dhe konfirmohen nga admini.",
-      "cardNote": "Do te ridrejtohesh ne Stripe checkout te sigurt."
+      "arrivalNote": "Pagesa online eshte e caktivizuar per momentin."
     },
     "mobile": {
       "to": "deri",
@@ -49,7 +47,6 @@
     },
     "alerts": {
       "fillAllFields": "Ju lutem plotesoni te gjitha fushat.",
-      "paymentInitFailed": "Inicializimi i pageses deshtoi.",
       "reservationFailed": "Rezervimi deshtoi.",
       "pendingCreated": "Rezervimi u krijua si pending. Ju lutem paguani ne hotel.",
       "genericError": "Ndodhi nje gabim. Ju lutem provoni perseri."
@@ -57,8 +54,8 @@
   },
   "success": {
     "metaTitle": "Suksesi | Dijari Premium",
-    "title": "Pagesa u krye me sukses!",
-    "subtitle": "Rezervimi juaj u konfirmua. Nje email konfirmimi eshte derguar.",
+    "title": "Rezervimi u pranua",
+    "subtitle": "Kerkesa juaj per rezervim u krijua. Pagesa do te kryhet me cash ne hotel.",
     "bookingDetails": "Detajet e rezervimit:",
     "room": "Dhoma",
     "checkIn": "Check-in",
@@ -276,6 +273,689 @@
       "checkoutsToday": "Checkout sot",
       "needsCleaning": "Per pastrim",
       "outOfOrder": "Jashte funksionit"
+    }
+  },
+  "dashboard": {
+    "metaTitle": "Dashboard | Dijari Premium",
+    "tabs": {
+      "overview": "Përmbledhje",
+      "rooms": "Dhomat",
+      "reservations": "Rezervimet",
+      "payments": "Pagesat & Faturat",
+      "reports": "Raportet",
+      "expenses": "Shpenzimet",
+      "users": "Përdoruesit",
+      "manageRooms": "Menaxho Dhomat",
+      "activityLogsTab": "Aktiviteti",
+      "permissions": "Lejet"
+    },
+    "shell": {
+      "adminPanel": "Paneli Admin",
+      "workerPanel": "Paneli i Punëtorit",
+      "expandSidebar": "Zgjero menynë",
+      "collapseSidebar": "Mblidh menynë",
+      "copyright": "Menaxhimi i Hotelit",
+      "mobileTitle": "Dashboard"
+    },
+    "overview": {
+      "title": "Përmbledhje",
+      "subtitle": "Paneli ditor operacional dhe financiar.",
+      "loading": "Duke ngarkuar përmbledhjen...",
+      "occupancyChip": "Okupimi {value}%",
+      "errors": {
+        "loadFailed": "Ngarkimi i statistikave dështoi"
+      },
+      "cards": {
+        "totalUsers": "Përdorues gjithsej",
+        "totalReservations": "Rezervime gjithsej",
+        "totalEarnings": "Fitime gjithsej",
+        "todayCheckins": "Check-in sot",
+        "upcomingReservations": "Rezervime të ardhshme",
+        "revenueToday": "Të ardhura sot",
+        "occupancy": "Okupimi"
+      },
+      "sections": {
+        "primaryKpis": "KPI kryesore",
+        "operationalSnapshot": "Pamja operative",
+        "todaySnapshot": "Gjendja e sotme",
+        "occupancyHealth": "Gjendja e okupimit"
+      },
+      "snapshot": {
+        "checkIns": "Check-in",
+        "upcoming": "Në ardhje",
+        "revenue": "Të ardhura",
+        "currentOccupancy": "Okupimi aktual"
+      }
+    },
+    "rooms": {
+      "title": "Dhomat",
+      "subtitle": "Statusi live i okupimit dhe housekeeping.",
+      "badges": {
+        "booked": "Të rezervuara: {count}",
+        "available": "Të lira: {count}",
+        "total": "Gjithsej: {count}"
+      },
+      "filters": {
+        "date": "Data",
+        "status": "Statusi",
+        "all": "Të gjitha",
+        "available": "Të lira",
+        "booked": "Të rezervuara",
+        "needsCleaning": "Për pastrim"
+      },
+      "sections": {
+        "apartments": "Apartamentet",
+        "hotelRooms": "Dhomat e hotelit"
+      },
+      "messages": {
+        "confirmClean": "Ta shënoj këtë dhomë si të pastruar?",
+        "cleaned": "Dhoma u shënua si e pastruar.",
+        "cleanError": "Gabim gjatë pastrimit të dhomës",
+        "statusUpdated": "Statusi i dhomës u përditësua.",
+        "statusError": "Gabim gjatë ndryshimit të statusit"
+      },
+      "dialog": {
+        "roomTitle": "Dhoma {room}",
+        "markAvailable": "Shëno si e lirë",
+        "outOfOrder": "Jashtë funksionit",
+        "noActiveReservation": "Nuk ka rezervim aktiv.",
+        "cleanRoom": "Pastro dhomën",
+        "hideCalendar": "Fshih kalendarin",
+        "showCalendar": "Shfaq kalendarin",
+        "close": "Mbyll",
+        "fields": {
+          "guest": "Mysafiri",
+          "phone": "Telefoni",
+          "checkIn": "Check-in",
+          "checkOut": "Check-out",
+          "status": "Statusi",
+          "total": "Totali"
+        }
+      }
+    },
+    "reservations": {
+      "title": "Rezervimet",
+      "subtitle": "Menaxho rezervimet, statuset dhe pagesat.",
+      "selected": "Të zgjedhura: {count}",
+      "deleteSelected": "Fshij të zgjedhurat",
+      "empty": "Nuk u gjetën rezervime.",
+      "summary": {
+        "total": "Gjithsej: {count}",
+        "active": "Aktive: {count}",
+        "finished": "Të përfunduara: {count}"
+      },
+      "tabs": {
+        "all": "Të gjitha",
+        "upcoming": "Në ardhje",
+        "today": "Sot",
+        "present": "Prezent",
+        "past": "Të kaluara"
+      },
+      "filters": {
+        "search": "Kërko (Emër ose Email)",
+        "status": "Statusi",
+        "type": "Lloji",
+        "addNew": "+ Shto të re",
+        "options": {
+          "all": "Të gjitha",
+          "pending": "Në pritje",
+          "confirmed": "Të konfirmuara",
+          "completed": "Të përfunduara",
+          "cancelled": "Të anuluara",
+          "hotel": "Hotel",
+          "apartment": "Apartament"
+        }
+      },
+      "statuses": {
+        "pending": "Në pritje",
+        "confirmed": "E konfirmuar",
+        "completed": "E përfunduar",
+        "cancelled": "E anuluar"
+      },
+      "menu": {
+        "editReservation": "Ndrysho rezervimin",
+        "setAs": "Vendose si {status}",
+        "markCashPaidAndConfirm": "Shëno cash si të paguar + konfirmo",
+        "markAsUnpaid": "Shëno si të papaguar"
+      },
+      "messages": {
+        "loadFailed": "Ngarkimi i rezervimeve dështoi.",
+        "loadNetworkError": "Gabim rrjeti gjatë ngarkimit të rezervimeve.",
+        "statusUpdated": "Statusi i rezervimit u përditësua.",
+        "statusUpdateFailed": "Përditësimi i statusit dështoi.",
+        "statusUpdateNetworkError": "Gabim rrjeti gjatë përditësimit të statusit.",
+        "paymentUpdated": "Të dhënat e pagesës u përditësuan.",
+        "paymentUpdateFailed": "Përditësimi i pagesës dështoi.",
+        "paymentUpdateNetworkError": "Gabim rrjeti gjatë përditësimit të pagesës.",
+        "deleted": "Rezervimi u fshi me sukses.",
+        "deleteFailed": "Fshirja e rezervimit dështoi.",
+        "deleteNetworkError": "Gabim rrjeti gjatë fshirjes së rezervimit.",
+        "bulkDeleteConfirm": "Të fshihen {count} rezervime?",
+        "bulkDeleted": "Rezervimet e zgjedhura u fshinë.",
+        "bulkDeleteFailed": "Fshirja e rezervimeve të zgjedhura dështoi.",
+        "bulkDeleteNetworkError": "Gabim rrjeti gjatë fshirjes së rezervimeve të zgjedhura.",
+        "saved": "Rezervimi u ruajt me sukses.",
+        "updated": "Rezervimi u përditësua me sukses."
+      },
+      "table": {
+        "selectAll": "Zgjidh te gjitha rezervimet",
+        "selectOne": "Zgjidh rezervimin",
+        "pinned": "Te fiksuara",
+        "code": "Kodi",
+        "guest": "Mysafiri",
+        "room": "Dhoma",
+        "stay": "Qendrimi",
+        "status": "Statusi",
+        "total": "Totali",
+        "actions": "Veprimet",
+        "checkIn": "HYRJE",
+        "checkOut": "DALJE",
+        "tooltips": {
+          "viewDetails": "Shiko detajet",
+          "printReceipt": "Printo faturen",
+          "deleteReservation": "Fshij rezervimin"
+        }
+      },
+      "detailsDialog": {
+        "title": "Detajet e rezervimit",
+        "subtitle": "Shiko te dhenat e mysafirit, qendrimit dhe pageses.",
+        "sections": {
+          "guest": "Mysafiri",
+          "stay": "Qendrimi",
+          "booking": "Rezervimi",
+          "payment": "Pagesa",
+          "cancellation": "Anulimi"
+        },
+        "fields": {
+          "name": "Emri",
+          "email": "Email",
+          "phone": "Telefoni",
+          "address": "Adresa",
+          "room": "Dhoma",
+          "dates": "Datat",
+          "guests": "Mysafire",
+          "code": "Kodi",
+          "invoice": "Fatura",
+          "status": "Statusi",
+          "payment": "Pagesa",
+          "total": "Totali",
+          "paid": "Paguar",
+          "paidAt": "Paguar me",
+          "cancelledAt": "Anuluar me",
+          "reason": "Arsyeja"
+        },
+        "close": "Mbyll"
+      },
+      "deleteDialog": {
+        "title": "Fshij rezervimin",
+        "description": "A je i sigurt qe deshiron ta fshish kete rezervim? Ky veprim nuk mund te kthehet.",
+        "cancel": "Anulo",
+        "delete": "Fshij"
+      },
+      "reasonDialog": {
+        "title": "Detajet e anulimit",
+        "reservation": "Rezervimi",
+        "guest": "Mysafiri",
+        "cancelledAt": "Anuluar me",
+        "reason": "Arsyeja",
+        "noReason": "Nuk eshte dhene arsye.",
+        "close": "Mbyll"
+      }
+    },
+    "manageRooms": {
+      "title": "Menaxho Dhomat",
+      "subtitle": "Krijo, ndrysho dhe menaxho inventarin.",
+      "onlyWithPhotos": "Vetëm dhomat me foto",
+      "search": "Kërko dhoma...",
+      "allRoomTypes": "Të gjitha llojet e dhomave",
+      "allTypes": "Të gjitha llojet",
+      "hotel": "Hotel",
+      "apartment": "Apartament",
+      "addRoom": "Shto dhomë",
+      "loading": "Duke ngarkuar dhomat...",
+      "roomsSection": "Dhomat",
+      "empty": "Nuk u gjetën dhoma",
+      "edit": "Ndrysho",
+      "delete": "Fshij",
+      "cancel": "Anulo",
+      "table": {
+        "roomNumber": "Dhoma #",
+        "name": "Emri",
+        "type": "Lloji",
+        "price": "Çmimi (EUR)",
+        "actions": "Veprimet"
+      },
+      "deleteDialog": {
+        "title": "Fshij dhomën",
+        "description": "A je i sigurt që dëshiron ta fshish këtë dhomë? Ky veprim nuk mund të kthehet."
+      },
+      "messages": {
+        "deleted": "Dhoma u fshi me sukses.",
+        "deleteFailed": "Fshirja e dhomës dështoi.",
+        "deleteNetworkError": "Gabim rrjeti gjatë fshirjes së dhomës.",
+        "saved": "U ruajt me sukses."
+      }
+    },
+    "permissions": {
+      "title": "Lejet",
+      "subtitle": "Menaxho qasjen e stafit dhe profilin e punësimit në një vend.",
+      "staffCount": "{count} staf",
+      "staff": "Stafi",
+      "staffHelper": "Zgjidh një anëtar për të menaxhuar qasjen dhe detajet e punësimit",
+      "searchPlaceholder": "Kërko staf",
+      "noStaffFound": "Nuk u gjet staf.",
+      "noName": "Pa emër",
+      "noUserSelected": "Asnjë përdorues i zgjedhur",
+      "selectStaffMember": "Zgjidh një anëtar të stafit për të ndryshuar detajet e punësimit dhe lejet e qasjes.",
+      "hidePermissions": "Fshih lejet",
+      "showPermissions": "Shfaq lejet",
+      "selectedPermissions": "Të zgjedhura: {count} leje",
+      "saving": "Duke ruajtur...",
+      "saveChanges": "Ruaj ndryshimet",
+      "saved": "U ruajt",
+      "accessThisSection": "Qasje në këtë seksion",
+      "messages": {
+        "loadUsersFailed": "Ngarkimi i përdoruesve dështoi",
+        "saveFailed": "Ruajtja e lejeve dështoi",
+        "saved": "Ndryshimet u ruajtën me sukses."
+      },
+      "employment": {
+        "position": "Pozita",
+        "startDate": "Data e fillimit",
+        "employmentStatus": "Statusi i punësimit",
+        "salaryType": "Lloji i pagës",
+        "baseSalary": "Paga bazë",
+        "active": "Aktiv",
+        "inactive": "Joaktiv",
+        "monthly": "Mujore",
+        "hourly": "Për orë"
+      },
+      "positions": {
+        "receptionist": "Recepsionist",
+        "cleaner": "Pastrues",
+        "manager": "Menaxher",
+        "maintenance": "Mirëmbajtje",
+        "accountant": "Kontabilist",
+        "other": "Tjetër"
+      },
+      "tabLabels": {
+        "overview": "Përmbledhje",
+        "rooms": "Dhomat",
+        "reservations": "Rezervimet",
+        "payments": "Pagesat & Faturat",
+        "reports": "Raportet",
+        "expenses": "Shpenzimet",
+        "users": "Përdoruesit",
+        "manageRooms": "Menaxho Dhomat",
+        "activityLogsTab": "Aktiviteti",
+        "permissions": "Lejet"
+      },
+      "tabDescriptions": {
+        "overview": "Qasje në statistikat kryesore të dashboard-it",
+        "rooms": "Shiko dhe menaxho statusin e dhomave",
+        "reservations": "Krijo dhe përditëso rezervimet",
+        "payments": "Shiko faturat dhe evidencat e pagesave",
+        "reports": "Qasje në raportet analitike",
+        "expenses": "Menaxho shpenzimet e biznesit",
+        "users": "Menaxho përdoruesit e stafit",
+        "manageRooms": "Ndrysho detajet dhe fotot e dhomave",
+        "activityLogsTab": "Shiko historinë e aktiviteteve",
+        "permissions": "Menaxho lejet e stafit"
+      }
+    },
+    "activityLogs": {
+      "title": "Aktiviteti",
+      "subtitle": "Historia e veprimeve në sistem.",
+      "empty": "Nuk u gjetën aktivitete",
+      "deleteSelected": "Fshij ({count})",
+      "filters": {
+        "action": "Veprimi",
+        "all": "Të gjitha",
+        "create": "Krijo",
+        "update": "Përditëso",
+        "delete": "Fshij",
+        "clean": "Pastro"
+      },
+      "messages": {
+        "confirmDelete": "Të fshihen {count} aktivitete",
+        "deleted": "Aktivitetet u fshinë me sukses.",
+        "deleteFailed": "Fshirja e aktiviteteve dështoi."
+      },
+      "table": {
+        "selectAll": "Zgjidh te gjitha",
+        "user": "Perdoruesi",
+        "action": "Veprimi",
+        "entity": "Entiteti",
+        "description": "Pershkrimi",
+        "date": "Data",
+        "emptyDescription": "-"
+      }
+    },
+    "users": {
+      "title": "Perdoruesit",
+      "subtitle": "Menaxho stafin dhe nivelet e qasjes.",
+      "actions": {
+        "addUser": "+ Shto perdorues",
+        "changeRole": "Ndrysho rolin",
+        "delete": "Fshij",
+        "cancel": "Anulo",
+        "save": "Ruaj",
+        "create": "Krijo perdorues"
+      },
+      "empty": {
+        "title": "Nuk u gjeten perdorues",
+        "subtitle": "Krijo nje perdorues per te filluar."
+      },
+      "fields": {
+        "name": "Emri",
+        "email": "Email",
+        "role": "Roli",
+        "password": "Fjalekalimi",
+        "createdAt": "Krijuar me",
+        "actions": "Veprimet"
+      },
+      "roles": {
+        "admin": "Admin",
+        "worker": "Punetor",
+        "client": "Klient"
+      },
+      "roleDialog": {
+        "title": "Ndrysho rolin",
+        "description": "Perditeso rolin per",
+        "select": "Zgjidh rolin e ri"
+      },
+      "addDialog": {
+        "title": "Shto perdorues te ri"
+      },
+      "messages": {
+        "loadFailed": "Ngarkimi i perdoruesve deshtoi.",
+        "loadNetworkError": "Gabim rrjeti gjate ngarkimit te perdoruesve.",
+        "roleUpdated": "Roli i perdoruesit u perditesua me sukses.",
+        "roleUpdateFailed": "Perditesimi i rolit deshtoi.",
+        "roleUpdateNetworkError": "Gabim rrjeti gjate perditesimit te rolit.",
+        "requiredFields": "Ju lutem plotesoni te gjitha fushat e kerkuara.",
+        "created": "Perdoruesi u krijua me sukses.",
+        "createFailed": "Krijimi i perdoruesit deshtoi.",
+        "createNetworkError": "Gabim rrjeti gjate krijimit te perdoruesit.",
+        "confirmDelete": "A je i sigurt qe deshiron ta fshish kete perdorues?",
+        "deleted": "Perdoruesi u fshi me sukses.",
+        "deleteFailed": "Fshirja e perdoruesit deshtoi.",
+        "deleteNetworkError": "Gabim rrjeti gjate fshirjes se perdoruesit."
+      }
+    },
+    "payments": {
+      "title": "Pagesat & Faturat",
+      "subtitle": "Menaxho statusin e faturave, shumat e paguara dhe balancat ne pritje.",
+      "errors": {
+        "loadFailed": "Ngarkimi i faturave deshtoi."
+      },
+      "cards": {
+        "invoices": "Faturat",
+        "paid": "Te paguara",
+        "pending": "Ne pritje",
+        "collected": "Te arketuara"
+      },
+      "sections": {
+        "invoiceList": "Lista e faturave"
+      },
+      "filters": {
+        "allStatuses": "Te gjitha statuset",
+        "paid": "E paguar",
+        "unpaid": "E papaguar",
+        "month": "Muaji",
+        "searchPlaceholder": "Kerko fature / mysafir / telefon"
+      },
+      "fields": {
+        "stay": "Qendrimi",
+        "total": "Totali",
+        "paid": "Paguar",
+        "room": "Dhoma",
+        "method": "Menyra"
+      },
+      "actions": {
+        "view": "Shiko",
+        "print": "Printo"
+      },
+      "empty": {
+        "title": "Nuk u gjeten fatura",
+        "subtitle": "Provo te ndryshosh filtrin ose kerkimin."
+      },
+      "table": {
+        "invoice": "Fatura",
+        "guest": "Mysafiri",
+        "room": "Dhoma",
+        "stay": "Qendrimi",
+        "total": "Totali",
+        "paid": "Paguar",
+        "method": "Menyra",
+        "status": "Statusi",
+        "created": "Krijuar",
+        "actions": "Veprimet"
+      },
+      "summary": {
+        "showing": "Po shfaqen {count} fatura",
+        "pendingBalance": "Balanca ne pritje"
+      }
+    },
+    "reports": {
+      "title": "Raportet",
+      "subtitle": "Pamje vjetore e performances me trendet mujore te te ardhurave dhe rezervimeve.",
+      "filePrefix": "raportet",
+      "errors": {
+        "loadFailed": "Ngarkimi i raporteve deshtoi."
+      },
+      "actions": {
+        "exportCsv": "Eksporto CSV",
+        "exportPdf": "Eksporto PDF"
+      },
+      "cards": {
+        "reservations": "Rezervimet",
+        "roomNights": "Netet e dhomave",
+        "revenue": "Te ardhurat",
+        "avgBooking": "Mesatarja per rezervim"
+      },
+      "sections": {
+        "monthlyReport": "Raporti mujor"
+      },
+      "months": {
+        "jan": "Jan",
+        "feb": "Shk",
+        "mar": "Mar",
+        "apr": "Pri",
+        "may": "Maj",
+        "jun": "Qer",
+        "jul": "Kor",
+        "aug": "Gus",
+        "sep": "Sht",
+        "oct": "Tet",
+        "nov": "Nen",
+        "dec": "Dhj"
+      },
+      "mobile": {
+        "reservations": "{count} rezervime",
+        "nights": "Netet"
+      },
+      "table": {
+        "month": "Muaji",
+        "reservations": "Rezervimet",
+        "roomNights": "Netet e dhomave",
+        "revenue": "Te ardhurat",
+        "paid": "Paguar",
+        "collection": "Arketime",
+        "revenueTrend": "Trendi i te ardhurave"
+      },
+      "footer": {
+        "cancellations": "Anulimet",
+        "collectionRate": "Norma e arketimit"
+      },
+      "csv": {
+        "year": "Viti",
+        "totalReservations": "Rezervime gjithsej",
+        "totalRoomNights": "Nete dhomash gjithsej",
+        "totalRevenue": "Te ardhura gjithsej",
+        "totalPaid": "Paguar gjithsej",
+        "cancellations": "Anulimet",
+        "collectionRate": "Norma e arketimit %"
+      },
+      "pdf": {
+        "title": "Raporti vjetor",
+        "year": "Viti",
+        "generated": "Gjeneruar",
+        "collectionRate": "Norma e arketimit"
+      }
+    },
+    "expenses": {
+      "title": "Shpenzimet",
+      "subtitle": "Menaxho kostot operative dhe pagesat e pagave ne nje vend.",
+      "errors": {
+        "loadFailed": "Ngarkimi i shpenzimeve deshtoi.",
+        "createFailed": "Shtimi i shpenzimit deshtoi."
+      },
+      "feedback": {
+        "added": "Shpenzimi u shtua me sukses."
+      },
+      "cards": {
+        "entries": "Regjistrime",
+        "totalExpenses": "Shpenzime totale",
+        "salaryPayouts": "Pagesa pagash",
+        "operational": "Operative"
+      },
+      "sections": {
+        "addExpense": "Shto shpenzim",
+        "expenseList": "Lista e shpenzimeve"
+      },
+      "fields": {
+        "date": "Data",
+        "category": "Kategoria",
+        "amount": "Shuma (EUR)",
+        "paymentMethod": "Menyra e pageses",
+        "note": "Shenim",
+        "month": "Muaji",
+        "createdBy": "Krijuar nga"
+      },
+      "actions": {
+        "saving": "Duke ruajtur...",
+        "addExpense": "Shto shpenzim"
+      },
+      "filters": {
+        "allCategories": "Te gjitha kategorite"
+      },
+      "categories": {
+        "utilities": "Sherbime",
+        "maintenance": "Mirembajtje",
+        "supplies": "Materiale",
+        "salary": "Paga",
+        "marketing": "Marketing",
+        "other": "Tjera"
+      },
+      "paymentMethods": {
+        "cash": "Cash",
+        "card": "Kartele",
+        "bank_transfer": "Transfer bankar"
+      },
+      "empty": "Nuk u gjeten shpenzime",
+      "table": {
+        "date": "Data",
+        "category": "Kategoria",
+        "amount": "Shuma",
+        "payment": "Pagesa",
+        "note": "Shenim",
+        "createdBy": "Krijuar nga",
+        "createdAt": "Krijuar me"
+      }
+    },
+    "roomForm": {
+      "title": {
+        "edit": "Ndrysho dhomen",
+        "add": "Shto dhome te re"
+      },
+      "fields": {
+        "roomName": "Emri i dhomes",
+        "roomNumber": "Numri i dhomes",
+        "roomType": "Lloji i dhomes",
+        "price": "Cmimi (EUR)",
+        "description": "Pershkrim i shkurter marketingu",
+        "customAmenity": "Shto amenity personal"
+      },
+      "placeholders": {
+        "description": "p.sh. Dhome moderne me pamje nga deti, ideale per cifte."
+      },
+      "sections": {
+        "amenities": "Amenitetet"
+      },
+      "applyToType": {
+        "title": "Apliko fushat e perbashketa ne te gjitha dhomat e ketij lloji",
+        "description": "Aplikon emrin, cmimin, pershkrimin dhe amenitetet ne te gjitha dhomat me kete tip."
+      },
+      "actions": {
+        "addAmenity": "Shto",
+        "cancel": "Anulo",
+        "saving": "Duke ruajtur...",
+        "save": "Ruaj ndryshimet",
+        "add": "Shto dhomen"
+      },
+      "errors": {
+        "loadRoomNames": "Ngarkimi i emrave te dhomave deshtoi",
+        "required": "Ju lutem plotesoni te gjitha fushat e kerkuara.",
+        "unknown": "Gabim i panjohur",
+        "generic": "Ndodhi nje gabim"
+      },
+      "messages": {
+        "updatedType": "U perditesua kjo dhome dhe te gjitha dhomat e ketij lloji.",
+        "updated": "Dhoma u perditesua me sukses.",
+        "created": "Dhoma u krijua me sukses."
+      }
+    },
+    "roomPhotos": {
+      "loading": "Duke ngarkuar llojet e dhomave...",
+      "photoCount": "{count} foto",
+      "noPhotosYet": "Ende nuk ka foto",
+      "actions": {
+        "uploading": "Duke ngarkuar...",
+        "addPhoto": "Shto foto",
+        "manage": "Menaxho"
+      },
+      "dialog": {
+        "managePhotos": "Menaxho fotot - {type}",
+        "order": "Renditja",
+        "noPhotosForType": "Nuk ka ende foto per kete lloj.",
+        "close": "Mbyll"
+      },
+      "errors": {
+        "load": "Ngarkimi i fotove te dhomave deshtoi.",
+        "upload": "Ngarkimi i fotos deshtoi",
+        "save": "Ruajtja deshtoi",
+        "delete": "Fshirja deshtoi",
+        "generic": "Ndodhi nje gabim."
+      },
+      "messages": {
+        "uploaded": "Fotoja u ngarkua me sukses.",
+        "deleted": "Fotoja u fshi me sukses."
+      }
+    },
+    "printReceipt": {
+      "invoice": "Fatura",
+      "guestStay": "Te dhenat e mysafirit dhe qendrimit",
+      "paymentDetails": "Detajet e pageses",
+      "totalAmount": "Shuma totale",
+      "scanToVerify": "Skano per te verifikuar faturen",
+      "thankYou": "Faleminderit qe zgjodhet Hotel Dijari Premium",
+      "generated": "Kjo fature eshte gjeneruar nga sistemi.",
+      "fields": {
+        "guestName": "Emri i mysafirit",
+        "email": "Email",
+        "phone": "Telefoni",
+        "room": "Dhoma",
+        "checkIn": "Check-in",
+        "checkOut": "Check-out",
+        "paymentMethod": "Menyra e pageses",
+        "paymentStatus": "Statusi i pageses",
+        "paidAt": "Paguar me"
+      },
+      "actions": {
+        "downloadPdf": "Shkarko PDF",
+        "print": "Printo"
+      }
     }
   },
   "home": {

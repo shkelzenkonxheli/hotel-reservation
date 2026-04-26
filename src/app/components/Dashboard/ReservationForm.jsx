@@ -46,11 +46,6 @@ export default function ReservationForm({
   const t = useTranslations("dashboard.reservations.form");
   const { data: session } = useSession();
 
-  const paymentStatusLabel =
-    paymentStatus === "PAID"
-      ? t("paymentStatus.paid")
-      : t("paymentStatus.unpaid");
-
   const [roomTypes, setRoomTypes] = useState([]);
 
   const [fullname, setFullname] = useState("");
@@ -75,6 +70,11 @@ export default function ReservationForm({
     message: "",
     severity: "success",
   });
+
+  const paymentStatusLabel =
+    paymentStatus === "PAID"
+      ? t("paymentStatus.paid")
+      : t("paymentStatus.unpaid");
 
   const sectionCardSx = {
     p: 2.25,

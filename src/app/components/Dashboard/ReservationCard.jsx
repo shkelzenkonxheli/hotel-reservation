@@ -8,6 +8,7 @@ import {
   Divider,
   Checkbox,
 } from "@mui/material";
+import { useTranslations } from "next-intl";
 import { MoreVert, Star, StarBorder, Print, Delete } from "@mui/icons-material";
 
 export default function ReservationCard({
@@ -21,9 +22,17 @@ export default function ReservationCard({
   selected = false,
   onSelect,
 }) {
+  const t = useTranslations("dashboard.reservations");
   const status = String(reservation?.status || "").toLowerCase();
   const isCancelled = Boolean(reservation?.cancelled_at) || status === "cancelled";
   const isCompletedByStatus = status === "completed";
+  const localizedStatus =
+    status === "pending" ||
+    status === "confirmed" ||
+    status === "completed" ||
+    status === "cancelled"
+      ? t(`statuses.${status}`)
+      : reservation.status;
 
   const toLocalYmd = (date) =>
     `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
@@ -80,7 +89,7 @@ export default function ReservationCard({
                 size="small"
                 checked={selected}
                 onChange={(e) => onSelect?.(e.target.checked)}
-                inputProps={{ "aria-label": "select reservation" }}
+                inputProps={{ "aria-label": t("table.selectOne") }}
               />
             ) : null}
             <IconButton size="small" onClick={onFavorite}>
@@ -95,7 +104,7 @@ export default function ReservationCard({
         <Box display="flex" gap={1} flexWrap="wrap">
           <Chip label={reservation.rooms?.name} size="small" />
           <Chip
-            label={reservation.status}
+            label={localizedStatus}
             size="small"
             sx={{
               background:
@@ -114,14 +123,14 @@ export default function ReservationCard({
         <Box mt={1} display="flex" gap={1}>
           <Chip
             size="small"
-            label={`IN: ${new Date(
+            label={`${t("table.checkIn")}: ${new Date(
               reservation.start_date
             ).toLocaleDateString()}`}
             sx={{ background: "#ecfeff", color: "#155e75" }}
           />
           <Chip
             size="small"
-            label={`OUT: ${new Date(
+            label={`${t("table.checkOut")}: ${new Date(
               reservation.end_date
             ).toLocaleDateString()}`}
             sx={{ background: "#fff7ed", color: "#9a3412" }}

@@ -500,6 +500,82 @@
         "reason": "Arsyeja",
         "noReason": "Nuk eshte dhene arsye.",
         "close": "Mbyll"
+      },
+      "form": {
+        "title": {
+          "create": "Rezervim i ri walk-in",
+          "edit": "Ndrysho rezervimin",
+          "step": "Hapi {step} nga {total} - {current}",
+          "minimize": "Minimizo"
+        },
+        "steps": {
+          "stayRoom": "Qendrimi dhe dhoma",
+          "guestPayment": "Mysafiri dhe pagesa"
+        },
+        "minimized": {
+          "title": "Forma e rezervimit u minimizua",
+          "restore": "Rikthe",
+          "close": "Mbyll"
+        },
+        "sections": {
+          "stayDetails": "Detajet e qendrimit",
+          "guestDetails": "Detajet e mysafirit",
+          "pricingPayment": "Cmimi dhe pagesa"
+        },
+        "availability": {
+          "available": "E lire",
+          "unavailable": "Pa disponueshmeri",
+          "success": "Dhoma eshte e lire per datat e zgjedhura.",
+          "error": "Nuk ka dhoma te lira per datat e zgjedhura."
+        },
+        "fields": {
+          "roomType": "Lloji i dhomes",
+          "roomTypeOption": "{type} - EUR {price}/nata",
+          "checkIn": "Check-in",
+          "checkOut": "Check-out",
+          "roomNumber": "Numri i dhomes",
+          "fullName": "Emri i plote",
+          "phone": "Telefoni",
+          "addressOptional": "Adresa (opsionale)",
+          "guests": "Mysafire",
+          "totalPrice": "Cmimi total",
+          "currency": "EUR",
+          "paymentMethod": "Menyra e pageses",
+          "paymentStatus": "Statusi i pageses"
+        },
+        "paymentMethods": {
+          "cash": "Cash",
+          "card": "Kartele"
+        },
+        "paymentStatus": {
+          "unpaid": "E papaguar",
+          "paid": "E paguar"
+        },
+        "helpers": {
+          "required": "E detyrueshme",
+          "selectTypeAndDates": "Zgjidh fillimisht llojin e dhomes dhe datat",
+          "noRoomsForDates": "Nuk ka dhoma te lira per datat e zgjedhura",
+          "showingAvailableRooms": "Po shfaqen dhomat e lira per datat e zgjedhura",
+          "unavailableRooms": "Dhoma te padisponueshme ({count})",
+          "outOfOrder": "Jashte funksionit",
+          "bookedUntil": "E rezervuar deri me {until}",
+          "bookedInSelectedDates": "E rezervuar ne datat e zgjedhura",
+          "nightlyRate": "Cmimi per nate: EUR {price}"
+        },
+        "actions": {
+          "cancel": "Anulo",
+          "back": "Kthehu",
+          "next": "Vazhdo",
+          "create": "Krijo rezervimin",
+          "save": "Ruaj ndryshimet"
+        },
+        "messages": {
+          "requiredFields": "Ju lutem plotesoni te gjitha fushat e kerkuara.",
+          "noAvailability": "Nuk ka dhoma te lira per keto data.",
+          "saveFailed": "Ruajtja e rezervimit deshtoi",
+          "created": "Rezervimi u krijua me sukses.",
+          "updated": "Rezervimi u perditesua me sukses."
+        }
       }
     },
     "manageRooms": {
@@ -735,6 +811,11 @@
       "summary": {
         "showing": "Po shfaqen {count} fatura",
         "pendingBalance": "Balanca ne pritje"
+      },
+      "paymentMethods": {
+        "cash": "Cash",
+        "card": "Kartele",
+        "bankTransfer": "Transfer bankar"
       }
     },
     "reports": {
@@ -955,6 +1036,15 @@
       "actions": {
         "downloadPdf": "Shkarko PDF",
         "print": "Printo"
+      },
+      "paymentMethods": {
+        "cash": "Cash",
+        "card": "Kartele",
+        "bankTransfer": "Transfer bankar"
+      },
+      "paymentStatus": {
+        "paid": "E paguar",
+        "unpaid": "E papaguar"
       }
     }
   },

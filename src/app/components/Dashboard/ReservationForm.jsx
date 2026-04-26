@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   Box,
   Button,
@@ -42,7 +43,13 @@ export default function ReservationForm({
   mode = "create",
   reservation = null,
 }) {
+  const t = useTranslations("dashboard.reservations.form");
   const { data: session } = useSession();
+
+  const paymentStatusLabel =
+    paymentStatus === "PAID"
+      ? t("paymentStatus.paid")
+      : t("paymentStatus.unpaid");
 
   const [roomTypes, setRoomTypes] = useState([]);
 
@@ -222,7 +229,7 @@ export default function ReservationForm({
     if (!fullname || !phone || !type || !roomId || !startDate || !endDate) {
       setFeedback({
         open: true,
-        message: "Please fill all required fields.",
+        message: t("messages.requiredFields"),
         severity: "warning",
       });
       return;
@@ -231,7 +238,7 @@ export default function ReservationForm({
     if (isAvailable === false) {
       setFeedback({
         open: true,
-        message: "No rooms available for these dates.",
+        message: t("messages.noAvailability"),
         severity: "error",
       });
       return;
@@ -273,13 +280,19 @@ export default function ReservationForm({
       if (mode === "create") {
         resetForm();
       }
+      setFeedback({
+        open: true,
+        message:
+          mode === "create" ? t("messages.created") : t("messages.updated"),
+        severity: "success",
+      });
       onClose();
       if (onSuccess) onSuccess();
     } else {
       const data = await res.json();
       setFeedback({
         open: true,
-        message: data.error || "Failed to save reservation",
+        message: data.error || t("messages.saveFailed"),
         severity: "error",
       });
     }
@@ -316,14 +329,14 @@ export default function ReservationForm({
         }}
       >
         <Typography variant="body2" fontWeight={700}>
-          Reservation form minimized
+          {t("minimized.title")}
         </Typography>
-        <Tooltip title="Restore">
+        <Tooltip title={t("minimized.restore")}>
           <IconButton size="small" onClick={() => setIsMinimized(false)}>
             <OpenInFullIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Close">
+        <Tooltip title={t("minimized.close")}>
           <IconButton size="small" onClick={handleCancel}>
             <CloseIcon fontSize="small" />
           </IconButton>
@@ -350,13 +363,17 @@ export default function ReservationForm({
         <Box display="flex" alignItems="flex-start" justifyContent="space-between" gap={1}>
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 800, color: "#0f172a" }}>
-              {mode === "create" ? "New walk-in reservation" : "Edit reservation"}
+              {mode === "create" ? t("title.create") : t("title.edit")}
             </Typography>
             <Typography variant="body2" color="#64748b" mt={0.5}>
-              Step {step} of 2 - {step === 1 ? "Stay and room" : "Guest and payment"}
+              {t("title.step", {
+                step,
+                total: 2,
+                current: step === 1 ? t("steps.stayRoom") : t("steps.guestPayment"),
+              })}
             </Typography>
           </Box>
-          <Tooltip title="Minimize">
+          <Tooltip title={t("title.minimize")}>
             <IconButton size="small" onClick={() => setIsMinimized(true)}>
               <MinimizeIcon fontSize="small" />
             </IconButton>
@@ -374,17 +391,17 @@ export default function ReservationForm({
                 justifyContent="space-between"
                 mb={1}
               >
-                <Typography fontWeight={800}>Stay details</Typography>
+                <Typography fontWeight={800}>{t("sections.stayDetails")}</Typography>
                 {isAvailable === true && (
                   <Chip
-                    label="Available"
+                    label={t("availability.available")}
                     size="small"
                     sx={{ bgcolor: "#dcfce7", color: "#166534" }}
                   />
                 )}
                 {isAvailable === false && (
                   <Chip
-                    label="No availability"
+                    label={t("availability.unavailable")}
                     size="small"
                     sx={{ bgcolor: "#fee2e2", color: "#b91c1c" }}
                   />
@@ -393,7 +410,7 @@ export default function ReservationForm({
 
               <Stack spacing={2}>
                 <TextField
-                  label="Room type"
+                  label={t("fields.roomType")}
                   select
                   fullWidth
                   sx={fieldSx}
@@ -406,7 +423,10 @@ export default function ReservationForm({
                 >
                   {roomTypes.map((room, index) => (
                     <MenuItem key={index} value={room.type}>
-                      {room.type} - EUR {room.price}/night
+                      {t("fields.roomTypeOption", {
+                        type: room.type,
+                        price: room.price,
+                      })}
                     </MenuItem>
                   ))}
                 </TextField>
@@ -417,7 +437,7 @@ export default function ReservationForm({
                   gap={2}
                 >
                   <TextField
-                    label="Check-in"
+                    label={t("fields.checkIn")}
                     type="date"
                     sx={fieldSx}
                     InputLabelProps={{ shrink: true }}
@@ -427,7 +447,7 @@ export default function ReservationForm({
                     fullWidth
                   />
                   <TextField
-                    label="Check-out"
+                    label={t("fields.checkOut")}
                     type="date"
                     sx={fieldSx}
                     InputLabelProps={{ shrink: true }}
@@ -441,7 +461,7 @@ export default function ReservationForm({
                 </Box>
 
                 <TextField
-                  label="Room number"
+                  label={t("fields.roomNumber")}
                   select
                   fullWidth
                   sx={fieldSx}
@@ -450,10 +470,10 @@ export default function ReservationForm({
                   disabled={!type || !startDate || !endDate || availableRooms.length === 0}
                   helperText={
                     !type || !startDate || !endDate
-                      ? "Select room type and dates first"
+                      ? t("helpers.selectTypeAndDates")
                       : availableRooms.length === 0
-                        ? "No rooms available for selected dates"
-                        : "Showing available rooms for selected dates"
+                        ? t("helpers.noRoomsForDates")
+                        : t("helpers.showingAvailableRooms")
                   }
                 >
                   {availableRooms.map((room) => (
@@ -479,7 +499,9 @@ export default function ReservationForm({
                       sx={{ bgcolor: "#f8fafc", minHeight: 48 }}
                     >
                       <Typography variant="subtitle2" fontWeight={700}>
-                        Unavailable rooms ({unavailableRooms.length})
+                        {t("helpers.unavailableRooms", {
+                          count: unavailableRooms.length,
+                        })}
                       </Typography>
                     </AccordionSummary>
                   <AccordionDetails sx={{ bgcolor: "#ffffff", py: 1.5 }}>
@@ -490,10 +512,10 @@ export default function ReservationForm({
                             : null;
                           const details =
                             room.reason === "Out of order"
-                              ? "Out of order"
+                              ? t("helpers.outOfOrder")
                               : until
-                                ? `Booked until ${until}`
-                                : "Booked in selected dates";
+                                ? t("helpers.bookedUntil", { until })
+                                : t("helpers.bookedInSelectedDates");
                           return (
                             <Typography
                               key={room.id}
@@ -512,12 +534,12 @@ export default function ReservationForm({
 
               {isAvailable === true && (
                 <Alert severity="success" sx={{ mt: 2 }}>
-                  Room available for selected dates.
+                  {t("availability.success")}
                 </Alert>
               )}
               {isAvailable === false && (
                 <Alert severity="error" sx={{ mt: 2 }}>
-                  No rooms available for selected dates.
+                  {t("availability.error")}
                 </Alert>
               )}
             </Box>
@@ -527,30 +549,30 @@ export default function ReservationForm({
             <>
               <Box sx={sectionCardSx}>
                 <Typography fontWeight={800} mb={1}>
-                  Guest details
+                  {t("sections.guestDetails")}
                 </Typography>
                 <Stack spacing={2}>
                   <TextField
-                    label="Full name"
+                    label={t("fields.fullName")}
                     fullWidth
                     sx={fieldSx}
                     value={fullname}
                     onChange={(e) => setFullname(e.target.value)}
-                    helperText="Required"
+                    helperText={t("helpers.required")}
                   />
 
                   <TextField
-                    label="Phone"
+                    label={t("fields.phone")}
                     type="tel"
                     fullWidth
                     sx={fieldSx}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    helperText="Required"
+                    helperText={t("helpers.required")}
                   />
 
                   <TextField
-                    label="Address (optional)"
+                    label={t("fields.addressOptional")}
                     fullWidth
                     sx={fieldSx}
                     value={address}
@@ -558,7 +580,7 @@ export default function ReservationForm({
                   />
 
                   <TextField
-                    label="Guests"
+                    label={t("fields.guests")}
                     type="number"
                     fullWidth
                     sx={fieldSx}
@@ -570,22 +592,22 @@ export default function ReservationForm({
 
               <Box sx={sectionCardSx}>
                 <Typography fontWeight={800} mb={1}>
-                  Pricing and payment
+                  {t("sections.pricingPayment")}
                 </Typography>
 
                 <TextField
-                  label="Total price"
+                  label={t("fields.totalPrice")}
                   fullWidth
                   sx={fieldSx}
                   value={totalPrice}
                   InputProps={{
                     startAdornment: (
-                      <InputAdornment position="start">EUR</InputAdornment>
+                      <InputAdornment position="start">{t("fields.currency")}</InputAdornment>
                     ),
                   }}
                   helperText={
                     selectedRoomPrice
-                      ? `Nightly rate: EUR ${selectedRoomPrice}`
+                      ? t("helpers.nightlyRate", { price: selectedRoomPrice })
                       : ""
                   }
                   onChange={(e) => setTotalPrice(e.target.value)}
@@ -595,7 +617,7 @@ export default function ReservationForm({
 
                 <Box mt={1}>
                   <FormControl>
-                    <FormLabel sx={{ fontWeight: 700 }}>Payment method</FormLabel>
+                    <FormLabel sx={{ fontWeight: 700 }}>{t("fields.paymentMethod")}</FormLabel>
                     <RadioGroup
                       row
                       value={paymentMethod}
@@ -604,12 +626,12 @@ export default function ReservationForm({
                       <FormControlLabel
                         value="cash"
                         control={<Radio />}
-                        label="Cash"
+                        label={t("paymentMethods.cash")}
                       />
                       <FormControlLabel
                         value="card"
                         control={<Radio />}
-                        label="Card"
+                        label={t("paymentMethods.card")}
                       />
                     </RadioGroup>
                   </FormControl>
@@ -617,25 +639,36 @@ export default function ReservationForm({
 
                 <Box mt={1}>
                   <FormControl>
-                    <FormLabel sx={{ fontWeight: 700 }}>Payment status</FormLabel>
+                    <FormLabel sx={{ fontWeight: 700 }}>{t("fields.paymentStatus")}</FormLabel>
                     <RadioGroup
                       row
-                      value={paymentStatus}
-                      onChange={(e) => setPaymentStatus(e.target.value)}
+                    value={paymentStatus}
+                    onChange={(e) => setPaymentStatus(e.target.value)}
                     >
                       <FormControlLabel
                         value="UNPAID"
                         control={<Radio />}
-                        label="Unpaid"
+                        label={t("paymentStatus.unpaid")}
                       />
                       <FormControlLabel
                         value="PAID"
                         control={<Radio />}
-                        label="Paid"
+                        label={t("paymentStatus.paid")}
                       />
                     </RadioGroup>
                   </FormControl>
                 </Box>
+
+                <Chip
+                  size="small"
+                  label={`${t("fields.paymentStatus")}: ${paymentStatusLabel}`}
+                  sx={{
+                    mt: 1.5,
+                    bgcolor: paymentStatus === "PAID" ? "#dcfce7" : "#fef3c7",
+                    color: paymentStatus === "PAID" ? "#166534" : "#92400e",
+                    fontWeight: 700,
+                  }}
+                />
               </Box>
             </>
           )}
@@ -644,11 +677,11 @@ export default function ReservationForm({
 
       <DialogActions sx={{ p: 2 }}>
         <Button onClick={handleCancel} variant="outlined" sx={secondaryButtonSx}>
-          Cancel
+          {t("actions.cancel")}
         </Button>
         {step === 2 && (
           <Button variant="outlined" onClick={() => setStep(1)} sx={secondaryButtonSx}>
-            Back
+            {t("actions.back")}
           </Button>
         )}
         {step === 1 ? (
@@ -658,7 +691,7 @@ export default function ReservationForm({
             disabled={!canProceedToStep2}
             sx={primaryButtonSx}
           >
-            Next
+            {t("actions.next")}
           </Button>
         ) : (
           <Button
@@ -675,7 +708,7 @@ export default function ReservationForm({
               !endDate
             }
           >
-            {mode === "create" ? "Create reservation" : "Save changes"}
+            {mode === "create" ? t("actions.create") : t("actions.save")}
           </Button>
         )}
       </DialogActions>

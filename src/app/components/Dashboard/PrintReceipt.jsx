@@ -30,6 +30,22 @@ function Row({ label, value }) {
 export default function PrintReceipt({ reservation, onClose }) {
   const t = useTranslations("dashboard.printReceipt");
   const handlePrint = () => window.print();
+  const paymentMethod = String(reservation.payment_method || "").toLowerCase();
+  const paymentStatus = String(reservation.payment_status || "").toUpperCase();
+
+  const paymentMethodLabel =
+    paymentMethod === "cash"
+      ? t("paymentMethods.cash")
+      : paymentMethod === "card"
+        ? t("paymentMethods.card")
+        : paymentMethod === "bank_transfer"
+          ? t("paymentMethods.bankTransfer")
+          : reservation.payment_method || "-";
+
+  const paymentStatusLabel =
+    paymentStatus === "PAID"
+      ? t("paymentStatus.paid")
+      : t("paymentStatus.unpaid");
 
   const handleDownloadPDF = async () => {
     const html2pdf = (await import("html2pdf.js")).default;
@@ -68,7 +84,7 @@ export default function PrintReceipt({ reservation, onClose }) {
 
             <Box textAlign="right">
               <Chip
-                label={reservation.payment_status}
+                label={paymentStatusLabel}
                 color={
                   reservation.payment_status === "PAID" ? "success" : "warning"
                 }
@@ -115,9 +131,9 @@ export default function PrintReceipt({ reservation, onClose }) {
 
             <Row
               label={t("fields.paymentMethod")}
-              value={reservation.payment_method?.toUpperCase() || "-"}
+              value={paymentMethodLabel}
             />
-            <Row label={t("fields.paymentStatus")} value={reservation.payment_status} />
+            <Row label={t("fields.paymentStatus")} value={paymentStatusLabel} />
             <Row
               label={t("fields.paidAt")}
               value={

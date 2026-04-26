@@ -63,6 +63,19 @@ export default function PaymentsInvoicesTab() {
   const [printOpen, setPrintOpen] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState(null);
 
+  const getPaymentStatusLabel = (status) =>
+    String(status || "").toUpperCase() === "PAID"
+      ? t("filters.paid")
+      : t("filters.unpaid");
+
+  const getPaymentMethodLabel = (method) => {
+    const normalized = String(method || "").toLowerCase();
+    if (normalized === "cash") return t("paymentMethods.cash");
+    if (normalized === "card") return t("paymentMethods.card");
+    if (normalized === "bank_transfer") return t("paymentMethods.bankTransfer");
+    return method || "-";
+  };
+
   useEffect(() => {
     let active = true;
 
@@ -256,7 +269,7 @@ export default function PaymentsInvoicesTab() {
                       </Box>
                       <Chip
                         size="small"
-                        label={r.payment_status || "UNPAID"}
+                        label={getPaymentStatusLabel(r.payment_status)}
                         sx={{
                           fontWeight: 700,
                           bgcolor:
@@ -278,7 +291,7 @@ export default function PaymentsInvoicesTab() {
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       {t("fields.room")}: {r.rooms?.room_number ? `#${r.rooms.room_number}` : "-"} •{" "}
-                      {t("fields.method")}: {r.payment_method || "-"}
+                      {t("fields.method")}: {getPaymentMethodLabel(r.payment_method)}
                     </Typography>
                     <Box mt={1} display="flex" gap={1} flexWrap="wrap">
                       <Button
@@ -355,12 +368,12 @@ export default function PaymentsInvoicesTab() {
                         <TableCell>{formatCurrency(r.total_price)}</TableCell>
                         <TableCell>{formatCurrency(r.amount_paid)}</TableCell>
                         <TableCell sx={{ textTransform: "capitalize" }}>
-                          {r.payment_method || "-"}
+                          {getPaymentMethodLabel(r.payment_method)}
                         </TableCell>
                         <TableCell>
                           <Chip
                             size="small"
-                            label={r.payment_status || "UNPAID"}
+                            label={getPaymentStatusLabel(r.payment_status)}
                             sx={{
                               fontWeight: 700,
                               bgcolor:

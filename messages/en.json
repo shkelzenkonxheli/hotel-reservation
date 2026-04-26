@@ -500,6 +500,82 @@
         "reason": "Reason",
         "noReason": "No reason provided.",
         "close": "Close"
+      },
+      "form": {
+        "title": {
+          "create": "New walk-in reservation",
+          "edit": "Edit reservation",
+          "step": "Step {step} of {total} - {current}",
+          "minimize": "Minimize"
+        },
+        "steps": {
+          "stayRoom": "Stay and room",
+          "guestPayment": "Guest and payment"
+        },
+        "minimized": {
+          "title": "Reservation form minimized",
+          "restore": "Restore",
+          "close": "Close"
+        },
+        "sections": {
+          "stayDetails": "Stay details",
+          "guestDetails": "Guest details",
+          "pricingPayment": "Pricing and payment"
+        },
+        "availability": {
+          "available": "Available",
+          "unavailable": "No availability",
+          "success": "Room available for selected dates.",
+          "error": "No rooms available for selected dates."
+        },
+        "fields": {
+          "roomType": "Room type",
+          "roomTypeOption": "{type} - EUR {price}/night",
+          "checkIn": "Check-in",
+          "checkOut": "Check-out",
+          "roomNumber": "Room number",
+          "fullName": "Full name",
+          "phone": "Phone",
+          "addressOptional": "Address (optional)",
+          "guests": "Guests",
+          "totalPrice": "Total price",
+          "currency": "EUR",
+          "paymentMethod": "Payment method",
+          "paymentStatus": "Payment status"
+        },
+        "paymentMethods": {
+          "cash": "Cash",
+          "card": "Card"
+        },
+        "paymentStatus": {
+          "unpaid": "Unpaid",
+          "paid": "Paid"
+        },
+        "helpers": {
+          "required": "Required",
+          "selectTypeAndDates": "Select room type and dates first",
+          "noRoomsForDates": "No rooms available for selected dates",
+          "showingAvailableRooms": "Showing available rooms for selected dates",
+          "unavailableRooms": "Unavailable rooms ({count})",
+          "outOfOrder": "Out of order",
+          "bookedUntil": "Booked until {until}",
+          "bookedInSelectedDates": "Booked in selected dates",
+          "nightlyRate": "Nightly rate: EUR {price}"
+        },
+        "actions": {
+          "cancel": "Cancel",
+          "back": "Back",
+          "next": "Next",
+          "create": "Create reservation",
+          "save": "Save changes"
+        },
+        "messages": {
+          "requiredFields": "Please fill all required fields.",
+          "noAvailability": "No rooms available for these dates.",
+          "saveFailed": "Failed to save reservation",
+          "created": "Reservation created successfully.",
+          "updated": "Reservation updated successfully."
+        }
       }
     },
     "manageRooms": {
@@ -735,6 +811,11 @@
       "summary": {
         "showing": "Showing {count} invoice(s)",
         "pendingBalance": "Pending balance"
+      },
+      "paymentMethods": {
+        "cash": "Cash",
+        "card": "Card",
+        "bankTransfer": "Bank transfer"
       }
     },
     "reports": {
@@ -955,6 +1036,15 @@
       "actions": {
         "downloadPdf": "Download PDF",
         "print": "Print"
+      },
+      "paymentMethods": {
+        "cash": "Cash",
+        "card": "Card",
+        "bankTransfer": "Bank transfer"
+      },
+      "paymentStatus": {
+        "paid": "Paid",
+        "unpaid": "Unpaid"
       }
     }
   },

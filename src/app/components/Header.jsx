@@ -622,6 +622,7 @@ export default function Header() {
             display: { xs: "flex", md: "none" },
             alignItems: "center",
             gap: 1,
+            ml: "auto",
           }}
         >
           {mounted && user && user.role !== "client" && (

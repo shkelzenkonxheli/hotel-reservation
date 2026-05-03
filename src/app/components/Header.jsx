@@ -23,11 +23,11 @@ import { useLocale, useTranslations } from "next-intl";
 
 import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
-import DashboardIcon from "@mui/icons-material/Dashboard";
 import LoginIcon from "@mui/icons-material/Login";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import LanguageIcon from "@mui/icons-material/Language";
 
 export default function Header() {
   const t = useTranslations("header");
@@ -42,6 +42,7 @@ export default function Header() {
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [alertsAnchor, setAlertsAnchor] = useState(null);
   const [userAnchor, setUserAnchor] = useState(null);
+  const [languageAnchor, setLanguageAnchor] = useState(null);
 
   const [summary, setSummary] = useState(null);
   const [notifications, setNotifications] = useState([]);
@@ -51,6 +52,7 @@ export default function Header() {
   const openMenu = (e) => setMenuAnchor(e.currentTarget);
   const closeMenu = () => setMenuAnchor(null);
   const closeUserMenu = () => setUserAnchor(null);
+  const closeLanguageMenu = () => setLanguageAnchor(null);
 
   const closeAlerts = async () => {
     setAlertsAnchor(null);
@@ -71,6 +73,7 @@ export default function Header() {
   const changeLocale = (nextLocale) => {
     if (!nextLocale || nextLocale === locale) return;
     document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=31536000; samesite=lax`;
+    closeLanguageMenu();
     router.refresh();
   };
 
@@ -128,12 +131,26 @@ export default function Header() {
 
   const showDashboard = user && user.role !== "client";
   const isDashboard = pathname?.startsWith("/dashboard");
+  const isPublicShell = !isDashboard;
   const isLoggedIn = Boolean(user);
 
-  const navSurface = isLoggedIn
-    ? "linear-gradient(90deg, #eef6ff 0%, #f8fbff 100%)"
-    : "#f8fafc";
-  const navBorder = isLoggedIn ? "#bfdbfe" : "#e2e8f0";
+  const publicNavLinks = [
+    { key: "roomsLink", href: "/rooms" },
+    { key: "contact", href: "/contact" },
+    ...(user ? [{ key: "profile", href: "/profile" }] : []),
+    ...(showDashboard ? [{ key: "dashboard", href: "/dashboard" }] : []),
+  ];
+
+  const navSurface = isPublicShell
+    ? "rgba(248, 250, 252, 0.92)"
+    : isLoggedIn
+      ? "linear-gradient(90deg, #eef6ff 0%, #f8fbff 100%)"
+      : "#f8fafc";
+  const navBorder = isPublicShell
+    ? "rgba(226,232,240,0.95)"
+    : isLoggedIn
+      ? "#bfdbfe"
+      : "#e2e8f0";
 
   return (
     <AppBar
@@ -143,18 +160,25 @@ export default function Header() {
         background: navSurface,
         color: "#0f172a",
         borderBottom: `1px solid ${navBorder}`,
+        backdropFilter: isPublicShell ? "blur(16px)" : "none",
       }}
     >
       <Toolbar
         sx={{
-          minHeight: 64,
+          minHeight: isPublicShell ? 58 : 64,
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
           gap: 2,
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1.25,
+            minWidth: { md: isPublicShell ? 180 : "auto" },
+          }}
+        >
           <Link
             href="/"
             aria-label="Go to home"
@@ -165,8 +189,8 @@ export default function Header() {
               src="/hotel-images/Logo.png"
               alt="Dijari Premium"
               sx={{
-                width: 42,
-                height: 42,
+                width: isPublicShell ? 34 : 42,
+                height: isPublicShell ? 34 : 42,
                 borderRadius: "50%",
                 objectFit: "cover",
                 backgroundColor: "#ffffff",
@@ -178,7 +202,12 @@ export default function Header() {
             />
           </Link>
           <Box>
-            <Typography variant="subtitle1" fontWeight={800} lineHeight={1}>
+            <Typography
+              variant="subtitle1"
+              fontWeight={isPublicShell ? 700 : 800}
+              lineHeight={1}
+              sx={{ fontSize: isPublicShell ? 17 : undefined }}
+            >
               <Link
                 href="/"
                 style={{ color: "inherit", textDecoration: "none" }}
@@ -194,58 +223,101 @@ export default function Header() {
           </Box>
         </Box>
 
+        {isPublicShell && (
+          <Box
+            sx={{
+              display: { xs: "none", md: "flex" },
+              flex: 1,
+              justifyContent: "center",
+              gap: 0.5,
+            }}
+          >
+            {publicNavLinks.map((item) => (
+              <Button
+                key={item.key}
+                component={Link}
+                href={item.href}
+                sx={{
+                  px: 1.4,
+                  minWidth: "auto",
+                  color: "#64748b",
+                  textTransform: "none",
+                  fontWeight: 500,
+                  fontSize: 13,
+                  borderRadius: 2,
+                  "&:hover": {
+                    backgroundColor: "rgba(226,232,240,0.45)",
+                    color: "#0f172a",
+                  },
+                }}
+              >
+                {t(item.key)}
+              </Button>
+            ))}
+          </Box>
+        )}
+
         <Box
           className="hidden md:flex items-center gap-2"
-          sx={{ marginLeft: "auto" }}
+          sx={{
+            marginLeft: isPublicShell ? 0 : "auto",
+            justifyContent: "flex-end",
+            flex: isPublicShell ? 1 : undefined,
+            minWidth: { md: isPublicShell ? 220 : "auto" },
+            gap: isPublicShell ? 1 : 2,
+          }}
         >
           <Box
             sx={{
               display: "inline-flex",
-              border: "1px solid #cbd5e1",
-              borderRadius: 2,
-              overflow: "hidden",
               mr: 0.5,
             }}
           >
-            <Button
-              onClick={() => changeLocale("sq")}
+            <IconButton
+              onClick={(e) => setLanguageAnchor(e.currentTarget)}
+              aria-label={t("language")}
               sx={{
-                minWidth: 46,
-                height: 34,
-                borderRadius: 0,
-                textTransform: "none",
-                fontWeight: 700,
-                fontSize: 12,
-                color: locale === "sq" ? "#ffffff" : "#334155",
-                backgroundColor: locale === "sq" ? "#0f172a" : "transparent",
+                width: isPublicShell ? 36 : 40,
+                height: isPublicShell ? 36 : 40,
+                borderRadius: 2,
+                color: "#334155",
                 "&:hover": {
-                  backgroundColor: locale === "sq" ? "#0f172a" : "#f1f5f9",
+                  backgroundColor: "#f1f5f9",
                 },
               }}
             >
-              SQ
-            </Button>
-            <Button
-              onClick={() => changeLocale("en")}
-              sx={{
-                minWidth: 46,
-                height: 34,
-                borderRadius: 0,
-                textTransform: "none",
-                fontWeight: 700,
-                fontSize: 12,
-                color: locale === "en" ? "#ffffff" : "#334155",
-                backgroundColor: locale === "en" ? "#0f172a" : "transparent",
-                "&:hover": {
-                  backgroundColor: locale === "en" ? "#0f172a" : "#f1f5f9",
-                },
-              }}
-            >
-              EN
-            </Button>
+              <LanguageIcon sx={{ fontSize: 18 }} />
+            </IconButton>
           </Box>
 
-          {!user && (
+          <Menu
+            anchorEl={languageAnchor}
+            open={Boolean(languageAnchor)}
+            onClose={closeLanguageMenu}
+            PaperProps={{
+              sx: {
+                borderRadius: 2,
+                mt: 1,
+                minWidth: 150,
+                boxShadow: "0 8px 24px rgba(15,23,42,0.12)",
+              },
+            }}
+          >
+            <MenuItem
+              selected={locale === "sq"}
+              onClick={() => changeLocale("sq")}
+            >
+              Shqip
+            </MenuItem>
+            <MenuItem
+              selected={locale === "en"}
+              onClick={() => changeLocale("en")}
+            >
+              English
+            </MenuItem>
+          </Menu>
+
+          {!user && !isPublicShell && (
             <Button
               component={Link}
               href="/contact"
@@ -267,10 +339,9 @@ export default function Header() {
                   onClick={openAlerts}
                   sx={{
                     color: "#0f172a",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: 2,
                     width: 40,
                     height: 40,
+                    borderRadius: 2,
                     "&:hover": { backgroundColor: "#f1f5f9" },
                   }}
                 >
@@ -398,7 +469,8 @@ export default function Header() {
                   fontWeight: 600,
                   border: "1px solid #e2e8f0",
                   borderRadius: 2,
-                  px: 1.5,
+                  px: isPublicShell ? 1.2 : 1.5,
+                  minHeight: isPublicShell ? 36 : 40,
                   "&:hover": { backgroundColor: "#f1f5f9" },
                 }}
               >
@@ -418,26 +490,50 @@ export default function Header() {
                   },
                 }}
               >
-                {showDashboard && (
-                  <MenuItem
-                    onClick={() => {
-                      closeUserMenu();
-                      router.push("/dashboard");
-                    }}
-                  >
-                    <DashboardIcon sx={{ fontSize: 18, mr: 1 }} />
-                    {t("dashboard")}
-                  </MenuItem>
-                )}
-                <MenuItem
-                  onClick={() => {
-                    closeUserMenu();
-                    router.push("/profile");
+                <Box
+                  sx={{
+                    px: 2,
+                    py: 1.5,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.25,
                   }}
                 >
-                  <PersonOutlineIcon sx={{ fontSize: 18, mr: 1 }} />
-                  {t("profile")}
-                </MenuItem>
+                  <Avatar
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      bgcolor: "#e2e8f0",
+                      color: "#0f172a",
+                      fontWeight: 700,
+                    }}
+                    src={user.avatar_url || undefined}
+                  >
+                    {(user.name || user.email || "?").slice(0, 1).toUpperCase()}
+                  </Avatar>
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography
+                      sx={{
+                        fontSize: 14,
+                        fontWeight: 700,
+                        color: "#0f172a",
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {user.name || t("account")}
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontSize: 12,
+                        color: "#64748b",
+                        lineHeight: 1.2,
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {user.email}
+                    </Typography>
+                  </Box>
+                </Box>
                 <Divider />
                 <MenuItem
                   onClick={() => {
@@ -453,30 +549,70 @@ export default function Header() {
             </>
           ) : (
             <>
-              <Button
-                component={Link}
-                href="/login"
-                startIcon={<LoginIcon />}
-                sx={{
-                  color: "#0f172a",
-                  textTransform: "none",
-                  fontWeight: 600,
-                }}
-              >
-                {t("login")}
-              </Button>
-              <Button
-                component={Link}
-                href="/register"
-                startIcon={<PersonAddIcon />}
-                sx={{
-                  color: "#0f172a",
-                  textTransform: "none",
-                  fontWeight: 600,
-                }}
-              >
-                {t("register")}
-              </Button>
+              {isPublicShell ? (
+                <>
+                  <Button
+                    component={Link}
+                    href="/login"
+                    sx={{
+                      color: "#475569",
+                      textTransform: "none",
+                      fontWeight: 500,
+                      fontSize: 13,
+                      minWidth: "auto",
+                      px: 1.25,
+                    }}
+                  >
+                    {t("signIn")}
+                  </Button>
+                  <Button
+                    component={Link}
+                    href="/rooms"
+                    sx={{
+                      backgroundColor: "#1f6feb",
+                      color: "#ffffff",
+                      textTransform: "none",
+                      fontWeight: 700,
+                      fontSize: 13,
+                      borderRadius: 2,
+                      minHeight: 34,
+                      px: 1.8,
+                      "&:hover": {
+                        backgroundColor: "#195fd0",
+                      },
+                    }}
+                  >
+                    {t("bookNow")}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    component={Link}
+                    href="/login"
+                    startIcon={<LoginIcon />}
+                    sx={{
+                      color: "#0f172a",
+                      textTransform: "none",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {t("login")}
+                  </Button>
+                  <Button
+                    component={Link}
+                    href="/register"
+                    startIcon={<PersonAddIcon />}
+                    sx={{
+                      color: "#0f172a",
+                      textTransform: "none",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {t("register")}
+                  </Button>
+                </>
+              )}
             </>
           )}
         </Box>
@@ -495,10 +631,9 @@ export default function Header() {
                   onClick={openAlerts}
                   sx={{
                     color: "#0f172a",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: 2,
                     width: 40,
                     height: 40,
+                    borderRadius: 2,
                     "&:hover": { backgroundColor: "#f1f5f9" },
                   }}
                 >
@@ -631,58 +766,30 @@ export default function Header() {
             },
           }}
         >
-          <Box
-            sx={{
-              px: 1.5,
-              pt: 1,
-              pb: 0.5,
-              display: "flex",
-              gap: 1,
-              alignItems: "center",
+          <MenuItem
+            onClick={(e) => {
+              closeMenu();
+              setLanguageAnchor(e.currentTarget);
             }}
+            sx={{ justifyContent: "space-between" }}
           >
-            <Typography variant="caption" color="text.secondary">
-              {t("language")}
-            </Typography>
-            <Button
-              size="small"
-              onClick={() => changeLocale("sq")}
-              sx={{
-                minWidth: 42,
-                textTransform: "none",
-                fontSize: 12,
-                fontWeight: 700,
-                color: locale === "sq" ? "#ffffff" : "#334155",
-                backgroundColor: locale === "sq" ? "#0f172a" : "#f1f5f9",
-                "&:hover": {
-                  backgroundColor: locale === "sq" ? "#0f172a" : "#e2e8f0",
-                },
-              }}
-            >
-              SQ
-            </Button>
-            <Button
-              size="small"
-              onClick={() => changeLocale("en")}
-              sx={{
-                minWidth: 42,
-                textTransform: "none",
-                fontSize: 12,
-                fontWeight: 700,
-                color: locale === "en" ? "#ffffff" : "#334155",
-                backgroundColor: locale === "en" ? "#0f172a" : "#f1f5f9",
-                "&:hover": {
-                  backgroundColor: locale === "en" ? "#0f172a" : "#e2e8f0",
-                },
-              }}
-            >
-              EN
-            </Button>
-          </Box>
+            {t("language")}
+            <LanguageIcon sx={{ fontSize: 18, color: "#64748b" }} />
+          </MenuItem>
           <Divider />
 
           {[
-            !user && (
+            isPublicShell && (
+              <MenuItem
+                key="rooms-link"
+                component={Link}
+                href="/rooms"
+                onClick={closeMenu}
+              >
+                {t("roomsLink")}
+              </MenuItem>
+            ),
+            isPublicShell && (
               <MenuItem
                 key="contact"
                 component={Link}
@@ -690,6 +797,26 @@ export default function Header() {
                 onClick={closeMenu}
               >
                 {t("contact")}
+              </MenuItem>
+            ),
+            isPublicShell && user && (
+              <MenuItem
+                key="profile"
+                component={Link}
+                href="/profile"
+                onClick={closeMenu}
+              >
+                {t("profile")}
+              </MenuItem>
+            ),
+            isPublicShell && showDashboard && (
+              <MenuItem
+                key="dashboard"
+                component={Link}
+                href="/dashboard"
+                onClick={closeMenu}
+              >
+                {t("dashboard")}
               </MenuItem>
             ),
             !user && (
@@ -712,17 +839,7 @@ export default function Header() {
                 {t("register")}
               </MenuItem>
             ),
-            user && user.role !== "client" && (
-              <MenuItem
-                key="dashboard"
-                component={Link}
-                href="/dashboard"
-                onClick={closeMenu}
-              >
-                {t("dashboard")}
-              </MenuItem>
-            ),
-            user && (
+            user && !isPublicShell && (
               <MenuItem
                 key="profile"
                 component={Link}

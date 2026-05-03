@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { nanoid } from "nanoid";
+import { Resend } from "resend";
 import { logActivity } from "../../../../lib/activityLogger";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { rateLimit } from "@/lib/rateLimit";
 import { requireSameOrigin } from "@/lib/security";
+import {
+  reservationConfirmationSubject,
+  reservationConfirmationTemplate,
+} from "@/lib/email/reservationConfirmationTemplate";
 
 // Convert YYYY-MM-DD to a UTC midnight Date for day-precision comparisons.
 function parseDateOnlyToUTC(dateStr) {
@@ -19,6 +24,10 @@ function isOverlapError(error) {
     error?.message?.includes("violates exclusion constraint") ||
     error?.meta?.cause?.includes?.("exclusion constraint")
   );
+}
+
+function normalizeEmailLocale(locale) {
+  return String(locale || "").toLowerCase().startsWith("en") ? "en" : "sq";
 }
 
 async function syncReservationStatuses() {
@@ -77,6 +86,7 @@ export async function POST(request) {
       total_price,
       payment_method, // "cash" | "card"
       payment_status, // "PAID" | "UNPAID"
+      locale,
     } = await request.json();
 
     if (!type || !startDate || !endDate || !fullname || !phone) {
@@ -156,6 +166,16 @@ export async function POST(request) {
     const finalUserId = canSetUserId
       ? (userId ?? session?.user?.id ?? null)
       : (session?.user?.id ?? null);
+    const emailLocale = normalizeEmailLocale(
+      locale || request.cookies.get("NEXT_LOCALE")?.value || "sq",
+    );
+
+    const guestUser = finalUserId
+      ? await prisma.users.findUnique({
+          where: { id: finalUserId },
+          select: { email: true, name: true },
+        })
+      : null;
 
     const reservation = await prisma.reservations.create({
       data: {
@@ -207,6 +227,34 @@ export async function POST(request) {
         is_read: false,
       },
     });
+
+    if (process.env.RESEND_API_KEY && guestUser?.email) {
+      try {
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        await resend.emails.send({
+          from: "Dijari Premium <onboarding@dijaripremium.com>",
+          to: guestUser.email,
+          subject: reservationConfirmationSubject({
+            locale: emailLocale,
+            reservationStatus,
+          }),
+          html: reservationConfirmationTemplate({
+            locale: emailLocale,
+            fullname: fullname || guestUser.name || "Guest",
+            roomName: availableRoom.name || `#${availableRoom.room_number}`,
+            startDate,
+            endDate,
+            totalPrice: total.toFixed(2),
+            reservationCode: reservation.reservation_code,
+            paymentMethod: payMethod,
+            paymentStatus: payStatus,
+            reservationStatus,
+          }),
+        });
+      } catch (emailError) {
+        console.error("Reservation confirmation email failed:", emailError);
+      }
+    }
 
     return NextResponse.json(reservation);
   } catch (error) {

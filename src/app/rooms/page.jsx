@@ -22,6 +22,10 @@ function fYMD(date) {
   )}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
+function getFeatureChips(amenities = []) {
+  return Array.isArray(amenities) ? amenities.filter(Boolean).slice(0, 3) : [];
+}
+
 export default function RoomsPage() {
   const t = useTranslations("rooms");
   usePageTitle(t("metaTitle"));
@@ -63,6 +67,23 @@ export default function RoomsPage() {
   }, []);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const savedDraft = localStorage.getItem("homeSearchDraft");
+    if (!savedDraft) return;
+
+    try {
+      const draft = JSON.parse(savedDraft);
+      if (draft?.startDate) setStartDate(draft.startDate);
+      if (draft?.endDate) setEndDate(draft.endDate);
+    } catch {
+      // Ignore malformed draft data from the home page widget.
+    } finally {
+      localStorage.removeItem("homeSearchDraft");
+    }
+  }, []);
+
+  useEffect(() => {
     if (!selectedRoom) return;
 
     async function loadAvailability() {
@@ -101,8 +122,6 @@ export default function RoomsPage() {
   const handleBookClick = (room) => {
     setSelectedRoom(room);
     setShowDateInput(true);
-    setStartDate("");
-    setEndDate("");
   };
 
   const checkAvailability = async () => {
@@ -176,55 +195,56 @@ export default function RoomsPage() {
               {roomTypes.map((room) => (
                 <PublicCard
                   key={room.type}
-                  className="overflow-hidden flex flex-col transition duration-200 hover:-translate-y-1"
+                  className="overflow-hidden flex flex-col rounded-[22px] border border-slate-200/80 bg-white p-0 shadow-[0_12px_30px_rgba(15,23,42,0.06)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_18px_44px_rgba(15,23,42,0.1)]"
                 >
-                  <div className="relative h-56 w-full">
-                    <Swiper
-                      modules={[Navigation, Pagination]}
-                      navigation
-                      pagination={{ clickable: true }}
-                      className="h-full w-full cursor-pointer"
-                      onClick={() => setGalleryRoom(room)}
-                    >
-                      {room.images.map((img, i) => (
-                        <SwiperSlide key={i}>
-                          <img
-                            src={img}
-                            className="w-full h-full object-cover"
-                          />
-                        </SwiperSlide>
-                      ))}
-                    </Swiper>
-
-                    <span className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">
+                  <button
+                    type="button"
+                    className="relative h-56 w-full cursor-pointer overflow-hidden text-left"
+                    onClick={() => setGalleryRoom(room)}
+                  >
+                    <img
+                      src={room.images?.[0]}
+                      alt={room.name}
+                      className="h-full w-full object-cover transition duration-500 hover:scale-[1.03]"
+                    />
+                    <span className="absolute left-3 top-3 rounded-full bg-white/92 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-700 shadow-sm">
                       {room.type}
                     </span>
-                  </div>
+                  </button>
 
-                  <div className="p-4 flex flex-col justify-between flex-grow">
+                  <div className="flex flex-grow flex-col p-5">
                     <div>
-                      <h3 className="text-lg font-semibold text-slate-900">
+                      <h3 className="text-[1.65rem] font-semibold leading-tight text-slate-900">
                         {room.name}
                       </h3>
-                      <p className="text-slate-500 text-sm mt-1 line-clamp-2">
+                      <p className="mt-2 min-h-[48px] text-sm leading-6 text-slate-500 line-clamp-2">
                         {getFirstLine(room.description)}
                       </p>
-                      <button
-                        className="text-slate-700 cursor-pointer text-sm mt-2 underline underline-offset-4 w-fit"
-                        onClick={() => setExpandedRoom(room)}
-                      >
-                        {t("buttons.viewDetails")}
-                      </button>
+
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {getFeatureChips(room.amenities).map((amenity) => (
+                          <span
+                            key={amenity}
+                            className="rounded-md bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600"
+                          >
+                            {amenity}
+                          </span>
+                        ))}
+                      </div>
                     </div>
 
-                    <div className="flex items-center justify-between mt-5">
-                      <span className="text-slate-900 font-semibold text-sm">
-                        EUR {Number(room.price || 0).toFixed(2)} /{" "}
-                        {t("night")}
-                      </span>
+                    <div className="mt-6 flex items-end justify-between gap-4">
+                      <div>
+                        <span className="text-[1.6rem] font-semibold leading-none text-slate-900">
+                          €{Number(room.price || 0).toFixed(0)}
+                        </span>
+                        <span className="ml-1 text-sm text-slate-500">
+                          / {t("night")}
+                        </span>
+                      </div>
 
                       <button
-                        className="public-button primary cursor-pointer text-sm px-4 py-2"
+                        className="inline-flex items-center justify-center rounded-lg bg-[#1f6feb] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#195fd0]"
                         onClick={() => handleBookClick(room)}
                       >
                         {t("buttons.bookNow")}

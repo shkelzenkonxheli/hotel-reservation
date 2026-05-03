@@ -1,5 +1,6 @@
 "use client";
 import { useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import { useBooking } from "@/context/BookingContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -24,6 +25,7 @@ import usePageTitle from "../hooks/usePageTitle";
 
 export default function CheckoutBooking() {
   const t = useTranslations("checkout");
+  const locale = useLocale();
   usePageTitle(t("metaTitle"));
 
   const { booking } = useBooking();
@@ -124,6 +126,7 @@ export default function CheckoutBooking() {
           total_price: totalPrice,
           payment_method: "cash",
           payment_status: "UNPAID",
+          locale,
         }),
       });
       const data = await res.json();

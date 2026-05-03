@@ -273,7 +273,13 @@
       "checkoutsToday": "Checkouts Today",
       "needsCleaning": "Needs Cleaning",
       "outOfOrder": "Out of Order"
-    }
+    },
+    "discover": "Discover",
+    "roomsLink": "Rooms",
+    "amenities": "Amenities",
+    "specialOffers": "Special Offers",
+    "signIn": "Sign In",
+    "bookNow": "Book Now"
   },
   "dashboard": {
     "metaTitle": "Dashboard | Dijari Premium",
@@ -1051,55 +1057,95 @@
   "home": {
     "metaTitle": "Home | Dijari Premium",
     "hero": {
-      "title": "A refined stay for business and leisure",
-      "subtitle": "Premium apartments in Ulqin with a practical location, sea-view stays, and a calm hospitality experience close to the coast.",
-      "cta": "View Rooms"
+      "eyebrow": "Dijari Premium - Ulqin",
+      "title": "Sea-view stays, poolside calm, and a practical location near the coast",
+      "subtitle": "Designed for guests who want a clean, modern stay in Ulqin with easy access to the beach, the old town, and the everyday rhythm of the coast.",
+      "search": {
+        "checkIn": "Check-in",
+        "checkOut": "Check-out",
+        "guests": "Guests",
+        "guestOption": "{count} guest(s)",
+        "button": "Check availability",
+        "hint": "Choose your dates to carry them into the room selection flow."
+      }
     },
-    "intro": {
-      "title": "Designed for relaxed stays in Ulqin",
-      "description": "Dijari Premium combines a calm apartment-style stay with a practical location in Ulqin. It is suited for guests who want easy access to the coast, a peaceful atmosphere, and a modern, well-kept space to return to.",
-      "listTitle": "What you get",
-      "items": [
-        "Comfortable apartments with a premium, private feel",
-        "Sea-view and poolside experience across selected stays",
-        "Convenient access to beaches, dining, and city routes",
-        "A practical base for both short trips and longer stays"
-      ]
+    "story": {
+      "eyebrow": "Heritage of comfort",
+      "title": "A modern retreat shaped for relaxed stays in Ulqin",
+      "body": [
+        "Dijari Premium brings together contemporary rooms, a calm poolside atmosphere, and the kind of location that keeps the sea, beaches, and old town within easy reach.",
+        "Whether guests arrive for a summer holiday, a weekend escape, or a longer coastal stay, the experience is designed to feel polished, quiet, and easy from check-in to check-out."
+      ],
+      "highlights": [
+        "Sea-view apartments",
+        "Poolside mornings",
+        "Short access to the coast"
+      ],
+      "cta": "Discover the stay",
+      "imageAlt": "Interior room at Dijari Premium"
     },
-    "experience": {
-      "title": "A stay shaped by sea views, quiet comfort, and easy access around Ulqin",
-      "subtitle": "From poolside moments to open views and a location that keeps you close to the coast, Dijari Premium is designed for guests who want both relaxation and convenience in one place.",
+    "curation": {
+      "eyebrow": "Curated stays",
+      "title": "Featured spaces and signature moments around the property",
+      "viewAll": "View all rooms",
       "cards": [
         {
-          "title": "Sea-view apartments",
-          "description": "Wake up to open Adriatic views and calm private terraces in Ulqin."
+          "badge": "Most popular",
+          "title": "Sea View Residence",
+          "description": "Open Adriatic views, private balcony moments, and a refined base for longer stays in Ulqin.",
+          "price": "From EUR 120 / night"
         },
         {
-          "title": "Poolside mornings",
-          "description": "A relaxed setting for long summer days and quiet evening breaks."
+          "badge": "Poolside",
+          "title": "Morning by the pool",
+          "description": "A lighter stay experience built around calm mornings, breakfast outdoors, and quiet afternoons.",
+          "price": "From EUR 95 / night"
         },
         {
-          "title": "Comfort near everything",
-          "description": "Well connected to the beach, city centre, and key points around Ulqin."
+          "badge": "Leisure",
+          "title": "Sun terrace atmosphere",
+          "description": "Relaxed outdoor corners, generous sun, and an easy holiday rhythm around the property.",
+          "price": "From EUR 90 / night"
         }
       ]
     },
-    "features": {
+    "testimonials": {
+      "eyebrow": "Guest experiences",
+      "title": "What guests remember after their stay",
+      "subtitle": "A calm location, clean modern spaces, and a polished atmosphere are the themes guests mention most often.",
       "cards": [
         {
-          "title": "Comfort",
-          "desc": "Thoughtful interiors, calm rooms, and a stay that feels private and easy."
+          "quote": "The hotel felt fresh, organized, and peaceful. The pool area and the location made the stay very easy.",
+          "name": "Arta G.",
+          "role": "Summer guest"
         },
         {
-          "title": "Location",
-          "desc": "A convenient Ulqin location near the coast, beaches, and everyday essentials."
+          "quote": "Sea views from the room and fast access to the center gave us exactly the balance we were looking for.",
+          "name": "Leon D.",
+          "role": "Weekend traveler"
         },
         {
-          "title": "Experience",
-          "desc": "Sea views, pool moments, and a more elevated holiday atmosphere."
+          "quote": "The property feels premium without being heavy. Clean rooms, a calm atmosphere, and good positioning in Ulqin.",
+          "name": "Mira K.",
+          "role": "Family stay"
         }
       ]
     },
-    "footer": "All rights reserved."
+    "cta": {
+      "eyebrow": "Your sanctuary awaits",
+      "title": "Reserve directly and plan a smoother stay at Dijari Premium",
+      "subtitle": "Browse the available room types, choose your preferred dates, and continue your booking flow in a few steps.",
+      "primary": "Reserve your stay",
+      "secondary": "Contact us",
+      "imageAlt": "Pool and sea view at Dijari Premium"
+    },
+    "footer": {
+      "rights": "All rights reserved.",
+      "links": {
+        "rooms": "Rooms",
+        "contact": "Contact",
+        "signIn": "Sign in"
+      }
+    }
   }
 }

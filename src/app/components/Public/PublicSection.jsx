@@ -1,3 +1,7 @@
-export default function PublicSection({ children, className = "" }) {
-  return <section className={`public-section ${className}`}>{children}</section>;
+export default function PublicSection({ children, className = "", ...props }) {
+  return (
+    <section {...props} className={`public-section ${className}`}>
+      {children}
+    </section>
+  );
 }

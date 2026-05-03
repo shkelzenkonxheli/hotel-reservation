@@ -273,7 +273,13 @@
       "checkoutsToday": "Checkout sot",
       "needsCleaning": "Per pastrim",
       "outOfOrder": "Jashte funksionit"
-    }
+    },
+    "discover": "Zbulo",
+    "roomsLink": "Dhomat",
+    "amenities": "Amenitetet",
+    "specialOffers": "Oferta speciale",
+    "signIn": "Kycu",
+    "bookNow": "Rezervo"
   },
   "dashboard": {
     "metaTitle": "Dashboard | Dijari Premium",
@@ -1049,57 +1055,97 @@
     }
   },
   "home": {
-    "metaTitle": "Home | Dijari Premium",
+    "metaTitle": "Ballina | Dijari Premium",
     "hero": {
-      "title": "Qendrim i rafinuar per pune dhe pushim",
-      "subtitle": "Apartamente premium ne Ulqin me lokacion praktik, pamje nga deti dhe eksperience te qete mikpritjeje prane bregdetit.",
-      "cta": "Shiko dhomat"
+      "eyebrow": "Dijari Premium - Ulqin",
+      "title": "Qendrime me pamje nga deti, qetesi prane pishines dhe lokacion praktik afer bregdetit",
+      "subtitle": "I pershtatur per mysafire qe kerkojne nje qendrim modern e te paster ne Ulqin, me qasje te lehte ne plazh, qytetin e vjeter dhe ritmin e bregdetit.",
+      "search": {
+        "checkIn": "Check-in",
+        "checkOut": "Check-out",
+        "guests": "Mysafire",
+        "guestOption": "{count} mysafir(e)",
+        "button": "Kontrollo disponueshmerine",
+        "hint": "Zgjidh datat qe te kalojne direkt te pjesa e zgjedhjes se dhomave."
+      }
     },
-    "intro": {
-      "title": "Projektuar per qendrime te qeta ne Ulqin",
-      "description": "Dijari Premium kombinon qendrimin e qete ne stil apartamenti me lokacion praktik ne Ulqin. E pershtatshme per mysafire qe duan akses te lehte ne bregdet, atmosfere te qete dhe hapesire moderne ku kthehen me kenaqesi.",
-      "listTitle": "Cfare perfiton",
-      "items": [
-        "Apartamente komode me ndjesi private premium",
-        "Eksperience me pamje deti dhe zones pishine ne qendrime te zgjedhura",
-        "Akses i lehte ne plazh, restorante dhe rruge kryesore",
-        "Baze praktike si per udhetime te shkurtra ashtu edhe per qendrime me te gjata"
-      ]
+    "story": {
+      "eyebrow": "Komoditet i menduar mire",
+      "title": "Nje terheqje moderne per qendrime te qeta ne Ulqin",
+      "body": [
+        "Dijari Premium bashkon dhoma moderne, atmosfere te qete prane pishines dhe nje lokacion qe te mban afer detit, plazheve dhe qytetit te vjeter.",
+        "Qofte per pushime verore, nje ikje fundjave apo nje qendrim me te gjate ne bregdet, pervoja eshte menduar te ndihet e rregullt, e qete dhe praktike nga hyrja deri te largimi."
+      ],
+      "highlights": [
+        "Apartamente me pamje",
+        "Mengjese prane pishines",
+        "Afer bregdetit"
+      ],
+      "cta": "Shiko qendrimin",
+      "imageAlt": "Brendesi dhome ne Dijari Premium"
     },
-    "experience": {
-      "title": "Qendrim i formuar nga pamja e detit, qetesia dhe levizja e lehte ne Ulqin",
-      "subtitle": "Nga momentet te pishina deri te pamjet e hapura dhe lokacioni afer bregdetit, Dijari Premium eshte projektuar per mysafire qe duan relaks dhe komoditet ne nje vend.",
+    "curation": {
+      "eyebrow": "Qendrime te zgjedhura",
+      "title": "Hapesirat kryesore dhe momentet qe e dallojne pronen",
+      "viewAll": "Shiko te gjitha dhomat",
       "cards": [
         {
-          "title": "Apartamente me pamje deti",
-          "description": "Zgjohu me pamje te Adriatikut dhe terasa private te qeta ne Ulqin."
+          "badge": "Me e kerkuara",
+          "title": "Sea View Residence",
+          "description": "Pamje te hapura drejt Adriatikut, momente private ne ballkon dhe baze e rafinuar per qendrime me te gjata ne Ulqin.",
+          "price": "Nga EUR 120 / nate"
         },
         {
-          "title": "Mengjese prane pishines",
-          "description": "Ambient i relaksuar per dite te gjata vere dhe mbremje te qeta."
+          "badge": "Poolside",
+          "title": "Mengjes prane pishines",
+          "description": "Nje eksperience me e lehte qendrimi e ndertuar rreth mengjeseve te qeta, kafese jashte dhe pasditeve relaksuese.",
+          "price": "Nga EUR 95 / nate"
         },
         {
-          "title": "Komoditet afer cdo gjeje",
-          "description": "I lidhur mire me plazhin, qendren e qytetit dhe pikat kryesore ne Ulqin."
+          "badge": "Leisure",
+          "title": "Atmosfere ne sun terrace",
+          "description": "Kende relaksuese jashte, diell i plote dhe nje ritm pushimi i lehte perreth prones.",
+          "price": "Nga EUR 90 / nate"
         }
       ]
     },
-    "features": {
+    "testimonials": {
+      "eyebrow": "Pershtypjet e mysafireve",
+      "title": "Cfare mbetet ne mendje pas qendrimit",
+      "subtitle": "Lokacioni i qete, ambientet moderne dhe atmosfera e rregullt jane pikat qe permenden me se shumti nga mysafiret.",
       "cards": [
         {
-          "title": "Komoditet",
-          "desc": "Interier i menduar mire, dhoma te qeta dhe qendrim me ndjesi private."
+          "quote": "Hoteli ndihej i fresket, i rregullt dhe i qete. Zona e pishines dhe lokacioni e benin qendrimin shume te lehte.",
+          "name": "Arta G.",
+          "role": "Mysafire vere"
         },
         {
-          "title": "Lokacion",
-          "desc": "Lokacion i pershtatshem ne Ulqin prane bregdetit, plazheve dhe sherbimeve te perditshme."
+          "quote": "Pamja nga dhoma dhe qasja e shpejte ne qender na dha saktesisht balancen qe kerkonim.",
+          "name": "Leon D.",
+          "role": "Udhetar fundjave"
         },
         {
-          "title": "Eksperience",
-          "desc": "Pamje deti, momente ne pishine dhe atmosfere pushimi me nivel me te larte."
+          "quote": "Prona duket premium pa u ngarkuar. Dhoma te pastra, atmosfere e qete dhe pozicion shume i mire ne Ulqin.",
+          "name": "Mira K.",
+          "role": "Qendrim familjar"
         }
       ]
     },
-    "footer": "Te gjitha te drejtat e rezervuara."
+    "cta": {
+      "eyebrow": "Qendrimi yt po pret",
+      "title": "Rezervo direkt dhe organizo nje qendrim me te lehte ne Dijari Premium",
+      "subtitle": "Shiko llojet e dhomave, zgjidh datat qe te pershtaten dhe vazhdo rezervimin ne pak hapa.",
+      "primary": "Rezervo qendrimin",
+      "secondary": "Na kontakto",
+      "imageAlt": "Pamje nga pishina dhe deti ne Dijari Premium"
+    },
+    "footer": {
+      "rights": "Te gjitha te drejtat e rezervuara.",
+      "links": {
+        "rooms": "Dhomat",
+        "contact": "Kontakti",
+        "signIn": "Kycu"
+      }
+    }
   }
 }

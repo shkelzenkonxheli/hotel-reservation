@@ -89,11 +89,11 @@ export async function POST(req) {
     });
 
     const resend = new Resend(process.env.RESEND_API_KEY);
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
     const verifyUrl = `${baseUrl}/api/auth/verify-email?token=${verifyToken}`;
 
     await resend.emails.send({
-      from: "Dijari Premium <onboarding@resend.dev>",
+      from: "Dijari Premium <onboarding@dijaripremium.com>",
       to: normalizedEmail,
       subject: "Verify your email",
       html: `

@@ -4,7 +4,6 @@ import { Suspense, useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import Link from "next/link";
 
 import {
   Box,
@@ -19,13 +18,10 @@ import {
   CircularProgress,
   AppBar,
   Typography,
-  Avatar,
   Divider,
 } from "@mui/material";
 
 import MenuIcon from "@mui/icons-material/Menu";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import SecurityIcon from "@mui/icons-material/Security";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
@@ -50,7 +46,6 @@ import { DASHBOARD_TABS } from "@/lib/dashboardTabs";
 import usePageTitle from "../hooks/usePageTitle";
 
 const drawerWidth = 256;
-const collapsedWidth = 76;
 // lartÃ«sia e AppBar-it tÃ« header-it (afÃ«rsisht 64px)
 const HEADER_HEIGHT = 64;
 
@@ -71,22 +66,10 @@ function DashboardContent() {
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
-  const [collapsed, setCollapsed] = useState(
-    typeof window !== "undefined"
-      ? localStorage.getItem("dashboardSidebarCollapsed") === "true"
-      : false,
-  );
 
   useEffect(() => {
     if (activeTab) localStorage.setItem("activeTab", activeTab);
   }, [activeTab]);
-
-  useEffect(() => {
-    localStorage.setItem(
-      "dashboardSidebarCollapsed",
-      collapsed ? "true" : "false",
-    );
-  }, [collapsed]);
 
   const user = session?.user ?? null;
   const tabs = DASHBOARD_TABS.map((tab) => ({
@@ -180,63 +163,7 @@ function DashboardContent() {
         flexDirection: "column",
       }}
     >
-      {/* BRAND + PROFILE */}
-      <Box
-        sx={{
-          height: HEADER_HEIGHT,
-          display: "flex",
-          alignItems: "center",
-          gap: 1.5,
-          px: 2,
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
-        }}
-      >
-        <Avatar
-          src={user?.avatar_url || undefined}
-          sx={{ width: 36, height: 36 }}
-          component={Link}
-          href="/profile"
-        />
-
-        {!collapsed ? (
-          <Box>
-            <Typography fontWeight={700} color="white">
-              {user.role === "admin"
-                ? t("shell.adminPanel")
-                : t("shell.workerPanel")}
-            </Typography>
-            <Typography variant="caption" color="#94a3b8">
-              {user.name}
-            </Typography>
-          </Box>
-        ) : null}
-
-        <Box sx={{ marginLeft: "auto" }}>
-          <IconButton
-            onClick={() => setCollapsed((prev) => !prev)}
-            sx={{
-              color: "#e2e8f0",
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: 2,
-              width: 32,
-              height: 32,
-              "&:hover": { backgroundColor: "rgba(255,255,255,0.06)" },
-            }}
-            aria-label={
-              collapsed ? t("shell.expandSidebar") : t("shell.collapseSidebar")
-            }
-          >
-            {collapsed ? (
-              <ChevronRightIcon sx={{ fontSize: 18 }} />
-            ) : (
-              <ChevronLeftIcon sx={{ fontSize: 18 }} />
-            )}
-          </IconButton>
-        </Box>
-      </Box>
-
-      {/* MENU */}
-      <List sx={{ mt: 1, px: 1 }}>
+      <List sx={{ px: 1, py: 1 }}>
         {visibleTabs.map((tab) => (
           <ListItem key={tab.key} disablePadding>
             <ListItemButton
@@ -249,7 +176,7 @@ function DashboardContent() {
                 my: 0.4,
                 borderRadius: 2,
                 gap: 1.5,
-                px: collapsed ? 1.2 : 1.8,
+                px: 1.8,
                 "&.Mui-selected": {
                   bgcolor: "rgba(59,130,246,0.18)",
                   color: "#e2e8f0",
@@ -272,33 +199,29 @@ function DashboardContent() {
               <ListItemIcon
                 sx={{
                   color: "inherit",
-                  minWidth: collapsed ? 32 : 36,
+                  minWidth: 36,
                 }}
               >
                 {tab.icon}
               </ListItemIcon>
-              {!collapsed ? (
-                <ListItemText
-                  primary={tab.label}
-                  primaryTypographyProps={{
-                    fontSize: 14,
-                    fontWeight: activeTab === tab.key ? 700 : 600,
-                  }}
-                />
-              ) : null}
+              <ListItemText
+                primary={tab.label}
+                primaryTypographyProps={{
+                  fontSize: 14,
+                  fontWeight: activeTab === tab.key ? 700 : 600,
+                }}
+              />
             </ListItemButton>
           </ListItem>
         ))}
       </List>
 
-      {!collapsed ? (
-        <Box sx={{ mt: "auto", px: 2, pb: 2 }}>
-          <Divider sx={{ borderColor: "rgba(255,255,255,0.06)", mb: 2 }} />
-          <Typography variant="caption" color="#94a3b8">
-            © {t("shell.copyright")}
-          </Typography>
-        </Box>
-      ) : null}
+      <Box sx={{ mt: "auto", px: 2, pb: 2 }}>
+        <Divider sx={{ borderColor: "rgba(255,255,255,0.06)", mb: 2 }} />
+        <Typography variant="caption" color="#94a3b8">
+          © {t("shell.copyright")}
+        </Typography>
+      </Box>
     </Box>
   );
 
@@ -360,14 +283,13 @@ function DashboardContent() {
         variant="permanent"
         sx={{
           display: { xs: "none", md: "block" },
-          width: collapsed ? collapsedWidth : drawerWidth,
+          width: drawerWidth,
           "& .MuiDrawer-paper": {
-            width: collapsed ? collapsedWidth : drawerWidth,
+            width: drawerWidth,
             bgcolor: "#0f172a",
             color: "#e2e8f0",
             top: HEADER_HEIGHT, // KJO E ZGJIDH: nis poshtÃ« header-it
             height: `calc(100% - ${HEADER_HEIGHT}px)`,
-            transition: "width 200ms ease",
           },
         }}
       >

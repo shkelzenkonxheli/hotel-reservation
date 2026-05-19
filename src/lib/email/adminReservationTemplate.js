@@ -1,30 +1,51 @@
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function detailsRow(label, value) {
   return `
     <tr>
-      <td style="padding:10px 0;color:#64748b;font-size:14px;">${label}</td>
-      <td style="padding:10px 0;color:#0f172a;font-size:14px;font-weight:600;text-align:right;">${value}</td>
+      <td style="padding:10px 0;color:#64748b;font-size:14px;">${escapeHtml(label)}</td>
+      <td style="padding:10px 0;color:#0f172a;font-size:14px;font-weight:600;text-align:right;">${escapeHtml(value)}</td>
     </tr>
   `;
 }
 
+export function adminReservationSubject({ reservationStatus = "pending" } = {}) {
+  return String(reservationStatus || "").toLowerCase() === "confirmed"
+    ? "Reservation confirmed"
+    : "New reservation request";
+}
+
 export function adminReservationTemplate({
   fullname,
+  guestEmail,
   phone,
   roomType,
   roomName,
   startDate,
   endDate,
   totalPrice,
-  sessionId,
+  reservationCode,
+  reservationStatus = "pending",
+  source = "Guest portal",
 }) {
+  const isConfirmed =
+    String(reservationStatus || "").toLowerCase() === "confirmed";
+
   return `
     <div style="margin:0;padding:32px 16px;background:#f8fafc;font-family:Arial,sans-serif;color:#0f172a;">
       <div style="max-width:620px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:20px;overflow:hidden;">
         <div style="padding:28px 32px;background:linear-gradient(135deg,#1e293b,#334155);color:#ffffff;">
           <div style="font-size:12px;letter-spacing:0.12em;text-transform:uppercase;opacity:0.78;">Dijari Premium</div>
-          <h1 style="margin:12px 0 0;font-size:28px;line-height:1.2;">New reservation received</h1>
+          <h1 style="margin:12px 0 0;font-size:28px;line-height:1.2;">${isConfirmed ? "Reservation confirmed" : "New reservation request"}</h1>
           <p style="margin:12px 0 0;font-size:15px;line-height:1.7;opacity:0.88;">
-            A new paid reservation has been created and assigned successfully.
+            ${isConfirmed ? "A reservation has been confirmed by staff." : "A new reservation has been created and is waiting for review."}
           </p>
         </div>
 
@@ -34,7 +55,10 @@ export function adminReservationTemplate({
               Booking summary
             </div>
             <table style="width:100%;border-collapse:collapse;">
-              ${detailsRow("Client", fullname)}
+              ${detailsRow("Status", isConfirmed ? "Confirmed" : "Pending")}
+              ${detailsRow("Source", source)}
+              ${detailsRow("Guest", fullname)}
+              ${detailsRow("Guest email", guestEmail || "-")}
               ${detailsRow("Phone", phone || "-")}
               ${detailsRow("Room type", roomType)}
               ${detailsRow("Assigned room", roomName)}
@@ -43,12 +67,12 @@ export function adminReservationTemplate({
             </table>
           </div>
 
-          <div style="margin-top:18px;padding:18px 20px;border-radius:16px;background:#fefce8;border:1px solid #fde68a;">
-            <div style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#a16207;margin-bottom:8px;">
-              Stripe session
+          <div style="margin-top:18px;padding:18px 20px;border-radius:16px;background:#eff6ff;border:1px solid #bfdbfe;">
+            <div style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#1d4ed8;margin-bottom:8px;">
+              Reservation code
             </div>
-            <div style="font-size:14px;font-weight:600;color:#0f172a;word-break:break-all;">
-              ${sessionId}
+            <div style="font-size:18px;font-weight:700;color:#0f172a;word-break:break-all;">
+              ${escapeHtml(reservationCode || "-")}
             </div>
           </div>
         </div>

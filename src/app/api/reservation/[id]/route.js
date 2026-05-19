@@ -1,9 +1,18 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { Resend } from "resend";
 import { logActivity } from "../../../../../lib/activityLogger";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import { requireSameOrigin } from "@/lib/security";
+import {
+  reservationConfirmationSubject,
+  reservationConfirmationTemplate,
+} from "@/lib/email/reservationConfirmationTemplate";
+import {
+  calculateReservationTotal,
+  clampGuests,
+} from "@/lib/pricing";
 
 // Convert YYYY-MM-DD to a UTC midnight Date for day-precision comparisons.
 function parseDateOnlyToUTC(dateStr) {
@@ -17,6 +26,51 @@ function isOverlapError(error) {
     error?.message?.includes("violates exclusion constraint") ||
     error?.meta?.cause?.includes?.("exclusion constraint")
   );
+}
+
+function normalizeEmailLocale(locale) {
+  return String(locale || "").toLowerCase().startsWith("en") ? "en" : "sq";
+}
+
+async function sendConfirmationEmailIfNeeded(previous, updated) {
+  const wasConfirmed = String(previous?.status || "").toLowerCase() === "confirmed";
+  const isConfirmed = String(updated?.status || "").toLowerCase() === "confirmed";
+  const recipient = String(
+    updated?.guest_email || updated?.users?.email || "",
+  ).trim();
+
+  if (
+    wasConfirmed ||
+    !isConfirmed ||
+    !recipient ||
+    !process.env.RESEND_API_KEY
+  ) {
+    return;
+  }
+
+  const locale = normalizeEmailLocale(updated?.guest_locale);
+  const resend = new Resend(process.env.RESEND_API_KEY);
+
+  await resend.emails.send({
+    from: "Dijari Premium <onboarding@dijaripremium.com>",
+    to: recipient,
+    subject: reservationConfirmationSubject({
+      locale,
+      reservationStatus: updated.status,
+    }),
+    html: reservationConfirmationTemplate({
+      locale,
+      fullname: updated.full_name || updated?.users?.name || "Guest",
+      roomName: updated?.rooms?.name || `#${updated?.rooms?.room_number || ""}`,
+      startDate: updated.start_date?.toISOString?.().slice(0, 10) || "",
+      endDate: updated.end_date?.toISOString?.().slice(0, 10) || "",
+      totalPrice: Number(updated.total_price || 0).toFixed(2),
+      reservationCode: updated.reservation_code,
+      paymentMethod: updated.payment_method || "cash",
+      paymentStatus: updated.payment_status || "UNPAID",
+      reservationStatus: updated.status || "pending",
+    }),
+  });
 }
 
 // Handle PATCH requests for this route.
@@ -38,7 +92,15 @@ export async function PATCH(req, context) {
     if (body.payment_status && onlyPaymentFields) {
       const existing = await prisma.reservations.findUnique({
         where: { id: Number(id) },
-        select: { id: true, total_price: true },
+        select: {
+          id: true,
+          total_price: true,
+          status: true,
+          guest_email: true,
+          guest_locale: true,
+          full_name: true,
+          reservation_code: true,
+        },
       });
 
       if (!existing) {
@@ -66,10 +128,12 @@ export async function PATCH(req, context) {
         where: { id: Number(id) },
         data: updateData,
         include: {
-          users: { select: { email: true } },
+          users: { select: { email: true, name: true } },
           rooms: true,
         },
       });
+
+      await sendConfirmationEmailIfNeeded(existing, updated);
 
       await logActivity({
         action: "PAYMENT_UPDATE",
@@ -83,6 +147,25 @@ export async function PATCH(req, context) {
     }
 
     if (body.status && Object.keys(body).length === 1) {
+      const existing = await prisma.reservations.findUnique({
+        where: { id: Number(id) },
+        select: {
+          id: true,
+          status: true,
+          guest_email: true,
+          guest_locale: true,
+          full_name: true,
+          reservation_code: true,
+        },
+      });
+
+      if (!existing) {
+        return NextResponse.json(
+          { error: "Reservation not found" },
+          { status: 404 },
+        );
+      }
+
       const nextStatus = String(body.status).toLowerCase();
       const updated = await prisma.reservations.update({
         where: { id: Number(id) },
@@ -91,10 +174,13 @@ export async function PATCH(req, context) {
           ...(nextStatus === "cancelled" ? { cancelled_at: new Date() } : {}),
         },
         include: {
-          users: { select: { email: true } },
+          users: { select: { email: true, name: true } },
           rooms: true,
         },
       });
+
+      await sendConfirmationEmailIfNeeded(existing, updated);
+
       await logActivity({
         action: "STATUS_CHANGE",
         entity: "reservation",
@@ -108,6 +194,7 @@ export async function PATCH(req, context) {
 
     const {
       fullname,
+      email,
       phone,
       address,
       type,
@@ -203,18 +290,27 @@ export async function PATCH(req, context) {
       newRoomId = fallback.id;
     }
 
+    const pricingRoom =
+      availableRooms.find((room) => room.id === Number(newRoomId)) ||
+      rooms.find((room) => room.id === Number(newRoomId));
+    const normalizedGuests = pricingRoom ? clampGuests(pricingRoom, guests) : Number(guests);
+    const computedTotal = pricingRoom
+      ? calculateReservationTotal(pricingRoom, normalizedGuests, startDate, endDate)
+      : parseFloat(total_price);
+
     const updated = await prisma.reservations.update({
       where: { id: Number(id) },
       data: {
         room_id: newRoomId,
         full_name: fullname,
         phone,
+        guest_email: String(email || existing.guest_email || "").trim().toLowerCase() || null,
         address,
         // Coerce numeric and date fields before update.
-        guests: Number(guests),
+        guests: normalizedGuests,
         start_date: start,
         end_date: end,
-        total_price: parseFloat(total_price),
+        total_price: computedTotal,
       },
       include: {
         users: { select: { name: true, email: true } },

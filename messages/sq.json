@@ -18,7 +18,8 @@
       "nightsLower": "nete",
       "priceBreakdown": "Detajet e cmimit",
       "total": "Totali",
-      "secureNote": "Checkout i sigurt. Te dhenat tuaja jane te mbrojtura."
+      "secureNote": "Checkout i sigurt. Te dhenat tuaja jane te mbrojtura.",
+      "guestPricing": "{included} te perfshire, +EUR {price} per cdo mysafir shtese, deri ne {max} mysafire."
     },
     "form": {
       "guestInformation": "Te dhenat e mysafirit",
@@ -541,6 +542,7 @@
           "checkOut": "Check-out",
           "roomNumber": "Numri i dhomes",
           "fullName": "Emri i plote",
+          "email": "Email",
           "phone": "Telefoni",
           "addressOptional": "Adresa (opsionale)",
           "guests": "Mysafire",
@@ -566,7 +568,8 @@
           "outOfOrder": "Jashte funksionit",
           "bookedUntil": "E rezervuar deri me {until}",
           "bookedInSelectedDates": "E rezervuar ne datat e zgjedhura",
-          "nightlyRate": "Cmimi per nate: EUR {price}"
+          "nightlyRate": "Cmimi per nate: EUR {price}",
+          "guestRange": "Lejohet: {included}-{max} mysafire"
         },
         "actions": {
           "cancel": "Anulo",
@@ -961,18 +964,28 @@
         "roomNumber": "Numri i dhomes",
         "roomType": "Lloji i dhomes",
         "price": "Cmimi (EUR)",
+        "includedGuests": "Mysafire te perfshire",
+        "maxGuests": "Maksimumi i mysafireve",
+        "extraGuestPrice": "Cmimi per mysafir shtese (EUR)",
         "description": "Pershkrim i shkurter marketingu",
         "customAmenity": "Shto amenity personal"
       },
       "placeholders": {
         "description": "p.sh. Dhome moderne me pamje nga deti, ideale per cifte."
       },
+      "helpers": {
+        "basePrice": "Cmimi baze per nate per numrin e perfshire te mysafireve.",
+        "guestPricingRule": "Cmimi i dhomes mbetet i njejte deri te mysafiret e perfshire. Cdo mysafir shtese shton cmimin shtese per mysafir deri te limiti maksimal.",
+        "includedGuests": "Mysafiret e perfshire ne cmimin baze.",
+        "maxGuests": "Numri maksimal i mysafireve te lejuar per kete dhome.",
+        "extraGuestPrice": "Shuma shtese per cdo mysafir mbi numrin e perfshire."
+      },
       "sections": {
         "amenities": "Amenitetet"
       },
       "applyToType": {
         "title": "Apliko fushat e perbashketa ne te gjitha dhomat e ketij lloji",
-        "description": "Aplikon emrin, cmimin, pershkrimin dhe amenitetet ne te gjitha dhomat me kete tip."
+        "description": "Aplikon emrin, cmimin, cmimin sipas mysafireve, pershkrimin dhe amenitetet ne te gjitha dhomat me kete tip."
       },
       "actions": {
         "addAmenity": "Shto",

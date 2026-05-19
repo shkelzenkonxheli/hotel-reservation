@@ -8,9 +8,17 @@ import { authOptions } from "../auth/[...nextauth]/route";
 import { rateLimit } from "@/lib/rateLimit";
 import { requireSameOrigin } from "@/lib/security";
 import {
+  calculateReservationTotal,
+  clampGuests,
+} from "@/lib/pricing";
+import {
   reservationConfirmationSubject,
   reservationConfirmationTemplate,
 } from "@/lib/email/reservationConfirmationTemplate";
+import {
+  adminReservationSubject,
+  adminReservationTemplate,
+} from "@/lib/email/adminReservationTemplate";
 
 // Convert YYYY-MM-DD to a UTC midnight Date for day-precision comparisons.
 function parseDateOnlyToUTC(dateStr) {
@@ -28,6 +36,26 @@ function isOverlapError(error) {
 
 function normalizeEmailLocale(locale) {
   return String(locale || "").toLowerCase().startsWith("en") ? "en" : "sq";
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim());
+}
+
+function getAdminNotificationEmail() {
+  return (
+    process.env.RESERVATION_ADMIN_EMAIL ||
+    process.env.ADMIN_EMAIL ||
+    "info@dijaripremium.com"
+  );
+}
+
+function getReservationSource(session) {
+  if (!session?.user) return "Guest portal";
+  if (session.user.role === "admin" || session.user.role === "worker") {
+    return "Staff dashboard";
+  }
+  return "Guest portal";
 }
 
 async function syncReservationStatuses() {
@@ -80,6 +108,7 @@ export async function POST(request) {
       startDate,
       endDate,
       fullname,
+      email,
       phone,
       address,
       guests,
@@ -89,9 +118,20 @@ export async function POST(request) {
       locale,
     } = await request.json();
 
-    if (!type || !startDate || !endDate || !fullname || !phone) {
+    const normalizedGuestEmail = String(email || "")
+      .trim()
+      .toLowerCase();
+
+    if (!type || !startDate || !endDate || !fullname || !phone || !normalizedGuestEmail) {
       return NextResponse.json(
         { error: "Missing required fields" },
+        { status: 400 },
+      );
+    }
+
+    if (!isValidEmail(normalizedGuestEmail)) {
+      return NextResponse.json(
+        { error: "A valid email address is required" },
         { status: 400 },
       );
     }
@@ -152,8 +192,16 @@ export async function POST(request) {
       );
     }
 
+    const normalizedGuests = guests ? clampGuests(availableRoom, guests) : null;
+    const computedTotal = calculateReservationTotal(
+      availableRoom,
+      normalizedGuests || availableRoom.included_guests,
+      startDate,
+      endDate,
+    );
+
     // Normalize pricing and payment metadata.
-    const total = Number(total_price || 0);
+    const total = computedTotal || Number(total_price || 0);
     const payStatus = payment_status === "PAID" ? "PAID" : "UNPAID";
     const payMethod = payment_method === "card" ? "card" : "cash";
     const reservationStatus = payStatus === "PAID" ? "confirmed" : "pending";
@@ -176,6 +224,7 @@ export async function POST(request) {
           select: { email: true, name: true },
         })
       : null;
+    const guestEmail = normalizedGuestEmail;
 
     const reservation = await prisma.reservations.create({
       data: {
@@ -190,8 +239,10 @@ export async function POST(request) {
 
         full_name: fullname,
         phone,
+        guest_email: guestEmail || null,
+        guest_locale: emailLocale,
         address: address || null,
-        guests: guests ? parseInt(guests, 10) : null,
+        guests: normalizedGuests,
         total_price: total,
 
         payment_method: payMethod, // ✅ (pasi ta shtosh në DB)
@@ -228,31 +279,54 @@ export async function POST(request) {
       },
     });
 
-    if (process.env.RESEND_API_KEY && guestUser?.email) {
+    if (process.env.RESEND_API_KEY) {
       try {
         const resend = new Resend(process.env.RESEND_API_KEY);
         await resend.emails.send({
           from: "Dijari Premium <onboarding@dijaripremium.com>",
-          to: guestUser.email,
-          subject: reservationConfirmationSubject({
-            locale: emailLocale,
+          to: getAdminNotificationEmail(),
+          subject: adminReservationSubject({
             reservationStatus,
           }),
-          html: reservationConfirmationTemplate({
-            locale: emailLocale,
-            fullname: fullname || guestUser.name || "Guest",
-            roomName: availableRoom.name || `#${availableRoom.room_number}`,
+          html: adminReservationTemplate({
+            fullname,
+            guestEmail: guestEmail || guestUser?.email || "",
+            phone,
+            roomType: type,
+            roomName: availableRoom.name || `Room ${availableRoom.room_number}`,
             startDate,
             endDate,
             totalPrice: total.toFixed(2),
             reservationCode: reservation.reservation_code,
-            paymentMethod: payMethod,
-            paymentStatus: payStatus,
             reservationStatus,
+            source: getReservationSource(session),
           }),
         });
+
+        if (reservationStatus === "confirmed" && (guestEmail || guestUser?.email)) {
+          await resend.emails.send({
+            from: "Dijari Premium <onboarding@dijaripremium.com>",
+            to: guestEmail || guestUser.email,
+            subject: reservationConfirmationSubject({
+              locale: emailLocale,
+              reservationStatus,
+            }),
+            html: reservationConfirmationTemplate({
+              locale: emailLocale,
+              fullname: fullname || guestUser?.name || "Guest",
+              roomName: availableRoom.name || `#${availableRoom.room_number}`,
+              startDate,
+              endDate,
+              totalPrice: total.toFixed(2),
+              reservationCode: reservation.reservation_code,
+              paymentMethod: payMethod,
+              paymentStatus: payStatus,
+              reservationStatus,
+            }),
+          });
+        }
       } catch (emailError) {
-        console.error("Reservation confirmation email failed:", emailError);
+        console.error("Reservation email flow failed:", emailError);
       }
     }
 

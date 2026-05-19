@@ -18,7 +18,8 @@
       "nightsLower": "nights",
       "priceBreakdown": "Price breakdown",
       "total": "Total",
-      "secureNote": "Secure checkout. Your details are protected."
+      "secureNote": "Secure checkout. Your details are protected.",
+      "guestPricing": "{included} included, +EUR {price} per extra guest, up to {max} guests."
     },
     "form": {
       "guestInformation": "Guest information",
@@ -541,6 +542,7 @@
           "checkOut": "Check-out",
           "roomNumber": "Room number",
           "fullName": "Full name",
+          "email": "Email",
           "phone": "Phone",
           "addressOptional": "Address (optional)",
           "guests": "Guests",
@@ -566,7 +568,8 @@
           "outOfOrder": "Out of order",
           "bookedUntil": "Booked until {until}",
           "bookedInSelectedDates": "Booked in selected dates",
-          "nightlyRate": "Nightly rate: EUR {price}"
+          "nightlyRate": "Nightly rate: EUR {price}",
+          "guestRange": "Allowed range: {included}-{max} guests"
         },
         "actions": {
           "cancel": "Cancel",
@@ -961,18 +964,28 @@
         "roomNumber": "Room Number",
         "roomType": "Room Type",
         "price": "Price (EUR)",
+        "includedGuests": "Included Guests",
+        "maxGuests": "Max Guests",
+        "extraGuestPrice": "Extra Guest Price (EUR)",
         "description": "Short Marketing Description",
         "customAmenity": "Add custom amenity"
       },
       "placeholders": {
         "description": "e.g. Modern sea-view room ideal for couples."
       },
+      "helpers": {
+        "basePrice": "Base nightly price for the included number of guests.",
+        "guestPricingRule": "The room price stays the same up to the included guests. Every extra guest adds the extra guest price until the max guest limit.",
+        "includedGuests": "Guests covered by the base price.",
+        "maxGuests": "Maximum number of guests allowed for this room.",
+        "extraGuestPrice": "Extra amount added per guest above the included count."
+      },
       "sections": {
         "amenities": "Amenities"
       },
       "applyToType": {
         "title": "Apply shared fields to all rooms of this type",
-        "description": "Applies name, price, short description and amenities to all rooms with this type."
+        "description": "Applies name, price, guest pricing, short description and amenities to all rooms with this type."
       },
       "actions": {
         "addAmenity": "Add",

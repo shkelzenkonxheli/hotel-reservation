@@ -35,6 +35,12 @@ import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import CloseIcon from "@mui/icons-material/Close";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import {
+  calculateNightlyRate,
+  calculateReservationTotal,
+  clampGuests,
+  getRoomCapacityConfig,
+} from "@/lib/pricing";
 
 export default function ReservationForm({
   open,
@@ -49,6 +55,7 @@ export default function ReservationForm({
   const [roomTypes, setRoomTypes] = useState([]);
 
   const [fullname, setFullname] = useState("");
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [type, setType] = useState("");
@@ -61,6 +68,7 @@ export default function ReservationForm({
   const [totalPrice, setTotalPrice] = useState("");
   const [isAvailable, setIsAvailable] = useState(null);
   const [selectedRoomPrice, setSelectedRoomPrice] = useState(0);
+  const [selectedRoomConfig, setSelectedRoomConfig] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [paymentStatus, setPaymentStatus] = useState("UNPAID");
   const [step, setStep] = useState(1);
@@ -138,6 +146,7 @@ export default function ReservationForm({
   useEffect(() => {
     if (mode === "edit" && reservation) {
       setFullname(reservation.full_name || "");
+      setEmail(reservation.guest_email || reservation.users?.email || "");
       setPhone(reservation.phone || "");
       setAddress(reservation.address || "");
       setType(reservation.rooms?.type || "");
@@ -151,6 +160,7 @@ export default function ReservationForm({
 
   const resetForm = () => {
     setFullname("");
+    setEmail("");
     setPhone("");
     setAddress("");
     setType("");
@@ -162,6 +172,7 @@ export default function ReservationForm({
     setEndDate("");
     setTotalPrice("");
     setIsAvailable(null);
+    setSelectedRoomConfig(null);
   };
 
   useEffect(() => {
@@ -174,14 +185,25 @@ export default function ReservationForm({
     }
 
     const selected = roomTypes.find((r) => r.type === type);
-    if (selected) setSelectedRoomPrice(selected.price);
+    if (selected) {
+      setSelectedRoomPrice(selected.price);
+      setSelectedRoomConfig(selected);
+    }
 
-    const nights =
-      (new Date(endDate).getTime() - new Date(startDate).getTime()) /
-      (1000 * 60 * 60 * 24);
-
-    if (nights > 0 && selected) {
-      setTotalPrice((nights * selected.price).toFixed(2));
+    if (selected) {
+      const normalizedGuests = clampGuests(selected, guests || selected.included_guests);
+      if (String(normalizedGuests) !== String(guests || "")) {
+        setGuests(String(normalizedGuests));
+      }
+      const computedTotal = calculateReservationTotal(
+        selected,
+        normalizedGuests,
+        startDate,
+        endDate,
+      );
+      if (computedTotal > 0) {
+        setTotalPrice(computedTotal.toFixed(2));
+      }
     }
 
     async function checkAvailability() {
@@ -225,8 +247,29 @@ export default function ReservationForm({
     checkAvailability();
   }, [type, startDate, endDate, roomTypes, mode, reservation?.id, reservation?.room_id]);
 
+  useEffect(() => {
+    if (!selectedRoomConfig || !startDate || !endDate) return;
+    const normalizedGuests = clampGuests(
+      selectedRoomConfig,
+      guests || selectedRoomConfig.included_guests,
+    );
+    if (String(normalizedGuests) !== String(guests || "")) {
+      setGuests(String(normalizedGuests));
+      return;
+    }
+    const computedTotal = calculateReservationTotal(
+      selectedRoomConfig,
+      normalizedGuests,
+      startDate,
+      endDate,
+    );
+    if (computedTotal > 0) {
+      setTotalPrice(computedTotal.toFixed(2));
+    }
+  }, [guests, selectedRoomConfig, startDate, endDate]);
+
   const handleSubmit = async () => {
-    if (!fullname || !phone || !type || !roomId || !startDate || !endDate) {
+    if (!fullname || !email || !phone || !type || !roomId || !startDate || !endDate) {
       setFeedback({
         open: true,
         message: t("messages.requiredFields"),
@@ -246,6 +289,7 @@ export default function ReservationForm({
 
     const payload = {
       fullname,
+      email,
       phone,
       address,
       type,
@@ -304,6 +348,7 @@ export default function ReservationForm({
     Boolean(endDate) &&
     Boolean(roomId) &&
     isAvailable !== false;
+  const guestConfig = getRoomCapacityConfig(selectedRoomConfig || {});
 
   const handleCancel = () => {
     resetForm();
@@ -562,6 +607,16 @@ export default function ReservationForm({
                   />
 
                   <TextField
+                    label={t("fields.email")}
+                    type="email"
+                    fullWidth
+                    sx={fieldSx}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    helperText={t("helpers.required")}
+                  />
+
+                  <TextField
                     label={t("fields.phone")}
                     type="tel"
                     fullWidth
@@ -586,6 +641,14 @@ export default function ReservationForm({
                     sx={fieldSx}
                     value={guests}
                     onChange={(e) => setGuests(e.target.value)}
+                    inputProps={{
+                      min: 1,
+                      max: guestConfig.maxGuests,
+                    }}
+                    helperText={t("helpers.guestRange", {
+                      included: guestConfig.includedGuests,
+                      max: guestConfig.maxGuests,
+                    })}
                   />
                 </Stack>
               </Box>
@@ -607,7 +670,12 @@ export default function ReservationForm({
                   }}
                   helperText={
                     selectedRoomPrice
-                      ? t("helpers.nightlyRate", { price: selectedRoomPrice })
+                      ? t("helpers.nightlyRate", {
+                          price: calculateNightlyRate(
+                            selectedRoomConfig || { price: selectedRoomPrice },
+                            guests || guestConfig.includedGuests,
+                          ).toFixed(2),
+                        })
                       : ""
                   }
                   onChange={(e) => setTotalPrice(e.target.value)}
@@ -701,6 +769,7 @@ export default function ReservationForm({
             disabled={
               isAvailable === false ||
               !fullname ||
+              !email ||
               !phone ||
               !type ||
               !roomId ||

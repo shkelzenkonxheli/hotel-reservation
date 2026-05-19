@@ -25,6 +25,16 @@ function normalizeAmenities(input) {
   return [...new Set(clean)];
 }
 
+function parsePositiveInt(value, fallback) {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function parseNonNegativeDecimal(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
+}
+
 function blocksRoom(status) {
   const s = String(status || "").toLowerCase();
   return s !== "cancelled" && s !== "completed";
@@ -195,7 +205,17 @@ export async function POST(request) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const { name, room_number, type, price, description, amenities } =
+    const {
+      name,
+      room_number,
+      type,
+      price,
+      description,
+      amenities,
+      included_guests,
+      max_guests,
+      extra_guest_price,
+    } =
       await request.json();
 
     if (!name || !room_number || !type || price === undefined || price === "") {
@@ -221,12 +241,26 @@ export async function POST(request) {
       return NextResponse.json({ error: "Invalid price" }, { status: 400 });
     }
 
+    const includedGuests = parsePositiveInt(included_guests, 2);
+    const maxGuests = parsePositiveInt(max_guests, includedGuests);
+    const extraGuestPrice = parseNonNegativeDecimal(extra_guest_price, 0);
+
+    if (maxGuests < includedGuests) {
+      return NextResponse.json(
+        { error: "Max guests must be greater than or equal to included guests" },
+        { status: 400 },
+      );
+    }
+
     const room = await prisma.rooms.create({
       data: {
         name: String(name).trim(),
         room_number: String(room_number).trim(),
         type: String(type).trim(),
         price: parsedPrice,
+        included_guests: includedGuests,
+        max_guests: maxGuests,
+        extra_guest_price: extraGuestPrice,
         description: description ? String(description).trim() : null,
         amenities: normalizeAmenities(amenities),
       },

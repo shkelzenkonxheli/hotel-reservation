@@ -22,6 +22,12 @@ import PublicContainer from "../components/Public/PublicContainer";
 import PublicSection from "../components/Public/PublicSection";
 import PublicCard from "../components/Public/PublicCard";
 import usePageTitle from "../hooks/usePageTitle";
+import {
+  calculateNightlyRate,
+  calculateReservationTotal,
+  clampGuests,
+  getRoomCapacityConfig,
+} from "@/lib/pricing";
 
 export default function CheckoutBooking() {
   const t = useTranslations("checkout");
@@ -74,15 +80,9 @@ export default function CheckoutBooking() {
       return;
     }
 
-    let basePrice = Number(room.price);
-    let extraPrice = 0;
-
-    const maxGuests = room.type.toLowerCase().includes("apartment") ? 4 : 2;
-    if (guests > maxGuests) setGuests(maxGuests);
-
-    if (guests > 2) extraPrice = (guests - 2) * 20;
-
-    setTotalPrice((basePrice + extraPrice) * nights);
+    const normalizedGuests = clampGuests(room, guests);
+    if (normalizedGuests !== guests) setGuests(normalizedGuests);
+    setTotalPrice(calculateReservationTotal(room, normalizedGuests, startDate, endDate));
   }, [booking, guests, router]);
 
   /* ---------------- LOADING IF NO BOOKING ---------------- */
@@ -100,8 +100,9 @@ export default function CheckoutBooking() {
     (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24),
   );
 
-  const nightlyRate = Number(room.price || 0);
+  const adjustedNightlyRate = calculateNightlyRate(room, guests);
   const totalFormatted = totalPrice.toFixed(2);
+  const { includedGuests, maxGuests, extraGuestPrice } = getRoomCapacityConfig(room);
 
   /* ---------------- SUBMIT ---------------- */
   const handleBookClick = async () => {
@@ -120,6 +121,7 @@ export default function CheckoutBooking() {
           startDate,
           endDate,
           fullname,
+          email: session?.user?.email || "",
           phone,
           address,
           guests,
@@ -212,12 +214,21 @@ export default function CheckoutBooking() {
         </Typography>
         <div className="flex items-center justify-between text-sm text-slate-600">
           <span>
-            EUR {nightlyRate.toFixed(2)} x {nights} {t("summary.nightsLower")}
+            EUR {adjustedNightlyRate.toFixed(2)} x {nights} {t("summary.nightsLower")}
           </span>
           <span className="font-semibold text-slate-900">
-            EUR {(nightlyRate * nights).toFixed(2)}
+            EUR {(adjustedNightlyRate * nights).toFixed(2)}
           </span>
         </div>
+        {extraGuestPrice > 0 && maxGuests > includedGuests ? (
+          <Typography variant="caption" color="text.secondary">
+            {t("summary.guestPricing", {
+              included: includedGuests,
+              price: Number(extraGuestPrice).toFixed(2),
+              max: maxGuests,
+            })}
+          </Typography>
+        ) : null}
       </div>
 
       <div className="mt-4 rounded-xl bg-slate-50 px-4 py-3">
@@ -268,10 +279,10 @@ export default function CheckoutBooking() {
         <TextField
           label={t("form.guests")}
           type="number"
-          inputProps={{ min: 1 }}
+          inputProps={{ min: 1, max: maxGuests }}
           value={guests}
           onChange={(e) => setGuests(Number(e.target.value))}
-          helperText={t("form.guestsHelper")}
+          helperText={`${t("form.guestsHelper")} (${includedGuests}-${maxGuests})`}
         />
 
       </Box>

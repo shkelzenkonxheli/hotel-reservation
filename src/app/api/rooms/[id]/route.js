@@ -12,6 +12,16 @@ function normalizeAmenities(input) {
     .filter(Boolean);
   return [...new Set(clean)];
 }
+
+function parsePositiveInt(value, fallback) {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function parseNonNegativeDecimal(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
+}
 // Handle PATCH requests for this route.
 export async function PATCH(request, context) {
   try {
@@ -26,6 +36,9 @@ export async function PATCH(request, context) {
       room_number,
       type,
       price,
+      included_guests,
+      max_guests,
+      extra_guest_price,
       description,
       status,
       amenities,
@@ -50,6 +63,23 @@ export async function PATCH(request, context) {
         { status: 400 }
       );
     }
+    const normalizedIncludedGuests = parsePositiveInt(included_guests, 2);
+    const normalizedMaxGuests = parsePositiveInt(
+      max_guests,
+      normalizedIncludedGuests,
+    );
+    const normalizedExtraGuestPrice = parseNonNegativeDecimal(
+      extra_guest_price,
+      0,
+    );
+
+    if (normalizedMaxGuests < normalizedIncludedGuests) {
+      return NextResponse.json(
+        { error: "Max guests must be greater than or equal to included guests." },
+        { status: 400 },
+      );
+    }
+
     const updatedRoom = await prisma.rooms.update({
       where: { id: roomId },
       data: {
@@ -58,6 +88,9 @@ export async function PATCH(request, context) {
         type,
         // Coerce price to a number for storage.
         price: parseFloat(price),
+        included_guests: normalizedIncludedGuests,
+        max_guests: normalizedMaxGuests,
+        extra_guest_price: normalizedExtraGuestPrice,
         description,
         amenities: normalizeAmenities(amenities),
         status: status || undefined,
@@ -74,6 +107,9 @@ export async function PATCH(request, context) {
         data: {
           name,
           price: parseFloat(price),
+          included_guests: normalizedIncludedGuests,
+          max_guests: normalizedMaxGuests,
+          extra_guest_price: normalizedExtraGuestPrice,
           description,
           amenities: normalizeAmenities(amenities),
         },

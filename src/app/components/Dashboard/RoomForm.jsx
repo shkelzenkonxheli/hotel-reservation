@@ -17,6 +17,7 @@ import {
   FormControlLabel,
   Checkbox,
   Chip,
+  Alert,
 } from "@mui/material";
 
 const DEFAULT_AMENITIES = [
@@ -39,6 +40,9 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
     room_number: "",
     type: "",
     price: "",
+    included_guests: 2,
+    max_guests: 2,
+    extra_guest_price: 0,
     description: "",
     amenities: [],
   };
@@ -70,6 +74,9 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
         room_number: "",
         type: "",
         price: "",
+        included_guests: 2,
+        max_guests: 2,
+        extra_guest_price: 0,
         description: "",
         amenities: [],
       }
@@ -298,6 +305,7 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
           type="number"
           variant="outlined"
           margin="normal"
+          helperText={t("helpers.basePrice")}
           value={formData.price}
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, price: e.target.value }))
@@ -317,6 +325,55 @@ export default function RoomForm({ mode, room, onClose, onSaved }) {
             setFormData((prev) => ({ ...prev, description: e.target.value }))
           }
         />
+
+        <Alert severity="info" sx={{ mt: 1, borderRadius: 2 }}>
+          {t("helpers.guestPricingRule")}
+        </Alert>
+
+        <Box display="grid" gridTemplateColumns={{ xs: "1fr", sm: "1fr 1fr 1fr" }} gap={2} mt={1}>
+          <TextField
+            fullWidth
+            label={t("fields.includedGuests")}
+            type="number"
+            inputProps={{ min: 1 }}
+            helperText={t("helpers.includedGuests")}
+            value={formData.included_guests ?? 2}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                included_guests: e.target.value,
+              }))
+            }
+          />
+          <TextField
+            fullWidth
+            label={t("fields.maxGuests")}
+            type="number"
+            inputProps={{ min: 1 }}
+            helperText={t("helpers.maxGuests")}
+            value={formData.max_guests ?? 2}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                max_guests: e.target.value,
+              }))
+            }
+          />
+          <TextField
+            fullWidth
+            label={t("fields.extraGuestPrice")}
+            type="number"
+            inputProps={{ min: 0, step: "0.01" }}
+            helperText={t("helpers.extraGuestPrice")}
+            value={formData.extra_guest_price ?? 0}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                extra_guest_price: e.target.value,
+              }))
+            }
+          />
+        </Box>
 
         <Box mt={2}>
           <Typography variant="subtitle2" fontWeight={700} mb={1}>

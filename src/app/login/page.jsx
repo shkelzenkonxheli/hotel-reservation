@@ -22,6 +22,8 @@ import {
   LockOutlined,
   VisibilityOff,
   Visibility,
+  CheckCircleOutline,
+  ErrorOutline,
 } from "@mui/icons-material";
 import PublicContainer from "../components/Public/PublicContainer";
 import PublicSection from "../components/Public/PublicSection";
@@ -47,11 +49,17 @@ export default function LoginPage() {
     severity: "success",
   });
   const [hasLoginSuccessParam, setHasLoginSuccessParam] = useState(false);
+  const [showResendPrompt, setShowResendPrompt] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const ok = new URLSearchParams(window.location.search).get("login");
+    const params = new URLSearchParams(window.location.search);
+    const ok = params.get("login");
+    const registered = params.get("registered");
+    const prefillEmail = params.get("email");
     setHasLoginSuccessParam(ok === "success");
+    setShowResendPrompt(registered === "1");
+    if (prefillEmail) setEmail(prefillEmail);
   }, []);
 
   useEffect(() => {
@@ -131,7 +139,12 @@ export default function LoginPage() {
         setError(data.error || t("errors.resendFailed"));
         return;
       }
-      setError(t("messages.verificationSent"));
+      setError("");
+      setFeedback({
+        open: true,
+        message: t("messages.verificationSent"),
+        severity: "success",
+      });
     } catch (err) {
       setError(t("errors.resendFailed"));
     } finally {
@@ -150,6 +163,20 @@ export default function LoginPage() {
         borderColor: "#0ea5e9",
         borderWidth: 2,
       },
+    },
+  };
+
+  const feedbackCardSx = {
+    mt: 1.5,
+    borderRadius: 2.5,
+    alignItems: "flex-start",
+    "& .MuiAlert-icon": {
+      mt: "2px",
+      fontSize: 22,
+    },
+    "& .MuiAlert-message": {
+      width: "100%",
+      py: 0.25,
     },
   };
 
@@ -175,19 +202,21 @@ export default function LoginPage() {
             }}
           >
             <PublicCard
-              className="w-full max-w-md p-8 md:p-9"
+              className="w-full max-w-md p-7 md:p-8"
               style={{
                 backgroundColor: "#ffffff",
-                boxShadow: "0 20px 48px rgba(15,23,42,0.12)",
+                borderRadius: 28,
+                boxShadow: "0 22px 56px rgba(15,23,42,0.14)",
               }}
             >
               <Typography
                 variant="h4"
                 align="center"
-                fontWeight="bold"
+                fontWeight={800}
                 sx={{
                   color: "#0f172a",
-                  fontSize: { xs: "1.7rem", md: "2rem" },
+                  fontSize: { xs: "1.9rem", md: "2.15rem" },
+                  letterSpacing: "-0.03em",
                   mt: 0.5,
                 }}
                 gutterBottom
@@ -198,10 +227,17 @@ export default function LoginPage() {
                 variant="body2"
                 color="text.secondary"
                 align="center"
-                mb={3.2}
+                mb={3.25}
+                sx={{ maxWidth: 280, mx: "auto", lineHeight: 1.7 }}
               >
                 {t("subtitle")}
               </Typography>
+
+              {showResendPrompt && !error && (
+                <Alert severity="info" sx={{ mb: 2.25, borderRadius: 2.5, alignItems: "flex-start" }}>
+                  {t("registeredHint")}
+                </Alert>
+              )}
 
               <Box component="form" onSubmit={handleLoginCredentials}>
                 <TextField
@@ -250,10 +286,9 @@ export default function LoginPage() {
 
                 {error && (
                   <Alert
-                    severity={
-                      error.toLowerCase().includes("sent") ? "success" : "error"
-                    }
-                    sx={{ mt: 1 }}
+                    severity="error"
+                    icon={<ErrorOutline />}
+                    sx={feedbackCardSx}
                   >
                     {error}
                   </Alert>
@@ -267,7 +302,7 @@ export default function LoginPage() {
                     py: 1.35,
                     fontSize: "1rem",
                     textTransform: "none",
-                    borderRadius: 2,
+                    borderRadius: 3,
                     fontWeight: 700,
                     backgroundColor: "#0284c7",
                     "&:hover": { backgroundColor: "#0369a1" },
@@ -282,19 +317,40 @@ export default function LoginPage() {
                     t("buttons.login")
                   )}
                 </Button>
+
+                <Box display="flex" justifyContent="center" mt={1.75}>
+                  <Typography
+                    component="button"
+                    type="button"
+                    onClick={() => router.push("/forgot-password")}
+                    sx={{
+                      border: "none",
+                      background: "transparent",
+                      p: 0,
+                      m: 0,
+                      cursor: "pointer",
+                      fontSize: "0.92rem",
+                      fontWeight: 600,
+                      color: "#0284c7",
+                      textAlign: "center",
+                    }}
+                  >
+                    {t("forgotPassword")}
+                  </Typography>
+                </Box>
               </Box>
 
-              <Button
-                fullWidth
-                variant="text"
-                sx={{ mt: 1, textTransform: "none" }}
-                onClick={handleResend}
-                disabled={resendLoading}
-              >
-                {resendLoading
-                  ? t("buttons.sending")
-                  : t("buttons.resend")}
-              </Button>
+              {showResendPrompt && (
+                <Button
+                  fullWidth
+                  variant="text"
+                  sx={{ mt: 1, textTransform: "none", fontWeight: 600 }}
+                  onClick={handleResend}
+                  disabled={resendLoading}
+                >
+                  {resendLoading ? t("buttons.sending") : t("buttons.resend")}
+                </Button>
+              )}
 
               <Divider sx={{ my: 3 }}>{t("or")}</Divider>
 
@@ -306,7 +362,7 @@ export default function LoginPage() {
                   py: 1.25,
                   textTransform: "none",
                   fontWeight: 700,
-                  borderRadius: 2,
+                  borderRadius: 3,
                   borderColor: "#d1dbe7",
                   "&:hover": {
                     borderColor: "#b9c7d8",
@@ -350,8 +406,18 @@ export default function LoginPage() {
         <Alert
           severity={feedback.severity}
           variant="filled"
+          iconMapping={{
+            success: <CheckCircleOutline fontSize="inherit" />,
+            error: <ErrorOutline fontSize="inherit" />,
+          }}
           onClose={() => setFeedback({ ...feedback, open: false })}
-          sx={{ fontWeight: 600 }}
+          sx={{
+            minWidth: 320,
+            borderRadius: 2.5,
+            fontWeight: 600,
+            boxShadow: "0 18px 40px rgba(15,23,42,0.18)",
+            "& .MuiAlert-icon": { fontSize: 22, alignItems: "center" },
+          }}
         >
           {feedback.message}
         </Alert>

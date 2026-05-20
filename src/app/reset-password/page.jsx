@@ -1,9 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { signIn } from "next-auth/react";
 import {
   Box,
   TextField,
@@ -11,37 +10,38 @@ import {
   Typography,
   Alert,
   CircularProgress,
-  Divider,
   InputAdornment,
   IconButton,
 } from "@mui/material";
 import {
-  AccountCircle,
-  EmailOutlined,
-  Google,
   LockOutlined,
   Visibility,
   VisibilityOff,
-  CheckCircleOutline,
-  ErrorOutline,
 } from "@mui/icons-material";
 import PublicContainer from "../components/Public/PublicContainer";
 import PublicSection from "../components/Public/PublicSection";
 import PublicCard from "../components/Public/PublicCard";
 import usePageTitle from "../hooks/usePageTitle";
 
-export default function RegisterPage() {
-  const t = useTranslations("register");
+export default function ResetPasswordPage() {
+  const t = useTranslations("resetPassword");
   usePageTitle(t("metaTitle"));
 
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [token, setToken] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    setToken(params.get("token") || "");
+  }, []);
 
   const fieldSx = {
     "& .MuiOutlinedInput-root": {
@@ -57,72 +57,39 @@ export default function RegisterPage() {
     },
   };
 
-  const feedbackCardSx = {
-    mt: 2,
-    borderRadius: 2.5,
-    alignItems: "flex-start",
-    "& .MuiAlert-icon": {
-      mt: "2px",
-      fontSize: 22,
-    },
-    "& .MuiAlert-message": {
-      width: "100%",
-      py: 0.25,
-    },
-  };
-
-  const validateForm = () => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailRegex.test(email)) {
-      setError(t("errors.invalidEmail"));
-      return false;
-    }
-
-    const strongPassword = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
-
-    if (!strongPassword.test(password)) {
-      setError(
-        t("errors.weakPassword"),
-      );
-      return false;
-    }
-
-    return true;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     setMessage("");
-    if (!validateForm()) {
+
+    if (!token) {
+      setError(t("errors.missingToken"));
+      setLoading(false);
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError(t("errors.passwordMismatch"));
       setLoading(false);
       return;
     }
 
     try {
-      const res = await fetch("/api/auth/register", {
+      const res = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ token, password }),
       });
 
       const data = await res.json();
-
-      if (res.ok) {
-        setMessage(t("messages.verificationSent"));
-        setTimeout(
-          () =>
-            router.push(
-              `/login?registered=1&email=${encodeURIComponent(email)}`,
-            ),
-          1500,
-        );
+      if (!res.ok) {
+        setError(data.message || t("errors.generic"));
       } else {
-        setError(data.message || t("errors.registerFailed"));
+        setMessage(data.message || t("messages.success"));
+        setTimeout(() => router.push("/login"), 1400);
       }
-    } catch (err) {
+    } catch {
       setError(t("errors.generic"));
     } finally {
       setLoading(false);
@@ -160,8 +127,8 @@ export default function RegisterPage() {
             >
               <Typography
                 variant="h4"
-                fontWeight={800}
                 align="center"
+                fontWeight={800}
                 sx={{
                   color: "#0f172a",
                   fontSize: { xs: "1.9rem", md: "2.15rem" },
@@ -183,46 +150,10 @@ export default function RegisterPage() {
 
               <Box component="form" onSubmit={handleSubmit}>
                 <TextField
-                  label={t("fields.fullName")}
-                  fullWidth
-                  required
-                  variant="outlined"
-                  margin="normal"
-                  sx={fieldSx}
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <AccountCircle />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                <TextField
-                  label={t("fields.email")}
-                  type="email"
-                  fullWidth
-                  required
-                  variant="outlined"
-                  margin="normal"
-                  sx={fieldSx}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <EmailOutlined />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                <TextField
                   label={t("fields.password")}
                   type={showPassword ? "text" : "password"}
                   fullWidth
                   required
-                  variant="outlined"
                   margin="normal"
                   sx={fieldSx}
                   value={password}
@@ -236,9 +167,7 @@ export default function RegisterPage() {
                     ),
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowPassword(!showPassword)}
-                        >
+                        <IconButton onClick={() => setShowPassword((prev) => !prev)}>
                           {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
                       </InputAdornment>
@@ -246,29 +175,47 @@ export default function RegisterPage() {
                   }}
                 />
 
-                {error && (
-                  <Alert
-                    severity="error"
-                    icon={<ErrorOutline />}
-                    sx={feedbackCardSx}
-                  >
-                    {error}
+                <TextField
+                  label={t("fields.confirmPassword")}
+                  type={showConfirmPassword ? "text" : "password"}
+                  fullWidth
+                  required
+                  margin="normal"
+                  sx={fieldSx}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LockOutlined />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => setShowConfirmPassword((prev) => !prev)}
+                        >
+                          {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+
+                {message && (
+                  <Alert severity="success" sx={{ mt: 2, borderRadius: 2.5 }}>
+                    {message}
                   </Alert>
                 )}
-                {message && (
-                  <Alert
-                    severity="success"
-                    icon={<CheckCircleOutline />}
-                    sx={feedbackCardSx}
-                  >
-                    {message}
+                {error && (
+                  <Alert severity="error" sx={{ mt: 2, borderRadius: 2.5 }}>
+                    {error}
                   </Alert>
                 )}
 
                 <Button
                   type="submit"
                   variant="contained"
-                  color="primary"
                   fullWidth
                   disabled={loading}
                   sx={{
@@ -285,7 +232,7 @@ export default function RegisterPage() {
                   {loading ? (
                     <CircularProgress size={26} color="inherit" />
                   ) : (
-                    t("buttons.register")
+                    t("buttons.save")
                   )}
                 </Button>
               </Box>
@@ -295,42 +242,11 @@ export default function RegisterPage() {
                 align="center"
                 mt={3}
                 color="text.secondary"
+                sx={{ cursor: "pointer", fontWeight: 700, color: "#0284c7" }}
+                onClick={() => router.push("/login")}
               >
-                {t("haveAccount")}{" "}
-                <Typography
-                  component="span"
-                  sx={{ cursor: "pointer", color: "#0ea5e9", fontWeight: 700 }}
-                  onClick={() => router.push("/login")}
-                >
-                  {t("buttons.login")}
-                </Typography>
+                {t("backToLogin")}
               </Typography>
-
-              <Divider sx={{ my: 2 }}>{t("or")}</Divider>
-
-              <Button
-                fullWidth
-                variant="outlined"
-                startIcon={<Google />}
-                sx={{
-                  py: 1.25,
-                  textTransform: "none",
-                  borderRadius: 3,
-                  fontWeight: 700,
-                  borderColor: "#d1dbe7",
-                  "&:hover": {
-                    borderColor: "#b9c7d8",
-                    backgroundColor: "#f8fafc",
-                  },
-                }}
-                onClick={() =>
-                  signIn("google", {
-                    callbackUrl: "/",
-                  })
-                }
-              >
-                {t("buttons.google")}
-              </Button>
             </PublicCard>
           </Box>
         </PublicContainer>

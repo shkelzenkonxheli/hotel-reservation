@@ -72,6 +72,8 @@
     "subtitle": "Hyr ne llogarine tende",
     "or": "OSE",
     "noAccount": "Nuk ke llogari?",
+    "registeredHint": "Regjistrimi perfundoi. Verifiko email-in para hyrjes.",
+    "forgotPassword": "Ke harruar fjalekalimin?",
     "fields": {
       "email": "Email",
       "password": "Fjalekalimi"
@@ -100,6 +102,7 @@
     "subtitle": "Ploteso te dhenat per t'u regjistruar",
     "or": "Ose",
     "haveAccount": "Ke tashme llogari?",
+    "passwordHint": "Minimumi 8 karaktere, nje shkronje e madhe dhe nje numer.",
     "fields": {
       "fullName": "Emri i plote",
       "email": "Email",
@@ -118,6 +121,45 @@
       "weakPassword": "Fjalekalimi duhet te kete te pakten 8 karaktere, nje shkronje te madhe dhe nje numer.",
       "registerFailed": "Regjistrimi deshtoi.",
       "generic": "Ndodhi nje gabim. Ju lutem provoni perseri."
+    }
+  },
+  "forgotPassword": {
+    "metaTitle": "Harruat Fjalekalimin | Dijari Premium",
+    "title": "Rivendos fjalekalimin",
+    "subtitle": "Shkruaj email-in dhe do te dergojme nje link te sigurt per rivendosje.",
+    "backToLogin": "Kthehu te hyrja",
+    "fields": {
+      "email": "Email"
+    },
+    "buttons": {
+      "send": "Dergo linkun",
+      "sending": "Duke derguar..."
+    },
+    "messages": {
+      "success": "Nese ekziston nje llogari me kete email, linku i rivendosjes u dergua."
+    }
+  },
+  "resetPassword": {
+    "metaTitle": "Fjalekalim i Ri | Dijari Premium",
+    "title": "Vendos fjalekalim te ri",
+    "subtitle": "Zgjidh nje fjalekalim te forte per llogarine tende.",
+    "backToLogin": "Kthehu te hyrja",
+    "passwordHint": "Minimumi 8 karaktere, nje shkronje e madhe dhe nje numer.",
+    "fields": {
+      "password": "Fjalekalimi i ri",
+      "confirmPassword": "Konfirmo fjalekalimin"
+    },
+    "buttons": {
+      "save": "Ruaj fjalekalimin e ri",
+      "saving": "Duke ruajtur..."
+    },
+    "messages": {
+      "success": "Fjalekalimi u perditesua. Tani mund te kyqesh."
+    },
+    "errors": {
+      "missingToken": "Mungon token-i i rivendosjes.",
+      "passwordMismatch": "Fjalekalimet nuk perputhen.",
+      "generic": "Rivendosja e fjalekalimit deshtoi."
     }
   },
   "rooms": {

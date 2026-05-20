@@ -72,6 +72,8 @@
     "subtitle": "Sign in to access your account",
     "or": "OR",
     "noAccount": "Don't have an account?",
+    "registeredHint": "Registration completed. Verify your email before signing in.",
+    "forgotPassword": "Forgot password?",
     "fields": {
       "email": "Email",
       "password": "Password"
@@ -100,6 +102,7 @@
     "subtitle": "Fill in your details to register",
     "or": "Or",
     "haveAccount": "Already have an account?",
+    "passwordHint": "Minimum 8 characters, one uppercase letter and one number.",
     "fields": {
       "fullName": "Full Name",
       "email": "Email",
@@ -118,6 +121,45 @@
       "weakPassword": "Password must be at least 8 characters long, include one uppercase letter and one number.",
       "registerFailed": "Registration failed.",
       "generic": "Something went wrong. Please try again."
+    }
+  },
+  "forgotPassword": {
+    "metaTitle": "Forgot Password | Dijari Premium",
+    "title": "Reset your password",
+    "subtitle": "Enter your email and we will send you a secure reset link.",
+    "backToLogin": "Back to login",
+    "fields": {
+      "email": "Email"
+    },
+    "buttons": {
+      "send": "Send reset link",
+      "sending": "Sending..."
+    },
+    "messages": {
+      "success": "If an account with that email exists, a reset link has been sent."
+    }
+  },
+  "resetPassword": {
+    "metaTitle": "New Password | Dijari Premium",
+    "title": "Create a new password",
+    "subtitle": "Choose a strong password for your account.",
+    "backToLogin": "Back to login",
+    "passwordHint": "Minimum 8 characters, one uppercase letter and one number.",
+    "fields": {
+      "password": "New password",
+      "confirmPassword": "Confirm password"
+    },
+    "buttons": {
+      "save": "Save new password",
+      "saving": "Saving..."
+    },
+    "messages": {
+      "success": "Password updated. You can now sign in."
+    },
+    "errors": {
+      "missingToken": "Reset token is missing.",
+      "passwordMismatch": "Passwords do not match.",
+      "generic": "Failed to reset password."
     }
   },
   "rooms": {

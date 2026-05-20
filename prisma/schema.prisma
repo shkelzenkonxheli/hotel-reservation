@@ -72,6 +72,8 @@ model users {
   email_verified             Boolean?        @default(false)
   email_verification_token   String?         @db.VarChar(255)
   email_verification_expires DateTime?       @db.Timestamp(6)
+  password_reset_token       String?         @db.VarChar(255)
+  password_reset_expires     DateTime?       @db.Timestamp(6)
   base_salary                Decimal?        @db.Decimal(10, 2)
   employment_start_date      DateTime?       @db.Date
   employment_status          String          @default("active") @db.VarChar(30)

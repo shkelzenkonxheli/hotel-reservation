@@ -39,7 +39,7 @@ export async function GET() {
 
     // 3. Merr fotot nga RoomImage
     const images = await prisma.roomImage.findMany({
-      orderBy: { order: "asc" },
+      orderBy: [{ isCover: "desc" }, { order: "asc" }, { id: "asc" }],
     });
 
     // 4. Attach image URLs to their matching room type.

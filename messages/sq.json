@@ -1052,29 +1052,36 @@
       "loading": "Duke ngarkuar llojet e dhomave...",
       "photoCount": "{count} foto",
       "noPhotosYet": "Ende nuk ka foto",
-      "actions": {
-        "uploading": "Duke ngarkuar...",
-        "addPhoto": "Shto foto",
-        "manage": "Menaxho"
+        "actions": {
+          "uploading": "Duke ngarkuar...",
+          "addPhoto": "Shto foto",
+          "manage": "Menaxho",
+          "setCover": "Vendos ne liste"
+        },
+        "dialog": {
+          "managePhotos": "Menaxho fotot - {type}",
+          "order": "Renditja",
+          "noPhotosForType": "Nuk ka ende foto per kete lloj.",
+          "close": "Mbyll",
+          "cover": "Kryesore",
+          "dragHint": "Terhiqe per renditje"
+        },
+        "errors": {
+          "load": "Ngarkimi i fotove te dhomave deshtoi.",
+          "upload": "Ngarkimi i fotos deshtoi",
+          "save": "Ruajtja deshtoi",
+          "delete": "Fshirja deshtoi",
+          "cover": "Vendosja e fotos kryesore deshtoi",
+          "reorder": "Renditja e fotove deshtoi",
+          "generic": "Ndodhi nje gabim."
+        },
+        "messages": {
+          "uploaded": "Fotoja u ngarkua me sukses.",
+          "deleted": "Fotoja u fshi me sukses.",
+          "coverUpdated": "Fotoja kryesore u perditesua.",
+          "reordered": "Renditja e fotove u ruajt."
+        }
       },
-      "dialog": {
-        "managePhotos": "Menaxho fotot - {type}",
-        "order": "Renditja",
-        "noPhotosForType": "Nuk ka ende foto per kete lloj.",
-        "close": "Mbyll"
-      },
-      "errors": {
-        "load": "Ngarkimi i fotove te dhomave deshtoi.",
-        "upload": "Ngarkimi i fotos deshtoi",
-        "save": "Ruajtja deshtoi",
-        "delete": "Fshirja deshtoi",
-        "generic": "Ndodhi nje gabim."
-      },
-      "messages": {
-        "uploaded": "Fotoja u ngarkua me sukses.",
-        "deleted": "Fotoja u fshi me sukses."
-      }
-    },
     "printReceipt": {
       "invoice": "Fatura",
       "guestStay": "Te dhenat e mysafirit dhe qendrimit",

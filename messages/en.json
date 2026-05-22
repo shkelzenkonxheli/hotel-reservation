@@ -1052,29 +1052,36 @@
       "loading": "Loading room types...",
       "photoCount": "{count} photo(s)",
       "noPhotosYet": "No photos yet",
-      "actions": {
-        "uploading": "Uploading...",
-        "addPhoto": "Add photo",
-        "manage": "Manage"
+        "actions": {
+          "uploading": "Uploading...",
+          "addPhoto": "Add photo",
+          "manage": "Manage",
+          "setCover": "Set for list"
+        },
+        "dialog": {
+          "managePhotos": "Manage photos - {type}",
+          "order": "Order",
+          "noPhotosForType": "No photos for this type yet.",
+          "close": "Close",
+          "cover": "Cover",
+          "dragHint": "Drag to reorder"
+        },
+        "errors": {
+          "load": "Failed to load room photos.",
+          "upload": "Upload failed",
+          "save": "Save failed",
+          "delete": "Delete failed",
+          "cover": "Failed to update the cover image.",
+          "reorder": "Failed to reorder photos.",
+          "generic": "Something went wrong."
+        },
+        "messages": {
+          "uploaded": "Photo uploaded successfully.",
+          "deleted": "Photo deleted successfully.",
+          "coverUpdated": "Cover image updated successfully.",
+          "reordered": "Photo order saved successfully."
+        }
       },
-      "dialog": {
-        "managePhotos": "Manage photos - {type}",
-        "order": "Order",
-        "noPhotosForType": "No photos for this type yet.",
-        "close": "Close"
-      },
-      "errors": {
-        "load": "Failed to load room photos.",
-        "upload": "Upload failed",
-        "save": "Save failed",
-        "delete": "Delete failed",
-        "generic": "Something went wrong."
-      },
-      "messages": {
-        "uploaded": "Photo uploaded successfully.",
-        "deleted": "Photo deleted successfully."
-      }
-    },
     "printReceipt": {
       "invoice": "Invoice",
       "guestStay": "Guest & Stay Information",

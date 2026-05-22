@@ -1,10 +1,6 @@
-"use client";
+﻿"use client";
 import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
-import "swiper/css/navigation";
-import { Navigation, Pagination } from "swiper/modules";
 import { useRouter } from "next/navigation";
 import { useBooking } from "@/context/BookingContext";
 import Calendar from "react-calendar";
@@ -43,6 +39,7 @@ export default function RoomsPage() {
   const [bookedDays, setBookedDays] = useState([]);
   const [expandedRoom, setExpandedRoom] = useState(null);
   const [galleryRoom, setGalleryRoom] = useState(null);
+  const [galleryIndex, setGalleryIndex] = useState(0);
 
   const router = useRouter();
   const { setBooking } = useBooking();
@@ -159,6 +156,31 @@ export default function RoomsPage() {
     return text.split("\n")[0];
   };
 
+  const openGallery = (room, index = 0) => {
+    setGalleryRoom(room);
+    setGalleryIndex(index);
+  };
+
+  const galleryImages = Array.isArray(galleryRoom?.images)
+    ? galleryRoom.images
+    : [];
+  const currentGalleryImage =
+    galleryImages[galleryIndex] || galleryImages[0] || null;
+
+  const showPreviousImage = () => {
+    if (galleryImages.length <= 1) return;
+    setGalleryIndex((prev) =>
+      prev === 0 ? galleryImages.length - 1 : prev - 1,
+    );
+  };
+
+  const showNextImage = () => {
+    if (galleryImages.length <= 1) return;
+    setGalleryIndex((prev) =>
+      prev === galleryImages.length - 1 ? 0 : prev + 1,
+    );
+  };
+
   return (
     <div className="public-page min-h-screen">
       <PublicSection className="!pt-4 !pb-0">
@@ -200,7 +222,7 @@ export default function RoomsPage() {
                   <button
                     type="button"
                     className="relative h-56 w-full cursor-pointer overflow-hidden text-left"
-                    onClick={() => setGalleryRoom(room)}
+                    onClick={() => openGallery(room, 0)}
                   >
                     <img
                       src={room.images?.[0]}
@@ -261,7 +283,9 @@ export default function RoomsPage() {
       {showDateInput && selectedRoom && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50 p-3">
           <div className="public-card p-4 md:p-6 w-full max-w-[420px]">
-            <h3 className="text-lg font-semibold text-center">{t("selectDates")}</h3>
+            <h3 className="text-lg font-semibold text-center">
+              {t("selectDates")}
+            </h3>
 
             <Calendar
               selectRange={true}
@@ -355,30 +379,60 @@ export default function RoomsPage() {
       )}
 
       {galleryRoom && (
-        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
-          <div className="relative w-full max-w-4xl px-3 md:px-4">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/78 px-4 pb-4 pt-20 md:px-6 md:pb-6 md:pt-24"
+          onClick={() => setGalleryRoom(null)}
+        >
+          <div
+            className="relative mx-auto"
+            onClick={(event) => event.stopPropagation()}
+          >
             <button
-              className="absolute -top-10 right-0 text-white text-2xl cursor-pointer "
+              className="absolute right-3 top-3 z-20 inline-flex h-11 w-11 items-center justify-center rounded-full bg-black/62 text-xl font-semibold text-white shadow-lg transition hover:bg-black/78"
               onClick={() => setGalleryRoom(null)}
+              aria-label={t("buttons.close")}
             >
-              {t("buttons.close")}
+              X
             </button>
 
-            <Swiper
-              modules={[Navigation, Pagination]}
-              navigation
-              pagination={{ clickable: true }}
-              className="w-full h-[70vh] rounded-lg overflow-hidden"
-            >
-              {galleryRoom.images.map((img, i) => (
-                <SwiperSlide key={i}>
-                  <img
-                    src={img}
-                    className="w-full h-full object-contain bg-black"
-                  />
-                </SwiperSlide>
-              ))}
-            </Swiper>
+            {currentGalleryImage ? (
+              <div className="relative h-[75vh] w-[min(84vw,640px)] overflow-hidden rounded-2xl shadow-[0_20px_60px_rgba(15,23,42,0.35)] md:w-[min(70vw,760px)]">
+                <div
+                  className="absolute inset-0 scale-110 blur-2xl"
+                  style={{
+                    backgroundImage: `url(${currentGalleryImage})`,
+                    backgroundPosition: "center",
+                    backgroundSize: "cover",
+                  }}
+                />
+                <div className="absolute inset-0 bg-slate-950/8" />
+                <img
+                  src={currentGalleryImage}
+                  alt={`${galleryRoom.name} ${galleryIndex + 1}`}
+                  className="relative z-10 h-full w-full scale-[0.97] object-contain"
+                />
+                {galleryImages.length > 1 ? (
+                  <>
+                    <button
+                      type="button"
+                      className="absolute left-4 top-1/2 z-10 inline-flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-3xl text-white shadow-lg transition hover:bg-black/72"
+                      onClick={showPreviousImage}
+                      aria-label="Previous image"
+                    >
+                      {"<"}
+                    </button>
+                    <button
+                      type="button"
+                      className="absolute right-4 top-1/2 z-10 inline-flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-3xl text-white shadow-lg transition hover:bg-black/72"
+                      onClick={showNextImage}
+                      aria-label="Next image"
+                    >
+                      {">"}
+                    </button>
+                  </>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         </div>
       )}

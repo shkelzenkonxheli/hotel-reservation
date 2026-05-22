@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
+import StarIcon from "@mui/icons-material/Star";
 
 export default function RoomTypePhotosManager() {
   const t = useTranslations("dashboard.roomPhotos");
@@ -29,6 +30,7 @@ export default function RoomTypePhotosManager() {
 
   const [openType, setOpenType] = useState(null);
   const [busyType, setBusyType] = useState(null);
+  const [draggedImageId, setDraggedImageId] = useState(null);
   const [feedback, setFeedback] = useState({
     open: false,
     message: "",
@@ -70,6 +72,16 @@ export default function RoomTypePhotosManager() {
     images.forEach((img) => {
       if (!map.has(img.type)) map.set(img.type, []);
       map.get(img.type).push(img);
+    });
+    map.forEach((list, type) => {
+      map.set(
+        type,
+        [...list].sort((a, b) => {
+          if (a.isCover !== b.isCover) return a.isCover ? -1 : 1;
+          if (a.order !== b.order) return a.order - b.order;
+          return a.id - b.id;
+        }),
+      );
     });
     return map;
   }, [images]);
@@ -135,6 +147,100 @@ export default function RoomTypePhotosManager() {
       console.error(e);
       notify(t("errors.generic"), "error");
     }
+  }
+
+  async function setCoverImage(id) {
+    try {
+      const res = await fetch(`/api/room-images/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "set-cover" }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        notify(data?.error || t("errors.cover"), "error");
+        return;
+      }
+      await fetchAll();
+      notify(t("messages.coverUpdated"));
+    } catch (e) {
+      console.error(e);
+      notify(t("errors.generic"), "error");
+    }
+  }
+
+  async function persistImageOrder(type, orderedIds) {
+    try {
+      setBusyType(type);
+      const res = await fetch("/api/room-images", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type, orderedIds }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        notify(data?.error || t("errors.reorder"), "error");
+        await fetchAll();
+        return;
+      }
+      setImages((current) => {
+        const typeImages = current.filter((img) => img.type === type);
+        const otherImages = current.filter((img) => img.type !== type);
+        const imageMap = new Map(typeImages.map((img) => [img.id, img]));
+        const reordered = orderedIds
+          .map((id, index) => {
+            const image = imageMap.get(id);
+            return image ? { ...image, order: index } : null;
+          })
+          .filter(Boolean);
+        return [...otherImages, ...reordered];
+      });
+      notify(t("messages.reordered"));
+    } catch (e) {
+      console.error(e);
+      notify(t("errors.generic"), "error");
+      await fetchAll();
+    } finally {
+      setBusyType(null);
+    }
+  }
+
+  function handleDragStart(id) {
+    setDraggedImageId(id);
+  }
+
+  async function handleDropOnImage(targetId) {
+    if (!openType || !draggedImageId || draggedImageId === targetId) {
+      setDraggedImageId(null);
+      return;
+    }
+
+    const currentImages = imagesByType.get(openType) || [];
+    const fromIndex = currentImages.findIndex((img) => img.id === draggedImageId);
+    const toIndex = currentImages.findIndex((img) => img.id === targetId);
+
+    if (fromIndex === -1 || toIndex === -1) {
+      setDraggedImageId(null);
+      return;
+    }
+
+    const reordered = [...currentImages];
+    const [moved] = reordered.splice(fromIndex, 1);
+    reordered.splice(toIndex, 0, moved);
+
+    setImages((current) => {
+      const otherImages = current.filter((img) => img.type !== openType);
+      return [
+        ...otherImages,
+        ...reordered.map((img, index) => ({ ...img, order: index })),
+      ];
+    });
+
+    setDraggedImageId(null);
+    await persistImageOrder(
+      openType,
+      reordered.map((img) => img.id),
+    );
   }
 
   if (loading) {
@@ -242,42 +348,97 @@ export default function RoomTypePhotosManager() {
             {(imagesByType.get(openType) || []).map((img) => (
               <Box
                 key={img.id}
+                draggable={busyType !== openType}
+                onDragStart={() => handleDragStart(img.id)}
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={() => handleDropOnImage(img.id)}
+                onDragEnd={() => setDraggedImageId(null)}
                 sx={{
                   width: 180,
                   borderRadius: 2,
                   overflow: "hidden",
                   border: "1px solid rgba(0,0,0,0.08)",
+                  opacity: draggedImageId === img.id ? 0.5 : 1,
+                  cursor: busyType === openType ? "progress" : "grab",
                 }}
               >
                 <Box
-                  component="img"
-                  src={img.url}
-                  alt={String(img.id)}
-                  onClick={() => setPreviewUrl(img.url)}
                   sx={{
-                    width: "100%",
-                    height: 120,
-                    objectFit: "cover",
-                    cursor: "pointer",
+                    position: "relative",
                   }}
-                />
+                >
+                  {img.isCover ? (
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 8,
+                        left: 8,
+                        zIndex: 1,
+                        px: 1,
+                        py: 0.35,
+                        borderRadius: 999,
+                        bgcolor: "rgba(15, 23, 42, 0.78)",
+                        color: "white",
+                        fontSize: 11,
+                        fontWeight: 700,
+                        letterSpacing: "0.04em",
+                      }}
+                    >
+                      {t("dialog.cover")}
+                    </Box>
+                  ) : null}
+                  <Box
+                    component="img"
+                    src={img.url}
+                    alt={String(img.id)}
+                    onClick={() => setPreviewUrl(img.url)}
+                    sx={{
+                      width: "100%",
+                      height: 120,
+                      objectFit: "cover",
+                      cursor: "pointer",
+                    }}
+                  />
+                </Box>
                 <Box
                   display="flex"
                   justifyContent="space-between"
                   alignItems="center"
+                  gap={1}
                   px={1}
-                  py={0.5}
+                  py={0.75}
                 >
-                  <Typography variant="caption" color="text.secondary">
-                    {t("dialog.order")}: {img.order}
-                  </Typography>
-                  <IconButton
-                    size="small"
-                    color="error"
-                    onClick={() => deleteImage(img.id)}
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">
+                      {t("dialog.order")}: {img.order}
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ display: "block", mt: 0.25 }}
+                    >
+                      {t("dialog.dragHint")}
+                    </Typography>
+                  </Box>
+                  <Box display="flex" alignItems="center" gap={0.5}>
+                    {!img.isCover ? (
+                      <Button
+                        size="small"
+                        variant="text"
+                        startIcon={<StarIcon fontSize="small" />}
+                        onClick={() => setCoverImage(img.id)}
+                      >
+                        {t("actions.setCover")}
+                      </Button>
+                    ) : null}
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => deleteImage(img.id)}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
                 </Box>
               </Box>
             ))}

@@ -154,7 +154,7 @@ export default function LoginPage() {
 
   const fieldSx = {
     "& .MuiOutlinedInput-root": {
-      height: 52,
+      height: { xs: 48, md: 50 },
       borderRadius: 2,
       backgroundColor: "#ffffff",
       "& fieldset": { borderColor: "#dbe3ed" },
@@ -198,15 +198,15 @@ export default function LoginPage() {
               minHeight: { xs: "calc(100vh - 72px)", md: "calc(100vh - 84px)" },
               display: "grid",
               placeItems: "center",
-              py: { xs: 4, md: 6 },
+              py: { xs: 3, md: 5 },
             }}
           >
             <PublicCard
-              className="w-full max-w-md p-7 md:p-8"
+              className="w-full max-w-[420px] p-5 md:p-6"
               style={{
                 backgroundColor: "#ffffff",
-                borderRadius: 28,
-                boxShadow: "0 22px 56px rgba(15,23,42,0.14)",
+                borderRadius: 24,
+                boxShadow: "0 18px 44px rgba(15,23,42,0.13)",
               }}
             >
               <Typography
@@ -215,9 +215,9 @@ export default function LoginPage() {
                 fontWeight={800}
                 sx={{
                   color: "#0f172a",
-                  fontSize: { xs: "1.9rem", md: "2.15rem" },
+                  fontSize: { xs: "1.65rem", md: "1.9rem" },
                   letterSpacing: "-0.03em",
-                  mt: 0.5,
+                  mt: 0.25,
                 }}
                 gutterBottom
               >
@@ -227,8 +227,8 @@ export default function LoginPage() {
                 variant="body2"
                 color="text.secondary"
                 align="center"
-                mb={3.25}
-                sx={{ maxWidth: 280, mx: "auto", lineHeight: 1.7 }}
+                mb={2.5}
+                sx={{ maxWidth: 260, mx: "auto", lineHeight: 1.6, fontSize: "0.92rem" }}
               >
                 {t("subtitle")}
               </Typography>
@@ -298,9 +298,9 @@ export default function LoginPage() {
                   fullWidth
                   variant="contained"
                   sx={{
-                    mt: 3,
-                    py: 1.35,
-                    fontSize: "1rem",
+                    mt: 2.5,
+                    py: 1.15,
+                    fontSize: "0.96rem",
                     textTransform: "none",
                     borderRadius: 3,
                     fontWeight: 700,
@@ -352,17 +352,18 @@ export default function LoginPage() {
                 </Button>
               )}
 
-              <Divider sx={{ my: 3 }}>{t("or")}</Divider>
+              <Divider sx={{ my: 2.1, fontSize: "0.9rem" }}>{t("or")}</Divider>
 
               <Button
                 fullWidth
                 variant="outlined"
                 startIcon={<Google />}
                 sx={{
-                  py: 1.25,
+                  py: 0.9,
                   textTransform: "none",
                   fontWeight: 700,
                   borderRadius: 3,
+                  fontSize: "0.96rem",
                   borderColor: "#d1dbe7",
                   "&:hover": {
                     borderColor: "#b9c7d8",
@@ -381,13 +382,19 @@ export default function LoginPage() {
               <Typography
                 variant="body2"
                 align="center"
-                mt={3}
+                mt={2.2}
                 color="text.secondary"
+                sx={{ fontSize: "0.94rem" }}
               >
                 {t("noAccount")}{" "}
                 <Typography
                   component="span"
-                  sx={{ cursor: "pointer", fontWeight: 700, color: "#0ea5e9" }}
+                  sx={{
+                    cursor: "pointer",
+                    fontWeight: 700,
+                    color: "#0ea5e9",
+                    fontSize: "0.94rem",
+                  }}
                   onClick={() => router.push("/register")}
                 >
                   {t("buttons.register")}

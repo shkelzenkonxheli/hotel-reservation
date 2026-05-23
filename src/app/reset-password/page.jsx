@@ -45,8 +45,8 @@ export default function ResetPasswordPage() {
 
   const fieldSx = {
     "& .MuiOutlinedInput-root": {
-      height: 54,
-      borderRadius: 3,
+      height: { xs: 48, md: 50 },
+      borderRadius: 2,
       backgroundColor: "#ffffff",
       "& fieldset": { borderColor: "#dbe3ed" },
       "&:hover fieldset": { borderColor: "#b9c7d8" },
@@ -114,15 +114,15 @@ export default function ResetPasswordPage() {
               minHeight: { xs: "calc(100vh - 72px)", md: "calc(100vh - 84px)" },
               display: "grid",
               placeItems: "center",
-              py: { xs: 4, md: 6 },
+              py: { xs: 3, md: 5 },
             }}
           >
             <PublicCard
-              className="w-full max-w-md p-7 md:p-8"
+              className="w-full max-w-[420px] p-5 md:p-6"
               style={{
                 backgroundColor: "#ffffff",
-                borderRadius: 28,
-                boxShadow: "0 22px 56px rgba(15,23,42,0.14)",
+                borderRadius: 24,
+                boxShadow: "0 18px 44px rgba(15,23,42,0.13)",
               }}
             >
               <Typography
@@ -131,7 +131,7 @@ export default function ResetPasswordPage() {
                 fontWeight={800}
                 sx={{
                   color: "#0f172a",
-                  fontSize: { xs: "1.9rem", md: "2.15rem" },
+                  fontSize: { xs: "1.65rem", md: "1.9rem" },
                   letterSpacing: "-0.03em",
                 }}
                 gutterBottom
@@ -142,8 +142,8 @@ export default function ResetPasswordPage() {
                 variant="body2"
                 align="center"
                 color="text.secondary"
-                mb={3.5}
-                sx={{ maxWidth: 320, mx: "auto", lineHeight: 1.7 }}
+                mb={2.5}
+                sx={{ maxWidth: 260, mx: "auto", lineHeight: 1.6, fontSize: "0.92rem" }}
               >
                 {t("subtitle")}
               </Typography>
@@ -219,12 +219,12 @@ export default function ResetPasswordPage() {
                   fullWidth
                   disabled={loading}
                   sx={{
-                    mt: 3,
-                    py: 1.35,
+                    mt: 2.5,
+                    py: 1.15,
                     borderRadius: 3,
                     fontWeight: 700,
                     textTransform: "none",
-                    fontSize: "1rem",
+                    fontSize: "0.96rem",
                     backgroundColor: "#0284c7",
                     "&:hover": { backgroundColor: "#0369a1" },
                   }}

@@ -229,9 +229,6 @@ export default function RoomsPage() {
                       alt={room.name}
                       className="h-full w-full object-cover transition duration-500 hover:scale-[1.03]"
                     />
-                    <span className="absolute left-3 top-3 rounded-full bg-white/92 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-700 shadow-sm">
-                      {room.type}
-                    </span>
                   </button>
 
                   <div className="flex flex-grow flex-col p-5">
@@ -289,12 +286,16 @@ export default function RoomsPage() {
 
             <Calendar
               selectRange={true}
+              allowPartialRange={true}
               minDate={new Date()}
               onChange={(range) => {
                 if (Array.isArray(range)) {
-                  setStartDate(fYMD(range[0]));
-                  setEndDate(fYMD(range[1]));
+                  setStartDate(range[0] ? fYMD(range[0]) : "");
+                  setEndDate(range[1] ? fYMD(range[1]) : "");
+                  return;
                 }
+                setStartDate(range ? fYMD(range) : "");
+                setEndDate("");
               }}
               tileDisabled={({ date }) => {
                 const d = fYMD(date);
@@ -397,19 +398,10 @@ export default function RoomsPage() {
 
             {currentGalleryImage ? (
               <div className="relative h-[75vh] w-[min(84vw,640px)] overflow-hidden rounded-2xl shadow-[0_20px_60px_rgba(15,23,42,0.35)] md:w-[min(70vw,760px)]">
-                <div
-                  className="absolute inset-0 scale-110 blur-2xl"
-                  style={{
-                    backgroundImage: `url(${currentGalleryImage})`,
-                    backgroundPosition: "center",
-                    backgroundSize: "cover",
-                  }}
-                />
-                <div className="absolute inset-0 bg-slate-950/8" />
                 <img
                   src={currentGalleryImage}
                   alt={`${galleryRoom.name} ${galleryIndex + 1}`}
-                  className="relative z-10 h-full w-full scale-[0.97] object-contain"
+                  className="relative z-10 h-full w-full object-cover"
                 />
                 {galleryImages.length > 1 ? (
                   <>

@@ -58,6 +58,16 @@ function getReservationSource(session) {
   return "Guest portal";
 }
 
+async function sendEmailOrThrow(sendPromise, label) {
+  const result = await sendPromise;
+  if (result?.error) {
+    throw new Error(
+      `${label} failed: ${result.error.message || JSON.stringify(result.error)}`,
+    );
+  }
+  return result;
+}
+
 async function syncReservationStatuses() {
   const today = parseDateOnlyToUTC(new Date().toISOString().slice(0, 10));
 
@@ -280,9 +290,11 @@ export async function POST(request) {
     });
 
     if (process.env.RESEND_API_KEY) {
+      const resend = new Resend(process.env.RESEND_API_KEY);
+
       try {
-        const resend = new Resend(process.env.RESEND_API_KEY);
-        await resend.emails.send({
+        await sendEmailOrThrow(
+          resend.emails.send({
           from: "Dijari Premium <onboarding@dijaripremium.com>",
           to: getAdminNotificationEmail(),
           subject: adminReservationSubject({
@@ -301,10 +313,17 @@ export async function POST(request) {
             reservationStatus,
             source: getReservationSource(session),
           }),
-        });
+          }),
+          "Admin reservation email",
+        );
+      } catch (adminEmailError) {
+        console.error("Admin reservation email failed:", adminEmailError);
+      }
 
-        if (reservationStatus === "confirmed" && (guestEmail || guestUser?.email)) {
-          await resend.emails.send({
+      if (reservationStatus === "confirmed" && (guestEmail || guestUser?.email)) {
+        try {
+          await sendEmailOrThrow(
+            resend.emails.send({
             from: "Dijari Premium <onboarding@dijaripremium.com>",
             to: guestEmail || guestUser.email,
             subject: reservationConfirmationSubject({
@@ -323,10 +342,15 @@ export async function POST(request) {
               paymentStatus: payStatus,
               reservationStatus,
             }),
-          });
+            }),
+            "Guest reservation confirmation email",
+          );
+        } catch (guestEmailError) {
+          console.error(
+            "Guest reservation confirmation email failed:",
+            guestEmailError,
+          );
         }
-      } catch (emailError) {
-        console.error("Reservation email flow failed:", emailError);
       }
     }
 

@@ -82,7 +82,7 @@ export default function Home() {
     },
     {
       name: "Poolside Deluxe Room",
-      image: "/hotel-images/hotel-room8.JPG",
+      image: "/hotel-images/hotel-room8.jpg",
     },
     {
       name: "Terrace Comfort Room",

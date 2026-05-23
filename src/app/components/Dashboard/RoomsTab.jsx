@@ -21,7 +21,7 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
-import { CleaningServices, Close, MeetingRoom } from "@mui/icons-material";
+import { Close, MeetingRoom } from "@mui/icons-material";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import PageHeader from "./ui/PageHeader";
@@ -70,24 +70,6 @@ export default function RoomsTab() {
     }
   }
 
-  async function handleCleanRoom(room_id) {
-    if (!confirm(t("messages.confirmClean"))) return;
-
-    const res = await fetch("/api/rooms", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ room_id, action: "CLEAN" }),
-    });
-
-    if (res.ok) {
-      await fetchRooms();
-      setSelectedRoom(null);
-      notify(t("messages.cleaned"));
-    } else {
-      const e = await res.json();
-      notify(e.error || t("messages.cleanError"), "error");
-    }
-  }
   async function handleRoomStatus(room_id) {
     const res = await fetch("/api/rooms", {
       method: "PATCH",
@@ -109,8 +91,6 @@ export default function RoomsTab() {
   const filteredRooms = rooms.filter((r) => {
     if (filter === "booked") return r.current_status === "booked";
     if (filter === "available") return r.current_status === "available";
-    if (filter === "needs_cleaning")
-      return r.current_status === "needs_cleaning";
     return true;
   });
 
@@ -127,8 +107,8 @@ export default function RoomsTab() {
         return "#ef4444"; // red
       case "available":
         return "#22c55e"; // green
-      case "needs_cleaning":
-        return "#facc15"; // yellow
+      case "out_of_order":
+        return "#94a3b8"; // slate
       default:
         return "#9ca3af"; // gray
     }
@@ -138,14 +118,11 @@ export default function RoomsTab() {
     const available = list.filter(
       (r) => r.current_status === "available",
     ).length;
-    const needsCleaning = list.filter(
-      (r) => r.current_status === "needs_cleaning",
-    ).length;
     const outOfOrder = list.filter(
       (r) => r.current_status === "out_of_order",
     ).length;
 
-    return { booked, available, needsCleaning, outOfOrder, total: list.length };
+    return { booked, available, outOfOrder, total: list.length };
   };
 
   const apartmentsCount = countByStatus(apartments);
@@ -322,18 +299,6 @@ export default function RoomsTab() {
               variant={filter === "booked" ? "filled" : "outlined"}
             />
 
-            <Chip
-              label={t("filters.needsCleaning")}
-              clickable
-              onClick={() => setFilter("needs_cleaning")}
-              sx={{
-                bgcolor:
-                  filter === "needs_cleaning" ? "#fef9c3" : "transparent",
-                color: "#a16207",
-                borderColor: "#facc15",
-              }}
-              variant={filter === "needs_cleaning" ? "filled" : "outlined"}
-            />
           </Box>
         </Box>
       </SectionCard>
@@ -587,23 +552,6 @@ export default function RoomsTab() {
               <Typography color="text.secondary">
                 {t("dialog.noActiveReservation")}
               </Typography>
-            )}
-
-            {selectedRoom.room.current_status === "needs_cleaning" && (
-              <Box textAlign="center" mt={3}>
-                <Button
-                  variant="contained"
-                  startIcon={<CleaningServices />}
-                  onClick={() => handleCleanRoom(selectedRoom.room.id)}
-                  sx={{
-                    bgcolor: "#facc15",
-                    color: "black",
-                    "&:hover": { bgcolor: "#eab308" },
-                  }}
-                >
-                  {t("dialog.cleanRoom")}
-                </Button>
-              </Box>
             )}
 
             {/* Button pÃ«r tÃ« shfaqur/fshirÃ« calendarin */}

@@ -379,9 +379,6 @@ export default function Header() {
                     {t("housekeeping.checkoutsToday")}: {summary?.checkout_today ?? 0}
                   </Typography>
                   <Typography>
-                    {t("housekeeping.needsCleaning")}: {summary?.needs_cleaning ?? 0}
-                  </Typography>
-                  <Typography>
                     {t("housekeeping.outOfOrder")}: {summary?.out_of_order ?? 0}
                   </Typography>
 
@@ -671,9 +668,6 @@ export default function Header() {
                   </Typography>
                   <Typography>
                     {t("housekeeping.checkoutsToday")}: {summary?.checkout_today ?? 0}
-                  </Typography>
-                  <Typography>
-                    {t("housekeeping.needsCleaning")}: {summary?.needs_cleaning ?? 0}
                   </Typography>
                   <Typography>
                     {t("housekeeping.outOfOrder")}: {summary?.out_of_order ?? 0}

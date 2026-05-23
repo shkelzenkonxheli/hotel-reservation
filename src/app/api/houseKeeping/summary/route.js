@@ -23,7 +23,6 @@ export async function GET() {
     // Accumulators for daily housekeeping metrics.
     let checkout_today = 0;
     let checkin_today = 0;
-    let needs_cleaning = 0;
     let out_of_order = 0;
 
     for (const room of rooms) {
@@ -31,11 +30,6 @@ export async function GET() {
       if (room.status === "out_of_order") {
         out_of_order++;
         continue;
-      }
-
-      // Needs cleaning (status already saved)
-      if (room.status === "needs_cleaning") {
-        needs_cleaning++;
       }
 
       // Check if checkout is today
@@ -74,7 +68,7 @@ export async function GET() {
     return NextResponse.json({
       checkout_today,
       checkin_today,
-      needs_cleaning,
+      needs_cleaning: 0,
       out_of_order,
     });
   } catch (error) {

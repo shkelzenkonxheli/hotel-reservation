@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { logActivity } from "../../../../lib/activityLogger";
@@ -80,30 +80,6 @@ export async function GET(request) {
       return NextResponse.json(rooms);
     }
 
-    const roomIds = rooms.map((r) => r.id);
-
-    // Read CLEAN logs so we can keep needs_cleaning until an actual CLEAN action happens.
-    const cleanLogs = await prisma.activity_logs.findMany({
-      where: {
-        entity: "room",
-        action: "CLEAN",
-        entity_id: { in: roomIds },
-      },
-      select: { entity_id: true, created_at: true },
-      orderBy: { created_at: "desc" },
-    });
-
-    // Keep latest CLEAN timestamp per room.
-    const lastCleanAtByRoom = new Map();
-    for (const log of cleanLogs) {
-      const roomId = Number(log.entity_id);
-      if (!lastCleanAtByRoom.has(roomId)) {
-        lastCleanAtByRoom.set(roomId, new Date(log.created_at));
-      }
-    }
-
-    const needsCleaningRoomIds = [];
-
     const updatedRooms = rooms.map((room) => {
       const operationalStatus = room.status || "available";
 
@@ -120,7 +96,6 @@ export async function GET(request) {
 
       let activeReservation = null;
       let hasCheckoutToday = false;
-      let latestCheckoutAt = null;
 
       for (const r of room.reservations) {
         if (!blocksRoom(r.status)) continue;
@@ -139,54 +114,24 @@ export async function GET(request) {
           hasCheckoutToday = true;
         }
 
-        if (endDay <= selectedDay) {
-          if (!latestCheckoutAt || endDay > latestCheckoutAt) {
-            latestCheckoutAt = endDay;
-          }
-        }
-      }
 
-      // ✅ current_status i thjeshtë:
-      // - nëse ka rezervim aktiv -> booked
-      // - përndryshe -> statusi i DB (available / needs_cleaning)
-      // Derive current status for UI based on active reservation.
-      const lastCleanAt = lastCleanAtByRoom.get(room.id) || null;
-      const pendingCleaning =
-        Boolean(latestCheckoutAt) &&
-        (!lastCleanAt || lastCleanAt < latestCheckoutAt);
-
-      if (
-        operationalStatus === "available" &&
-        pendingCleaning &&
-        !activeReservation
-      ) {
-        needsCleaningRoomIds.push(room.id);
       }
 
       const currentStatus = activeReservation
         ? "booked"
-        : operationalStatus === "needs_cleaning" || pendingCleaning
-          ? "needs_cleaning"
-          : operationalStatus;
+        : operationalStatus === "out_of_order"
+          ? "out_of_order"
+          : "available";
 
       return {
         ...room,
         operational_status: operationalStatus,
         current_status: currentStatus,
         active_reservation: activeReservation,
-        has_checkout_today: hasCheckoutToday, // vetëm info për UI
+        has_checkout_today: hasCheckoutToday, // vetÃ«m info pÃ«r UI
       };
     });
 
-    if (needsCleaningRoomIds.length > 0) {
-      await prisma.rooms.updateMany({
-        where: {
-          id: { in: needsCleaningRoomIds },
-          status: "available",
-        },
-        data: { status: "needs_cleaning" },
-      });
-    }
 
     return NextResponse.json(updatedRooms);
   } catch (error) {
@@ -282,11 +227,9 @@ export async function POST(request) {
 }
 
 /**
- * PATCH super i thjeshtë me action
- * CLEAN -> available
- * TOGGLE_OUT_OF_ORDER -> out_of_order/available
- * MARK_NEEDS_CLEANING -> needs_cleaning
- */
+ * PATCH super i thjeshtÃ« me action
+  * TOGGLE_OUT_OF_ORDER -> out_of_order/available
+  */
 // Handle PATCH requests for this route.
 export async function PATCH(request) {
   try {
@@ -318,13 +261,9 @@ export async function PATCH(request) {
     const currentStatus = room.status || "available";
     let nextStatus = currentStatus;
 
-    if (action === "CLEAN") {
-      nextStatus = "available";
-    } else if (action === "TOGGLE_OUT_OF_ORDER") {
+    if (action === "TOGGLE_OUT_OF_ORDER") {
       nextStatus =
         currentStatus === "out_of_order" ? "available" : "out_of_order";
-    } else if (action === "MARK_NEEDS_CLEANING") {
-      nextStatus = "needs_cleaning";
     } else {
       return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
@@ -335,22 +274,6 @@ export async function PATCH(request) {
         where: { id: roomIdNum },
         data: { status: nextStatus },
       });
-
-      // If staff marks a room as CLEAN, close all past stays for that room.
-      // This prevents old confirmed/pending stays from forcing needs_cleaning again.
-      if (action === "CLEAN") {
-        await tx.reservations.updateMany({
-          where: {
-            room_id: roomIdNum,
-            cancelled_at: null,
-            admin_hidden: false,
-            status: { in: ["pending", "confirmed"] },
-            end_date: { lte: new Date() },
-          },
-          data: { status: "completed" },
-        });
-      }
-
       return updatedRoom;
     });
 
@@ -368,3 +291,6 @@ export async function PATCH(request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+
+

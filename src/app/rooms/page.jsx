@@ -302,17 +302,12 @@ export default function RoomsPage() {
                       }`}
                     >
                       <div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[#4b74a8]">
-                            {room.type.replaceAll("-", " ")}
-                          </p>
-                          {roomLabelKey ? (
-                            <span className="rounded-full bg-[#e8f1ff] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#1f6feb]">
-                              {t(`labels.${roomLabelKey}`)}
-                            </span>
-                          ) : null}
-                        </div>
-                        <h3 className="mt-4 text-[2rem] font-semibold leading-tight text-slate-900 md:text-[2.35rem]">
+                        {roomLabelKey ? (
+                          <span className="inline-flex rounded-full bg-[#e8f1ff] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#1f6feb]">
+                            {t(`labels.${roomLabelKey}`)}
+                          </span>
+                        ) : null}
+                        <h3 className="mt-4 text-[1.7rem] font-semibold leading-tight text-slate-900 md:text-[2.1rem]">
                           {room.name}
                         </h3>
                         <p className="mt-4 max-w-xl text-[15px] leading-8 text-slate-600 md:text-base">
@@ -331,13 +326,10 @@ export default function RoomsPage() {
                         </div>
                       </div>
 
-                      <div className="mt-8 flex flex-col gap-4 border-t border-slate-200/80 pt-6 sm:flex-row sm:items-end sm:justify-between">
+                      <div className="mt-8 flex items-end justify-between gap-4 border-t border-slate-200/80 pt-6">
                         <div>
-                          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
-                            {t("night")}
-                          </p>
-                          <div className="mt-2">
-                            <span className="text-[2rem] font-semibold leading-none text-slate-900 md:text-[2.35rem]">
+                          <div>
+                            <span className="text-[1.85rem] font-semibold leading-none text-slate-900 md:text-[2.2rem]">
                               €{Number(room.price || 0).toFixed(0)}
                             </span>
                             <span className="ml-2 text-sm text-slate-500">
@@ -346,9 +338,9 @@ export default function RoomsPage() {
                           </div>
                         </div>
 
-                        <div className="flex flex-wrap gap-3">
+                        <div className="shrink-0">
                           <button
-                            className="inline-flex min-w-[150px] items-center justify-center rounded-full bg-[#1f6feb] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#195fd0] sm:min-w-[170px]"
+                            className="inline-flex min-w-[132px] items-center justify-center rounded-full bg-[#1f6feb] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#195fd0] sm:min-w-[160px] sm:px-5"
                             onClick={() => handleBookClick(room)}
                           >
                             {t("buttons.bookNow")}

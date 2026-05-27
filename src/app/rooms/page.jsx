@@ -19,7 +19,29 @@ function fYMD(date) {
 }
 
 function getFeatureChips(amenities = []) {
-  return Array.isArray(amenities) ? amenities.filter(Boolean).slice(0, 3) : [];
+  return Array.isArray(amenities) ? amenities.filter(Boolean).slice(0, 5) : [];
+}
+
+function getRoomLabelKey(type = "") {
+  const normalized = String(type).toLowerCase();
+
+  if (normalized.includes("pool")) {
+    return "poolView";
+  }
+  if (normalized.includes("standard")) {
+    return "idealForCouples";
+  }
+  if (normalized.includes("3-room") || normalized.includes("3-rooms")) {
+    return "familyStay";
+  }
+  if (normalized.includes("2-room") || normalized.includes("2-rooms")) {
+    return "extraSpace";
+  }
+  if (normalized.includes("apartment")) {
+    return "flexibleStay";
+  }
+
+  return "";
 }
 
 export default function RoomsPage() {
@@ -185,13 +207,10 @@ export default function RoomsPage() {
     <div className="public-page min-h-screen">
       <PublicSection className="!pt-4 !pb-0">
         <PublicContainer>
-          <div className="text-center max-w-2xl mx-auto mb-2">
-            <h2 className="text-3xl md:text-4xl font-semibold mt-3">
+          <div className="mx-auto mb-3 max-w-3xl text-center">
+            <h2 className="mt-3 text-[1.9rem] font-semibold leading-tight text-slate-900 md:text-[2.4rem]">
               {t("title")}
             </h2>
-            <p className="text-sm md:text-base text-slate-500 mt-2">
-              {t("subtitle")}
-            </p>
           </div>
         </PublicContainer>
       </PublicSection>
@@ -199,79 +218,148 @@ export default function RoomsPage() {
       <PublicSection className="!pt-0 pb-16">
         <PublicContainer>
           {loadingRooms ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
-              {[...Array(6)].map((_, i) => (
-                <PublicCard key={i} className="overflow-hidden animate-pulse">
-                  <div className="h-56 w-full bg-slate-200" />
-                  <div className="p-4 space-y-3">
-                    <div className="h-4 w-2/3 rounded bg-slate-200" />
-                    <div className="h-3 w-full rounded bg-slate-100" />
-                    <div className="h-3 w-5/6 rounded bg-slate-100" />
-                    <div className="h-9 w-28 rounded bg-slate-200 mt-4" />
+            <div className="space-y-8">
+              {[...Array(3)].map((_, i) => (
+                <PublicCard
+                  key={i}
+                  className="overflow-hidden rounded-[30px] border border-slate-200/80 bg-white p-0 animate-pulse"
+                >
+                  <div className="grid lg:grid-cols-[1.1fr_0.9fr]">
+                    <div className="h-[300px] bg-slate-200 md:h-[360px]" />
+                    <div className="p-6 md:p-8">
+                      <div className="h-3 w-24 rounded-full bg-slate-100" />
+                      <div className="mt-5 h-8 w-2/3 rounded bg-slate-200" />
+                      <div className="mt-4 h-3 w-full rounded bg-slate-100" />
+                      <div className="mt-2 h-3 w-5/6 rounded bg-slate-100" />
+                      <div className="mt-6 flex gap-2">
+                        <div className="h-8 w-24 rounded-full bg-slate-100" />
+                        <div className="h-8 w-20 rounded-full bg-slate-100" />
+                      </div>
+                      <div className="mt-8 flex items-center justify-between">
+                        <div className="h-8 w-28 rounded bg-slate-200" />
+                        <div className="h-11 w-32 rounded-full bg-slate-200" />
+                      </div>
+                    </div>
                   </div>
                 </PublicCard>
               ))}
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
-              {roomTypes.map((room) => (
+            <div className="space-y-8">
+              {roomTypes.map((room, index) => {
+                const reverse = index % 2 === 1;
+                const previewImages = Array.isArray(room.images)
+                  ? room.images.slice(1, 3)
+                  : [];
+                const roomLabelKey = getRoomLabelKey(room.type);
+
+                return (
                 <PublicCard
                   key={room.type}
-                  className="overflow-hidden flex flex-col rounded-[22px] border border-slate-200/80 bg-white p-0 shadow-[0_12px_30px_rgba(15,23,42,0.06)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_18px_44px_rgba(15,23,42,0.1)]"
+                  className="overflow-hidden rounded-[30px] border border-slate-200/80 bg-white p-0 shadow-[0_16px_40px_rgba(15,23,42,0.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_52px_rgba(15,23,42,0.1)]"
                 >
-                  <button
-                    type="button"
-                    className="relative h-56 w-full cursor-pointer overflow-hidden text-left"
-                    onClick={() => openGallery(room, 0)}
-                  >
-                    <img
-                      src={room.images?.[0]}
-                      alt={room.name}
-                      className="h-full w-full object-cover transition duration-500 hover:scale-[1.03]"
-                    />
-                  </button>
+                  <div className="grid lg:grid-cols-[1.05fr_0.95fr] lg:items-stretch">
+                    <div
+                      className={`relative min-h-[320px] overflow-hidden bg-slate-100 md:min-h-[420px] ${
+                        reverse ? "lg:order-2" : ""
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        className="absolute inset-0 h-full w-full cursor-pointer"
+                        onClick={() => openGallery(room, 0)}
+                      >
+                        <img
+                          src={room.images?.[0]}
+                          alt={room.name}
+                          className="h-full w-full object-cover transition duration-500 hover:scale-[1.03]"
+                        />
+                      </button>
 
-                  <div className="flex flex-grow flex-col p-5">
-                    <div>
-                      <h3 className="text-[1.65rem] font-semibold leading-tight text-slate-900">
-                        {room.name}
-                      </h3>
-                      <p className="mt-2 min-h-[48px] text-sm leading-6 text-slate-500 line-clamp-2">
-                        {getFirstLine(room.description)}
-                      </p>
-
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {getFeatureChips(room.amenities).map((amenity) => (
-                          <span
-                            key={amenity}
-                            className="rounded-md bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600"
-                          >
-                            {amenity}
-                          </span>
-                        ))}
-                      </div>
+                      {previewImages.length > 0 ? (
+                        <div className="absolute bottom-4 left-4 right-4 hidden gap-3 md:grid md:grid-cols-2">
+                          {previewImages.map((image, imageIndex) => (
+                            <button
+                              key={`${room.type}-${imageIndex + 1}`}
+                              type="button"
+                              className="overflow-hidden rounded-2xl border border-white/55 bg-white/20 backdrop-blur-sm"
+                              onClick={() => openGallery(room, imageIndex + 1)}
+                            >
+                              <img
+                                src={image}
+                                alt={`${room.name} preview ${imageIndex + 2}`}
+                                className="h-24 w-full object-cover"
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      ) : null}
                     </div>
 
-                    <div className="mt-6 flex items-end justify-between gap-4">
+                    <div
+                      className={`flex flex-col justify-between p-6 md:p-8 lg:p-10 ${
+                        reverse ? "lg:order-1" : ""
+                      }`}
+                    >
                       <div>
-                        <span className="text-[1.6rem] font-semibold leading-none text-slate-900">
-                          €{Number(room.price || 0).toFixed(0)}
-                        </span>
-                        <span className="ml-1 text-sm text-slate-500">
-                          / {t("night")}
-                        </span>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[#4b74a8]">
+                            {room.type.replaceAll("-", " ")}
+                          </p>
+                          {roomLabelKey ? (
+                            <span className="rounded-full bg-[#e8f1ff] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#1f6feb]">
+                              {t(`labels.${roomLabelKey}`)}
+                            </span>
+                          ) : null}
+                        </div>
+                        <h3 className="mt-4 text-[2rem] font-semibold leading-tight text-slate-900 md:text-[2.35rem]">
+                          {room.name}
+                        </h3>
+                        <p className="mt-4 max-w-xl text-[15px] leading-8 text-slate-600 md:text-base">
+                          {room.description || getFirstLine(room.description)}
+                        </p>
+
+                        <div className="mt-6 flex flex-wrap gap-2.5">
+                          {getFeatureChips(room.amenities).map((amenity) => (
+                            <span
+                              key={amenity}
+                              className="rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-medium text-slate-600"
+                            >
+                              {amenity}
+                            </span>
+                          ))}
+                        </div>
                       </div>
 
-                      <button
-                        className="inline-flex items-center justify-center rounded-lg bg-[#1f6feb] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#195fd0]"
-                        onClick={() => handleBookClick(room)}
-                      >
-                        {t("buttons.bookNow")}
-                      </button>
+                      <div className="mt-8 flex flex-col gap-4 border-t border-slate-200/80 pt-6 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
+                            {t("night")}
+                          </p>
+                          <div className="mt-2">
+                            <span className="text-[2rem] font-semibold leading-none text-slate-900 md:text-[2.35rem]">
+                              €{Number(room.price || 0).toFixed(0)}
+                            </span>
+                            <span className="ml-2 text-sm text-slate-500">
+                              / {t("night")}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-3">
+                          <button
+                            className="inline-flex min-w-[150px] items-center justify-center rounded-full bg-[#1f6feb] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#195fd0] sm:min-w-[170px]"
+                            onClick={() => handleBookClick(room)}
+                          >
+                            {t("buttons.bookNow")}
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </PublicCard>
-              ))}
+                );
+              })}
             </div>
           )}
         </PublicContainer>

@@ -164,10 +164,17 @@
   },
   "rooms": {
     "metaTitle": "Dhomat | Dijari Premium",
-    "title": "Llojet e dhomave te lira",
-    "subtitle": "Zgjidh hapesiren qe pershtatet me qendrimin tend. Konfirmo datat dhe rezervo shpejt.",
+    "title": "Llojet e dhomave",
+    "subtitle": "Zbuloni llojet kryesore te dhomave tona, me komoditet, hapesire dhe atmosfere te pershtatur per nje qendrim te qete ne Ulqin.",
     "night": "nate",
     "selectDates": "Zgjidh datat",
+    "labels": {
+      "poolView": "Pamje nga pishina",
+      "idealForCouples": "Ideale per cifte",
+      "familyStay": "Qendrim familjar",
+      "extraSpace": "Me shume hapesire",
+      "flexibleStay": "Qendrim fleksibel"
+    },
     "buttons": {
       "viewDetails": "Shiko detajet",
       "bookNow": "Rezervo tani",

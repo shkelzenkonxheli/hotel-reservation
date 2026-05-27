@@ -164,10 +164,17 @@
   },
   "rooms": {
     "metaTitle": "Rooms | Dijari Premium",
-    "title": "Available room types",
-    "subtitle": "Choose the space that matches your stay. Confirm your dates and book in minutes.",
+    "title": "Room types",
+    "subtitle": "Explore the main room types available at the hotel, each designed with the right balance of comfort, space, and atmosphere for a calm stay in Ulqin.",
     "night": "night",
     "selectDates": "Select dates",
+    "labels": {
+      "poolView": "Pool view",
+      "idealForCouples": "Ideal for couples",
+      "familyStay": "Family stay",
+      "extraSpace": "Extra space",
+      "flexibleStay": "Flexible stay"
+    },
     "buttons": {
       "viewDetails": "View details",
       "bookNow": "Book now",

@@ -56,13 +56,18 @@
   "success": {
     "metaTitle": "Suksesi | Dijari Premium",
     "title": "Rezervimi u pranua",
-    "subtitle": "Kerkesa juaj per rezervim u krijua. Pagesa do te kryhet me cash ne hotel.",
+    "subtitle": "Kerkesa juaj per rezervim u krijua me sukses dhe eshte ne pritje te konfirmimit nga stafi i hotelit.",
+    "pendingNoticeTitle": "Rezervimi u krijua me sukses",
+    "pendingNoticeBody": "Prisni konfirmimin nga stafi i hotelit. Nese rezervimi aprovohet, do te merrni email me detajet e konfirmimit.",
+    "emailHint": "Kontrolloni emailin dhe spam folder-in per njoftime nga hoteli.",
     "bookingDetails": "Detajet e rezervimit:",
     "room": "Dhoma",
     "checkIn": "Check-in",
     "checkOut": "Check-out",
     "guests": "Mysafiret",
     "total": "Totali",
+    "status": "Statusi",
+    "pendingStatus": "Ne pritje te konfirmimit",
     "noReservation": "Nuk u gjet rezervim i fundit.",
     "backHome": "Kthehu ne Home"
   },
@@ -460,7 +465,16 @@
           "cancelled": "Të anuluara",
           "hotel": "Hotel",
           "apartment": "Apartament"
-        }
+        },
+        "dateRange": "Periudha",
+        "ranges": {
+          "last30": "30 ditet e fundit",
+          "thisMonth": "Ky muaj",
+          "last90": "90 ditet e fundit",
+          "allTime": "Gjithe koha"
+        },
+        "pageSize": "Per faqe",
+        "pageSizeOption": "{count}"
       },
       "statuses": {
         "pending": "Në pritje",
@@ -472,7 +486,18 @@
         "editReservation": "Ndrysho rezervimin",
         "setAs": "Vendose si {status}",
         "markCashPaidAndConfirm": "Shëno cash si të paguar + konfirmo",
-        "markAsUnpaid": "Shëno si të papaguar"
+        "markAsUnpaid": "Shëno si të papaguar",
+        "printReceipt": "Printo faturen",
+        "deleteReservation": "Fshij rezervimin"
+      },
+      "confirm": {
+        "cancel": "Anulo",
+        "statusTitle": "Konfirmo ndryshimin në {status}",
+        "statusDescription": "A jeni të sigurt që doni ta vendosni rezervimin e {guest} si {status}?",
+        "markPaidTitle": "Konfirmo pagesën cash",
+        "markPaidDescription": "A jeni të sigurt që doni ta shënoni rezervimin e {guest} si të paguar dhe të konfirmuar?",
+        "markUnpaidTitle": "Ktheje si të papaguar",
+        "markUnpaidDescription": "A jeni të sigurt që doni ta ktheni rezervimin e {guest} si të papaguar dhe në pritje?"
       },
       "messages": {
         "loadFailed": "Ngarkimi i rezervimeve dështoi.",
@@ -510,7 +535,8 @@
           "viewDetails": "Shiko detajet",
           "printReceipt": "Printo faturen",
           "deleteReservation": "Fshij rezervimin"
-        }
+        },
+        "payment": "Pagesa"
       },
       "detailsDialog": {
         "title": "Detajet e rezervimit",
@@ -634,6 +660,11 @@
           "created": "Rezervimi u krijua me sukses.",
           "updated": "Rezervimi u perditesua me sukses."
         }
+      },
+      "emptyFiltered": "Nuk u gjet asnje rezervim per filtrat aktuale ({range}).",
+      "payment": {
+        "paid": "E paguar",
+        "unpaid": "E papaguar"
       }
     },
     "manageRooms": {
@@ -1059,36 +1090,36 @@
       "loading": "Duke ngarkuar llojet e dhomave...",
       "photoCount": "{count} foto",
       "noPhotosYet": "Ende nuk ka foto",
-        "actions": {
-          "uploading": "Duke ngarkuar...",
-          "addPhoto": "Shto foto",
-          "manage": "Menaxho",
-          "setCover": "Vendos ne liste"
-        },
-        "dialog": {
-          "managePhotos": "Menaxho fotot - {type}",
-          "order": "Renditja",
-          "noPhotosForType": "Nuk ka ende foto per kete lloj.",
-          "close": "Mbyll",
-          "cover": "Kryesore",
-          "dragHint": "Terhiqe per renditje"
-        },
-        "errors": {
-          "load": "Ngarkimi i fotove te dhomave deshtoi.",
-          "upload": "Ngarkimi i fotos deshtoi",
-          "save": "Ruajtja deshtoi",
-          "delete": "Fshirja deshtoi",
-          "cover": "Vendosja e fotos kryesore deshtoi",
-          "reorder": "Renditja e fotove deshtoi",
-          "generic": "Ndodhi nje gabim."
-        },
-        "messages": {
-          "uploaded": "Fotoja u ngarkua me sukses.",
-          "deleted": "Fotoja u fshi me sukses.",
-          "coverUpdated": "Fotoja kryesore u perditesua.",
-          "reordered": "Renditja e fotove u ruajt."
-        }
+      "actions": {
+        "uploading": "Duke ngarkuar...",
+        "addPhoto": "Shto foto",
+        "manage": "Menaxho",
+        "setCover": "Vendos ne liste"
       },
+      "dialog": {
+        "managePhotos": "Menaxho fotot - {type}",
+        "order": "Renditja",
+        "noPhotosForType": "Nuk ka ende foto per kete lloj.",
+        "close": "Mbyll",
+        "cover": "Kryesore",
+        "dragHint": "Terhiqe per renditje"
+      },
+      "errors": {
+        "load": "Ngarkimi i fotove te dhomave deshtoi.",
+        "upload": "Ngarkimi i fotos deshtoi",
+        "save": "Ruajtja deshtoi",
+        "delete": "Fshirja deshtoi",
+        "cover": "Vendosja e fotos kryesore deshtoi",
+        "reorder": "Renditja e fotove deshtoi",
+        "generic": "Ndodhi nje gabim."
+      },
+      "messages": {
+        "uploaded": "Fotoja u ngarkua me sukses.",
+        "deleted": "Fotoja u fshi me sukses.",
+        "coverUpdated": "Fotoja kryesore u perditesua.",
+        "reordered": "Renditja e fotove u ruajt."
+      }
+    },
     "printReceipt": {
       "invoice": "Fatura",
       "guestStay": "Te dhenat e mysafirit dhe qendrimit",

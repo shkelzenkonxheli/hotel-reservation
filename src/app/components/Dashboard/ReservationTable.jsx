@@ -2,11 +2,9 @@
 import { useTranslations } from "next-intl";
 import {
   MoreVert,
-  Delete,
   BookOnline,
   Star,
   StarBorder,
-  Print as PrintIcon,
 } from "@mui/icons-material";
 
 export default function ReservationTable({
@@ -15,9 +13,8 @@ export default function ReservationTable({
   onToggleFavorite,
   onOpenDetails,
   onManage,
-  onPrint,
-  onDelete,
   getStatusChip,
+  getPaymentChip,
   getBookingState,
   selectedIds,
   onToggleSelect,
@@ -25,9 +22,15 @@ export default function ReservationTable({
   allSelected,
 }) {
   const t = useTranslations("dashboard.reservations.table");
+  const formatShortDate = (value) =>
+    new Date(value).toLocaleDateString(undefined, {
+      day: "2-digit",
+      month: "short",
+    });
+
   return (
     <div className="overflow-x-auto admin-card">
-      <table className="admin-table min-w-[900px]">
+      <table className="admin-table min-w-[820px]">
         <thead>
           <tr>
             <th className="px-2 py-2 text-center whitespace-nowrap text-xs">
@@ -39,11 +42,11 @@ export default function ReservationTable({
               />
             </th>
             <th className="px-2 py-2 text-center whitespace-nowrap text-xs">{t("pinned")}</th>
-            <th className="px-2 py-2 text-left whitespace-nowrap text-xs">{t("code")}</th>
             <th className="px-2 py-2 text-left whitespace-nowrap text-xs">{t("guest")}</th>
             <th className="px-2 py-2 text-left whitespace-nowrap text-xs">{t("room")}</th>
             <th className="px-2 py-2 text-center whitespace-nowrap text-xs">{t("stay")}</th>
             <th className="px-2 py-2 text-center whitespace-nowrap text-xs">{t("status")}</th>
+            <th className="px-2 py-2 text-center whitespace-nowrap text-xs">{t("payment")}</th>
             <th className="px-2 py-2 text-center whitespace-nowrap text-xs">{t("total")}</th>
             <th className="px-2 py-2 text-center whitespace-nowrap text-xs">{t("actions")}</th>
           </tr>
@@ -52,14 +55,23 @@ export default function ReservationTable({
         <tbody>
           {reservations.map((r) => {
             const bookingState = getBookingState(r);
-            const rowBg =
+            const rowStyle =
               bookingState === "CANCELLED"
-                ? "#fee2e2"
+                ? {
+                    backgroundColor: "#ffe4e6",
+                    boxShadow: "inset 4px 0 0 #e11d48",
+                  }
                 : bookingState === "FINISHED"
-                  ? "#fef9c3"
-                  : "#dcfce7";
+                  ? {
+                      backgroundColor: "#fef3c7",
+                      boxShadow: "inset 4px 0 0 #d97706",
+                    }
+                  : {
+                      backgroundColor: "#e6f4ff",
+                      boxShadow: "inset 4px 0 0 #2563eb",
+                    };
             return (
-              <tr key={r.id} style={{ backgroundColor: rowBg }}>
+              <tr key={r.id} style={rowStyle}>
                 <td className="px-2 py-2 text-center">
                   <Checkbox
                     size="small"
@@ -77,44 +89,55 @@ export default function ReservationTable({
                     )}
                   </IconButton>
                 </td>
-                <td className="px-2 py-2 font-mono text-sm text-gray-700 whitespace-nowrap">
-                  {r.reservation_code || "-"}
-                </td>
-
-                <td className="px-2 py-2 font-medium text-gray-800 whitespace-nowrap">
+                <td className="px-3 py-2.5 font-medium text-gray-800 whitespace-nowrap align-middle">
                   {r.full_name || "-"}
                 </td>
 
-                <td className="px-2 py-2">
+                <td className="px-3 py-2.5 align-middle">
                   <div className="flex flex-col">
-                    <span className="text-xs text-gray-600">
-                      #{r.rooms?.room_number || "-"} {r.rooms?.type || "-"}
+                    <span className="text-sm font-semibold text-slate-800">
+                      {r.rooms?.type || "-"}
+                    </span>
+                    <span className="text-xs text-slate-500">
+                      #{r.rooms?.room_number || "-"}
                     </span>
                   </div>
                 </td>
 
-                <td className="px-2 py-2 text-center">
-                  <Box display="flex" flexDirection="column" gap={0.5}>
+                <td className="px-3 py-2.5 text-center align-middle">
+                  <Box display="flex" flexDirection="column" gap={0.75}>
                     <Chip
                       size="small"
-                      label={`${t("checkIn")}: ${new Date(r.start_date).toLocaleDateString()}`}
-                      sx={{ background: "#ecfeff", color: "#155e75" }}
+                      label={`${t("checkIn")}: ${formatShortDate(r.start_date)}`}
+                      sx={{
+                        background: "#f8fafc",
+                        color: "#334155",
+                        fontWeight: 600,
+                        border: "1px solid #e2e8f0",
+                      }}
                     />
                     <Chip
                       size="small"
-                      label={`${t("checkOut")}: ${new Date(r.end_date).toLocaleDateString()}`}
-                      sx={{ background: "#fff7ed", color: "#9a3412" }}
+                      label={`${t("checkOut")}: ${formatShortDate(r.end_date)}`}
+                      sx={{
+                        background: "#f8fafc",
+                        color: "#334155",
+                        fontWeight: 600,
+                        border: "1px solid #e2e8f0",
+                      }}
                     />
                   </Box>
                 </td>
 
-                <td className="px-2 py-2 text-center">{getStatusChip(r.status)}</td>
+                <td className="px-3 py-2.5 text-center align-middle">{getStatusChip(r.status)}</td>
 
-                <td className="px-2 py-2 text-center font-semibold">
-                  {Number(r.total_price ?? 0).toFixed(2)}
+                <td className="px-3 py-2.5 text-center align-middle">{getPaymentChip(r)}</td>
+
+                <td className="px-3 py-2.5 text-center font-semibold text-slate-900 align-middle">
+                  EUR {Number(r.total_price ?? 0).toFixed(2)}
                 </td>
 
-                <td className="px-2 py-2 text-center">
+                <td className="px-3 py-2.5 text-center align-middle">
                   <div className="flex items-center justify-center gap-1">
                     <Tooltip title={t("tooltips.viewDetails")}>
                       <IconButton size="small" onClick={() => onOpenDetails(r)}>
@@ -125,22 +148,6 @@ export default function ReservationTable({
                     <IconButton size="small" onClick={(e) => onManage(e, r)}>
                       <MoreVert />
                     </IconButton>
-
-                    <Tooltip title={t("tooltips.printReceipt")}>
-                      <IconButton size="small" onClick={() => onPrint(r)}>
-                        <PrintIcon />
-                      </IconButton>
-                    </Tooltip>
-
-                    <Tooltip title={t("tooltips.deleteReservation")}>
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => onDelete(r)}
-                      >
-                        <Delete />
-                      </IconButton>
-                    </Tooltip>
                   </div>
                 </td>
               </tr>

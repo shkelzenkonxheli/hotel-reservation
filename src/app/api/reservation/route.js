@@ -377,6 +377,7 @@ export async function GET(request) {
     const listAll = searchParams.get("list");
     const userId = searchParams.get("user_id");
     const userRole = searchParams.get("role")?.toLowerCase();
+    const fromDate = searchParams.get("from");
     const roomType = searchParams.get("room_type");
     const startDate = searchParams.get("start_date");
     const endDate = searchParams.get("end_date");
@@ -416,6 +417,9 @@ export async function GET(request) {
       }
 
       let where = {};
+      if (fromDate) {
+        where.end_date = { gte: parseDateOnlyToUTC(fromDate) };
+      }
 
       if (userRole === "client") {
         where.user_id = Number(userId);

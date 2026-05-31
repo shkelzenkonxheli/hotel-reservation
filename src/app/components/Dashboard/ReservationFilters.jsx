@@ -16,6 +16,10 @@ export default function ReservationFilters({
   onStatusFilterChange,
   typeFilter,
   onTypeFilterChange,
+  dateRange,
+  onDateRangeChange,
+  pageSize,
+  onPageSizeChange,
   onAddNew,
 }) {
   const t = useTranslations("dashboard.reservations.filters");
@@ -73,6 +77,35 @@ export default function ReservationFilters({
             <MenuItem value="all">{t("options.all")}</MenuItem>
             <MenuItem value="hotel">{t("options.hotel")}</MenuItem>
             <MenuItem value="apartment">{t("options.apartment")}</MenuItem>
+          </Select>
+        </FormControl>
+
+        <FormControl size="small" sx={{ minWidth: { xs: "100%", sm: 180 } }}>
+          <InputLabel>{t("dateRange")}</InputLabel>
+          <Select
+            value={dateRange}
+            label={t("dateRange")}
+            onChange={(e) => onDateRangeChange(e.target.value)}
+          >
+            <MenuItem value="last30">{t("ranges.last30")}</MenuItem>
+            <MenuItem value="thisMonth">{t("ranges.thisMonth")}</MenuItem>
+            <MenuItem value="last90">{t("ranges.last90")}</MenuItem>
+            <MenuItem value="all">{t("ranges.allTime")}</MenuItem>
+          </Select>
+        </FormControl>
+
+        <FormControl size="small" sx={{ minWidth: { xs: "100%", sm: 130 } }}>
+          <InputLabel>{t("pageSize")}</InputLabel>
+          <Select
+            value={pageSize}
+            label={t("pageSize")}
+            onChange={(e) => onPageSizeChange(Number(e.target.value))}
+          >
+            {[20, 50, 100].map((size) => (
+              <MenuItem key={size} value={size}>
+                {t("pageSizeOption", { count: size })}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
       </Box>

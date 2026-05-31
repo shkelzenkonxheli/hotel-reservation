@@ -9,6 +9,8 @@ import {
   Card,
   CardContent,
   CircularProgress,
+  Alert,
+  Stack,
 } from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { useRouter } from "next/navigation";
@@ -99,6 +101,24 @@ export default function SuccessPage() {
           {t("subtitle")}
         </Typography>
 
+        <Alert
+          severity="info"
+          sx={{
+            mb: 3,
+            textAlign: "left",
+            borderRadius: "14px",
+            alignItems: "flex-start",
+          }}
+        >
+          <Stack spacing={0.75}>
+            <Typography variant="body2" fontWeight={700}>
+              {t("pendingNoticeTitle")}
+            </Typography>
+            <Typography variant="body2">{t("pendingNoticeBody")}</Typography>
+            <Typography variant="body2">{t("emailHint")}</Typography>
+          </Stack>
+        </Alert>
+
         {reservation ? (
           <CardContent
             sx={{
@@ -131,6 +151,9 @@ export default function SuccessPage() {
               <span style={{ color: "#16a34a", fontWeight: 600 }}>
                 EUR {reservation.total_price}
               </span>
+            </Typography>
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              <strong>{t("status")}:</strong> {t("pendingStatus")}
             </Typography>
           </CardContent>
         ) : (

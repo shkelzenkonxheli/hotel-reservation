@@ -10,6 +10,10 @@ import {
   reservationConfirmationTemplate,
 } from "@/lib/email/reservationConfirmationTemplate";
 import {
+  reservationDeclinedSubject,
+  reservationDeclinedTemplate,
+} from "@/lib/email/reservationDeclinedTemplate";
+import {
   calculateReservationTotal,
   clampGuests,
 } from "@/lib/pricing";
@@ -32,6 +36,16 @@ function normalizeEmailLocale(locale) {
   return String(locale || "").toLowerCase().startsWith("en") ? "en" : "sq";
 }
 
+async function sendEmailOrThrow(sendPromise, label) {
+  const result = await sendPromise;
+  if (result?.error) {
+    throw new Error(
+      `${label} failed: ${result.error.message || JSON.stringify(result.error)}`,
+    );
+  }
+  return result;
+}
+
 async function sendConfirmationEmailIfNeeded(previous, updated) {
   const wasConfirmed = String(previous?.status || "").toLowerCase() === "confirmed";
   const isConfirmed = String(updated?.status || "").toLowerCase() === "confirmed";
@@ -51,26 +65,66 @@ async function sendConfirmationEmailIfNeeded(previous, updated) {
   const locale = normalizeEmailLocale(updated?.guest_locale);
   const resend = new Resend(process.env.RESEND_API_KEY);
 
-  await resend.emails.send({
-    from: "Dijari Premium <onboarding@dijaripremium.com>",
-    to: recipient,
-    subject: reservationConfirmationSubject({
-      locale,
-      reservationStatus: updated.status,
+  await sendEmailOrThrow(
+    resend.emails.send({
+      from: "Dijari Premium <onboarding@dijaripremium.com>",
+      to: recipient,
+      subject: reservationConfirmationSubject({
+        locale,
+        reservationStatus: updated.status,
+      }),
+      html: reservationConfirmationTemplate({
+        locale,
+        fullname: updated.full_name || updated?.users?.name || "Guest",
+        roomName: updated?.rooms?.name || `#${updated?.rooms?.room_number || ""}`,
+        startDate: updated.start_date?.toISOString?.().slice(0, 10) || "",
+        endDate: updated.end_date?.toISOString?.().slice(0, 10) || "",
+        totalPrice: Number(updated.total_price || 0).toFixed(2),
+        reservationCode: updated.reservation_code,
+        paymentMethod: updated.payment_method || "cash",
+        paymentStatus: updated.payment_status || "UNPAID",
+        reservationStatus: updated.status || "pending",
+      }),
     }),
-    html: reservationConfirmationTemplate({
-      locale,
-      fullname: updated.full_name || updated?.users?.name || "Guest",
-      roomName: updated?.rooms?.name || `#${updated?.rooms?.room_number || ""}`,
-      startDate: updated.start_date?.toISOString?.().slice(0, 10) || "",
-      endDate: updated.end_date?.toISOString?.().slice(0, 10) || "",
-      totalPrice: Number(updated.total_price || 0).toFixed(2),
-      reservationCode: updated.reservation_code,
-      paymentMethod: updated.payment_method || "cash",
-      paymentStatus: updated.payment_status || "UNPAID",
-      reservationStatus: updated.status || "pending",
+    "Guest reservation confirmation email",
+  );
+}
+
+async function sendDeclinedEmailIfNeeded(previous, updated) {
+  const wasCancelled = String(previous?.status || "").toLowerCase() === "cancelled";
+  const isCancelled = String(updated?.status || "").toLowerCase() === "cancelled";
+  const recipient = String(
+    updated?.guest_email || updated?.users?.email || "",
+  ).trim();
+
+  if (
+    wasCancelled ||
+    !isCancelled ||
+    !recipient ||
+    !process.env.RESEND_API_KEY
+  ) {
+    return;
+  }
+
+  const locale = normalizeEmailLocale(updated?.guest_locale);
+  const resend = new Resend(process.env.RESEND_API_KEY);
+
+  await sendEmailOrThrow(
+    resend.emails.send({
+      from: "Dijari Premium <onboarding@dijaripremium.com>",
+      to: recipient,
+      subject: reservationDeclinedSubject({ locale }),
+      html: reservationDeclinedTemplate({
+        locale,
+        fullname: updated.full_name || updated?.users?.name || "Guest",
+        roomName: updated?.rooms?.name || `#${updated?.rooms?.room_number || ""}`,
+        startDate: updated.start_date?.toISOString?.().slice(0, 10) || "",
+        endDate: updated.end_date?.toISOString?.().slice(0, 10) || "",
+        reservationCode: updated.reservation_code,
+      }),
     }),
-  });
+    "Guest reservation declined email",
+  );
 }
 
 // Handle PATCH requests for this route.
@@ -133,7 +187,12 @@ export async function PATCH(req, context) {
         },
       });
 
-      await sendConfirmationEmailIfNeeded(existing, updated);
+      try {
+        await sendConfirmationEmailIfNeeded(existing, updated);
+        await sendDeclinedEmailIfNeeded(existing, updated);
+      } catch (emailError) {
+        console.error("Reservation status email failed:", emailError);
+      }
 
       await logActivity({
         action: "PAYMENT_UPDATE",
@@ -179,7 +238,12 @@ export async function PATCH(req, context) {
         },
       });
 
-      await sendConfirmationEmailIfNeeded(existing, updated);
+      try {
+        await sendConfirmationEmailIfNeeded(existing, updated);
+        await sendDeclinedEmailIfNeeded(existing, updated);
+      } catch (emailError) {
+        console.error("Reservation status email failed:", emailError);
+      }
 
       await logActivity({
         action: "STATUS_CHANGE",

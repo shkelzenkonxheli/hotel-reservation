@@ -1,20 +1,39 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import {
   CircularProgress,
   Chip,
   Menu,
   MenuItem,
+  ListItemIcon,
+  ListItemText,
   Typography,
   Box,
   Button,
   Snackbar,
   Alert,
+  Pagination,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { DoneAll } from "@mui/icons-material";
+import {
+  DoneAll,
+  EditOutlined,
+  HourglassEmptyRounded,
+  CheckCircleOutlineRounded,
+  TaskAltRounded,
+  CancelOutlined,
+  PaymentsOutlined,
+  MoneyOffCsredOutlined,
+  PrintOutlined,
+  DeleteOutline,
+} from "@mui/icons-material";
 import ReservationFilters from "./ReservationFilters";
 import ReservationTabs from "./ReservationTabs";
 import ReservationTable from "./ReservationTable";
@@ -28,15 +47,28 @@ import PageHeader from "./ui/PageHeader";
 
 export default function ReservationsTab() {
   const t = useTranslations("dashboard.reservations");
+  const locale = useLocale();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedReservation, setSelectedReservation] = useState(null);
   const [deleteDialog, setDeleteDialog] = useState({ open: false, id: null });
   const [reasonTarget, setReasonTarget] = useState(null);
+  const [actionDialog, setActionDialog] = useState({
+    open: false,
+    title: "",
+    description: "",
+    confirmLabel: "",
+    tone: "primary",
+    onConfirm: null,
+  });
 
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [dateRange, setDateRange] = useState("last30");
   const [search, setSearch] = useState("");
   const [openModal, setOpenModal] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
@@ -54,10 +86,47 @@ export default function ReservationsTab() {
     message: "",
     severity: "success",
   });
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const reservationIdParam = searchParams.get("reservationId");
+  const confirmCopy = {
+    sq: {
+      cancel: "Anulo",
+      statusTitle: "Konfirmo ndryshimin në {status}",
+      statusDescription:
+        "A jeni të sigurt që doni ta vendosni rezervimin e {guest} si {status}?",
+      markPaidTitle: "Konfirmo pagesën cash",
+      markPaidDescription:
+        "A jeni të sigurt që doni ta shënoni rezervimin e {guest} si të paguar dhe të konfirmuar?",
+      markUnpaidTitle: "Ktheje si të papaguar",
+      markUnpaidDescription:
+        "A jeni të sigurt që doni ta ktheni rezervimin e {guest} si të papaguar dhe në pritje?",
+    },
+    en: {
+      cancel: "Cancel",
+      statusTitle: "Confirm change to {status}",
+      statusDescription:
+        "Are you sure you want to set {guest}'s reservation as {status}?",
+      markPaidTitle: "Confirm cash payment",
+      markPaidDescription:
+        "Are you sure you want to mark {guest}'s reservation as paid and confirmed?",
+      markUnpaidTitle: "Mark as unpaid again",
+      markUnpaidDescription:
+        "Are you sure you want to move {guest}'s reservation back to unpaid and pending?",
+    },
+  };
+  const confirmLocale = String(locale || "").startsWith("en") ? "en" : "sq";
+  const confirmT = (key, values) => {
+    if (typeof t.has === "function" && t.has(`confirm.${key}`)) {
+      return t(`confirm.${key}`, values);
+    }
+    let template = confirmCopy[confirmLocale][key] || "";
+    if (!values) return template;
+    return Object.entries(values).reduce(
+      (acc, [name, value]) => acc.replaceAll(`{${name}}`, String(value)),
+      template,
+    );
+  };
   const notify = (message, severity = "success") => {
     setFeedback({ open: true, message, severity });
   };
@@ -67,6 +136,35 @@ export default function ReservationsTab() {
     setDetailsOpen(true);
   };
 
+  const closeActionDialog = () => {
+    setActionDialog({
+      open: false,
+      title: "",
+      description: "",
+      confirmLabel: "",
+      tone: "primary",
+      onConfirm: null,
+    });
+  };
+
+  const requestActionConfirmation = ({
+    title,
+    description,
+    confirmLabel,
+    tone = "primary",
+    onConfirm,
+  }) => {
+    setAnchorEl(null);
+    setActionDialog({
+      open: true,
+      title,
+      description,
+      confirmLabel,
+      tone,
+      onConfirm,
+    });
+  };
+
   const toggleFavorite = (id) => {
     setFavorites((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
@@ -74,8 +172,60 @@ export default function ReservationsTab() {
   };
 
   useEffect(() => {
-    fetchReservations();
-  }, []);
+    fetchReservations(dateRange);
+  }, [dateRange]);
+
+  useEffect(() => {
+    const nextSearch = searchParams.get("search") || "";
+    const nextStatus = searchParams.get("status") || "all";
+    const nextType = searchParams.get("type") || "all";
+    const nextRange = searchParams.get("range") || "last30";
+    const nextTab = searchParams.get("tab") || "all";
+    const nextPage = Number(searchParams.get("page") || 1);
+    const nextPageSize = Number(searchParams.get("pageSize") || 20);
+
+    setSearch((prev) => (prev === nextSearch ? prev : nextSearch));
+    setStatusFilter((prev) => (prev === nextStatus ? prev : nextStatus));
+    setTypeFilter((prev) => (prev === nextType ? prev : nextType));
+    setDateRange((prev) => (prev === nextRange ? prev : nextRange));
+    setActiveTab((prev) => (prev === nextTab ? prev : nextTab));
+    setPage((prev) => (prev === nextPage ? prev : nextPage));
+    setPageSize((prev) => (prev === nextPageSize ? prev : nextPageSize));
+  }, [searchParams]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, statusFilter, typeFilter, activeTab, dateRange, pageSize]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    const setOrDelete = (key, value, fallback) => {
+      if (!value || value === fallback) params.delete(key);
+      else params.set(key, String(value));
+    };
+
+    setOrDelete("search", search, "");
+    setOrDelete("status", statusFilter, "all");
+    setOrDelete("type", typeFilter, "all");
+    setOrDelete("range", dateRange, "last30");
+    setOrDelete("tab", activeTab, "all");
+    setOrDelete("page", page, 1);
+    setOrDelete("pageSize", pageSize, 20);
+
+    const next = params.toString();
+    if (next === searchParams.toString()) return;
+    router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
+  }, [
+    search,
+    statusFilter,
+    typeFilter,
+    dateRange,
+    activeTab,
+    page,
+    pageSize,
+    pathname,
+    searchParams,
+  ]);
 
   useEffect(() => {
     if (!reservationIdParam) return;
@@ -84,13 +234,37 @@ export default function ReservationsTab() {
     const found = reservations.find((r) => r.id === id);
     if (found) {
       openDetails(found);
-      router.replace(pathname);
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("reservationId");
+      const next = params.toString();
+      router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
     }
   }, [reservationIdParam, reservations]);
 
-  async function fetchReservations() {
+  function getDateRangeFromPreset(preset) {
+    if (preset === "all") return null;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (preset === "thisMonth") {
+      return new Date(today.getFullYear(), today.getMonth(), 1)
+        .toISOString()
+        .slice(0, 10);
+    }
+
+    const from = new Date(today);
+    from.setDate(from.getDate() - (preset === "last90" ? 89 : 29));
+    return from.toISOString().slice(0, 10);
+  }
+
+  async function fetchReservations(rangePreset = dateRange) {
     try {
-      const res = await fetch("/api/reservation?list=true");
+      const params = new URLSearchParams({ list: "true" });
+      const from = getDateRangeFromPreset(rangePreset);
+      if (from) params.set("from", from);
+
+      const res = await fetch(`/api/reservation?${params.toString()}`);
       const data = await res.json();
       if (res.ok) {
         setReservations(data);
@@ -132,6 +306,36 @@ export default function ReservationsTab() {
       setSelectedReservation(null);
     }
   }
+
+  const getStatusActionMeta = (status) => {
+    switch (status) {
+      case "pending":
+        return {
+          icon: <HourglassEmptyRounded fontSize="small" sx={{ color: "#d97706" }} />,
+          tone: "warning",
+        };
+      case "confirmed":
+        return {
+          icon: <CheckCircleOutlineRounded fontSize="small" sx={{ color: "#16a34a" }} />,
+          tone: "success",
+        };
+      case "completed":
+        return {
+          icon: <TaskAltRounded fontSize="small" sx={{ color: "#2563eb" }} />,
+          tone: "info",
+        };
+      case "cancelled":
+        return {
+          icon: <CancelOutlined fontSize="small" sx={{ color: "#dc2626" }} />,
+          tone: "error",
+        };
+      default:
+        return {
+          icon: <DoneAll fontSize="small" />,
+          tone: "primary",
+        };
+    }
+  };
 
   async function handlePaymentUpdate(id, paymentStatus, paymentMethod, status) {
     try {
@@ -294,6 +498,18 @@ export default function ReservationsTab() {
     });
   }
 
+  const totalPages = Math.max(1, Math.ceil(displayList.length / pageSize));
+  const paginatedList = displayList.slice(
+    (page - 1) * pageSize,
+    page * pageSize,
+  );
+
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [page, totalPages]);
+
   const getStatusChip = (status = "pending") => {
     const s = status.toLowerCase();
 
@@ -350,6 +566,21 @@ export default function ReservationsTab() {
       default:
         return <Chip label={status} size="small" />;
     }
+  };
+
+  const getPaymentChip = (reservation) => {
+    const isPaid = String(reservation?.payment_status || "").toUpperCase() === "PAID";
+    return (
+      <Chip
+        size="small"
+        label={t(`payment.${isPaid ? "paid" : "unpaid"}`)}
+        sx={{
+          backgroundColor: isPaid ? "#dcfce7" : "#fee2e2",
+          color: isPaid ? "#166534" : "#991b1b",
+          fontWeight: 600,
+        }}
+      />
+    );
   };
 
   function getBookingState(r) {
@@ -446,6 +677,10 @@ export default function ReservationsTab() {
         onStatusFilterChange={setStatusFilter}
         typeFilter={typeFilter}
         onTypeFilterChange={setTypeFilter}
+        dateRange={dateRange}
+        onDateRangeChange={setDateRange}
+        pageSize={pageSize}
+        onPageSizeChange={setPageSize}
         onAddNew={() => setOpenModal(true)}
       />
 
@@ -501,10 +736,12 @@ export default function ReservationsTab() {
       ) : null}
 
       {displayList.length === 0 ? (
-        <p className="text-center text-gray-500">{t("empty")}</p>
+        <p className="text-center text-gray-500">
+          {t("emptyFiltered", { range: t(`filters.ranges.${dateRange}`) })}
+        </p>
       ) : isMobile ? (
         <ReservationListMobile
-          reservations={displayList}
+          reservations={paginatedList}
           favorites={favorites}
           onToggleFavorite={toggleFavorite}
           onManage={(e, r) => {
@@ -515,10 +752,11 @@ export default function ReservationsTab() {
           onDelete={(r) => setDeleteDialog({ open: true, id: r.id })}
           selectedIds={selectedIds}
           onToggleSelect={toggleSelect}
+          getPaymentChip={getPaymentChip}
         />
       ) : (
         <ReservationTable
-          reservations={displayList}
+          reservations={paginatedList}
           favorites={favorites}
           onToggleFavorite={toggleFavorite}
           onOpenDetails={openDetails}
@@ -529,16 +767,28 @@ export default function ReservationsTab() {
           onPrint={setPrintReservation}
           onDelete={(r) => setDeleteDialog({ open: true, id: r.id })}
           getStatusChip={getStatusChip}
+          getPaymentChip={getPaymentChip}
           getBookingState={getBookingState}
           selectedIds={selectedIds}
           onToggleSelect={toggleSelect}
-          onSelectAll={(checked) => selectAllVisible(checked, displayList)}
+          onSelectAll={(checked) => selectAllVisible(checked, paginatedList)}
           allSelected={
-            displayList.length > 0 &&
-            displayList.every((r) => selectedIds.includes(r.id))
+            paginatedList.length > 0 &&
+            paginatedList.every((r) => selectedIds.includes(r.id))
           }
         />
       )}
+
+      {totalPages > 1 ? (
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+          <Pagination
+            count={totalPages}
+            page={page}
+            color="primary"
+            onChange={(_, value) => setPage(value)}
+          />
+        </Box>
+      ) : null}
 
       <Menu
         anchorEl={anchorEl}
@@ -552,7 +802,36 @@ export default function ReservationsTab() {
             setAnchorEl(null);
           }}
         >
-          {t("menu.editReservation")}
+          <ListItemIcon>
+            <EditOutlined fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>{t("menu.editReservation")}</ListItemText>
+        </MenuItem>
+
+        <MenuItem divider />
+
+        <MenuItem
+          onClick={() => {
+            setPrintReservation(selectedReservation);
+            setAnchorEl(null);
+          }}
+        >
+          <ListItemIcon>
+            <PrintOutlined fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>{t("menu.printReceipt")}</ListItemText>
+        </MenuItem>
+
+        <MenuItem
+          onClick={() => {
+            setDeleteDialog({ open: true, id: selectedReservation?.id ?? null });
+            setAnchorEl(null);
+          }}
+        >
+          <ListItemIcon>
+            <DeleteOutline fontSize="small" sx={{ color: "#dc2626" }} />
+          </ListItemIcon>
+          <ListItemText>{t("menu.deleteReservation")}</ListItemText>
         </MenuItem>
 
         <MenuItem divider />
@@ -561,13 +840,29 @@ export default function ReservationsTab() {
           <MenuItem
             key={status}
             onClick={() => {
-              handleStatusChange(selectedReservation.id, status);
-              setAnchorEl(null);
+              const meta = getStatusActionMeta(status);
+              requestActionConfirmation({
+                title: confirmT("statusTitle", {
+                  status: t(`statuses.${status}`),
+                }),
+                description: confirmT("statusDescription", {
+                  guest: selectedReservation?.full_name || "-",
+                  status: t(`statuses.${status}`),
+                }),
+                confirmLabel: t("menu.setAs", {
+                  status: t(`statuses.${status}`),
+                }),
+                tone: meta.tone,
+                onConfirm: () => handleStatusChange(selectedReservation.id, status),
+              });
             }}
           >
-            {t("menu.setAs", {
-              status: t(`statuses.${status}`),
-            })}
+            <ListItemIcon>{getStatusActionMeta(status).icon}</ListItemIcon>
+            <ListItemText>
+              {t("menu.setAs", {
+                status: t(`statuses.${status}`),
+              })}
+            </ListItemText>
           </MenuItem>
         ))}
 
@@ -575,30 +870,80 @@ export default function ReservationsTab() {
 
         <MenuItem
           onClick={() =>
-            handlePaymentUpdate(
-              selectedReservation.id,
-              "PAID",
-              "cash",
-              "confirmed",
-            )
+            requestActionConfirmation({
+              title: confirmT("markPaidTitle"),
+              description: confirmT("markPaidDescription", {
+                guest: selectedReservation?.full_name || "-",
+              }),
+              confirmLabel: t("menu.markCashPaidAndConfirm"),
+              tone: "success",
+              onConfirm: () =>
+                handlePaymentUpdate(
+                  selectedReservation.id,
+                  "PAID",
+                  "cash",
+                  "confirmed",
+                ),
+            })
           }
         >
-          {t("menu.markCashPaidAndConfirm")}
+          <ListItemIcon>
+            <PaymentsOutlined fontSize="small" sx={{ color: "#16a34a" }} />
+          </ListItemIcon>
+          <ListItemText>{t("menu.markCashPaidAndConfirm")}</ListItemText>
         </MenuItem>
 
         <MenuItem
           onClick={() =>
-            handlePaymentUpdate(
-              selectedReservation.id,
-              "UNPAID",
-              "cash",
-              "pending",
-            )
+            requestActionConfirmation({
+              title: confirmT("markUnpaidTitle"),
+              description: confirmT("markUnpaidDescription", {
+                guest: selectedReservation?.full_name || "-",
+              }),
+              confirmLabel: t("menu.markAsUnpaid"),
+              tone: "warning",
+              onConfirm: () =>
+                handlePaymentUpdate(
+                  selectedReservation.id,
+                  "UNPAID",
+                  "cash",
+                  "pending",
+                ),
+            })
           }
         >
-          {t("menu.markAsUnpaid")}
+          <ListItemIcon>
+            <MoneyOffCsredOutlined fontSize="small" sx={{ color: "#b45309" }} />
+          </ListItemIcon>
+          <ListItemText>{t("menu.markAsUnpaid")}</ListItemText>
         </MenuItem>
       </Menu>
+
+      <Dialog
+        open={actionDialog.open}
+        onClose={closeActionDialog}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle>{actionDialog.title}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{actionDialog.description}</DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2.5 }}>
+          <Button onClick={closeActionDialog}>{confirmT("cancel")}</Button>
+          <Button
+            variant="contained"
+            color={actionDialog.tone}
+            onClick={async () => {
+              const action = actionDialog.onConfirm;
+              closeActionDialog();
+              if (action) await action();
+            }}
+          >
+            {actionDialog.confirmLabel}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <ReservationDetailsDialog
         open={detailsOpen}

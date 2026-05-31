@@ -9,18 +9,17 @@ import {
   Checkbox,
 } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { MoreVert, Star, StarBorder, Print, Delete } from "@mui/icons-material";
+import { MoreVert, Star, StarBorder } from "@mui/icons-material";
 
 export default function ReservationCard({
   reservation,
   favorite,
   onFavorite,
   onManage,
-  onPrint,
-  onDelete,
   selectable = false,
   selected = false,
   onSelect,
+  getPaymentChip,
 }) {
   const t = useTranslations("dashboard.reservations");
   const status = String(reservation?.status || "").toLowerCase();
@@ -115,8 +114,9 @@ export default function ReservationCard({
                   : reservation.status === "cancelled"
                   ? "#fee2e2"
                   : "#fef9c3",
-            }}
+              }}
           />
+          {getPaymentChip?.(reservation)}
         </Box>
 
         {/* DATES */}
@@ -139,14 +139,8 @@ export default function ReservationCard({
 
         {/* ACTIONS */}
         <Box display="flex" justifyContent="flex-end" mt={2}>
-          <IconButton size="small" onClick={onPrint}>
-            <Print />
-          </IconButton>
           <IconButton size="small" onClick={onManage}>
             <MoreVert />
-          </IconButton>
-          <IconButton size="small" color="error" onClick={onDelete}>
-            <Delete />
           </IconButton>
         </Box>
       </CardContent>

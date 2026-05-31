@@ -56,13 +56,18 @@
   "success": {
     "metaTitle": "Success | Dijari Premium",
     "title": "Reservation received",
-    "subtitle": "Your booking request has been created. Payment will be completed in cash at the hotel.",
+    "subtitle": "Your booking request was created successfully and is waiting for confirmation from the hotel staff.",
+    "pendingNoticeTitle": "Reservation created successfully",
+    "pendingNoticeBody": "Please wait for confirmation from the hotel staff. If your reservation is approved, you will receive a confirmation email with the full details.",
+    "emailHint": "Check your email inbox and spam folder for hotel updates.",
     "bookingDetails": "Booking details:",
     "room": "Room",
     "checkIn": "Check-in",
     "checkOut": "Check-out",
     "guests": "Guests",
     "total": "Total",
+    "status": "Status",
+    "pendingStatus": "Waiting for confirmation",
     "noReservation": "No recent reservation found.",
     "backHome": "Back to Home"
   },
@@ -451,6 +456,7 @@
         "search": "Search (Name or Email)",
         "status": "Status",
         "type": "Type",
+        "dateRange": "Date range",
         "addNew": "+ Add New",
         "options": {
           "all": "All",
@@ -460,7 +466,15 @@
           "cancelled": "Cancelled",
           "hotel": "Hotel",
           "apartment": "Apartment"
-        }
+        },
+        "ranges": {
+          "last30": "Last 30 days",
+          "thisMonth": "This month",
+          "last90": "Last 90 days",
+          "allTime": "All time"
+        },
+        "pageSize": "Per page",
+        "pageSizeOption": "{count}"
       },
       "statuses": {
         "pending": "Pending",
@@ -472,7 +486,18 @@
         "editReservation": "Edit Reservation",
         "setAs": "Set as {status}",
         "markCashPaidAndConfirm": "Mark cash as paid + confirm",
-        "markAsUnpaid": "Mark as unpaid"
+        "markAsUnpaid": "Mark as unpaid",
+        "printReceipt": "Print receipt",
+        "deleteReservation": "Delete reservation"
+      },
+      "confirm": {
+        "cancel": "Cancel",
+        "statusTitle": "Confirm change to {status}",
+        "statusDescription": "Are you sure you want to set {guest}'s reservation as {status}?",
+        "markPaidTitle": "Confirm cash payment",
+        "markPaidDescription": "Are you sure you want to mark {guest}'s reservation as paid and confirmed?",
+        "markUnpaidTitle": "Mark as unpaid again",
+        "markUnpaidDescription": "Are you sure you want to move {guest}'s reservation back to unpaid and pending?"
       },
       "messages": {
         "loadFailed": "Failed to load reservations.",
@@ -510,7 +535,8 @@
           "viewDetails": "View details",
           "printReceipt": "Print receipt",
           "deleteReservation": "Delete reservation"
-        }
+        },
+        "payment": "Payment"
       },
       "detailsDialog": {
         "title": "Reservation details",
@@ -634,6 +660,11 @@
           "created": "Reservation created successfully.",
           "updated": "Reservation updated successfully."
         }
+      },
+      "emptyFiltered": "No reservations found for the current filters ({range}).",
+      "payment": {
+        "paid": "Paid",
+        "unpaid": "Unpaid"
       }
     },
     "manageRooms": {
@@ -1059,36 +1090,36 @@
       "loading": "Loading room types...",
       "photoCount": "{count} photo(s)",
       "noPhotosYet": "No photos yet",
-        "actions": {
-          "uploading": "Uploading...",
-          "addPhoto": "Add photo",
-          "manage": "Manage",
-          "setCover": "Set for list"
-        },
-        "dialog": {
-          "managePhotos": "Manage photos - {type}",
-          "order": "Order",
-          "noPhotosForType": "No photos for this type yet.",
-          "close": "Close",
-          "cover": "Cover",
-          "dragHint": "Drag to reorder"
-        },
-        "errors": {
-          "load": "Failed to load room photos.",
-          "upload": "Upload failed",
-          "save": "Save failed",
-          "delete": "Delete failed",
-          "cover": "Failed to update the cover image.",
-          "reorder": "Failed to reorder photos.",
-          "generic": "Something went wrong."
-        },
-        "messages": {
-          "uploaded": "Photo uploaded successfully.",
-          "deleted": "Photo deleted successfully.",
-          "coverUpdated": "Cover image updated successfully.",
-          "reordered": "Photo order saved successfully."
-        }
+      "actions": {
+        "uploading": "Uploading...",
+        "addPhoto": "Add photo",
+        "manage": "Manage",
+        "setCover": "Set for list"
       },
+      "dialog": {
+        "managePhotos": "Manage photos - {type}",
+        "order": "Order",
+        "noPhotosForType": "No photos for this type yet.",
+        "close": "Close",
+        "cover": "Cover",
+        "dragHint": "Drag to reorder"
+      },
+      "errors": {
+        "load": "Failed to load room photos.",
+        "upload": "Upload failed",
+        "save": "Save failed",
+        "delete": "Delete failed",
+        "cover": "Failed to update the cover image.",
+        "reorder": "Failed to reorder photos.",
+        "generic": "Something went wrong."
+      },
+      "messages": {
+        "uploaded": "Photo uploaded successfully.",
+        "deleted": "Photo deleted successfully.",
+        "coverUpdated": "Cover image updated successfully.",
+        "reordered": "Photo order saved successfully."
+      }
+    },
     "printReceipt": {
       "invoice": "Invoice",
       "guestStay": "Guest & Stay Information",

@@ -6,10 +6,9 @@ export default function ReservationListMobile({
   favorites,
   onToggleFavorite,
   onManage,
-  onPrint,
-  onDelete,
   selectedIds,
   onToggleSelect,
+  getPaymentChip,
 }) {
   return (
     <Box display="flex" flexDirection="column" gap={2}>
@@ -19,12 +18,11 @@ export default function ReservationListMobile({
           reservation={r}
           favorite={favorites.includes(r.id)}
           onFavorite={() => onToggleFavorite(r.id)}
-          onPrint={() => onPrint(r)}
           onManage={(e) => onManage(e, r)}
-          onDelete={() => onDelete(r)}
           selectable
           selected={selectedIds.includes(r.id)}
           onSelect={() => onToggleSelect(r.id)}
+          getPaymentChip={getPaymentChip}
         />
       ))}
     </Box>

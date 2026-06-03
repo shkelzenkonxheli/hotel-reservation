@@ -423,7 +423,6 @@ export default function ReservationsTab() {
 
   async function handleBulkDelete() {
     if (selectedIds.length === 0) return;
-    if (!confirm(t("messages.bulkDeleteConfirm", { count: selectedIds.length }))) return;
 
     try {
       const res = await fetch("/api/reservation/bulk", {
@@ -727,7 +726,17 @@ export default function ReservationsTab() {
           <Button
             color="error"
             variant="contained"
-            onClick={handleBulkDelete}
+            onClick={() =>
+              requestActionConfirmation({
+                title: t("deleteSelected"),
+                description: t("messages.bulkDeleteConfirm", {
+                  count: selectedIds.length,
+                }),
+                confirmLabel: t("deleteSelected"),
+                tone: "error",
+                onConfirm: handleBulkDelete,
+              })
+            }
             sx={{ width: { xs: "100%", sm: "auto" } }}
           >
             {t("deleteSelected")}

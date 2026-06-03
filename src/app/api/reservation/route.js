@@ -381,17 +381,24 @@ export async function GET(request) {
     const roomType = searchParams.get("room_type");
     const startDate = searchParams.get("start_date");
     const endDate = searchParams.get("end_date");
+    const session = await getServerSession(authOptions);
+    const role = session?.user?.role?.toLowerCase();
+
     if (searchParams.get("latest") === "true") {
-      const userId = parseInt(searchParams.get("userId"));
+      if (!session?.user?.id) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
       const latest = await prisma.reservations.findFirst({
-        where: { user_id: userId },
+        where: {
+          user_id: Number(session.user.id),
+          client_hidden: false,
+        },
         orderBy: { created_at: "desc" },
         include: { rooms: true },
       });
       return NextResponse.json(latest);
     }
-    const session = await getServerSession(authOptions);
-    const role = session?.user?.role?.toLowerCase();
 
     if (listAll === "true" || (userId && userRole)) {
       if (!session?.user) {
@@ -422,7 +429,10 @@ export async function GET(request) {
       }
 
       if (userRole === "client") {
-        where.user_id = Number(userId);
+        where.user_id =
+          role === "admin" || role === "worker"
+            ? Number(userId)
+            : Number(session.user.id);
         where.client_hidden = false;
       }
       if (role === "admin" || role === "worker") {

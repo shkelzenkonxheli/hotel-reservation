@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
-  Alert,
   Box,
   Button,
   CircularProgress,
@@ -19,6 +18,8 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import BedOutlinedIcon from "@mui/icons-material/BedOutlined";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
@@ -58,8 +59,15 @@ export default function ReportsTab() {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [feedback, setFeedback] = useState({
+    open: false,
+    message: "",
+    severity: "error",
+  });
   const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
+  const notify = (message, severity = "error") => {
+    setFeedback({ open: true, message, severity });
+  };
   const monthLabels = [
     t("months.jan"),
     t("months.feb"),
@@ -80,13 +88,12 @@ export default function ReportsTab() {
     async function load() {
       try {
         setLoading(true);
-        setError("");
         const res = await fetch("/api/reservation?list=true");
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error || t("errors.loadFailed"));
         if (active) setRows(Array.isArray(data) ? data : []);
       } catch (e) {
-        if (active) setError(e.message || t("errors.loadFailed"));
+        if (active) notify(e.message || t("errors.loadFailed"));
       } finally {
         if (active) setLoading(false);
       }
@@ -321,9 +328,6 @@ export default function ReportsTab() {
           </Box>
         }
       />
-
-      {error ? <Alert severity="error">{error}</Alert> : null}
-
       {loading ? (
         <Box sx={{ display: "grid", placeItems: "center", minHeight: 220 }}>
           <CircularProgress />
@@ -484,6 +488,21 @@ export default function ReportsTab() {
           </SectionCard>
         </>
       )}
+
+      <Snackbar
+        open={feedback.open}
+        autoHideDuration={3500}
+        onClose={() => setFeedback((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          severity={feedback.severity}
+          variant="filled"
+          onClose={() => setFeedback((prev) => ({ ...prev, open: false }))}
+        >
+          {feedback.message}
+        </Alert>
+      </Snackbar>
     </Stack>
   );
 }

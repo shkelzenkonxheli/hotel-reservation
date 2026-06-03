@@ -38,6 +38,7 @@ export default function UsersTab() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [newRole, setNewRole] = useState("");
   const [addOpen, setAddOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [newUser, setNewUser] = useState({
     name: "",
     email: "",
@@ -142,9 +143,6 @@ export default function UsersTab() {
     }
   }
   async function handleDeleteUser(userId) {
-    const confirm = window.confirm(t("messages.confirmDelete"));
-    if (!confirm) return;
-
     try {
       const res = await fetch("/api/user", {
         method: "DELETE",
@@ -252,7 +250,7 @@ export default function UsersTab() {
                       color="error"
                       startIcon={<Delete />}
                       disabled={u.role === "admin"}
-                      onClick={() => handleDeleteUser(u.id)}
+                      onClick={() => setDeleteTarget(u)}
                     >
                       {t("actions.delete")}
                     </Button>
@@ -341,7 +339,7 @@ export default function UsersTab() {
                             color="error"
                             startIcon={<Delete />}
                             disabled={u.role === "admin"}
-                            onClick={() => handleDeleteUser(u.id)}
+                            onClick={() => setDeleteTarget(u)}
                             sx={{ minWidth: 100 }}
                           >
                             {t("actions.delete")}
@@ -442,6 +440,39 @@ export default function UsersTab() {
           <Button onClick={() => setAddOpen(false)}>{t("actions.cancel")}</Button>
           <Button variant="contained" onClick={handleAddUser}>
             {t("actions.create")}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle>{t("actions.delete")}</DialogTitle>
+        <DialogContent dividers>
+          <Typography>
+            {t("messages.confirmDelete")}
+            {deleteTarget ? (
+              <>
+                {" "}
+                <strong>{deleteTarget.name}</strong> ({deleteTarget.email})
+              </>
+            ) : null}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteTarget(null)}>{t("actions.cancel")}</Button>
+          <Button
+            color="error"
+            variant="contained"
+            onClick={async () => {
+              const userId = deleteTarget?.id;
+              setDeleteTarget(null);
+              if (userId) await handleDeleteUser(userId);
+            }}
+          >
+            {t("actions.delete")}
           </Button>
         </DialogActions>
       </Dialog>

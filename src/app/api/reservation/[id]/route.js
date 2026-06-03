@@ -2,9 +2,8 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { Resend } from "resend";
 import { logActivity } from "../../../../../lib/activityLogger";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../auth/[...nextauth]/route";
 import { requireSameOrigin } from "@/lib/security";
+import { requireRole } from "@/lib/authz";
 import {
   reservationConfirmationSubject,
   reservationConfirmationTemplate,
@@ -133,9 +132,11 @@ export async function PATCH(req, context) {
     const originError = requireSameOrigin(req);
     if (originError) return originError;
 
+    const { session, error } = await requireRole(["admin", "worker"]);
+    if (error) return error;
+
     const params = await context.params;
     const { id } = params;
-    const session = await getServerSession(authOptions);
     const performedBy = session?.user?.email ?? "system";
 
     const body = await req.json();
@@ -408,14 +409,11 @@ export async function PATCH(req, context) {
 export async function DELETE(req, { params }) {
   const originError = requireSameOrigin(req);
   if (originError) return originError;
-
-  const session = await getServerSession(authOptions);
   const { id } = params;
 
   try {
-    if (!session || !session.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { session, error } = await requireRole(["admin", "worker"]);
+    if (error) return error;
 
     let body = null;
     try {

@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import {
-  Alert,
   Box,
   Button,
+  Snackbar,
+  Alert,
   Stack,
   TextField,
   Typography,
@@ -23,13 +24,21 @@ export default function ContactPage() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
-  const [feedback, setFeedback] = useState("");
+  const [feedback, setFeedback] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  const showFeedback = (message, severity = "success") => {
+    setFeedback({ open: true, message, severity });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
     if (!name || !email || !message) {
-      setFeedback(t("feedback.required"));
+      showFeedback(t("feedback.required"), "warning");
       return;
     }
 
@@ -39,7 +48,7 @@ export default function ContactPage() {
     );
 
     window.location.href = `mailto:info@dijaripremium.com?subject=${subject}&body=${body}`;
-    setFeedback(t("feedback.openingMail"));
+    showFeedback(t("feedback.openingMail"), "success");
   };
 
   return (
@@ -63,17 +72,6 @@ export default function ContactPage() {
               <Typography variant="body2" color="text.secondary" mb={2}>
                 {t("form.requiredNote")}
               </Typography>
-
-              {feedback ? (
-                <Alert
-                  severity={
-                    feedback === t("feedback.required") ? "warning" : "success"
-                  }
-                  sx={{ mb: 2 }}
-                >
-                  {feedback}
-                </Alert>
-              ) : null}
 
               <Box component="form" onSubmit={handleSubmit}>
                 <Stack spacing={2}>
@@ -154,6 +152,22 @@ export default function ContactPage() {
           </div>
         </PublicContainer>
       </PublicSection>
+
+      <Snackbar
+        open={feedback.open}
+        autoHideDuration={4000}
+        onClose={() => setFeedback((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          severity={feedback.severity}
+          variant="filled"
+          onClose={() => setFeedback((prev) => ({ ...prev, open: false }))}
+          sx={{ width: "100%" }}
+        >
+          {feedback.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

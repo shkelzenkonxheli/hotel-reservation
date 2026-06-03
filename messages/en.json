@@ -191,7 +191,8 @@
       "selectDates": "Please select both start and end dates.",
       "minimumNight": "Minimum one night",
       "loginFirst": "You need to login first",
-      "notAvailable": "Room is not available for the selected dates."
+      "notAvailable": "Room is not available for the selected dates.",
+      "loadFailed": "Failed to load rooms. Please try again."
     }
   },
   "contact": {
@@ -307,7 +308,10 @@
     "alerts": {
       "deleteFailed": "Failed to delete",
       "cancelFailed": "Failed to cancel",
-      "networkError": "Network error"
+      "networkError": "Network error",
+      "deleteSuccess": "Reservation removed from the list.",
+      "cancelSuccess": "Reservation cancelled successfully.",
+      "imageLoadFailed": "Failed to load room photos."
     },
     "profile": "Profile",
     "labels": {

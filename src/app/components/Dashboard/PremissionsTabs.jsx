@@ -6,12 +6,13 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  Alert,
   Box,
   Button,
   Chip,
   Collapse,
   Paper,
+  Snackbar,
+  Alert,
   Typography,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -37,10 +38,16 @@ export default function PermissionsTab() {
   const [saving, setSaving] = useState(false);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [search, setSearch] = useState("");
-  const [error, setError] = useState("");
-  const [feedback, setFeedback] = useState("");
+  const [feedback, setFeedback] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
   const [mobileStaffOpen, setMobileStaffOpen] = useState(true);
   const [showPermissions, setShowPermissions] = useState(false);
+  const notify = (message, severity = "success") => {
+    setFeedback({ open: true, message, severity });
+  };
 
   const [initialTabs, setInitialTabs] = useState([]);
   const [initialProfile, setInitialProfile] = useState({
@@ -55,7 +62,6 @@ export default function PermissionsTab() {
     (async () => {
       try {
         setLoadingUsers(true);
-        setError("");
 
         const res = await fetch("/api/user?roles=admin,worker");
         const data = await res.json();
@@ -63,7 +69,7 @@ export default function PermissionsTab() {
         if (!res.ok) throw new Error(data?.error || t("messages.loadUsersFailed"));
         setUsers(Array.isArray(data) ? data : []);
       } catch (e) {
-        setError(e.message || t("messages.loadUsersFailed"));
+        notify(e.message || t("messages.loadUsersFailed"), "error");
       } finally {
         setLoadingUsers(false);
       }
@@ -86,7 +92,6 @@ export default function PermissionsTab() {
   const pickUser = (u) => {
     setSelected(u);
     setMobileStaffOpen(false);
-    setFeedback("");
     const tabs = Array.isArray(u.allowed_tabs) ? u.allowed_tabs : [];
     setInitialTabs(tabs);
     setInitialProfile({
@@ -146,8 +151,6 @@ export default function PermissionsTab() {
   const save = async () => {
     if (!selected) return;
     setSaving(true);
-    setError("");
-    setFeedback("");
 
     try {
       const res = await fetch(`/api/user/${selected.id}/allowed-tabs`, {
@@ -187,9 +190,9 @@ export default function PermissionsTab() {
             ? String(updated.base_salary)
             : "",
       });
-      setFeedback(t("messages.saved"));
+      notify(t("messages.saved"));
     } catch (e) {
-      setError(e.message || t("messages.saveFailed"));
+      notify(e.message || t("messages.saveFailed"), "error");
     } finally {
       setSaving(false);
     }
@@ -207,18 +210,6 @@ export default function PermissionsTab() {
           />
         }
       />
-
-      {error ? (
-        <Box mt={1}>
-          <Alert severity="error">{error}</Alert>
-        </Box>
-      ) : null}
-      {feedback ? (
-        <Box mt={1}>
-          <Alert severity="success">{feedback}</Alert>
-        </Box>
-      ) : null}
-
       <Box display={{ xs: "block", md: "none" }} mb={2}>
         <Accordion
           expanded={mobileStaffOpen}
@@ -380,6 +371,21 @@ export default function PermissionsTab() {
           )}
         </Box>
       </Box>
+
+      <Snackbar
+        open={feedback.open}
+        autoHideDuration={3500}
+        onClose={() => setFeedback((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          severity={feedback.severity}
+          variant="filled"
+          onClose={() => setFeedback((prev) => ({ ...prev, open: false }))}
+        >
+          {feedback.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

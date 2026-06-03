@@ -10,6 +10,7 @@ import {
   CardContent,
   CircularProgress,
   Alert,
+  Snackbar,
   Stack,
 } from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
@@ -24,11 +25,34 @@ export default function SuccessPage() {
 
   const [reservation, setReservation] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
   const router = useRouter();
   const { data: session, status } = useSession();
 
   useEffect(() => {
     localStorage.removeItem("booking");
+    const rawToast = sessionStorage.getItem("postRedirectToast");
+
+    if (!rawToast) return;
+
+    try {
+      const parsed = JSON.parse(rawToast);
+      if (parsed?.message) {
+        setToast({
+          open: true,
+          message: parsed.message,
+          severity: parsed.severity || "success",
+        });
+      }
+    } catch {
+      // Ignore malformed temporary feedback payloads.
+    } finally {
+      sessionStorage.removeItem("postRedirectToast");
+    }
   }, []);
 
   useEffect(() => {
@@ -41,9 +65,7 @@ export default function SuccessPage() {
       if (status !== "authenticated") return;
 
       try {
-        const resv = await fetch(
-          `/api/reservation?latest=true&userId=${session.user.id}`,
-        );
+        const resv = await fetch(`/api/reservation?latest=true`);
         const data = await resv.json();
 
         if (resv.ok && data) {
@@ -175,10 +197,26 @@ export default function SuccessPage() {
             py: 1.5,
           }}
           onClick={() => router.push("/")}
+      >
+        {t("backHome")}
+      </Button>
+
+      <Snackbar
+        open={toast.open}
+        autoHideDuration={4000}
+        onClose={() => setToast((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          severity={toast.severity}
+          variant="filled"
+          onClose={() => setToast((prev) => ({ ...prev, open: false }))}
+          sx={{ width: "100%" }}
         >
-          {t("backHome")}
-        </Button>
-      </Card>
-    </Box>
+          {toast.message}
+        </Alert>
+      </Snackbar>
+    </Card>
+  </Box>
   );
 }

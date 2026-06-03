@@ -20,14 +20,14 @@ import {
   DialogActions,
   TextField,
   Divider,
-  Breadcrumbs,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import PaymentsOutlinedIcon from "@mui/icons-material/PaymentsOutlined";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import PublicContainer from "../components/Public/PublicContainer";
 import PublicSection from "../components/Public/PublicSection";
 import PublicCard from "../components/Public/PublicCard";
@@ -107,9 +107,18 @@ export default function ReservationsPage({ embedded = false }) {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [cancelTarget, setCancelTarget] = useState(null);
   const [cancelReason, setCancelReason] = useState("");
+  const [toast, setToast] = useState({
+    open: false,
+    message: "",
+    severity: "info",
+  });
 
   const router = useRouter();
   const { data: session, status } = useSession();
+
+  const showToast = (message, severity = "error") => {
+    setToast({ open: true, message, severity });
+  };
 
   useEffect(() => {
     if (status === "loading") return;
@@ -124,9 +133,15 @@ export default function ReservationsPage({ embedded = false }) {
         const userId = session.user.id;
         const response = await fetch(`/api/reservation?user_id=${userId}&role=client`);
         const data = await response.json();
+        if (!response.ok) {
+          showToast(data?.error || t("alerts.networkError"));
+          setReservations([]);
+          return;
+        }
         setReservations(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Error fetching reservations:", err);
+        showToast(t("alerts.networkError"));
         setReservations([]);
       } finally {
         setLoading(false);
@@ -157,6 +172,7 @@ export default function ReservationsPage({ embedded = false }) {
         setTypeCoverMap(map);
       } catch (e) {
         console.error("Failed to load room images", e);
+        showToast(t("alerts.imageLoadFailed"));
         setTypeCoverMap({});
       }
     }
@@ -173,13 +189,14 @@ export default function ReservationsPage({ embedded = false }) {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        alert(err.error || t("alerts.deleteFailed"));
+        showToast(err.error || t("alerts.deleteFailed"));
         return;
       }
       setReservations((prev) => prev.filter((x) => x.id !== reservationId));
+      showToast(t("alerts.deleteSuccess"), "success");
     } catch (e) {
       console.error(e);
-      alert(t("alerts.networkError"));
+      showToast(t("alerts.networkError"));
     }
   }
 
@@ -193,7 +210,7 @@ export default function ReservationsPage({ embedded = false }) {
 
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        alert(data.error || t("alerts.cancelFailed"));
+        showToast(data.error || t("alerts.cancelFailed"));
         return false;
       }
 
@@ -210,10 +227,12 @@ export default function ReservationsPage({ embedded = false }) {
         ),
       );
 
+      showToast(t("alerts.cancelSuccess"), "success");
+
       return true;
     } catch (e) {
       console.error(e);
-      alert(t("alerts.networkError"));
+      showToast(t("alerts.networkError"));
       return false;
     }
   }
@@ -612,6 +631,22 @@ export default function ReservationsPage({ embedded = false }) {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar
+        open={toast.open}
+        autoHideDuration={4000}
+        onClose={() => setToast((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          severity={toast.severity}
+          variant="filled"
+          onClose={() => setToast((prev) => ({ ...prev, open: false }))}
+          sx={{ width: "100%" }}
+        >
+          {toast.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 

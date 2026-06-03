@@ -191,7 +191,8 @@
       "selectDates": "Ju lutem zgjidhni daten e fillimit dhe te perfundimit.",
       "minimumNight": "Minimumi nje nate",
       "loginFirst": "Duhet te kyqesh fillimisht",
-      "notAvailable": "Dhoma nuk eshte e lire per datat e zgjedhura."
+      "notAvailable": "Dhoma nuk eshte e lire per datat e zgjedhura.",
+      "loadFailed": "Ngarkimi i dhomave deshtoi. Provoni perseri."
     }
   },
   "contact": {
@@ -307,7 +308,10 @@
     "alerts": {
       "deleteFailed": "Fshirja deshtoi",
       "cancelFailed": "Anulimi deshtoi",
-      "networkError": "Gabim ne rrjet"
+      "networkError": "Gabim ne rrjet",
+      "deleteSuccess": "Rezervimi u hoq nga lista.",
+      "cancelSuccess": "Rezervimi u anulua me sukses.",
+      "imageLoadFailed": "Ngarkimi i fotove te dhomave deshtoi."
     },
     "profile": "Profili",
     "labels": {

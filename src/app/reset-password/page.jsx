@@ -9,6 +9,7 @@ import {
   Button,
   Typography,
   Alert,
+  Snackbar,
   CircularProgress,
   InputAdornment,
   IconButton,
@@ -32,10 +33,17 @@ export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const [feedback, setFeedback] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const showFeedback = (message, severity = "success") => {
+    setFeedback({ open: true, message, severity });
+  };
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -60,17 +68,15 @@ export default function ResetPasswordPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
-    setMessage("");
 
     if (!token) {
-      setError(t("errors.missingToken"));
+      showFeedback(t("errors.missingToken"), "error");
       setLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
-      setError(t("errors.passwordMismatch"));
+      showFeedback(t("errors.passwordMismatch"), "error");
       setLoading(false);
       return;
     }
@@ -84,13 +90,13 @@ export default function ResetPasswordPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        setError(data.message || t("errors.generic"));
+        showFeedback(data.message || t("errors.generic"), "error");
       } else {
-        setMessage(data.message || t("messages.success"));
+        showFeedback(data.message || t("messages.success"), "success");
         setTimeout(() => router.push("/login"), 1400);
       }
     } catch {
-      setError(t("errors.generic"));
+      showFeedback(t("errors.generic"), "error");
     } finally {
       setLoading(false);
     }
@@ -201,18 +207,6 @@ export default function ResetPasswordPage() {
                     ),
                   }}
                 />
-
-                {message && (
-                  <Alert severity="success" sx={{ mt: 2, borderRadius: 2.5 }}>
-                    {message}
-                  </Alert>
-                )}
-                {error && (
-                  <Alert severity="error" sx={{ mt: 2, borderRadius: 2.5 }}>
-                    {error}
-                  </Alert>
-                )}
-
                 <Button
                   type="submit"
                   variant="contained"
@@ -251,6 +245,22 @@ export default function ResetPasswordPage() {
           </Box>
         </PublicContainer>
       </PublicSection>
+
+      <Snackbar
+        open={feedback.open}
+        autoHideDuration={4000}
+        onClose={() => setFeedback((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          severity={feedback.severity}
+          variant="filled"
+          onClose={() => setFeedback((prev) => ({ ...prev, open: false }))}
+          sx={{ width: "100%" }}
+        >
+          {feedback.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

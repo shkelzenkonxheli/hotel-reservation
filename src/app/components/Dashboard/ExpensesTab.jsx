@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
-  Alert,
   Box,
   Button,
   Chip,
@@ -20,6 +19,8 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import WalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
@@ -66,7 +67,6 @@ export default function ExpensesTab() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
   const [monthFilter, setMonthFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
 
@@ -77,12 +77,19 @@ export default function ExpensesTab() {
   const [amount, setAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [note, setNote] = useState("");
-  const [feedback, setFeedback] = useState("");
+  const [feedback, setFeedback] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  const notify = (message, severity = "success") => {
+    setFeedback({ open: true, message, severity });
+  };
 
   const fetchExpenses = async () => {
     try {
       setLoading(true);
-      setError("");
       const params = new URLSearchParams();
       if (monthFilter) params.set("month", monthFilter);
       if (categoryFilter && categoryFilter !== "all") {
@@ -94,7 +101,7 @@ export default function ExpensesTab() {
       if (!res.ok) throw new Error(data?.error || t("errors.loadFailed"));
       setRows(Array.isArray(data) ? data : []);
     } catch (e) {
-      setError(e.message || t("errors.loadFailed"));
+      notify(e.message || t("errors.loadFailed"), "error");
     } finally {
       setLoading(false);
     }
@@ -122,8 +129,6 @@ export default function ExpensesTab() {
   const handleAdd = async () => {
     try {
       setSaving(true);
-      setError("");
-      setFeedback("");
       const res = await fetch("/api/expenses", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -141,10 +146,10 @@ export default function ExpensesTab() {
 
       setAmount("");
       setNote("");
-      setFeedback(t("feedback.added"));
-      fetchExpenses();
+      notify(t("feedback.added"));
+      await fetchExpenses();
     } catch (e) {
-      setError(e.message || t("errors.createFailed"));
+      notify(e.message || t("errors.createFailed"), "error");
     } finally {
       setSaving(false);
     }
@@ -156,9 +161,6 @@ export default function ExpensesTab() {
         title={t("title")}
         subtitle={t("subtitle")}
       />
-
-      {error ? <Alert severity="error">{error}</Alert> : null}
-      {feedback ? <Alert severity="success">{feedback}</Alert> : null}
 
       <Box
         display="grid"
@@ -383,6 +385,21 @@ export default function ExpensesTab() {
           </TableContainer>
         )}
       </SectionCard>
+
+      <Snackbar
+        open={feedback.open}
+        autoHideDuration={3500}
+        onClose={() => setFeedback((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          severity={feedback.severity}
+          variant="filled"
+          onClose={() => setFeedback((prev) => ({ ...prev, open: false }))}
+        >
+          {feedback.message}
+        </Alert>
+      </Snackbar>
     </Stack>
   );
 }

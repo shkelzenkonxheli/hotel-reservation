@@ -14,6 +14,8 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  Snackbar,
+  Alert,
   useTheme,
   useMediaQuery,
 } from "@mui/material";
@@ -43,6 +45,11 @@ export default function CheckoutBooking() {
 
   const [loading, setLoading] = useState(false);
   const [openDetails, setOpenDetails] = useState(false);
+  const [toast, setToast] = useState({
+    open: false,
+    message: "",
+    severity: "info",
+  });
 
   const [fullname, setFullname] = useState("");
   const [phone, setPhone] = useState("");
@@ -50,6 +57,10 @@ export default function CheckoutBooking() {
   const [guests, setGuests] = useState(2);
   const [totalPrice, setTotalPrice] = useState(0);
   const [expandedRoom, setExpandedRoom] = useState(null);
+
+  const showToast = (message, severity = "error") => {
+    setToast({ open: true, message, severity });
+  };
 
   /* ---------------- AUTH GUARD ---------------- */
   useEffect(() => {
@@ -107,7 +118,7 @@ export default function CheckoutBooking() {
   /* ---------------- SUBMIT ---------------- */
   const handleBookClick = async () => {
     if (!fullname || !phone || !address) {
-      alert(t("alerts.fillAllFields"));
+      showToast(t("alerts.fillAllFields"));
       return;
     }
 
@@ -133,14 +144,20 @@ export default function CheckoutBooking() {
       });
       const data = await res.json();
       if (!res.ok) {
-        alert(data?.error || t("alerts.reservationFailed"));
+        showToast(data?.error || t("alerts.reservationFailed"));
         return;
       }
-      alert(t("alerts.pendingCreated"));
+      sessionStorage.setItem(
+        "postRedirectToast",
+        JSON.stringify({
+          message: t("alerts.pendingCreated"),
+          severity: "success",
+        }),
+      );
       router.push("/success");
     } catch (error) {
       console.error(error);
-      alert(t("alerts.genericError"));
+      showToast(t("alerts.genericError"));
     } finally {
       setLoading(false);
     }
@@ -400,6 +417,22 @@ export default function CheckoutBooking() {
           </div>
         </div>
       )}
+
+      <Snackbar
+        open={toast.open}
+        autoHideDuration={4000}
+        onClose={() => setToast((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          severity={toast.severity}
+          variant="filled"
+          onClose={() => setToast((prev) => ({ ...prev, open: false }))}
+          sx={{ width: "100%" }}
+        >
+          {toast.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

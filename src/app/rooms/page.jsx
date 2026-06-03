@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useBooking } from "@/context/BookingContext";
 import Calendar from "react-calendar";
+import { Alert, Snackbar } from "@mui/material";
 import "react-calendar/dist/Calendar.css";
 import PublicContainer from "../components/Public/PublicContainer";
 import PublicSection from "../components/Public/PublicSection";
@@ -62,11 +63,20 @@ export default function RoomsPage() {
   const [expandedRoom, setExpandedRoom] = useState(null);
   const [galleryRoom, setGalleryRoom] = useState(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
+  const [toast, setToast] = useState({
+    open: false,
+    message: "",
+    severity: "warning",
+  });
 
   const router = useRouter();
   const { setBooking } = useBooking();
 
   const todayStr = fYMD(new Date());
+
+  const showToast = (message, severity = "warning") => {
+    setToast({ open: true, message, severity });
+  };
 
   useEffect(() => {
     async function fetchRooms() {
@@ -74,9 +84,15 @@ export default function RoomsPage() {
         setLoadingRooms(true);
         const response = await fetch("/api/rooms-type");
         const data = await response.json();
+        if (!response.ok) {
+          showToast(data?.error || t("alerts.loadFailed"), "error");
+          setRoomTypes([]);
+          return;
+        }
         setRoomTypes(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Failed to fetch rooms:", error);
+        showToast(t("alerts.loadFailed"), "error");
         setRoomTypes([]);
       } finally {
         setLoadingRooms(false);
@@ -145,15 +161,15 @@ export default function RoomsPage() {
 
   const checkAvailability = async () => {
     if (!startDate || !endDate) {
-      alert(t("alerts.selectDates"));
+      showToast(t("alerts.selectDates"));
       return;
     }
     if (startDate === endDate) {
-      alert(t("alerts.minimumNight"));
+      showToast(t("alerts.minimumNight"));
       return;
     }
     if (!session?.user) {
-      alert(t("alerts.loginFirst"));
+      showToast(t("alerts.loginFirst"), "info");
       router.push("/login");
       return;
     }
@@ -163,7 +179,7 @@ export default function RoomsPage() {
     const data = await res.json();
 
     if (!data.available) {
-      alert(t("alerts.notAvailable"));
+      showToast(t("alerts.notAvailable"));
       return;
     }
 
@@ -508,6 +524,22 @@ export default function RoomsPage() {
           </div>
         </div>
       )}
+
+      <Snackbar
+        open={toast.open}
+        autoHideDuration={4000}
+        onClose={() => setToast((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          severity={toast.severity}
+          variant="filled"
+          onClose={() => setToast((prev) => ({ ...prev, open: false }))}
+          sx={{ width: "100%" }}
+        >
+          {toast.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

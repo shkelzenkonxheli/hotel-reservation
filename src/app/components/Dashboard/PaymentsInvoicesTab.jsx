@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
-  Alert,
   Box,
   Button,
   Chip,
@@ -20,6 +19,8 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import PaymentsIcon from "@mui/icons-material/Payments";
@@ -55,13 +56,21 @@ export default function PaymentsInvoicesTab() {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [feedback, setFeedback] = useState({
+    open: false,
+    message: "",
+    severity: "error",
+  });
   const [statusFilter, setStatusFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [monthFilter, setMonthFilter] = useState("");
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [printOpen, setPrintOpen] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState(null);
+
+  const notify = (message, severity = "error") => {
+    setFeedback({ open: true, message, severity });
+  };
 
   const getPaymentStatusLabel = (status) =>
     String(status || "").toUpperCase() === "PAID"
@@ -82,7 +91,6 @@ export default function PaymentsInvoicesTab() {
     async function loadPayments() {
       try {
         setLoading(true);
-        setError("");
         const res = await fetch("/api/reservation?list=true");
         const data = await res.json();
         if (!res.ok) {
@@ -93,7 +101,7 @@ export default function PaymentsInvoicesTab() {
         }
       } catch (e) {
         if (active) {
-          setError(e.message || t("errors.loadFailed"));
+          notify(e.message || t("errors.loadFailed"));
         }
       } finally {
         if (active) setLoading(false);
@@ -167,8 +175,6 @@ export default function PaymentsInvoicesTab() {
         title={t("title")}
         subtitle={t("subtitle")}
       />
-
-      {error ? <Alert severity="error">{error}</Alert> : null}
 
       {loading ? (
         <Box sx={{ display: "grid", placeItems: "center", minHeight: 220 }}>
@@ -472,6 +478,21 @@ export default function PaymentsInvoicesTab() {
           onClose={() => setPrintOpen(false)}
         />
       ) : null}
+
+      <Snackbar
+        open={feedback.open}
+        autoHideDuration={3500}
+        onClose={() => setFeedback((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          severity={feedback.severity}
+          variant="filled"
+          onClose={() => setFeedback((prev) => ({ ...prev, open: false }))}
+        >
+          {feedback.message}
+        </Alert>
+      </Snackbar>
     </Stack>
   );
 }

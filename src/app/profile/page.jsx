@@ -87,6 +87,11 @@ export default function ProfilePage() {
       });
       const data = await res.json();
       if (!res.ok) {
+        setFeedback({
+          open: true,
+          message: data?.error || t("messages.photoFailed"),
+          severity: "error",
+        });
         return;
       }
       setAvatarUrl(data.avatar_url || "");
@@ -132,12 +137,20 @@ export default function ProfilePage() {
         });
         setHasChanged(false);
       } else {
+        const data = await res.json().catch(() => ({}));
         setFeedback({
           open: true,
-          message: t("messages.profileUpdateFailed"),
+          message: data?.error || t("messages.profileUpdateFailed"),
           severity: "error",
         });
       }
+    } catch (error) {
+      console.error(error);
+      setFeedback({
+        open: true,
+        message: t("messages.profileUpdateFailed"),
+        severity: "error",
+      });
     } finally {
       setSaving(false);
     }

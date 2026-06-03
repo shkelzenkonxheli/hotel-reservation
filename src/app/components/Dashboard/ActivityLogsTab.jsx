@@ -18,6 +18,11 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
   useMediaQuery,
   Snackbar,
   Alert,
@@ -31,11 +36,13 @@ import EmptyState from "./ui/EmptyState";
 
 export default function activityLogTab() {
   const t = useTranslations("dashboard.activityLogs");
+  const commonT = useTranslations("common");
   const isMobile = useMediaQuery("(max-width:900px)");
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState([]);
   const [actionFilter, setActionFilter] = useState("all");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [feedback, setFeedback] = useState({
     open: false,
     message: "",
@@ -63,8 +70,6 @@ export default function activityLogTab() {
     }
   }
   async function handleBulkDelete() {
-    if (!confirm(t("messages.confirmDelete", { count: selectedIds.length }))) return;
-
     const res = await fetch("/api/activity-log", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -137,7 +142,7 @@ export default function activityLogTab() {
               <Button
                 color="error"
                 variant="contained"
-                onClick={handleBulkDelete}
+                onClick={() => setDeleteDialogOpen(true)}
                 startIcon={<Delete />}
                 sx={{ width: { xs: "100%", sm: "auto" } }}
               >
@@ -325,6 +330,34 @@ export default function activityLogTab() {
           )}
         </SectionCard>
       )}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle>{t("deleteSelected", { count: selectedIds.length })}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {t("messages.confirmDelete", { count: selectedIds.length })}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2.5 }}>
+          <Button onClick={() => setDeleteDialogOpen(false)}>
+            {commonT("cancel")}
+          </Button>
+          <Button
+            color="error"
+            variant="contained"
+            onClick={async () => {
+              setDeleteDialogOpen(false);
+              await handleBulkDelete();
+            }}
+          >
+            {t("filters.delete")}
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Snackbar
         open={feedback.open}
         autoHideDuration={3500}

@@ -9,6 +9,7 @@ import {
   Button,
   Typography,
   Alert,
+  Snackbar,
   CircularProgress,
   InputAdornment,
 } from "@mui/material";
@@ -26,8 +27,15 @@ export default function ForgotPasswordPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const [feedback, setFeedback] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  const showFeedback = (message, severity = "success") => {
+    setFeedback({ open: true, message, severity });
+  };
 
   const fieldSx = {
     "& .MuiOutlinedInput-root": {
@@ -46,8 +54,6 @@ export default function ForgotPasswordPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
-    setMessage("");
 
     try {
       const res = await fetch("/api/auth/forgot-password", {
@@ -58,12 +64,12 @@ export default function ForgotPasswordPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        setError(data.message || t("messages.success"));
+        showFeedback(data.message || t("messages.success"), "info");
       } else {
-        setMessage(data.message || t("messages.success"));
+        showFeedback(data.message || t("messages.success"), "success");
       }
     } catch {
-      setError(t("messages.success"));
+      showFeedback(t("messages.success"), "info");
     } finally {
       setLoading(false);
     }
@@ -139,18 +145,6 @@ export default function ForgotPasswordPage() {
                     ),
                   }}
                 />
-
-                {message && (
-                  <Alert severity="success" sx={{ mt: 2, borderRadius: 2.5 }}>
-                    {message}
-                  </Alert>
-                )}
-                {error && (
-                  <Alert severity="error" sx={{ mt: 2, borderRadius: 2.5 }}>
-                    {error}
-                  </Alert>
-                )}
-
                 <Button
                   type="submit"
                   variant="contained"
@@ -189,6 +183,22 @@ export default function ForgotPasswordPage() {
           </Box>
         </PublicContainer>
       </PublicSection>
+
+      <Snackbar
+        open={feedback.open}
+        autoHideDuration={4000}
+        onClose={() => setFeedback((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          severity={feedback.severity}
+          variant="filled"
+          onClose={() => setFeedback((prev) => ({ ...prev, open: false }))}
+          sx={{ width: "100%" }}
+        >
+          {feedback.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

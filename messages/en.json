@@ -308,6 +308,12 @@
       "deleteFailed": "Failed to delete",
       "cancelFailed": "Failed to cancel",
       "networkError": "Network error"
+    },
+    "profile": "Profile",
+    "labels": {
+      "date": "Date",
+      "guests": "Guests",
+      "total": "Total price"
     }
   },
   "header": {

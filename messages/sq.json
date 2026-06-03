@@ -308,6 +308,12 @@
       "deleteFailed": "Fshirja deshtoi",
       "cancelFailed": "Anulimi deshtoi",
       "networkError": "Gabim ne rrjet"
+    },
+    "profile": "Profili",
+    "labels": {
+      "date": "Data",
+      "guests": "Mysafire",
+      "total": "Cmimi total"
     }
   },
   "header": {

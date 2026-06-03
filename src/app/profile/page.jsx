@@ -180,7 +180,7 @@ export default function ProfilePage() {
         <PublicContainer>
           <PublicCard className="p-4 md:p-6">
             <TabContext value={value}>
-              <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}>
+              <Box sx={{ mb: 2 }}>
                 <TabList
                   onChange={handleChangeTab}
                   variant="scrollable"
@@ -357,7 +357,7 @@ export default function ProfilePage() {
 
               <TabPanel value="2" sx={{ p: 0 }}>
                 <Box sx={{ maxWidth: "100%", mx: "auto" }}>
-                  <ReservationsPage />
+                  <ReservationsPage embedded />
                 </Box>
               </TabPanel>
             </TabContext>

@@ -340,6 +340,18 @@ export default function Home() {
               Dijari Premium
             </p>
             <p className="mt-1 text-sm text-slate-500">{t("footer.rights")}</p>
+            <Link
+              href="/privacy-policy"
+              className="mt-2 text-sm font-medium text-[#1f6feb] transition hover:text-[#195fd0]"
+            >
+              {t("footer.links.privacy")}
+            </Link>
+            <Link
+              href="/terms-conditions"
+              className="mt-1 text-sm font-medium text-[#1f6feb] transition hover:text-[#195fd0]"
+            >
+              {t("footer.links.terms")}
+            </Link>
           </div>
         </PublicContainer>
       </footer>

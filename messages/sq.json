@@ -1254,7 +1254,116 @@
       "links": {
         "rooms": "Dhomat",
         "contact": "Kontakti",
-        "signIn": "Kycu"
+        "signIn": "Kycu",
+        "privacy": "Privatesia",
+        "terms": "Kushtet e perdorimit"
+      }
+    }
+  },
+  "privacy": {
+    "metaTitle": "Privatesia | Dijari Premium",
+    "eyebrow": "Politika e privatesise",
+    "title": "Privatesia dhe perdorimi i te dhenave",
+    "intro": "Kjo faqe shpjegon si Dijari Premium Apartment mbledh, perdor dhe mbron te dhenat personale qe jepen gjate rezervimeve, komunikimit me klientet dhe perdorimit te llogarise.",
+    "sections": {
+      "whoWeAre": {
+        "title": "1. Kush jemi ne",
+        "body": "Dijari Premium Apartment, me vendndodhje ne Ulqin, perpunon te dhena personale per rezervime, komunikim me mysafiret dhe menaxhim te llogarive te perdoruesve."
+      },
+      "dataWeCollect": {
+        "title": "2. Cilat te dhena mbledhim",
+        "items": {
+          "name": "Emrin dhe mbiemrin",
+          "email": "Adresen e email-it",
+          "phone": "Numrin e telefonit",
+          "address": "Adresen e kontaktit",
+          "booking": "Datat e rezervimit, numrin e mysafireve dhe detajet e qendrimit",
+          "account": "Te dhena profili qe perditesohen nga perdoruesi ne llogari"
+        }
+      },
+      "whyWeUseData": {
+        "title": "3. Pse i perdorim keto te dhena",
+        "items": {
+          "booking": "Per krijimin dhe menaxhimin e rezervimeve",
+          "communication": "Per komunikim me mysafiret lidhur me konfirmimin, ndryshimet ose anulimet",
+          "accounts": "Per menaxhimin e llogarive dhe hyrjes ne sistem",
+          "legal": "Per nevoja operative, sigurie dhe detyrime ligjore"
+        }
+      },
+      "cookies": {
+        "title": "4. Cookies",
+        "body1": "Faqja perdor vetem cookies te domosdoshme per funksionimin baze te sistemit, si login/session me NextAuth dhe ruajtjen e preferencave te gjuhes. Keto cookies jane te nevojshme dhe nuk perdoren per marketing apo gjurmim reklamash.",
+        "body2": "Nese ne te ardhmen shtohen analytics, marketing scripts ose embed-e te paleve te treta, kjo faqe do te perditesohet dhe do te shtohet edhe mekanizem p?lqimi per cookies jo-te-domosdoshme."
+      },
+      "services": {
+        "title": "5. Sherbime te paleve te treta",
+        "body": "Per funksionimin e website-it dhe rezervimeve, perdorim disa sherbime teknike qe mund te perpunojne te dhena ne emer tone:",
+        "items": {
+          "vercel": "Vercel per hostim dhe publikim te aplikacionit",
+          "neon": "Neon per databazen e rezervimeve dhe llogarive",
+          "resend": "Resend per dergimin e emaileve te rezervimit dhe njoftimeve",
+          "google": "Google login vetem nese perdoruesi zgjedh te hyje me Google"
+        }
+      },
+      "retention": {
+        "title": "6. Sa kohe ruhen te dhenat",
+        "body": "Te dhenat personale ruhen vetem per aq kohe sa jane te nevojshme per rezervimet, komunikimin me klientet, menaxhimin e llogarive dhe permbushjen e detyrimeve ligjore ose administrative."
+      },
+      "rights": {
+        "title": "7. Te drejtat tuaja",
+        "body": "Mund te kerkoni qasje, korrigjim ose fshirje te te dhenave tuaja personale, ne masen e lejuar nga ligji dhe detyrimet operative te biznesit."
+      },
+      "contact": {
+        "title": "8. Kontakt",
+        "body": "Per pyetje lidhur me privatesine ose trajtimin e te dhenave personale, mund te na kontaktoni ne: info@dijaripremium.com. Kjo adrese mund te perditesohet sapo te hapej emaili zyrtar i biznesit."
+      }
+    }
+  },
+  "terms": {
+    "metaTitle": "Kushtet e perdorimit | Dijari Premium",
+    "eyebrow": "Kushtet e rezervimit",
+    "title": "Kushtet dhe rregullat e qendrimit",
+    "intro": "Keto kushte zbatohen per rezervimet, qendrimin dhe perdorimin e sherbimeve te Dijari Premium Apartment. Duke bere rezervim, klienti pranon keto kushte ne masen e lejuar nga ligji.",
+    "sections": {
+      "scope": {
+        "title": "1. Fusheveprimi",
+        "body": "Keto kushte vlejne per te gjitha rezervimet e bera permes website-it, komunikimit direkt ose nga personeli i hotelit, dhe rregullojne marredhenien midis mysafirit dhe Dijari Premium Apartment."
+      },
+      "bookings": {
+        "title": "2. Rezervimet",
+        "body": "Rezervimi konsiderohet si kerkese ose si rezervim aktiv sipas statusit qe vendoset ne sistem. Mysafiri duhet te jape te dhena te sakta dhe te plota gjate rezervimit."
+      },
+      "confirmation": {
+        "title": "3. Konfirmimi i rezervimit",
+        "body": "Rezervimet mund te krijohen fillimisht me status pritjeje dhe konfirmohen nga stafi i hotelit. Vetem pas konfirmimit nga stafi, rezervimi konsiderohet i aprovuar perfundimisht."
+      },
+      "checkInOut": {
+        "title": "4. Check-in dhe Check-out",
+        "body": "Ora e sakte e check-in dhe check-out mund te percaktohet nga hoteli dhe te komunikohet me mysafirin para mbrritjes. Kerkesat per hyrje te hershme ose dalje te vonshme varen nga disponueshmeria."
+      },
+      "prices": {
+        "title": "5. Cmimet dhe pagesa",
+        "body": "Cmimet e publikuara ne website jane ne euro dhe mund te ndryshojne sipas llojit te dhomes, dates, numrit te mysafireve dhe politikave te hotelit. Pagesa aktualisht kryhet ne hotel, pervec nese hoteli vendos ndryshe ne te ardhmen."
+      },
+      "cancellations": {
+        "title": "6. Anulimet dhe mosparaqitja",
+        "body": "Mysafiri mund te kerkoje anulim sipas rregullave ne fuqi te hotelit. Hoteli ruan te drejten te refuzoje ose te anuloje rezervimin ne raste te arsyeshme operative, sigurie, mungese disponueshmerie ose te dhenash te pasakta. Mosparaqitja pa njoftim mund te trajtohet si no-show."
+      },
+      "guestResponsibility": {
+        "title": "7. Pergjegjesia e mysafirit",
+        "body": "Mysafiri eshte pergjegjes per korrektesine e te dhenave te dhena, respektimin e rregullave te qendrimit dhe perdorimin e kujdesshem te dhomes dhe ambienteve te hotelit."
+      },
+      "propertyRights": {
+        "title": "8. E drejta e hotelit",
+        "body": "Dijari Premium Apartment rezervon te drejten te perditesoje cmimet, disponueshmerine, llojet e dhomave dhe politikat operative, si dhe te refuzoje rezervime ne rast abuzimi, sjelljeje te papershtatshme ose shkeljeje te ketyre kushteve."
+      },
+      "liability": {
+        "title": "9. Kufizimi i pergjegjesise",
+        "body": "Hoteli ben perpjekje te arsyeshme qe informacioni ne website te jete i sakte dhe sherbimi te funksionoje normalisht, por nuk garanton mungese absolute te gabimeve teknike, ndryshimeve operative ose nderprerjeve te perkohshme."
+      },
+      "contact": {
+        "title": "10. Kontakt",
+        "body": "Per pyetje lidhur me rezervimet ose keto kushte, na kontaktoni ne: info@dijaripremium.com. Kjo adrese mund te perditesohet pasi te vendoset emaili zyrtar i biznesit."
       }
     }
   }

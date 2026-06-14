@@ -1254,7 +1254,116 @@
       "links": {
         "rooms": "Rooms",
         "contact": "Contact",
-        "signIn": "Sign in"
+        "signIn": "Sign in",
+        "privacy": "Privacy Policy",
+        "terms": "Terms & Conditions"
+      }
+    }
+  },
+  "privacy": {
+    "metaTitle": "Privacy Policy | Dijari Premium",
+    "eyebrow": "Privacy policy",
+    "title": "Privacy and data use",
+    "intro": "This page explains how Dijari Premium Apartment collects, uses, and protects personal data provided through reservations, guest communication, and account usage.",
+    "sections": {
+      "whoWeAre": {
+        "title": "1. Who we are",
+        "body": "Dijari Premium Apartment, located in Ulqin, processes personal data for reservations, guest communication, and user account management."
+      },
+      "dataWeCollect": {
+        "title": "2. What data we collect",
+        "items": {
+          "name": "Full name",
+          "email": "Email address",
+          "phone": "Phone number",
+          "address": "Contact address",
+          "booking": "Booking dates, guest count, and stay details",
+          "account": "Profile information updated by the user inside the account"
+        }
+      },
+      "whyWeUseData": {
+        "title": "3. Why we use this data",
+        "items": {
+          "booking": "To create and manage reservations",
+          "communication": "To communicate with guests about confirmations, changes, or cancellations",
+          "accounts": "To manage user accounts and sign-in access",
+          "legal": "For operational, security, and legal obligations"
+        }
+      },
+      "cookies": {
+        "title": "4. Cookies",
+        "body1": "This website currently uses only necessary cookies for core functionality, such as NextAuth login/session handling and language preferences. These cookies are required for the service to work and are not used for marketing or advertising tracking.",
+        "body2": "If analytics, marketing scripts, or third-party embeds are added later, this page will be updated and a consent mechanism for non-essential cookies will be introduced."
+      },
+      "services": {
+        "title": "5. Third-party services",
+        "body": "To operate the website and reservation system, we rely on technical service providers that may process data on our behalf:",
+        "items": {
+          "vercel": "Vercel for hosting and deployment",
+          "neon": "Neon for the reservations and accounts database",
+          "resend": "Resend for reservation and notification emails",
+          "google": "Google login only when a user chooses to sign in with Google"
+        }
+      },
+      "retention": {
+        "title": "6. How long data is kept",
+        "body": "Personal data is kept only for as long as necessary for reservations, guest communication, account management, and applicable legal or administrative obligations."
+      },
+      "rights": {
+        "title": "7. Your rights",
+        "body": "You may request access to, correction of, or deletion of your personal data, subject to applicable law and the business's operational obligations."
+      },
+      "contact": {
+        "title": "8. Contact",
+        "body": "For privacy-related questions or requests about personal data, you can contact us at: info@dijaripremium.com. This address can be updated later once the official business email is set up."
+      }
+    }
+  },
+  "terms": {
+    "metaTitle": "Terms & Conditions | Dijari Premium",
+    "eyebrow": "Booking terms",
+    "title": "Terms and stay conditions",
+    "intro": "These terms apply to reservations, stays, and the use of services provided by Dijari Premium Apartment. By making a reservation, the guest accepts these terms to the extent permitted by law.",
+    "sections": {
+      "scope": {
+        "title": "1. Scope",
+        "body": "These terms apply to all reservations made through the website, direct communication, or hotel staff, and govern the relationship between the guest and Dijari Premium Apartment."
+      },
+      "bookings": {
+        "title": "2. Reservations",
+        "body": "A reservation is treated as a request or an active booking according to the status assigned in the system. Guests are responsible for providing accurate and complete information during booking."
+      },
+      "confirmation": {
+        "title": "3. Reservation confirmation",
+        "body": "Reservations may initially be created with a pending status and later confirmed by hotel staff. A booking is treated as fully approved only after staff confirmation."
+      },
+      "checkInOut": {
+        "title": "4. Check-in and Check-out",
+        "body": "Exact check-in and check-out times may be set by the hotel and communicated to the guest before arrival. Early check-in or late check-out requests depend on availability."
+      },
+      "prices": {
+        "title": "5. Prices and payment",
+        "body": "Prices shown on the website are in EUR and may vary depending on room type, dates, guest count, and hotel policy. Payment is currently handled at the hotel unless the hotel introduces another method later."
+      },
+      "cancellations": {
+        "title": "6. Cancellations and no-show",
+        "body": "Guests may request cancellation in line with the hotel's active policy. The hotel reserves the right to refuse or cancel a reservation for reasonable operational, safety, availability, or inaccurate-information reasons. Failure to arrive without notice may be treated as a no-show."
+      },
+      "guestResponsibility": {
+        "title": "7. Guest responsibility",
+        "body": "The guest is responsible for the accuracy of submitted information, compliance with stay rules, and proper use of the room and hotel facilities."
+      },
+      "propertyRights": {
+        "title": "8. Hotel rights",
+        "body": "Dijari Premium Apartment reserves the right to update prices, availability, room categories, and operating policies, and to refuse reservations in cases of abuse, inappropriate conduct, or breach of these terms."
+      },
+      "liability": {
+        "title": "9. Limitation of liability",
+        "body": "The hotel makes reasonable efforts to keep website information accurate and the service operational, but does not guarantee the absolute absence of technical errors, operational changes, or temporary interruptions."
+      },
+      "contact": {
+        "title": "10. Contact",
+        "body": "For questions about reservations or these terms, contact us at: info@dijaripremium.com. This address may be updated once the official business email is set up."
       }
     }
   }

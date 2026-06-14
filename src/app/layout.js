@@ -16,6 +16,38 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const metadata = {
+  applicationName: "Dijari Premium",
+  title: {
+    default: "Dijari Premium",
+    template: "%s",
+  },
+  description:
+    "Dijari Premium Apartment reservation platform for room browsing, bookings, and guest account management.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Dijari Premium",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  icons: {
+    icon: [
+      { url: "/hotel-images/Logo-round.svg", type: "image/svg+xml" },
+      { url: "/hotel-images/Logo.png", sizes: "192x192", type: "image/png" },
+      { url: "/hotel-images/Logo.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/hotel-images/Logo.png", sizes: "180x180", type: "image/png" }],
+    shortcut: ["/hotel-images/Logo-round.svg"],
+  },
+};
+
+export const viewport = {
+  themeColor: "#f8fafc",
+};
+
 export default async function RootLayout({ children }) {
   const cookieStore = await cookies();
   const locale = cookieStore.get("NEXT_LOCALE")?.value || defaultLocale;
@@ -24,17 +56,7 @@ export default async function RootLayout({ children }) {
   return (
     <html lang={locale}>
       <head>
-        <link
-          rel="icon"
-          type="image/svg+xml"
-          href="/hotel-images/Logo-round.svg"
-        />
-        <link
-          rel="shortcut icon"
-          type="image/svg+xml"
-          href="/hotel-images/Logo-round.svg"
-        />
-        <link rel="apple-touch-icon" href="/hotel-images/Logo.png" />
+        <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 text-gray-900`}

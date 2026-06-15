@@ -493,17 +493,17 @@ export default function RoomsPage() {
             </button>
 
             {currentGalleryImage ? (
-              <div className="relative h-[75vh] w-[min(84vw,640px)] overflow-hidden rounded-2xl shadow-[0_20px_60px_rgba(15,23,42,0.35)] md:w-[min(70vw,760px)]">
+              <div className="relative flex max-h-[78vh] w-[92vw] items-center justify-center overflow-hidden rounded-2xl bg-slate-950 shadow-[0_20px_60px_rgba(15,23,42,0.35)] md:h-[75vh] md:w-[min(70vw,760px)]">
                 <img
                   src={currentGalleryImage}
                   alt={`${galleryRoom.name} ${galleryIndex + 1}`}
-                  className="relative z-10 h-full w-full object-cover"
+                  className="relative z-10 max-h-[78vh] w-full object-contain md:h-full md:max-h-none md:w-full md:object-cover"
                 />
                 {galleryImages.length > 1 ? (
                   <>
                     <button
                       type="button"
-                      className="absolute left-4 top-1/2 z-10 inline-flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-3xl text-white shadow-lg transition hover:bg-black/72"
+                      className="absolute left-3 top-1/2 z-10 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-3xl text-white shadow-lg transition hover:bg-black/72 md:left-4 md:h-12 md:w-12"
                       onClick={showPreviousImage}
                       aria-label="Previous image"
                     >
@@ -511,7 +511,7 @@ export default function RoomsPage() {
                     </button>
                     <button
                       type="button"
-                      className="absolute right-4 top-1/2 z-10 inline-flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-3xl text-white shadow-lg transition hover:bg-black/72"
+                      className="absolute right-3 top-1/2 z-10 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-3xl text-white shadow-lg transition hover:bg-black/72 md:right-4 md:h-12 md:w-12"
                       onClick={showNextImage}
                       aria-label="Next image"
                     >

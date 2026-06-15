@@ -46,7 +46,7 @@ function getAdminNotificationEmail() {
   return (
     process.env.RESERVATION_ADMIN_EMAIL ||
     process.env.ADMIN_EMAIL ||
-    "info@dijaripremium.com"
+    "dijaripremium@gmail.com"
   );
 }
 

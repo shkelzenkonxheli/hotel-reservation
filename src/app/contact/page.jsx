@@ -47,7 +47,7 @@ export default function ContactPage() {
       `${t("mail.name")}: ${name}\n${t("mail.email")}: ${email}\n${t("mail.phone")}: ${phone || "-"}\n\n${t("mail.message")}:\n${message}`,
     );
 
-    window.location.href = `mailto:info@dijaripremium.com?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:dijaripremium@gmail.com?subject=${subject}&body=${body}`;
     showFeedback(t("feedback.openingMail"), "success");
   };
 
@@ -127,7 +127,7 @@ export default function ContactPage() {
                 </Typography>
                 <Stack spacing={1}>
                   <Typography>
-                    <b>{t("details.email")}:</b> info@dijaripremium.com
+                    <b>{t("details.email")}:</b> dijaripremium@gmail.com
                   </Typography>
                   <Typography>
                     <b>{t("details.phone")}:</b> +383 44 123 456

@@ -72,17 +72,23 @@ export default function ReservationCard({
         border: "1px solid var(--admin-border)",
       }}
     >
-      <CardContent>
-        {/* HEADER */}
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Box>
-            <Typography fontWeight={600}>{reservation.full_name}</Typography>
-            <Typography variant="caption" color="text.secondary">
+      <CardContent sx={{ p: 2.25, "&:last-child": { pb: 2.25 } }}>
+        <Box display="flex" justifyContent="space-between" alignItems="flex-start" gap={1.5}>
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography fontWeight={700} fontSize="1rem" lineHeight={1.25} noWrap>
+              {reservation.full_name}
+            </Typography>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ display: "block", mt: 0.35 }}
+              noWrap
+            >
               {reservation.users?.email}
             </Typography>
           </Box>
 
-          <Box display="flex" alignItems="center" gap={0.5}>
+          <Box display="flex" alignItems="center" gap={0.25} flexShrink={0}>
             {selectable ? (
               <Checkbox
                 size="small"
@@ -94,14 +100,25 @@ export default function ReservationCard({
             <IconButton size="small" onClick={onFavorite}>
               {favorite ? <Star color="warning" /> : <StarBorder />}
             </IconButton>
+            <IconButton size="small" onClick={onManage}>
+              <MoreVert />
+            </IconButton>
           </Box>
         </Box>
 
         <Divider sx={{ my: 1.5 }} />
 
-        {/* ROOM + STATUS */}
-        <Box display="flex" gap={1} flexWrap="wrap">
-          <Chip label={reservation.rooms?.name} size="small" />
+        <Typography
+          fontWeight={700}
+          fontSize="0.98rem"
+          lineHeight={1.25}
+          sx={{ mb: 1.1 }}
+        >
+          {reservation.rooms?.type || reservation.rooms?.name || t("table.room")}
+          {reservation.rooms?.room_number ? `  #${reservation.rooms.room_number}` : ""}
+        </Typography>
+
+        <Box display="flex" gap={0.9} flexWrap="wrap" alignItems="center">
           <Chip
             label={localizedStatus}
             size="small"
@@ -110,38 +127,54 @@ export default function ReservationCard({
                 reservation.status === "confirmed"
                   ? "#dbeafe"
                   : reservation.status === "completed"
-                  ? "#dcfce7"
-                  : reservation.status === "cancelled"
-                  ? "#fee2e2"
-                  : "#fef9c3",
-              }}
+                    ? "#dcfce7"
+                    : reservation.status === "cancelled"
+                      ? "#fee2e2"
+                      : "#fef9c3",
+              fontWeight: 700,
+            }}
           />
           {getPaymentChip?.(reservation)}
         </Box>
 
-        {/* DATES */}
-        <Box mt={1} display="flex" gap={1}>
-          <Chip
-            size="small"
-            label={`${t("table.checkIn")}: ${new Date(
-              reservation.start_date
-            ).toLocaleDateString()}`}
-            sx={{ background: "#ecfeff", color: "#155e75" }}
-          />
-          <Chip
-            size="small"
-            label={`${t("table.checkOut")}: ${new Date(
-              reservation.end_date
-            ).toLocaleDateString()}`}
-            sx={{ background: "#fff7ed", color: "#9a3412" }}
-          />
-        </Box>
-
-        {/* ACTIONS */}
-        <Box display="flex" justifyContent="flex-end" mt={2}>
-          <IconButton size="small" onClick={onManage}>
-            <MoreVert />
-          </IconButton>
+        <Box
+          mt={1.35}
+          display="grid"
+          gridTemplateColumns="repeat(2, minmax(0, 1fr))"
+          gap={1}
+        >
+          <Box
+            sx={{
+              minWidth: 0,
+              px: 1.15,
+              py: 0.95,
+              borderRadius: 2,
+              backgroundColor: "#ecfeff",
+            }}
+          >
+            <Typography variant="caption" sx={{ color: "#0f766e", fontWeight: 700 }}>
+              {t("table.checkIn")}
+            </Typography>
+            <Typography fontWeight={600} fontSize="0.9rem" color="#164e63" noWrap>
+              {new Date(reservation.start_date).toLocaleDateString()}
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              minWidth: 0,
+              px: 1.15,
+              py: 0.95,
+              borderRadius: 2,
+              backgroundColor: "#fff7ed",
+            }}
+          >
+            <Typography variant="caption" sx={{ color: "#c2410c", fontWeight: 700 }}>
+              {t("table.checkOut")}
+            </Typography>
+            <Typography fontWeight={600} fontSize="0.9rem" color="#9a3412" noWrap>
+              {new Date(reservation.end_date).toLocaleDateString()}
+            </Typography>
+          </Box>
         </Box>
       </CardContent>
     </Card>

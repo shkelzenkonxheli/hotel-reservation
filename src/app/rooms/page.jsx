@@ -20,7 +20,7 @@ function fYMD(date) {
 }
 
 function getFeatureChips(amenities = []) {
-  return Array.isArray(amenities) ? amenities.filter(Boolean).slice(0, 5) : [];
+  return Array.isArray(amenities) ? amenities.filter(Boolean) : [];
 }
 
 function getRoomLabelKey(type = "") {
@@ -63,6 +63,7 @@ export default function RoomsPage() {
   const [expandedRoom, setExpandedRoom] = useState(null);
   const [galleryRoom, setGalleryRoom] = useState(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
+  const [expandedAmenities, setExpandedAmenities] = useState({});
   const [toast, setToast] = useState({
     open: false,
     message: "",
@@ -77,6 +78,15 @@ export default function RoomsPage() {
   const showToast = (message, severity = "warning") => {
     setToast({ open: true, message, severity });
   };
+
+  const showAllAmenitiesLabel =
+    typeof t.has === "function" && t.has("showAllAmenities")
+      ? t("showAllAmenities")
+      : "Shfaq te gjitha";
+  const showLessAmenitiesLabel =
+    typeof t.has === "function" && t.has("showLessAmenities")
+      ? t("showLessAmenities")
+      : "Shfaq me pak";
 
   useEffect(() => {
     async function fetchRooms() {
@@ -268,6 +278,11 @@ export default function RoomsPage() {
                   ? room.images.slice(1, 3)
                   : [];
                 const roomLabelKey = getRoomLabelKey(room.type);
+                const amenities = getFeatureChips(room.amenities);
+                const showAllAmenities = Boolean(expandedAmenities[room.type]);
+                const visibleAmenities = showAllAmenities
+                  ? amenities
+                  : amenities.slice(0, 4);
 
                 return (
                 <PublicCard
@@ -330,8 +345,8 @@ export default function RoomsPage() {
                           {room.description || getFirstLine(room.description)}
                         </p>
 
-                        <div className="mt-6 flex flex-wrap gap-2.5">
-                          {getFeatureChips(room.amenities).map((amenity) => (
+                        <div className="mt-5 flex flex-wrap gap-2.5">
+                          {visibleAmenities.map((amenity) => (
                             <span
                               key={amenity}
                               className="rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-medium text-slate-600"
@@ -339,10 +354,26 @@ export default function RoomsPage() {
                               {amenity}
                             </span>
                           ))}
+                          {amenities.length > 4 ? (
+                            <button
+                              type="button"
+                              className="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-[#1f6feb] transition hover:border-[#bfdbfe] hover:bg-[#eff6ff]"
+                              onClick={() =>
+                                setExpandedAmenities((prev) => ({
+                                  ...prev,
+                                  [room.type]: !prev[room.type],
+                                }))
+                              }
+                            >
+                              {showAllAmenities
+                                ? showLessAmenitiesLabel
+                                : showAllAmenitiesLabel}
+                            </button>
+                          ) : null}
                         </div>
                       </div>
 
-                      <div className="mt-8 flex items-end justify-between gap-4 border-t border-slate-200/80 pt-6">
+                      <div className="mt-6 flex items-end justify-between gap-4 border-t border-slate-200/80 pt-5">
                         <div>
                           <div>
                             <span className="text-[1.85rem] font-semibold leading-none text-slate-900 md:text-[2.2rem]">

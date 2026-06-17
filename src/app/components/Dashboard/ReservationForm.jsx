@@ -488,7 +488,12 @@ export default function ReservationForm({
                     InputLabelProps={{ shrink: true }}
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    inputProps={{ min: new Date().toISOString().split("T")[0] }}
+                    inputProps={{
+                      min:
+                        mode === "edit"
+                          ? undefined
+                          : new Date().toISOString().split("T")[0],
+                    }}
                     fullWidth
                   />
                   <TextField

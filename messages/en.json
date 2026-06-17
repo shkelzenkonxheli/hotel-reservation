@@ -193,7 +193,9 @@
       "loginFirst": "You need to login first",
       "notAvailable": "Room is not available for the selected dates.",
       "loadFailed": "Failed to load rooms. Please try again."
-    }
+    },
+    "showAllAmenities": "Show all",
+    "showLessAmenities": "Show less"
   },
   "contact": {
     "metaTitle": "Contact | Dijari Premium",
@@ -484,7 +486,8 @@
           "allTime": "All time"
         },
         "pageSize": "Per page",
-        "pageSizeOption": "{count}"
+        "pageSizeOption": "{count}",
+        "moreFilters": "More filters"
       },
       "statuses": {
         "pending": "Pending",

@@ -193,7 +193,9 @@
       "loginFirst": "Duhet te kyqesh fillimisht",
       "notAvailable": "Dhoma nuk eshte e lire per datat e zgjedhura.",
       "loadFailed": "Ngarkimi i dhomave deshtoi. Provoni perseri."
-    }
+    },
+    "showAllAmenities": "Shfaq te gjitha",
+    "showLessAmenities": "Shfaq me pak"
   },
   "contact": {
     "metaTitle": "Kontakti | Dijari Premium",
@@ -484,7 +486,8 @@
           "allTime": "Gjithe koha"
         },
         "pageSize": "Per faqe",
-        "pageSizeOption": "{count}"
+        "pageSizeOption": "{count}",
+        "moreFilters": "Me shume filtra"
       },
       "statuses": {
         "pending": "Në pritje",

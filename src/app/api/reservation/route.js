@@ -11,6 +11,11 @@ import {
   calculateReservationTotal,
   clampGuests,
 } from "@/lib/pricing";
+
+function blocksRoom(status) {
+  const s = String(status || "").toLowerCase();
+  return s !== "cancelled" && s !== "completed";
+}
 import {
   reservationConfirmationSubject,
   reservationConfirmationTemplate,
@@ -172,7 +177,7 @@ export async function POST(request) {
       include: {
         reservations: {
           where: { cancelled_at: null, admin_hidden: false },
-          select: { id: true, start_date: true, end_date: true },
+          select: { id: true, start_date: true, end_date: true, status: true },
         },
       },
     });
@@ -180,6 +185,7 @@ export async function POST(request) {
     const availableRooms = rooms.filter((room) => {
       if (room.status === "out_of_order") return false;
       const conflict = room.reservations.some((r) => {
+        if (!blocksRoom(r.status)) return false;
         return start < new Date(r.end_date) && end > new Date(r.start_date);
       });
       return !conflict;
@@ -474,6 +480,7 @@ export async function GET(request) {
               full_name: true,
               start_date: true,
               end_date: true,
+              status: true,
             },
           },
         },
@@ -496,6 +503,7 @@ export async function GET(request) {
         const overlaps = room.reservations
           .filter((res) => {
             if (reservationId && res.id === reservationId) return false;
+            if (!blocksRoom(res.status)) return false;
             const rStart = parseDateOnlyToUTC(
               res.start_date.toISOString().slice(0, 10),
             );

@@ -116,6 +116,30 @@ export default function ReservationsTab() {
     },
   };
   const confirmLocale = String(locale || "").startsWith("en") ? "en" : "sq";
+  const menuCopy =
+    confirmLocale === "en"
+      ? {
+          edit: "Edit reservation",
+          print: "Print receipt",
+          delete: "Delete reservation",
+          pending: "Set pending",
+          confirmed: "Confirm reservation",
+          completed: "Complete reservation",
+          cancelled: "Cancel reservation",
+          paid: "Mark cash paid",
+          unpaid: "Mark unpaid",
+        }
+      : {
+          edit: "Ndrysho rezervimin",
+          print: "Printo faturen",
+          delete: "Fshij rezervimin",
+          pending: "Ne pritje",
+          confirmed: "Konfirmo rezervimin",
+          completed: "Perfundo rezervimin",
+          cancelled: "Anulo rezervimin",
+          paid: "Sheno cash te paguar",
+          unpaid: "Sheno te papaguar",
+        };
   const confirmT = (key, values) => {
     if (typeof t.has === "function" && t.has(`confirm.${key}`)) {
       return t(`confirm.${key}`, values);
@@ -803,6 +827,24 @@ export default function ReservationsTab() {
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={() => setAnchorEl(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+        PaperProps={{
+          sx: {
+            width: { xs: "min(90vw, 296px)", sm: 296 },
+            maxWidth: "calc(100vw - 24px)",
+            mt: 0.25,
+            borderRadius: 3,
+            border: "1px solid #e2e8f0",
+            boxShadow: "0 18px 45px rgba(15, 23, 42, 0.18)",
+            overflow: "hidden",
+          },
+        }}
+        MenuListProps={{
+          sx: {
+            py: 0.35,
+          },
+        }}
       >
         <MenuItem
           onClick={() => {
@@ -810,25 +852,31 @@ export default function ReservationsTab() {
             setEditOpen(true);
             setAnchorEl(null);
           }}
+          sx={{ minHeight: 36, gap: 0.75, py: 0.45, px: 1.4 }}
         >
-          <ListItemIcon>
+          <ListItemIcon sx={{ minWidth: 28 }}>
             <EditOutlined fontSize="small" />
           </ListItemIcon>
-          <ListItemText>{t("menu.editReservation")}</ListItemText>
+          <ListItemText
+            primary={menuCopy.edit}
+            primaryTypographyProps={{ fontSize: 13.5, fontWeight: 500 }}
+          />
         </MenuItem>
-
-        <MenuItem divider />
 
         <MenuItem
           onClick={() => {
             setPrintReservation(selectedReservation);
             setAnchorEl(null);
           }}
+          sx={{ minHeight: 36, gap: 0.75, py: 0.45, px: 1.4 }}
         >
-          <ListItemIcon>
+          <ListItemIcon sx={{ minWidth: 28 }}>
             <PrintOutlined fontSize="small" />
           </ListItemIcon>
-          <ListItemText>{t("menu.printReceipt")}</ListItemText>
+          <ListItemText
+            primary={menuCopy.print}
+            primaryTypographyProps={{ fontSize: 13.5, fontWeight: 500 }}
+          />
         </MenuItem>
 
         <MenuItem
@@ -836,14 +884,16 @@ export default function ReservationsTab() {
             setDeleteDialog({ open: true, id: selectedReservation?.id ?? null });
             setAnchorEl(null);
           }}
+          sx={{ minHeight: 36, gap: 0.75, py: 0.45, px: 1.4 }}
         >
-          <ListItemIcon>
+          <ListItemIcon sx={{ minWidth: 28 }}>
             <DeleteOutline fontSize="small" sx={{ color: "#dc2626" }} />
           </ListItemIcon>
-          <ListItemText>{t("menu.deleteReservation")}</ListItemText>
+          <ListItemText
+            primary={menuCopy.delete}
+            primaryTypographyProps={{ fontSize: 13.5, fontWeight: 500 }}
+          />
         </MenuItem>
-
-        <MenuItem divider />
 
         {["pending", "confirmed", "completed", "cancelled"].map((status) => (
           <MenuItem
@@ -865,17 +915,22 @@ export default function ReservationsTab() {
                 onConfirm: () => handleStatusChange(selectedReservation.id, status),
               });
             }}
+            sx={{
+              minHeight: 34,
+              gap: 0.75,
+              py: 0.35,
+              px: 1.4,
+            }}
           >
-            <ListItemIcon>{getStatusActionMeta(status).icon}</ListItemIcon>
-            <ListItemText>
-              {t("menu.setAs", {
-                status: t(`statuses.${status}`),
-              })}
-            </ListItemText>
+            <ListItemIcon sx={{ minWidth: 28 }}>
+              {getStatusActionMeta(status).icon}
+            </ListItemIcon>
+            <ListItemText
+              primary={menuCopy[status]}
+              primaryTypographyProps={{ fontSize: 13.25, fontWeight: 500 }}
+            />
           </MenuItem>
         ))}
-
-        <MenuItem divider />
 
         <MenuItem
           onClick={() =>
@@ -895,11 +950,20 @@ export default function ReservationsTab() {
                 ),
             })
           }
+          sx={{
+            minHeight: 34,
+            gap: 0.75,
+            py: 0.35,
+            px: 1.4,
+          }}
         >
-          <ListItemIcon>
+          <ListItemIcon sx={{ minWidth: 28 }}>
             <PaymentsOutlined fontSize="small" sx={{ color: "#16a34a" }} />
           </ListItemIcon>
-          <ListItemText>{t("menu.markCashPaidAndConfirm")}</ListItemText>
+          <ListItemText
+            primary={menuCopy.paid}
+            primaryTypographyProps={{ fontSize: 13.25, fontWeight: 500 }}
+          />
         </MenuItem>
 
         <MenuItem
@@ -920,11 +984,20 @@ export default function ReservationsTab() {
                 ),
             })
           }
+          sx={{
+            minHeight: 34,
+            gap: 0.75,
+            py: 0.35,
+            px: 1.4,
+          }}
         >
-          <ListItemIcon>
+          <ListItemIcon sx={{ minWidth: 28 }}>
             <MoneyOffCsredOutlined fontSize="small" sx={{ color: "#b45309" }} />
           </ListItemIcon>
-          <ListItemText>{t("menu.markAsUnpaid")}</ListItemText>
+          <ListItemText
+            primary={menuCopy.unpaid}
+            primaryTypographyProps={{ fontSize: 13.25, fontWeight: 500 }}
+          />
         </MenuItem>
       </Menu>
 

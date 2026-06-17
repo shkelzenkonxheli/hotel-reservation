@@ -35,6 +35,18 @@ function normalizeEmailLocale(locale) {
   return String(locale || "").toLowerCase().startsWith("en") ? "en" : "sq";
 }
 
+function blocksRoom(status) {
+  const s = String(status || "").toLowerCase();
+  return s !== "cancelled" && s !== "completed";
+}
+
+function getTodayUtcDateOnly() {
+  const now = new Date();
+  return new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+  );
+}
+
 async function sendEmailOrThrow(sendPromise, label) {
   const result = await sendPromise;
   if (result?.error) {
@@ -170,11 +182,15 @@ export async function PATCH(req, context) {
         body.payment_method === "card" || body.payment_method === "cash"
           ? body.payment_method
           : undefined;
+      const nextStatus = body.status ? String(body.status).toLowerCase() : null;
+      const completedDate =
+        nextStatus === "completed" ? getTodayUtcDateOnly() : null;
 
       const updateData = {
         payment_status: nextPaymentStatus,
         ...(nextPaymentMethod ? { payment_method: nextPaymentMethod } : {}),
         ...(body.status ? { status: body.status } : {}),
+        ...(completedDate ? { end_date: completedDate } : {}),
         amount_paid: nextPaymentStatus === "PAID" ? existing.total_price : 0,
         paid_at: nextPaymentStatus === "PAID" ? new Date() : null,
       };
@@ -227,10 +243,13 @@ export async function PATCH(req, context) {
       }
 
       const nextStatus = String(body.status).toLowerCase();
+      const completedDate =
+        nextStatus === "completed" ? getTodayUtcDateOnly() : null;
       const updated = await prisma.reservations.update({
         where: { id: Number(id) },
         data: {
           status: body.status,
+          ...(completedDate ? { end_date: completedDate } : {}),
           ...(nextStatus === "cancelled" ? { cancelled_at: new Date() } : {}),
         },
         include: {
@@ -285,13 +304,6 @@ export async function PATCH(req, context) {
         { status: 400 },
       );
     }
-    if (start < today) {
-      return NextResponse.json(
-        { error: "Cannot create or edit reservation in the past" },
-        { status: 400 },
-      );
-    }
-
     const existing = await prisma.reservations.findUnique({
       where: { id: Number(id) },
       include: { rooms: true },
@@ -302,6 +314,16 @@ export async function PATCH(req, context) {
         { error: "Reservation not found" },
         { status: 404 },
       );
+    }
+
+    if (start < today) {
+      const existingStart = existing.start_date.toISOString().split("T")[0];
+      if (startDate !== existingStart) {
+        return NextResponse.json(
+          { error: "Cannot move check-in date to the past" },
+          { status: 400 },
+        );
+      }
     }
 
     // Detect whether room type or date range is being changed.
@@ -315,7 +337,15 @@ export async function PATCH(req, context) {
     const rooms = await prisma.rooms.findMany({
       where: { type },
       include: {
-        reservations: { where: { cancelled_at: null, admin_hidden: false } },
+        reservations: {
+          where: { cancelled_at: null, admin_hidden: false },
+          select: {
+            id: true,
+            start_date: true,
+            end_date: true,
+            status: true,
+          },
+        },
       },
     });
 
@@ -323,6 +353,7 @@ export async function PATCH(req, context) {
       if (room.status === "out_of_order") return false;
       const conflict = room.reservations.some((reservation) => {
         if (reservation.id === existing.id) return false;
+        if (!blocksRoom(reservation.status)) return false;
         const rStart = parseDateOnlyToUTC(
           reservation.start_date.toISOString().slice(0, 10),
         );

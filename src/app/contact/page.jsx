@@ -130,12 +130,29 @@ export default function ContactPage() {
                     <b>{t("details.email")}:</b> dijaripremium@gmail.com
                   </Typography>
                   <Typography>
-                    <b>{t("details.phone")}:</b> +383 44 123 456
+                    <b>{t("details.phone")}:</b>{" "}
+                    <a
+                      href="tel:+38268317993"
+                      className="text-[#1f6feb] hover:underline"
+                    >
+                      +382 68 317 993
+                    </a>
                   </Typography>
                   <Typography>
-                    <b>{t("details.address")}:</b> Prishtina, Kosovo
+                    <b>{t("details.address")}:</b>{" "}
+                    <a
+                      href="https://www.bing.com/maps/default.aspx?v=2&pc=FACEBK&mid=8100&where1=Mujo%20Ul%C3%A7inaku%2C%20Ulcinj%2C%20Montenegro&FORM=FBKPL1&mkt=en-US&fbclid=IwZXh0bgNhZW0CMTAAYnJpZBExcGV1MERDQ2plbmw1bFNFNnNydGMGYXBwX2lkEDIyMjAzOTE3ODgyMDA4OTIAAR7GVdvq4ITTNRVGRMUGeXkSymUr7PXCBQAQOmWJLoiaEooemHNBM3GURXJRCg_aem_lBIgrXbzKxHyjDgMor39Pg"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[#1f6feb] hover:underline"
+                    >
+                      Mujo Ulcinaku, Ulqin, Mali i Zi
+                    </a>
                   </Typography>
                 </Stack>
+                <Alert severity="info" sx={{ mt: 2, borderRadius: 2 }}>
+                  {t("details.stayRules")}
+                </Alert>
               </PublicCard>
 
               <PublicCard className="p-5 md:p-6">

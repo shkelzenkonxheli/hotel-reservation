@@ -8,7 +8,10 @@ export default function ReservationListMobile({
   onManage,
   selectedIds,
   onToggleSelect,
+  getStatusChip,
   getPaymentChip,
+  onOpenStatusMenu,
+  onOpenPaymentMenu,
 }) {
   return (
     <Box display="flex" flexDirection="column" gap={2}>
@@ -22,7 +25,10 @@ export default function ReservationListMobile({
           selectable
           selected={selectedIds.includes(r.id)}
           onSelect={() => onToggleSelect(r.id)}
+          getStatusChip={getStatusChip}
           getPaymentChip={getPaymentChip}
+          onOpenStatusMenu={onOpenStatusMenu}
+          onOpenPaymentMenu={onOpenPaymentMenu}
         />
       ))}
     </Box>

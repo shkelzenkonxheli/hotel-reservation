@@ -69,7 +69,8 @@
     "status": "Statusi",
     "pendingStatus": "Ne pritje te konfirmimit",
     "noReservation": "Nuk u gjet rezervim i fundit.",
-    "backHome": "Kthehu ne Home"
+    "backHome": "Kthehu ne Home",
+    "stayRules": "Check-in fillon nga ora 14:00, ndersa check-out eshte deri ne ora 11:00."
   },
   "login": {
     "metaTitle": "Hyrja | Dijari Premium",
@@ -226,7 +227,8 @@
       "subtitle": "Na kontaktoni direkt ne cdo kohe.",
       "email": "Email",
       "phone": "Telefoni",
-      "address": "Adresa"
+      "address": "Adresa",
+      "stayRules": "Check-in: nga ora 14:00. Check-out: deri ne ora 11:00. Hyrja me heret ose dalja me vone varen nga disponueshmeria."
     },
     "response": {
       "title": "Koha e pergjigjes",
@@ -1261,6 +1263,19 @@
         "privacy": "Privatesia",
         "terms": "Kushtet e perdorimit"
       }
+    },
+    "location": {
+      "eyebrow": "Lokacioni",
+      "title": "Qendrim ne nje pike te pershtatshme te Ulqinit",
+      "subtitle": "Dijari Premium ndodhet ne nje zone praktike per mysafiret qe duan qasje te shpejte ne bregdet, levizje te lehte ne qytet dhe nje baze te qete per qendrimin e tyre.",
+      "addressLabel": "Adresa",
+      "address": "Mujo Ulcinaku, Ulqin, Mali i Zi",
+      "primaryAction": "Hape ne harte",
+      "secondaryAction": "Na kontakto",
+      "imageAlt": "Pamje e zones perreth Dijari Premium",
+      "cardEyebrow": "Prane bregdetit",
+      "cardTitle": "Afer shetitores, plazheve dhe ritmit te qytetit",
+      "cardBody": "Lokacioni e ben me te lehte te organizosh mberritjen, daljet ditore dhe levizjen neper Ulqin pa humbur qetesine e qendrimit."
     }
   },
   "privacy": {
@@ -1342,7 +1357,7 @@
       },
       "checkInOut": {
         "title": "4. Check-in dhe Check-out",
-        "body": "Ora e sakte e check-in dhe check-out mund te percaktohet nga hoteli dhe te komunikohet me mysafirin para mbrritjes. Kerkesat per hyrje te hershme ose dalje te vonshme varen nga disponueshmeria."
+        "body": "Check-in fillon nga ora 14:00, ndersa check-out duhet te perfundoje deri ne ora 11:00. Kerkesat per hyrje te hershme ose dalje te vonshme varen nga disponueshmeria dhe konfirmohen nga hoteli."
       },
       "prices": {
         "title": "5. Cmimet dhe pagesa",

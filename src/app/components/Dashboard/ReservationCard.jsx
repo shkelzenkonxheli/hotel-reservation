@@ -19,7 +19,10 @@ export default function ReservationCard({
   selectable = false,
   selected = false,
   onSelect,
+  getStatusChip,
   getPaymentChip,
+  onOpenStatusMenu,
+  onOpenPaymentMenu,
 }) {
   const t = useTranslations("dashboard.reservations");
   const status = String(reservation?.status || "").toLowerCase();
@@ -119,22 +122,38 @@ export default function ReservationCard({
         </Typography>
 
         <Box display="flex" gap={0.9} flexWrap="wrap" alignItems="center">
-          <Chip
-            label={localizedStatus}
-            size="small"
-            sx={{
-              background:
-                reservation.status === "confirmed"
-                  ? "#dbeafe"
-                  : reservation.status === "completed"
-                    ? "#dcfce7"
-                    : reservation.status === "cancelled"
-                      ? "#fee2e2"
-                      : "#fef9c3",
-              fontWeight: 700,
-            }}
-          />
-          {getPaymentChip?.(reservation)}
+          <button
+            type="button"
+            onClick={(e) => onOpenStatusMenu?.(e, reservation)}
+            className="inline-flex rounded-full"
+          >
+            {getStatusChip ? (
+              getStatusChip(reservation.status, true)
+            ) : (
+              <Chip
+                label={localizedStatus}
+                size="small"
+                sx={{
+                  background:
+                    reservation.status === "confirmed"
+                      ? "#dbeafe"
+                      : reservation.status === "completed"
+                        ? "#dcfce7"
+                        : reservation.status === "cancelled"
+                          ? "#fee2e2"
+                          : "#fef9c3",
+                  fontWeight: 700,
+                }}
+              />
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={(e) => onOpenPaymentMenu?.(e, reservation)}
+            className="inline-flex rounded-full"
+          >
+            {getPaymentChip?.(reservation, true)}
+          </button>
         </Box>
 
         <Box

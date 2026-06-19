@@ -28,6 +28,10 @@ import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import LanguageIcon from "@mui/icons-material/Language";
+import BedOutlinedIcon from "@mui/icons-material/BedOutlined";
+import ContactMailOutlinedIcon from "@mui/icons-material/ContactMailOutlined";
+import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
+import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 
 export default function Header() {
   const t = useTranslations("header");
@@ -754,10 +758,18 @@ export default function Header() {
           onClose={closeMenu}
           PaperProps={{
             sx: {
-              borderRadius: 2,
+              borderRadius: 3,
               mt: 1,
-              minWidth: 200,
-              boxShadow: "0 8px 24px rgba(15,23,42,0.12)",
+              minWidth: 240,
+              maxWidth: "calc(100vw - 20px)",
+              border: "1px solid #e2e8f0",
+              boxShadow: "0 20px 40px rgba(15,23,42,0.14)",
+              overflow: "hidden",
+            },
+          }}
+          MenuListProps={{
+            sx: {
+              py: 0.75,
             },
           }}
         >
@@ -766,12 +778,27 @@ export default function Header() {
               closeMenu();
               setLanguageAnchor(e.currentTarget);
             }}
-            sx={{ justifyContent: "space-between" }}
+            sx={{
+              minHeight: 46,
+              px: 1.75,
+              py: 1,
+              borderRadius: 2,
+              mx: 0.75,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              fontWeight: 600,
+            }}
           >
-            {t("language")}
-            <LanguageIcon sx={{ fontSize: 18, color: "#64748b" }} />
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
+              <LanguageIcon sx={{ fontSize: 18, color: "#475569" }} />
+              <Typography sx={{ fontSize: 15, fontWeight: 600 }}>
+                {t("language")}
+              </Typography>
+            </Box>
+            <ChevronRightRoundedIcon sx={{ fontSize: 18, color: "#94a3b8" }} />
           </MenuItem>
-          <Divider />
+          <Divider sx={{ my: 0.75 }} />
 
           {[
             isPublicShell && (
@@ -780,8 +807,21 @@ export default function Header() {
                 component={Link}
                 href="/rooms"
                 onClick={closeMenu}
+                sx={{
+                  minHeight: 46,
+                  px: 1.75,
+                  py: 1,
+                  borderRadius: 2,
+                  mx: 0.75,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.25,
+                }}
               >
-                {t("roomsLink")}
+                <BedOutlinedIcon sx={{ fontSize: 18, color: "#475569" }} />
+                <Typography sx={{ fontSize: 15, fontWeight: 500 }}>
+                  {t("roomsLink")}
+                </Typography>
               </MenuItem>
             ),
             isPublicShell && (
@@ -790,8 +830,21 @@ export default function Header() {
                 component={Link}
                 href="/contact"
                 onClick={closeMenu}
+                sx={{
+                  minHeight: 46,
+                  px: 1.75,
+                  py: 1,
+                  borderRadius: 2,
+                  mx: 0.75,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.25,
+                }}
               >
-                {t("contact")}
+                <ContactMailOutlinedIcon sx={{ fontSize: 18, color: "#475569" }} />
+                <Typography sx={{ fontSize: 15, fontWeight: 500 }}>
+                  {t("contact")}
+                </Typography>
               </MenuItem>
             ),
             isPublicShell && user && (
@@ -800,8 +853,21 @@ export default function Header() {
                 component={Link}
                 href="/profile"
                 onClick={closeMenu}
+                sx={{
+                  minHeight: 46,
+                  px: 1.75,
+                  py: 1,
+                  borderRadius: 2,
+                  mx: 0.75,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.25,
+                }}
               >
-                {t("profile")}
+                <PersonOutlineIcon sx={{ fontSize: 18, color: "#475569" }} />
+                <Typography sx={{ fontSize: 15, fontWeight: 500 }}>
+                  {t("profile")}
+                </Typography>
               </MenuItem>
             ),
             isPublicShell && showDashboard && (
@@ -810,8 +876,21 @@ export default function Header() {
                 component={Link}
                 href="/dashboard"
                 onClick={closeMenu}
+                sx={{
+                  minHeight: 46,
+                  px: 1.75,
+                  py: 1,
+                  borderRadius: 2,
+                  mx: 0.75,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.25,
+                }}
               >
-                {t("dashboard")}
+                <DashboardOutlinedIcon sx={{ fontSize: 18, color: "#475569" }} />
+                <Typography sx={{ fontSize: 15, fontWeight: 500 }}>
+                  {t("dashboard")}
+                </Typography>
               </MenuItem>
             ),
             !user && (
@@ -820,8 +899,21 @@ export default function Header() {
                 component={Link}
                 href="/login"
                 onClick={closeMenu}
+                sx={{
+                  minHeight: 46,
+                  px: 1.75,
+                  py: 1,
+                  borderRadius: 2,
+                  mx: 0.75,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.25,
+                }}
               >
-                {t("login")}
+                <LoginIcon sx={{ fontSize: 18, color: "#475569" }} />
+                <Typography sx={{ fontSize: 15, fontWeight: 500 }}>
+                  {t("login")}
+                </Typography>
               </MenuItem>
             ),
             !user && (
@@ -830,8 +922,21 @@ export default function Header() {
                 component={Link}
                 href="/register"
                 onClick={closeMenu}
+                sx={{
+                  minHeight: 46,
+                  px: 1.75,
+                  py: 1,
+                  borderRadius: 2,
+                  mx: 0.75,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.25,
+                }}
               >
-                {t("register")}
+                <PersonAddIcon sx={{ fontSize: 18, color: "#475569" }} />
+                <Typography sx={{ fontSize: 15, fontWeight: 500 }}>
+                  {t("register")}
+                </Typography>
               </MenuItem>
             ),
             user && !isPublicShell && (
@@ -840,8 +945,21 @@ export default function Header() {
                 component={Link}
                 href="/profile"
                 onClick={closeMenu}
+                sx={{
+                  minHeight: 46,
+                  px: 1.75,
+                  py: 1,
+                  borderRadius: 2,
+                  mx: 0.75,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.25,
+                }}
               >
-                {t("profile")}
+                <PersonOutlineIcon sx={{ fontSize: 18, color: "#475569" }} />
+                <Typography sx={{ fontSize: 15, fontWeight: 500 }}>
+                  {t("profile")}
+                </Typography>
               </MenuItem>
             ),
             user && (
@@ -851,8 +969,22 @@ export default function Header() {
                   closeMenu();
                   logout();
                 }}
+                sx={{
+                  minHeight: 46,
+                  px: 1.75,
+                  py: 1,
+                  borderRadius: 2,
+                  mx: 0.75,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.25,
+                  color: "#b91c1c",
+                }}
               >
-                {t("logout")}
+                <LogoutIcon sx={{ fontSize: 18 }} />
+                <Typography sx={{ fontSize: 15, fontWeight: 600 }}>
+                  {t("logout")}
+                </Typography>
               </MenuItem>
             ),
           ].filter(Boolean)}

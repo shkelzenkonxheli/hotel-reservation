@@ -138,6 +138,7 @@ export default function SuccessPage() {
             </Typography>
             <Typography variant="body2">{t("pendingNoticeBody")}</Typography>
             <Typography variant="body2">{t("emailHint")}</Typography>
+            <Typography variant="body2">{t("stayRules")}</Typography>
           </Stack>
         </Alert>
 

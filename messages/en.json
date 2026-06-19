@@ -69,7 +69,8 @@
     "status": "Status",
     "pendingStatus": "Waiting for confirmation",
     "noReservation": "No recent reservation found.",
-    "backHome": "Back to Home"
+    "backHome": "Back to Home",
+    "stayRules": "Check-in starts from 14:00, while check-out is until 11:00."
   },
   "login": {
     "metaTitle": "Login | Dijari Premium",
@@ -226,7 +227,8 @@
       "subtitle": "Reach us directly any time.",
       "email": "Email",
       "phone": "Phone",
-      "address": "Address"
+      "address": "Address",
+      "stayRules": "Check-in: from 14:00. Check-out: until 11:00. Early check-in or late check-out depends on availability."
     },
     "response": {
       "title": "Response time",
@@ -1261,6 +1263,19 @@
         "privacy": "Privacy Policy",
         "terms": "Terms & Conditions"
       }
+    },
+    "location": {
+      "eyebrow": "Location",
+      "title": "Stay in a well-positioned part of Ulqin",
+      "subtitle": "Dijari Premium sits in a practical area for guests who want quick access to the coast, easy movement around town, and a calm base for their stay.",
+      "addressLabel": "Address",
+      "address": "Mujo Ulcinaku, Ulcinj, Montenegro",
+      "primaryAction": "Open map",
+      "secondaryAction": "Contact us",
+      "imageAlt": "View around Dijari Premium",
+      "cardEyebrow": "Near the coast",
+      "cardTitle": "Close to the promenade, beaches, and city rhythm",
+      "cardBody": "The location makes arrivals, daily outings, and moving through Ulqin simpler while keeping the stay itself calm and organized."
     }
   },
   "privacy": {
@@ -1342,7 +1357,7 @@
       },
       "checkInOut": {
         "title": "4. Check-in and Check-out",
-        "body": "Exact check-in and check-out times may be set by the hotel and communicated to the guest before arrival. Early check-in or late check-out requests depend on availability."
+        "body": "Check-in starts from 14:00, while check-out must be completed by 11:00. Early check-in or late check-out requests depend on availability and must be confirmed by the hotel."
       },
       "prices": {
         "title": "5. Prices and payment",

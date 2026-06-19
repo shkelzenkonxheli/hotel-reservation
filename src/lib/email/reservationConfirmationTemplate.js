@@ -34,6 +34,9 @@ const COPY = {
       "Please keep this email for your records. Our team can review your booking and payment will be completed directly at the hotel.",
     confirmedNextStep:
       "Please keep this email for your records. If you need assistance before arrival, simply reply to this message.",
+    stayInfoTitle: "Important stay information",
+    stayInfo:
+      "Check-in starts from 14:00 and check-out is until 11:00. Early check-in or late check-out depends on availability.",
     footer:
       "Thank you for choosing Dijari Premium. We are here if you need anything before your stay.",
     pendingLabel: "Pending",
@@ -65,6 +68,9 @@ const COPY = {
       "Ruajeni kete email per evidencen tuaj. Ekipi yne mund ta rishikoje rezervimin dhe pagesa do te kryhet direkt ne hotel.",
     confirmedNextStep:
       "Ruajeni kete email per evidencen tuaj. Nese ju duhet ndihme para arritjes, mjafton te pergjigjeni ne kete email.",
+    stayInfoTitle: "Informacion i rendesishem per qendrimin",
+    stayInfo:
+      "Check-in fillon nga ora 14:00, ndersa check-out eshte deri ne ora 11:00. Hyrja me heret ose dalja me vone varen nga disponueshmeria.",
     footer:
       "Faleminderit qe zgjodhet Dijari Premium. Jemi ne dispozicion per cdo ndihme para qendrimit tuaj.",
     pendingLabel: "Ne pritje",
@@ -148,10 +154,10 @@ export function reservationConfirmationTemplate({
   return `
     <div style="margin:0;padding:32px 16px;background:#f8fafc;font-family:Arial,sans-serif;color:#0f172a;">
       <div style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;box-shadow:0 24px 60px rgba(15,23,42,0.08);">
-        <div style="padding:32px;background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 55%,#2563eb 100%);color:#ffffff;">
-          <div style="font-size:12px;letter-spacing:0.18em;text-transform:uppercase;opacity:0.78;">${copy.eyebrow}</div>
-          <h1 style="margin:14px 0 0;font-size:30px;line-height:1.2;font-weight:700;">${isConfirmed ? copy.confirmedTitle : copy.pendingTitle}</h1>
-          <p style="margin:14px 0 0;font-size:15px;line-height:1.8;opacity:0.92;">${intro}</p>
+        <div bgcolor="#eaf3ff" style="padding:32px;background:#eaf3ff;color:#0f172a;border-bottom:1px solid #d6e6fb;">
+          <div style="font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:#315ea8;font-weight:700;">${copy.eyebrow}</div>
+          <h1 style="margin:14px 0 0;font-size:30px;line-height:1.2;font-weight:700;color:#0f172a;">${isConfirmed ? copy.confirmedTitle : copy.pendingTitle}</h1>
+          <p style="margin:14px 0 0;font-size:15px;line-height:1.8;color:#334155;">${intro}</p>
         </div>
 
         <div style="padding:28px 32px 32px;">
@@ -189,6 +195,15 @@ export function reservationConfirmationTemplate({
             </div>
             <div style="font-size:14px;line-height:1.8;color:#475569;">
               ${isConfirmed ? copy.confirmedNextStep : copy.pendingNextStep}
+            </div>
+          </div>
+
+          <div style="margin-top:18px;padding:18px 20px;border-radius:18px;background:#fff7ed;border:1px solid #fed7aa;">
+            <div style="font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#c2410c;margin-bottom:8px;">
+              ${copy.stayInfoTitle}
+            </div>
+            <div style="font-size:14px;line-height:1.8;color:#7c2d12;">
+              ${copy.stayInfo}
             </div>
           </div>
 

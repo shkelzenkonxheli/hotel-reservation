@@ -55,6 +55,11 @@ export default function ReservationsTab() {
   const [loading, setLoading] = useState(true);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedReservation, setSelectedReservation] = useState(null);
+  const [quickActionMenu, setQuickActionMenu] = useState({
+    anchorEl: null,
+    type: null,
+    reservation: null,
+  });
   const [deleteDialog, setDeleteDialog] = useState({ open: false, id: null });
   const [reasonTarget, setReasonTarget] = useState(null);
   const [actionDialog, setActionDialog] = useState({
@@ -171,6 +176,18 @@ export default function ReservationsTab() {
     });
   };
 
+  const closeQuickActionMenu = () => {
+    setQuickActionMenu({ anchorEl: null, type: null, reservation: null });
+  };
+
+  const openQuickActionMenu = (type, event, reservation) => {
+    setQuickActionMenu({
+      anchorEl: event.currentTarget,
+      type,
+      reservation,
+    });
+  };
+
   const requestActionConfirmation = ({
     title,
     description,
@@ -179,6 +196,7 @@ export default function ReservationsTab() {
     onConfirm,
   }) => {
     setAnchorEl(null);
+    closeQuickActionMenu();
     setActionDialog({
       open: true,
       title,
@@ -533,8 +551,18 @@ export default function ReservationsTab() {
     }
   }, [page, totalPages]);
 
-  const getStatusChip = (status = "pending") => {
+  const getStatusChip = (status = "pending", interactive = false) => {
     const s = status.toLowerCase();
+    const interactiveSx = interactive
+      ? {
+          cursor: "pointer",
+          transition: "transform 0.15s ease, box-shadow 0.15s ease",
+          "&:hover": {
+            transform: "translateY(-1px)",
+            boxShadow: "0 6px 16px rgba(15, 23, 42, 0.12)",
+          },
+        }
+      : {};
 
     switch (s) {
       case "pending":
@@ -546,6 +574,7 @@ export default function ReservationsTab() {
               backgroundColor: "#fef9c3",
               color: "#854d0e",
               fontWeight: 600,
+              ...interactiveSx,
             }}
           />
         );
@@ -558,6 +587,7 @@ export default function ReservationsTab() {
               backgroundColor: "#dbeafe",
               color: "#1e40af",
               fontWeight: 600,
+              ...interactiveSx,
             }}
           />
         );
@@ -571,6 +601,7 @@ export default function ReservationsTab() {
               backgroundColor: "#dcfce7",
               color: "#166534",
               fontWeight: 600,
+              ...interactiveSx,
             }}
           />
         );
@@ -583,16 +614,27 @@ export default function ReservationsTab() {
               backgroundColor: "#fee2e2",
               color: "#991b1b",
               fontWeight: 600,
+              ...interactiveSx,
             }}
           />
         );
       default:
-        return <Chip label={status} size="small" />;
+        return <Chip label={status} size="small" sx={interactiveSx} />;
     }
   };
 
-  const getPaymentChip = (reservation) => {
+  const getPaymentChip = (reservation, interactive = false) => {
     const isPaid = String(reservation?.payment_status || "").toUpperCase() === "PAID";
+    const interactiveSx = interactive
+      ? {
+          cursor: "pointer",
+          transition: "transform 0.15s ease, box-shadow 0.15s ease",
+          "&:hover": {
+            transform: "translateY(-1px)",
+            boxShadow: "0 6px 16px rgba(15, 23, 42, 0.12)",
+          },
+        }
+      : {};
     return (
       <Chip
         size="small"
@@ -601,6 +643,7 @@ export default function ReservationsTab() {
           backgroundColor: isPaid ? "#dcfce7" : "#fee2e2",
           color: isPaid ? "#166534" : "#991b1b",
           fontWeight: 600,
+          ...interactiveSx,
         }}
       />
     );
@@ -785,7 +828,10 @@ export default function ReservationsTab() {
           onDelete={(r) => setDeleteDialog({ open: true, id: r.id })}
           selectedIds={selectedIds}
           onToggleSelect={toggleSelect}
+          getStatusChip={getStatusChip}
           getPaymentChip={getPaymentChip}
+          onOpenStatusMenu={(e, r) => openQuickActionMenu("status", e, r)}
+          onOpenPaymentMenu={(e, r) => openQuickActionMenu("payment", e, r)}
         />
       ) : (
         <ReservationTable
@@ -802,6 +848,8 @@ export default function ReservationsTab() {
           getStatusChip={getStatusChip}
           getPaymentChip={getPaymentChip}
           getBookingState={getBookingState}
+          onOpenStatusMenu={(e, r) => openQuickActionMenu("status", e, r)}
+          onOpenPaymentMenu={(e, r) => openQuickActionMenu("payment", e, r)}
           selectedIds={selectedIds}
           onToggleSelect={toggleSelect}
           onSelectAll={(checked) => selectAllVisible(checked, paginatedList)}
@@ -999,6 +1047,131 @@ export default function ReservationsTab() {
             primaryTypographyProps={{ fontSize: 13.25, fontWeight: 500 }}
           />
         </MenuItem>
+      </Menu>
+
+      <Menu
+        anchorEl={quickActionMenu.anchorEl}
+        open={Boolean(quickActionMenu.anchorEl)}
+        onClose={closeQuickActionMenu}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        transformOrigin={{ vertical: "top", horizontal: "center" }}
+        PaperProps={{
+          sx: {
+            minWidth: 220,
+            borderRadius: 3,
+            border: "1px solid #e2e8f0",
+            boxShadow: "0 18px 45px rgba(15, 23, 42, 0.18)",
+          },
+        }}
+      >
+        {quickActionMenu.type === "status"
+          ? ["pending", "confirmed", "completed", "cancelled"].map((status) => (
+              <MenuItem
+                key={status}
+                disabled={
+                  String(quickActionMenu.reservation?.status || "").toLowerCase() === status
+                }
+                onClick={() => {
+                  const meta = getStatusActionMeta(status);
+                  requestActionConfirmation({
+                    title: confirmT("statusTitle", {
+                      status: t(`statuses.${status}`),
+                    }),
+                    description: confirmT("statusDescription", {
+                      guest: quickActionMenu.reservation?.full_name || "-",
+                      status: t(`statuses.${status}`),
+                    }),
+                    confirmLabel: menuCopy[status],
+                    tone: meta.tone,
+                    onConfirm: () =>
+                      handleStatusChange(quickActionMenu.reservation.id, status),
+                  });
+                }}
+                sx={{ minHeight: 38, gap: 0.75, py: 0.55, px: 1.4 }}
+              >
+                <ListItemIcon sx={{ minWidth: 28 }}>
+                  {getStatusActionMeta(status).icon}
+                </ListItemIcon>
+                <ListItemText
+                  primary={menuCopy[status]}
+                  primaryTypographyProps={{ fontSize: 13.5, fontWeight: 500 }}
+                />
+              </MenuItem>
+            ))
+          : null}
+
+        {quickActionMenu.type === "payment"
+          ? [
+              {
+                key: "paid",
+                icon: (
+                  <PaymentsOutlined fontSize="small" sx={{ color: "#16a34a" }} />
+                ),
+                label: menuCopy.paid,
+                disabled:
+                  String(quickActionMenu.reservation?.payment_status || "").toUpperCase() ===
+                  "PAID",
+                onConfirm: () =>
+                  requestActionConfirmation({
+                    title: confirmT("markPaidTitle"),
+                    description: confirmT("markPaidDescription", {
+                      guest: quickActionMenu.reservation?.full_name || "-",
+                    }),
+                    confirmLabel: menuCopy.paid,
+                    tone: "success",
+                    onConfirm: () =>
+                      handlePaymentUpdate(
+                        quickActionMenu.reservation.id,
+                        "PAID",
+                        "cash",
+                        "confirmed",
+                      ),
+                  }),
+              },
+              {
+                key: "unpaid",
+                icon: (
+                  <MoneyOffCsredOutlined
+                    fontSize="small"
+                    sx={{ color: "#b45309" }}
+                  />
+                ),
+                label: menuCopy.unpaid,
+                disabled:
+                  String(quickActionMenu.reservation?.payment_status || "").toUpperCase() ===
+                  "UNPAID",
+                onConfirm: () =>
+                  requestActionConfirmation({
+                    title: confirmT("markUnpaidTitle"),
+                    description: confirmT("markUnpaidDescription", {
+                      guest: quickActionMenu.reservation?.full_name || "-",
+                    }),
+                    confirmLabel: menuCopy.unpaid,
+                    tone: "warning",
+                    onConfirm: () =>
+                      handlePaymentUpdate(
+                        quickActionMenu.reservation.id,
+                        "UNPAID",
+                        "cash",
+                        "pending",
+                      ),
+                  }),
+              },
+            ].map((item) => (
+              <MenuItem
+                key={item.key}
+                disabled={item.disabled}
+                onClick={item.onConfirm}
+                sx={{ minHeight: 38, gap: 0.75, py: 0.55, px: 1.4 }}
+              >
+                <ListItemIcon sx={{ minWidth: 28 }}>{item.icon}</ListItemIcon>
+                <ListItemText
+                  primary={item.label}
+                  primaryTypographyProps={{ fontSize: 13.5, fontWeight: 500 }}
+                />
+              </MenuItem>
+            ))
+          : null}
       </Menu>
 
       <Dialog

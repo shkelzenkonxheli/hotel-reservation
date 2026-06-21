@@ -51,6 +51,24 @@ export default function LoginPage() {
   const [hasLoginSuccessParam, setHasLoginSuccessParam] = useState(false);
   const [showResendPrompt, setShowResendPrompt] = useState(false);
 
+  const resolvePostLoginDestination = () => {
+    if (typeof window === "undefined") return "/";
+    const raw = localStorage.getItem("postLoginRedirect");
+    if (!raw) return "/";
+
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed?.booking) {
+        localStorage.setItem("booking", JSON.stringify(parsed.booking));
+      }
+      return parsed?.destination || "/";
+    } catch {
+      return "/";
+    } finally {
+      localStorage.removeItem("postLoginRedirect");
+    }
+  };
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
@@ -66,7 +84,7 @@ export default function LoginPage() {
     if (status !== "authenticated") return;
     if (hasLoginSuccessParam) return;
     if (!feedback.open) {
-      router.replace("/");
+      router.replace(resolvePostLoginDestination());
     }
   }, [status, router, feedback.open, hasLoginSuccessParam]);
 
@@ -77,8 +95,9 @@ export default function LoginPage() {
       message: t("messages.loginSuccess"),
       severity: "success",
     });
+    const destination = resolvePostLoginDestination();
     const timer = setTimeout(() => {
-      router.replace("/");
+      router.replace(destination);
     }, 700);
     return () => clearTimeout(timer);
   }, [hasLoginSuccessParam, router, t]);

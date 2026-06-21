@@ -45,11 +45,17 @@ function getRoomLabelKey(type = "") {
   return "";
 }
 
+function getRoomCategory(type = "") {
+  const normalized = String(type).toLowerCase();
+  return normalized.includes("apartment") ? "apartment" : "hotel";
+}
+
 export default function RoomsPage() {
   const t = useTranslations("rooms");
   usePageTitle(t("metaTitle"));
 
   const [roomTypes, setRoomTypes] = useState([]);
+  const [roomCategory, setRoomCategory] = useState("all");
   const [loadingRooms, setLoadingRooms] = useState(true);
   const [showDateInput, setShowDateInput] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
@@ -63,7 +69,7 @@ export default function RoomsPage() {
   const [expandedRoom, setExpandedRoom] = useState(null);
   const [galleryRoom, setGalleryRoom] = useState(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
-  const [expandedAmenities, setExpandedAmenities] = useState({});
+  const [amenitiesRoom, setAmenitiesRoom] = useState(null);
   const [toast, setToast] = useState({
     open: false,
     message: "",
@@ -83,10 +89,20 @@ export default function RoomsPage() {
     typeof t.has === "function" && t.has("showAllAmenities")
       ? t("showAllAmenities")
       : "Shfaq te gjitha";
-  const showLessAmenitiesLabel =
-    typeof t.has === "function" && t.has("showLessAmenities")
-      ? t("showLessAmenities")
-      : "Shfaq me pak";
+  const roomFilterLabels = {
+    all:
+      typeof t.has === "function" && t.has("filters.all")
+        ? t("filters.all")
+        : "Te gjitha",
+    apartment:
+      typeof t.has === "function" && t.has("filters.apartment")
+        ? t("filters.apartment")
+        : "Apartmente",
+    hotel:
+      typeof t.has === "function" && t.has("filters.hotel")
+        ? t("filters.hotel")
+        : "Dhoma hoteli",
+  };
 
   useEffect(() => {
     async function fetchRooms() {
@@ -178,11 +194,6 @@ export default function RoomsPage() {
       showToast(t("alerts.minimumNight"));
       return;
     }
-    if (!session?.user) {
-      showToast(t("alerts.loginFirst"), "info");
-      router.push("/login");
-      return;
-    }
     const res = await fetch(
       `/api/reservation?room_type=${selectedRoom.type}&start_date=${startDate}&end_date=${endDate}`,
     );
@@ -190,6 +201,23 @@ export default function RoomsPage() {
 
     if (!data.available) {
       showToast(t("alerts.notAvailable"));
+      return;
+    }
+
+    if (!session?.user) {
+      const bookingDraft = { room: selectedRoom, startDate, endDate };
+      setBooking(bookingDraft);
+      if (typeof window !== "undefined") {
+        localStorage.setItem(
+          "postLoginRedirect",
+          JSON.stringify({
+            destination: `/checkoutBooking?room_type=${selectedRoom.type}&start_date=${startDate}&end_date=${endDate}`,
+            booking: bookingDraft,
+          }),
+        );
+      }
+      showToast(t("alerts.loginFirst"), "info");
+      router.push("/login");
       return;
     }
 
@@ -229,14 +257,52 @@ export default function RoomsPage() {
     );
   };
 
+  const sortedRoomTypes = [...roomTypes].sort((a, b) => {
+    const categoryOrder = { apartment: 0, hotel: 1 };
+    const categoryDiff =
+      categoryOrder[getRoomCategory(a.type)] -
+      categoryOrder[getRoomCategory(b.type)];
+
+    if (categoryDiff !== 0) return categoryDiff;
+
+    return String(a.name || a.type).localeCompare(String(b.name || b.type));
+  });
+
+  const visibleRoomTypes = sortedRoomTypes.filter((room) => {
+    if (roomCategory === "all") return true;
+    return getRoomCategory(room.type) === roomCategory;
+  });
+
   return (
     <div className="public-page min-h-screen">
       <PublicSection className="!pt-4 !pb-0">
         <PublicContainer>
-          <div className="mx-auto mb-3 max-w-3xl text-center">
-            <h2 className="mt-3 text-[1.9rem] font-semibold leading-tight text-slate-900 md:text-[2.4rem]">
+          <div className="mb-3 flex flex-col gap-4 md:mt-3 md:flex-row md:items-center md:justify-between">
+            <h2 className="text-[1.9rem] font-semibold leading-tight text-slate-900 md:text-[2.4rem]">
               {t("title")}
             </h2>
+            <div className="flex md:justify-end">
+              <div className="inline-flex flex-wrap items-center gap-2 rounded-full border border-slate-200/80 bg-white/90 p-2 shadow-[0_14px_34px_rgba(15,23,42,0.08)] backdrop-blur">
+              {["all", "apartment", "hotel"].map((category) => {
+                const isActive = roomCategory === category;
+
+                return (
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() => setRoomCategory(category)}
+                    className={`inline-flex min-w-[112px] items-center justify-center rounded-full px-4 py-2.5 text-sm font-semibold transition duration-200 ${
+                      isActive
+                        ? "bg-[#1f6feb] text-white shadow-[0_12px_28px_rgba(31,111,235,0.26)]"
+                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    }`}
+                  >
+                    {roomFilterLabels[category]}
+                  </button>
+                );
+              })}
+              </div>
+            </div>
           </div>
         </PublicContainer>
       </PublicSection>
@@ -272,17 +338,14 @@ export default function RoomsPage() {
             </div>
           ) : (
             <div className="space-y-8">
-              {roomTypes.map((room, index) => {
+              {visibleRoomTypes.map((room, index) => {
                 const reverse = index % 2 === 1;
                 const previewImages = Array.isArray(room.images)
                   ? room.images.slice(1, 3)
                   : [];
                 const roomLabelKey = getRoomLabelKey(room.type);
                 const amenities = getFeatureChips(room.amenities);
-                const showAllAmenities = Boolean(expandedAmenities[room.type]);
-                const visibleAmenities = showAllAmenities
-                  ? amenities
-                  : amenities.slice(0, 4);
+                const visibleAmenities = amenities.slice(0, 4);
 
                 return (
                 <PublicCard
@@ -345,29 +408,24 @@ export default function RoomsPage() {
                           {room.description || getFirstLine(room.description)}
                         </p>
 
-                        <div className="mt-5 flex flex-wrap gap-2.5">
-                          {visibleAmenities.map((amenity) => (
-                            <span
-                              key={amenity}
-                              className="rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-medium text-slate-600"
-                            >
-                              {amenity}
-                            </span>
-                          ))}
+                        <div className="mt-5">
+                          <div className="flex flex-wrap gap-2.5">
+                            {visibleAmenities.map((amenity) => (
+                              <span
+                                key={amenity}
+                                className="rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-medium text-slate-600"
+                              >
+                                {amenity}
+                              </span>
+                            ))}
+                          </div>
                           {amenities.length > 4 ? (
                             <button
                               type="button"
-                              className="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-[#1f6feb] transition hover:border-[#bfdbfe] hover:bg-[#eff6ff]"
-                              onClick={() =>
-                                setExpandedAmenities((prev) => ({
-                                  ...prev,
-                                  [room.type]: !prev[room.type],
-                                }))
-                              }
+                              className="mt-2 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-[#1f6feb] transition hover:border-[#bfdbfe] hover:bg-[#eff6ff]"
+                              onClick={() => setAmenitiesRoom(room)}
                             >
-                              {showAllAmenities
-                                ? showLessAmenitiesLabel
-                                : showAllAmenitiesLabel}
+                              {showAllAmenitiesLabel}
                             </button>
                           ) : null}
                         </div>
@@ -502,6 +560,41 @@ export default function RoomsPage() {
                 ))}
               </div>
             ) : null}
+          </div>
+        </div>
+      )}
+
+      {amenitiesRoom && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3"
+          onClick={() => setAmenitiesRoom(null)}
+        >
+          <div
+            className="public-card relative max-h-[82vh] w-full max-w-lg overflow-y-auto p-5 pr-12 md:p-6 md:pr-14"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-700 transition hover:bg-slate-200 md:right-4 md:top-4"
+              onClick={() => setAmenitiesRoom(null)}
+              aria-label={t("buttons.close")}
+            >
+              X
+            </button>
+            <h2 className="text-xl font-semibold mb-4">{amenitiesRoom.name}</h2>
+            <div className="flex flex-wrap gap-2.5">
+              {(Array.isArray(amenitiesRoom.amenities)
+                ? amenitiesRoom.amenities
+                : []
+              ).map((amenity) => (
+                <span
+                  key={amenity}
+                  className="rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-medium text-slate-600"
+                >
+                  {amenity}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       )}

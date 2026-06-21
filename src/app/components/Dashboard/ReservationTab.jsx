@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   CircularProgress,
   Chip,
@@ -49,8 +49,6 @@ export default function ReservationsTab() {
   const t = useTranslations("dashboard.reservations");
   const locale = useLocale();
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -70,7 +68,6 @@ export default function ReservationsTab() {
     tone: "primary",
     onConfirm: null,
   });
-
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [dateRange, setDateRange] = useState("last30");
@@ -218,56 +215,8 @@ export default function ReservationsTab() {
   }, [dateRange]);
 
   useEffect(() => {
-    const nextSearch = searchParams.get("search") || "";
-    const nextStatus = searchParams.get("status") || "all";
-    const nextType = searchParams.get("type") || "all";
-    const nextRange = searchParams.get("range") || "last30";
-    const nextTab = searchParams.get("tab") || "all";
-    const nextPage = Number(searchParams.get("page") || 1);
-    const nextPageSize = Number(searchParams.get("pageSize") || 20);
-
-    setSearch((prev) => (prev === nextSearch ? prev : nextSearch));
-    setStatusFilter((prev) => (prev === nextStatus ? prev : nextStatus));
-    setTypeFilter((prev) => (prev === nextType ? prev : nextType));
-    setDateRange((prev) => (prev === nextRange ? prev : nextRange));
-    setActiveTab((prev) => (prev === nextTab ? prev : nextTab));
-    setPage((prev) => (prev === nextPage ? prev : nextPage));
-    setPageSize((prev) => (prev === nextPageSize ? prev : nextPageSize));
-  }, [searchParams]);
-
-  useEffect(() => {
     setPage(1);
   }, [search, statusFilter, typeFilter, activeTab, dateRange, pageSize]);
-
-  useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    const setOrDelete = (key, value, fallback) => {
-      if (!value || value === fallback) params.delete(key);
-      else params.set(key, String(value));
-    };
-
-    setOrDelete("search", search, "");
-    setOrDelete("status", statusFilter, "all");
-    setOrDelete("type", typeFilter, "all");
-    setOrDelete("range", dateRange, "last30");
-    setOrDelete("tab", activeTab, "all");
-    setOrDelete("page", page, 1);
-    setOrDelete("pageSize", pageSize, 20);
-
-    const next = params.toString();
-    if (next === searchParams.toString()) return;
-    router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
-  }, [
-    search,
-    statusFilter,
-    typeFilter,
-    dateRange,
-    activeTab,
-    page,
-    pageSize,
-    pathname,
-    searchParams,
-  ]);
 
   useEffect(() => {
     if (!reservationIdParam) return;

@@ -32,7 +32,12 @@
       "addressHelper": "Billing or contact address",
       "guests": "Guests",
       "guestsHelper": "Select the number of guests",
-      "paymentMethod": "Payment method"
+      "paymentMethod": "Payment method",
+      "changeDatesHint": "If you selected the wrong dates, you can change them here without losing the rest of your details.",
+      "acceptPrefix": "By continuing, I accept the",
+      "termsLink": "Terms & Conditions",
+      "and": "and",
+      "privacyLink": "Privacy Policy"
     },
     "payment": {
       "cashOnlyTitle": "Pay at hotel",
@@ -50,7 +55,17 @@
       "fillAllFields": "Please fill in all fields.",
       "reservationFailed": "Reservation failed.",
       "pendingCreated": "Reservation created as pending. Please pay at the hotel.",
-      "genericError": "Something went wrong. Please try again."
+      "genericError": "Something went wrong. Please try again.",
+      "invalidDates": "Please choose a valid date range.",
+      "pastDate": "Check-in date cannot be in the past.",
+      "acceptTerms": "You must accept the Terms & Conditions and Privacy Policy to continue."
+    },
+    "availability": {
+      "selectDatesFirst": "Select dates to check availability.",
+      "checking": "Checking availability...",
+      "available": "The room is available for these dates.",
+      "unavailable": "There is no availability for these dates. Please change the dates.",
+      "checkFailed": "Availability check failed. Please try again."
     }
   },
   "success": {
@@ -196,7 +211,12 @@
       "loadFailed": "Failed to load rooms. Please try again."
     },
     "showAllAmenities": "Show all",
-    "showLessAmenities": "Show less"
+    "showLessAmenities": "Show less",
+    "filters": {
+      "all": "All",
+      "apartment": "Apartments",
+      "hotel": "Hotel rooms"
+    }
   },
   "contact": {
     "metaTitle": "Contact | Dijari Premium",
@@ -427,12 +447,15 @@
         "cleaned": "Room marked as cleaned.",
         "cleanError": "Error cleaning room",
         "statusUpdated": "Room status updated.",
-        "statusError": "Error changing status"
+        "statusError": "Error changing status",
+        "statusBlockedByReservation": "You cannot change the room status while it has an active reservation."
       },
       "dialog": {
         "roomTitle": "Room {room}",
         "markAvailable": "Mark Available",
+        "markUnavailable": "Mark unavailable",
         "outOfOrder": "Out of Order",
+        "statusLockedHint": "This room has an active reservation, so its status cannot be changed.",
         "noActiveReservation": "No active reservation.",
         "cleanRoom": "Clean Room",
         "hideCalendar": "Hide Calendar",
@@ -1386,3 +1409,4 @@
     }
   }
 }
+

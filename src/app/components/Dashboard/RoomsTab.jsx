@@ -21,7 +21,14 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
-import { Close, MeetingRoom } from "@mui/icons-material";
+import {
+  Close,
+  MeetingRoom,
+  PersonOutline,
+  LocalPhoneOutlined,
+  CalendarMonthOutlined,
+  InfoOutlined,
+} from "@mui/icons-material";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import PageHeader from "./ui/PageHeader";
@@ -71,6 +78,11 @@ export default function RoomsTab() {
   }
 
   async function handleRoomStatus(room_id) {
+    if (selectedRoom?.reservation) {
+      notify(t("messages.statusBlockedByReservation"), "warning");
+      return;
+    }
+
     const res = await fetch("/api/rooms", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -128,6 +140,7 @@ export default function RoomsTab() {
   const apartmentsCount = countByStatus(apartments);
   const hotelRoomsCount = countByStatus(hotelRooms);
   const totalCount = countByStatus(filteredRooms);
+  const isStatusToggleDisabled = Boolean(selectedRoom?.reservation);
 
   // Ngjyros ditÃ«t e rezervuara nÃ« calendar
   function tileClassName({ date, view }) {
@@ -442,57 +455,105 @@ export default function RoomsTab() {
           onClose={() => setSelectedRoom(null)}
           maxWidth="sm"
           fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: 4,
+              overflow: "hidden",
+            },
+          }}
         >
           <DialogTitle
             sx={{
               display: "flex",
-              flexDirection: { xs: "column", sm: "row" },
-              justifyContent: "space-between",
-              alignItems: { xs: "stretch", sm: "center" },
-              gap: 1.2,
-              pr: 6, // i jep hapÃ«sirÃ« qÃ« X tÃ« mos afrohet te butoni
+              flexDirection: "column",
+              alignItems: "flex-start",
+              gap: 1.5,
+              pr: 6,
               position: "relative",
+              pb: 2.5,
             }}
           >
-            {/* TITULLI */}
-            <Typography variant="h6" component="div" fontWeight="bold">
-              {t("dialog.roomTitle", { room: selectedRoom.room.room_number })}
-            </Typography>
-
-            {/* BUTONI OUT OF ORDER */}
-            <Button
-              variant="outlined"
-              onClick={() => handleRoomStatus(selectedRoom.room.id)}
+            <Box
               sx={{
-                borderColor:
-                  selectedRoom.room.current_status === "out_of_order"
-                    ? "#22c55e"
-                    : "#f87171",
-                color:
-                  selectedRoom.room.current_status === "out_of_order"
-                    ? "#16a34a"
-                    : "#dc2626",
-                textTransform: "none",
-                borderRadius: 2,
-                px: 2,
-                py: 0.5,
-                fontWeight: "600",
-                width: { xs: "100%", sm: "auto" },
-                "&:hover": {
-                  borderColor:
-                    selectedRoom.room.current_status === "out_of_order"
-                      ? "#16a34a"
-                      : "#b91c1c",
-                  bgcolor: "transparent",
-                },
+                width: "100%",
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent: "space-between",
+                gap: 2,
+                pr: 6,
               }}
             >
-              {selectedRoom.room.current_status === "out_of_order"
-                ? t("dialog.markAvailable")
-                : t("dialog.outOfOrder")}
-            </Button>
+              <Box>
+                <Typography variant="h5" component="div" fontWeight={800}>
+                  {t("dialog.roomTitle", {
+                    room: selectedRoom.room.room_number,
+                  })}
+                </Typography>
+                {selectedRoom.room.current_status === "out_of_order" ? (
+                  <Chip
+                    label={t("dialog.outOfOrder")}
+                    size="small"
+                    sx={{
+                      mt: 1,
+                      bgcolor: "#fee2e2",
+                      color: "#b91c1c",
+                      fontWeight: 700,
+                      borderRadius: 999,
+                    }}
+                  />
+                ) : null}
+              </Box>
 
-            {/* CLOSE BUTTON */}
+              <Tooltip
+                title={
+                  isStatusToggleDisabled ? t("dialog.statusLockedHint") : ""
+                }
+                arrow
+              >
+                <span>
+                  <Button
+                    variant="outlined"
+                    onClick={() => handleRoomStatus(selectedRoom.room.id)}
+                    disabled={isStatusToggleDisabled}
+                    sx={{
+                      mt: 0.25,
+                      minWidth: 0,
+                      borderColor:
+                        selectedRoom.room.current_status === "out_of_order"
+                          ? "#22c55e"
+                          : "#f59e0b",
+                      color:
+                        selectedRoom.room.current_status === "out_of_order"
+                          ? "#16a34a"
+                          : "#b45309",
+                      textTransform: "none",
+                      borderRadius: 2.5,
+                      px: 2,
+                      py: 0.75,
+                      fontWeight: 700,
+                      fontSize: "0.8rem",
+                      whiteSpace: "nowrap",
+                      "&:hover": {
+                        borderColor:
+                          selectedRoom.room.current_status === "out_of_order"
+                            ? "#16a34a"
+                            : "#92400e",
+                        bgcolor: "transparent",
+                      },
+                      "&.Mui-disabled": {
+                        borderColor: "#cbd5e1",
+                        color: "#94a3b8",
+                      },
+                    }}
+                  >
+                    {selectedRoom.room.current_status === "out_of_order"
+                      ? t("dialog.markAvailable")
+                      : t("dialog.markUnavailable")}
+                  </Button>
+                </span>
+              </Tooltip>
+            </Box>
+
             <Button
               onClick={() => setSelectedRoom(null)}
               sx={{
@@ -508,71 +569,165 @@ export default function RoomsTab() {
           </DialogTitle>
 
           <Divider />
-          <DialogContent dividers>
+          <DialogContent dividers sx={{ px: 3, py: 2.5 }}>
             {selectedRoom.reservation ? (
-              <>
-                <Typography>
-                  <strong>{t("dialog.fields.guest")}:</strong>{" "}
-                  {selectedRoom.reservation.full_name}
-                </Typography>
-                <Typography>
-                  <strong>{t("dialog.fields.phone")}:</strong>{" "}
-                  {selectedRoom.reservation.phone}
-                </Typography>
-                <Typography>
-                  <strong>{t("dialog.fields.checkIn")}:</strong>{" "}
-                  {new Date(
-                    selectedRoom.reservation.start_date,
-                  ).toLocaleDateString()}
-                </Typography>
-                <Typography>
-                  <strong>{t("dialog.fields.checkOut")}:</strong>{" "}
-                  {new Date(
-                    selectedRoom.reservation.end_date,
-                  ).toLocaleDateString()}
-                </Typography>
+              <Box display="flex" flexDirection="column" gap={2.2}>
+                <Box display="flex" alignItems="flex-start" gap={1.25}>
+                  <PersonOutline sx={{ color: "#6366f1", mt: "2px" }} />
+                  <Box>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ textTransform: "uppercase", letterSpacing: "0.08em" }}
+                    >
+                      {t("dialog.fields.guest")}
+                    </Typography>
+                    <Typography fontWeight={600}>
+                      {selectedRoom.reservation.full_name}
+                    </Typography>
+                  </Box>
+                </Box>
 
-                <Box display="flex" alignItems="center" gap={1} mt={1}>
-                  <Typography fontWeight="bold">
+                <Box display="flex" alignItems="flex-start" gap={1.25}>
+                  <LocalPhoneOutlined sx={{ color: "#10b981", mt: "2px" }} />
+                  <Box>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ textTransform: "uppercase", letterSpacing: "0.08em" }}
+                    >
+                      {t("dialog.fields.phone")}
+                    </Typography>
+                    <Typography fontWeight={600}>
+                      {selectedRoom.reservation.phone}
+                    </Typography>
+                  </Box>
+                </Box>
+
+                <Grid container spacing={2.5}>
+                  <Grid item xs={12} sm={6}>
+                    <Box display="flex" alignItems="flex-start" gap={1.25}>
+                      <CalendarMonthOutlined
+                        sx={{ color: "#8b5cf6", mt: "2px" }}
+                      />
+                      <Box>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{
+                            textTransform: "uppercase",
+                            letterSpacing: "0.08em",
+                          }}
+                        >
+                          {t("dialog.fields.checkIn")}
+                        </Typography>
+                        <Typography fontWeight={600}>
+                          {new Date(
+                            selectedRoom.reservation.start_date,
+                          ).toLocaleDateString()}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Box display="flex" alignItems="flex-start" gap={1.25}>
+                      <CalendarMonthOutlined
+                        sx={{ color: "#3b82f6", mt: "2px" }}
+                      />
+                      <Box>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{
+                            textTransform: "uppercase",
+                            letterSpacing: "0.08em",
+                          }}
+                        >
+                          {t("dialog.fields.checkOut")}
+                        </Typography>
+                        <Typography fontWeight={600}>
+                          {new Date(
+                            selectedRoom.reservation.end_date,
+                          ).toLocaleDateString()}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Grid>
+                </Grid>
+
+                <Box display="flex" alignItems="center" gap={1}>
+                  <InfoOutlined sx={{ color: "#f59e0b", fontSize: 20 }} />
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ textTransform: "uppercase", letterSpacing: "0.08em" }}
+                  >
                     {t("dialog.fields.status")}:
                   </Typography>
                   <Chip
                     label={selectedRoom.reservation.status}
                     color="warning"
                     size="small"
+                    sx={{ fontWeight: 700, textTransform: "capitalize" }}
                   />
                 </Box>
 
-                <Typography variant="h6" mt={2}>
-                  {t("dialog.fields.total")}:{" "}
-                  {selectedRoom.reservation.total_price} €
-                </Typography>
-              </>
+                <Divider />
+
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  gap={2}
+                >
+                  <Typography color="text.secondary" fontWeight={500}>
+                    {t("dialog.fields.total")}
+                  </Typography>
+                  <Typography variant="h4" fontWeight={800} color="#0f172a">
+                    {selectedRoom.reservation.total_price} €
+                  </Typography>
+                </Box>
+              </Box>
             ) : (
               <Typography color="text.secondary">
                 {t("dialog.noActiveReservation")}
               </Typography>
             )}
 
-            {/* Button pÃ«r tÃ« shfaqur/fshirÃ« calendarin */}
-            <Box mt={3}>
-              <Button
-                variant="outlined"
-                onClick={() => setShowCalendar((prev) => !prev)}
-              >
-                {showCalendar ? t("dialog.hideCalendar") : t("dialog.showCalendar")}
-              </Button>
-            </Box>
-
-            {/* Calendar opcional â€“ pÃ«r TÃ‹ GJITHA dhomat */}
             {showCalendar && (
               <Box mt={2} sx={{ overflowX: "auto" }}>
                 <Calendar tileClassName={tileClassName} />
               </Box>
             )}
           </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setSelectedRoom(null)}>{t("dialog.close")}</Button>
+          <DialogActions sx={{ px: 3, pb: 2.5, pt: 2 }}>
+            <Button
+              variant="outlined"
+              onClick={() => setShowCalendar((prev) => !prev)}
+              sx={{
+                textTransform: "none",
+                borderRadius: 2.5,
+                px: 2.2,
+                fontWeight: 700,
+              }}
+            >
+              {showCalendar ? t("dialog.hideCalendar") : t("dialog.showCalendar")}
+            </Button>
+            <Box sx={{ flexGrow: 1 }} />
+            <Button
+              variant="contained"
+              onClick={() => setSelectedRoom(null)}
+              sx={{
+                textTransform: "none",
+                borderRadius: 2.5,
+                px: 3,
+                fontWeight: 700,
+                bgcolor: "#0f172a",
+                "&:hover": { bgcolor: "#111827" },
+              }}
+            >
+              {t("dialog.close")}
+            </Button>
           </DialogActions>
         </Dialog>
       )}

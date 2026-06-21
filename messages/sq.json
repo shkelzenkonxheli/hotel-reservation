@@ -32,7 +32,12 @@
       "addressHelper": "Adresa e kontaktit ose faturimit",
       "guests": "Mysafiret",
       "guestsHelper": "Zgjidh numrin e mysafireve",
-      "paymentMethod": "Menyra e pageses"
+      "paymentMethod": "Menyra e pageses",
+      "changeDatesHint": "Nese keni zgjedhur datat gabim, mund t'i ndryshoni ketu pa humbur te dhenat e tjera.",
+      "acceptPrefix": "Duke vazhduar, pranoj",
+      "termsLink": "Kushtet e perdorimit",
+      "and": "dhe",
+      "privacyLink": "Politiken e privatesise"
     },
     "payment": {
       "cashOnlyTitle": "Paguaj ne hotel",
@@ -50,7 +55,17 @@
       "fillAllFields": "Ju lutem plotesoni te gjitha fushat.",
       "reservationFailed": "Rezervimi deshtoi.",
       "pendingCreated": "Rezervimi u krijua si pending. Ju lutem paguani ne hotel.",
-      "genericError": "Ndodhi nje gabim. Ju lutem provoni perseri."
+      "genericError": "Ndodhi nje gabim. Ju lutem provoni perseri.",
+      "invalidDates": "Ju lutem zgjidhni nje interval te vlefshem datash.",
+      "pastDate": "Data e check-in nuk mund te jete ne te kaluaren.",
+      "acceptTerms": "Duhet t'i pranoni Kushtet dhe Politiken e privatesise per te vazhduar."
+    },
+    "availability": {
+      "selectDatesFirst": "Zgjidhni datat per te kontrolluar disponueshmerine.",
+      "checking": "Duke kontrolluar disponueshmerine...",
+      "available": "Dhoma eshte e lire per keto data.",
+      "unavailable": "Nuk ka disponueshmeri per keto data. Ju lutem ndryshoni datat.",
+      "checkFailed": "Kontrolli i disponueshmerise deshtoi. Provoni perseri."
     }
   },
   "success": {
@@ -196,7 +211,12 @@
       "loadFailed": "Ngarkimi i dhomave deshtoi. Provoni perseri."
     },
     "showAllAmenities": "Shfaq te gjitha",
-    "showLessAmenities": "Shfaq me pak"
+    "showLessAmenities": "Shfaq me pak",
+    "filters": {
+      "all": "Te gjitha",
+      "apartment": "Apartmente",
+      "hotel": "Dhoma hoteli"
+    }
   },
   "contact": {
     "metaTitle": "Kontakti | Dijari Premium",
@@ -427,12 +447,15 @@
         "cleaned": "Dhoma u shënua si e pastruar.",
         "cleanError": "Gabim gjatë pastrimit të dhomës",
         "statusUpdated": "Statusi i dhomës u përditësua.",
-        "statusError": "Gabim gjatë ndryshimit të statusit"
+        "statusError": "Gabim gjatë ndryshimit të statusit",
+        "statusBlockedByReservation": "Nuk mund ta ndryshosh statusin e dhomës kur ka rezervim aktiv."
       },
       "dialog": {
         "roomTitle": "Dhoma {room}",
         "markAvailable": "Shëno si e lirë",
+        "markUnavailable": "Nxirre nga shërbimi",
         "outOfOrder": "Jashtë funksionit",
+        "statusLockedHint": "Kjo dhomë ka rezervim aktiv, prandaj statusi nuk mund të ndryshohet.",
         "noActiveReservation": "Nuk ka rezervim aktiv.",
         "cleanRoom": "Pastro dhomën",
         "hideCalendar": "Fshih kalendarin",
@@ -1311,7 +1334,7 @@
       "cookies": {
         "title": "4. Cookies",
         "body1": "Faqja perdor vetem cookies te domosdoshme per funksionimin baze te sistemit, si login/session me NextAuth dhe ruajtjen e preferencave te gjuhes. Keto cookies jane te nevojshme dhe nuk perdoren per marketing apo gjurmim reklamash.",
-        "body2": "Nese ne te ardhmen shtohen analytics, marketing scripts ose embed-e te paleve te treta, kjo faqe do te perditesohet dhe do te shtohet edhe mekanizem p?lqimi per cookies jo-te-domosdoshme."
+        "body2": "Nese ne te ardhmen shtohen analytics, marketing scripts ose embed-e te paleve te treta, kjo faqe do te perditesohet dhe do te shtohet edhe mekanizem pëlqimi per cookies jo-te-domosdoshme."
       },
       "services": {
         "title": "5. Sherbime te paleve te treta",

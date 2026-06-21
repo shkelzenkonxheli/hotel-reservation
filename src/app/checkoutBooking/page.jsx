@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
 import { useBooking } from "@/context/BookingContext";
@@ -18,6 +19,8 @@ import {
   Alert,
   useTheme,
   useMediaQuery,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import { useSession } from "next-auth/react";
 import PublicContainer from "../components/Public/PublicContainer";
@@ -36,7 +39,7 @@ export default function CheckoutBooking() {
   const locale = useLocale();
   usePageTitle(t("metaTitle"));
 
-  const { booking } = useBooking();
+  const { booking, setBooking } = useBooking();
   const router = useRouter();
   const { data: session, status } = useSession();
 
@@ -57,9 +60,28 @@ export default function CheckoutBooking() {
   const [guests, setGuests] = useState(2);
   const [totalPrice, setTotalPrice] = useState(0);
   const [expandedRoom, setExpandedRoom] = useState(null);
+  const [stayStartDate, setStayStartDate] = useState("");
+  const [stayEndDate, setStayEndDate] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [availability, setAvailability] = useState({
+    loading: false,
+    available: true,
+    message: "",
+  });
 
   const showToast = (message, severity = "error") => {
     setToast({ open: true, message, severity });
+  };
+
+  const formatDisplayDate = (value) => {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleDateString(locale, {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
   };
 
   /* ---------------- AUTH GUARD ---------------- */
@@ -77,24 +99,121 @@ export default function CheckoutBooking() {
     }
   }, [session]);
 
+  useEffect(() => {
+    if (!booking) return;
+    setStayStartDate(booking.startDate || "");
+    setStayEndDate(booking.endDate || "");
+  }, [booking]);
+
   /* ---------------- PRICE CALCULATION ---------------- */
   useEffect(() => {
     if (!booking) return;
 
-    const { room, startDate, endDate } = booking;
+    const { room } = booking;
+    const startDate = stayStartDate || booking.startDate;
+    const endDate = stayEndDate || booking.endDate;
 
     const nights =
       (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24);
 
     if (nights <= 0) {
-      router.push("/rooms");
+      setTotalPrice(0);
       return;
     }
 
     const normalizedGuests = clampGuests(room, guests);
     if (normalizedGuests !== guests) setGuests(normalizedGuests);
     setTotalPrice(calculateReservationTotal(room, normalizedGuests, startDate, endDate));
-  }, [booking, guests, router]);
+  }, [booking, guests, stayStartDate, stayEndDate]);
+
+  useEffect(() => {
+    if (!booking || !stayStartDate || !stayEndDate) return;
+    if (
+      booking.startDate === stayStartDate &&
+      booking.endDate === stayEndDate
+    ) {
+      return;
+    }
+
+    setBooking({
+      ...booking,
+      startDate: stayStartDate,
+      endDate: stayEndDate,
+    });
+  }, [booking, setBooking, stayStartDate, stayEndDate]);
+
+  const startDate = stayStartDate || booking?.startDate || "";
+  const endDate = stayEndDate || booking?.endDate || "";
+
+  useEffect(() => {
+    if (!booking) return;
+    if (!startDate || !endDate) {
+      setAvailability({
+        loading: false,
+        available: false,
+        message: t("availability.selectDatesFirst"),
+      });
+      return;
+    }
+
+    const nights =
+      (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24);
+
+    if (nights <= 0) {
+      setAvailability({
+        loading: false,
+        available: false,
+        message: t("alerts.invalidDates"),
+      });
+      return;
+    }
+
+    let active = true;
+
+    async function checkAvailability() {
+      try {
+        setAvailability({
+          loading: true,
+          available: false,
+          message: t("availability.checking"),
+        });
+
+        const res = await fetch(
+          `/api/reservation?room_type=${booking.room.type}&start_date=${startDate}&end_date=${endDate}`,
+        );
+        const data = await res.json();
+
+        if (!active) return;
+
+        if (!res.ok) {
+          setAvailability({
+            loading: false,
+            available: false,
+            message: data?.error || t("availability.unavailable"),
+          });
+          return;
+        }
+
+        setAvailability({
+          loading: false,
+          available: Boolean(data?.available),
+          message: data?.available ? "" : t("availability.unavailable"),
+        });
+      } catch {
+        if (!active) return;
+        setAvailability({
+          loading: false,
+          available: false,
+          message: t("availability.checkFailed"),
+        });
+      }
+    }
+
+    checkAvailability();
+    return () => {
+      active = false;
+    };
+  }, [booking, startDate, endDate, t]);
 
   /* ---------------- LOADING IF NO BOOKING ---------------- */
   if (!booking) {
@@ -105,7 +224,7 @@ export default function CheckoutBooking() {
     );
   }
 
-  const { room, startDate, endDate } = booking;
+  const { room } = booking;
 
   const nights = Math.ceil(
     (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24),
@@ -119,6 +238,26 @@ export default function CheckoutBooking() {
   const handleBookClick = async () => {
     if (!fullname || !phone || !address) {
       showToast(t("alerts.fillAllFields"));
+      return;
+    }
+
+    if (!startDate || !endDate || nights <= 0) {
+      showToast(t("alerts.invalidDates"));
+      return;
+    }
+
+    if (startDate < new Date().toISOString().split("T")[0]) {
+      showToast(t("alerts.pastDate"));
+      return;
+    }
+
+    if (!availability.available) {
+      showToast(availability.message || t("availability.unavailable"));
+      return;
+    }
+
+    if (!acceptedTerms) {
+      showToast(t("alerts.acceptTerms"));
       return;
     }
 
@@ -211,11 +350,15 @@ export default function CheckoutBooking() {
       <div className="space-y-2">
         <div className="flex items-center justify-between text-sm text-slate-600">
           <span>{t("summary.checkIn")}</span>
-          <span className="font-semibold text-slate-900">{startDate}</span>
+          <span className="font-semibold text-slate-900">
+            {formatDisplayDate(startDate)}
+          </span>
         </div>
         <div className="flex items-center justify-between text-sm text-slate-600">
           <span>{t("summary.checkOut")}</span>
-          <span className="font-semibold text-slate-900">{endDate}</span>
+          <span className="font-semibold text-slate-900">
+            {formatDisplayDate(endDate)}
+          </span>
         </div>
         <div className="flex items-center justify-between text-sm text-slate-600">
           <span>{t("summary.nights")}</span>
@@ -275,6 +418,43 @@ export default function CheckoutBooking() {
       </div>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Alert severity="info" sx={{ borderRadius: 2 }}>
+          {t("form.changeDatesHint")}
+        </Alert>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+            gap: 2,
+          }}
+        >
+          <TextField
+            label={t("summary.checkIn")}
+            type="date"
+            value={startDate}
+            onChange={(e) => setStayStartDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            inputProps={{ min: new Date().toISOString().split("T")[0] }}
+          />
+          <TextField
+            label={t("summary.checkOut")}
+            type="date"
+            value={endDate}
+            onChange={(e) => setStayEndDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            inputProps={{
+              min: startDate || new Date().toISOString().split("T")[0],
+            }}
+          />
+        </Box>
+        {(availability.loading || availability.message) && (
+          <Alert
+            severity={availability.loading ? "info" : "warning"}
+            sx={{ borderRadius: 2 }}
+          >
+            {availability.message}
+          </Alert>
+        )}
         <TextField
           label={t("form.fullName")}
           value={fullname}
@@ -306,12 +486,60 @@ export default function CheckoutBooking() {
 
       <Divider sx={{ my: 3 }} />
 
+      <Box
+        sx={{
+          mb: 2.25,
+          px: 0.5,
+          py: 1.25,
+          borderRadius: 2,
+          backgroundColor: "#f8fafc",
+          border: "1px solid #e2e8f0",
+        }}
+      >
+        <FormControlLabel
+          sx={{ alignItems: "flex-start", m: 0 }}
+          control={
+            <Checkbox
+              checked={acceptedTerms}
+              onChange={(e) => setAcceptedTerms(e.target.checked)}
+              sx={{ pt: 0.2, pr: 1.25 }}
+            />
+          }
+          label={
+            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.65 }}>
+              {t("form.acceptPrefix")}{" "}
+              <Link
+                href="/terms-conditions"
+                target="_blank"
+                className="font-semibold text-[#1f6feb] underline underline-offset-4"
+              >
+                {t("form.termsLink")}
+              </Link>{" "}
+              {t("form.and")}{" "}
+              <Link
+                href="/privacy-policy"
+                target="_blank"
+                className="font-semibold text-[#1f6feb] underline underline-offset-4"
+              >
+                {t("form.privacyLink")}
+              </Link>
+              .
+            </Typography>
+          }
+        />
+      </Box>
+
       <Button
         onClick={handleBookClick}
         variant="contained"
         size="large"
         fullWidth
-        disabled={loading}
+        disabled={
+          loading ||
+          availability.loading ||
+          !availability.available ||
+          !acceptedTerms
+        }
         sx={{ textTransform: "none", borderRadius: 2, fontWeight: 700 }}
       >
         {loading ? (
@@ -345,7 +573,8 @@ export default function CheckoutBooking() {
                     {room.name}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {startDate} {t("mobile.to")} {endDate} ({nights}{" "}
+                    {formatDisplayDate(startDate)} {t("mobile.to")}{" "}
+                    {formatDisplayDate(endDate)} ({nights}{" "}
                     {t("summary.nightsLower")})
                   </Typography>
 

@@ -14,16 +14,21 @@ import {
 import PublicContainer from "../components/Public/PublicContainer";
 import PublicSection from "../components/Public/PublicSection";
 import PublicCard from "../components/Public/PublicCard";
+import DeferredTurnstile from "../components/Public/DeferredTurnstile";
 import usePageTitle from "../hooks/usePageTitle";
 
 export default function ContactPage() {
   const t = useTranslations("contact");
   usePageTitle(t("metaTitle"));
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [showCaptcha, setShowCaptcha] = useState(false);
   const [feedback, setFeedback] = useState({
     open: false,
     message: "",
@@ -34,7 +39,7 @@ export default function ContactPage() {
     setFeedback({ open: true, message, severity });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!name || !email || !message) {
@@ -42,13 +47,43 @@ export default function ContactPage() {
       return;
     }
 
-    const subject = encodeURIComponent(`${t("mail.subjectPrefix")} ${name}`);
-    const body = encodeURIComponent(
-      `${t("mail.name")}: ${name}\n${t("mail.email")}: ${email}\n${t("mail.phone")}: ${phone || "-"}\n\n${t("mail.message")}:\n${message}`,
-    );
+    if (turnstileSiteKey && !captchaToken) {
+      setShowCaptcha(true);
+      showFeedback(t("feedback.captchaRequired"), "warning");
+      return;
+    }
 
-    window.location.href = `mailto:dijaripremium@gmail.com?subject=${subject}&body=${body}`;
-    showFeedback(t("feedback.openingMail"), "success");
+    try {
+      setLoading(true);
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          email,
+          phone,
+          message,
+          captchaToken,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        showFeedback(data.message || t("feedback.sendFailed"), "error");
+        return;
+      }
+
+      setName("");
+      setEmail("");
+      setPhone("");
+      setMessage("");
+      setCaptchaToken("");
+      showFeedback(data.message || t("feedback.sent"), "success");
+    } catch {
+      showFeedback(t("feedback.sendFailed"), "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -102,16 +137,22 @@ export default function ContactPage() {
                     minRows={4}
                     fullWidth
                   />
+                  <DeferredTurnstile
+                    siteKey={turnstileSiteKey}
+                    show={showCaptcha}
+                    onTokenChange={setCaptchaToken}
+                  />
                   <Button
                     type="submit"
                     variant="contained"
+                    disabled={loading}
                     sx={{
                       textTransform: "none",
                       borderRadius: 2,
                       fontWeight: 700,
                     }}
                   >
-                    {t("form.send")}
+                    {loading ? t("form.sending") : t("form.send")}
                   </Button>
                 </Stack>
               </Box>

@@ -234,6 +234,27 @@ export async function POST(request) {
       locale || request.cookies.get("NEXT_LOCALE")?.value || "sq",
     );
 
+    if (!canSetUserId && finalUserId) {
+      const pendingReservationCount = await prisma.reservations.count({
+        where: {
+          user_id: finalUserId,
+          status: "pending",
+        },
+      });
+
+      if (pendingReservationCount >= 2) {
+        return NextResponse.json(
+          {
+            error:
+              emailLocale === "en"
+                ? "You cannot create more than 2 pending reservations. Please contact the hotel staff if you need more help."
+                : "Nuk mund te krijoni me shume se 2 rezervime ne pritje. Ju lutem kontaktoni stafin e hotelit nese ju duhet ndihme shtese.",
+          },
+          { status: 400 },
+        );
+      }
+    }
+
     const guestUser = finalUserId
       ? await prisma.users.findUnique({
           where: { id: finalUserId },

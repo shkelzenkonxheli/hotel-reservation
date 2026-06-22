@@ -114,6 +114,7 @@
       "emailNotVerified": "Email-i nuk eshte i verifikuar. Kontrollo inbox.",
       "invalidCredentials": "Email ose fjalekalim i pavlefshem",
       "enterEmailForResend": "Shkruaj email-in per ridergim te verifikimit.",
+      "captchaRequired": "Ju lutem plotesoni captcha para ridergimit te verifikimit.",
       "resendFailed": "Ridergimi i email-it te verifikimit deshtoi."
     }
   },
@@ -129,6 +130,12 @@
       "email": "Email",
       "password": "Fjalekalimi"
     },
+    "terms": {
+      "prefix": "Pranoj",
+      "termsLink": "Kushtet e perdorimit",
+      "and": "dhe",
+      "privacyLink": "Politiken e privatesise"
+    },
     "buttons": {
       "register": "Regjistrohu",
       "login": "Hyr",
@@ -140,6 +147,8 @@
     "errors": {
       "invalidEmail": "Ju lutem shkruani nje email te vlefshem.",
       "weakPassword": "Fjalekalimi duhet te kete te pakten 8 karaktere, nje shkronje te madhe dhe nje numer.",
+      "acceptTerms": "Duhet t'i pranoni kushtet e perdorimit dhe politiken e privatesise.",
+      "captchaRequired": "Ju lutem plotesoni captcha para regjistrimit.",
       "registerFailed": "Regjistrimi deshtoi.",
       "generic": "Ndodhi nje gabim. Ju lutem provoni perseri."
     }
@@ -158,6 +167,9 @@
     },
     "messages": {
       "success": "Nese ekziston nje llogari me kete email, linku i rivendosjes u dergua."
+    },
+    "errors": {
+      "captchaRequired": "Ju lutem plotesoni captcha para se te vazhdoni."
     }
   },
   "resetPassword": {
@@ -224,7 +236,10 @@
     "subtitle": "Na dergoni kerkesen dhe ekipi yne do t'ju ndihmoje me dhomat, detajet e rezervimit dhe kerkesat speciale.",
     "feedback": {
       "required": "Ju lutem plotesoni te gjitha fushat e detyrueshme.",
-      "openingMail": "Aplikacioni i email-it po hapet. Do t'ju kontaktojme shpejt."
+      "openingMail": "Aplikacioni i email-it po hapet. Do t'ju kontaktojme shpejt.",
+      "captchaRequired": "Ju lutem plotesoni captcha para dergimit te mesazhit.",
+      "sendFailed": "Dergimi i mesazhit deshtoi. Ju lutem provoni perseri.",
+      "sent": "Mesazhi juaj u dergua me sukses."
     },
     "mail": {
       "subjectPrefix": "Kerkese kontakti nga",
@@ -240,7 +255,8 @@
       "email": "Email *",
       "phoneOptional": "Telefoni (opsional)",
       "message": "Mesazhi *",
-      "send": "Dergo mesazh"
+      "send": "Dergo mesazh",
+      "sending": "Duke derguar..."
     },
     "details": {
       "title": "Detajet e kontaktit",

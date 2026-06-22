@@ -4,6 +4,7 @@ import { Resend } from "resend";
 import crypto from "crypto";
 import { rateLimit } from "@/lib/rateLimit";
 import { requireSameOrigin } from "@/lib/security";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 import { isValidEmail, normalizeEmail } from "@/lib/validators";
 import {
   passwordResetSubject,
@@ -42,7 +43,15 @@ export async function POST(req) {
       );
     }
 
-    const { email, locale } = await req.json();
+    const { email, locale, captchaToken } = await req.json();
+
+    const captchaCheck = await verifyTurnstileToken(req, captchaToken);
+    if (!captchaCheck.ok) {
+      return NextResponse.json(
+        { message: captchaCheck.message },
+        { status: 400 },
+      );
+    }
 
     if (!email || !isValidEmail(email)) {
       return NextResponse.json({ message: GENERIC_MESSAGE });

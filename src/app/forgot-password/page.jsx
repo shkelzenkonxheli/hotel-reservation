@@ -17,16 +17,20 @@ import { EmailOutlined } from "@mui/icons-material";
 import PublicContainer from "../components/Public/PublicContainer";
 import PublicSection from "../components/Public/PublicSection";
 import PublicCard from "../components/Public/PublicCard";
+import DeferredTurnstile from "../components/Public/DeferredTurnstile";
 import usePageTitle from "../hooks/usePageTitle";
 
 export default function ForgotPasswordPage() {
   const t = useTranslations("forgotPassword");
   const locale = useLocale();
   usePageTitle(t("metaTitle"));
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
 
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [showCaptcha, setShowCaptcha] = useState(false);
   const [feedback, setFeedback] = useState({
     open: false,
     message: "",
@@ -53,13 +57,19 @@ export default function ForgotPasswordPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (turnstileSiteKey && !captchaToken) {
+      setShowCaptcha(true);
+      showFeedback(t("errors.captchaRequired"), "warning");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const res = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, locale }),
+        body: JSON.stringify({ email, locale, captchaToken }),
       });
 
       const data = await res.json();
@@ -68,6 +78,7 @@ export default function ForgotPasswordPage() {
       } else {
         showFeedback(data.message || t("messages.success"), "success");
       }
+      setCaptchaToken("");
     } catch {
       showFeedback(t("messages.success"), "info");
     } finally {
@@ -144,6 +155,11 @@ export default function ForgotPasswordPage() {
                       </InputAdornment>
                     ),
                   }}
+                />
+                <DeferredTurnstile
+                  siteKey={turnstileSiteKey}
+                  show={showCaptcha}
+                  onTokenChange={setCaptchaToken}
                 />
                 <Button
                   type="submit"

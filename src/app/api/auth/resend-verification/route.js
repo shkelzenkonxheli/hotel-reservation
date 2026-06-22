@@ -4,9 +4,12 @@ import { Resend } from "resend";
 import crypto from "crypto";
 import { rateLimit } from "@/lib/rateLimit";
 import { requireSameOrigin } from "@/lib/security";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 
 export async function POST(req) {
   try {
+    const GENERIC_MESSAGE = "If an account with that email exists, a verification link has been sent.";
+
     const originError = requireSameOrigin(req);
     if (originError) return originError;
 
@@ -22,18 +25,24 @@ export async function POST(req) {
       );
     }
 
-    const { email } = await req.json();
+    const { email, captchaToken } = await req.json();
+
+    const captchaCheck = await verifyTurnstileToken(req, captchaToken);
+    if (!captchaCheck.ok) {
+      return NextResponse.json(
+        { error: captchaCheck.message },
+        { status: 400 },
+      );
+    }
+
     if (!email) {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
+      return NextResponse.json({ message: GENERIC_MESSAGE });
     }
 
     const normalizedEmail = String(email).toLowerCase().trim();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(normalizedEmail)) {
-      return NextResponse.json(
-        { error: "Invalid email format" },
-        { status: 400 },
-      );
+      return NextResponse.json({ message: GENERIC_MESSAGE });
     }
 
     const user = await prisma.users.findUnique({
@@ -41,13 +50,11 @@ export async function POST(req) {
     });
 
     if (!user) {
-      return NextResponse.json({
-        message: "If the email exists, we sent a link.",
-      });
+      return NextResponse.json({ message: GENERIC_MESSAGE });
     }
 
     if (user.email_verified) {
-      return NextResponse.json({ message: "Email already verified." });
+      return NextResponse.json({ message: GENERIC_MESSAGE });
     }
 
     const verifyToken = crypto.randomUUID();
@@ -77,9 +84,12 @@ export async function POST(req) {
       `,
     });
 
-    return NextResponse.json({ message: "Verification email sent." });
+    return NextResponse.json({ message: GENERIC_MESSAGE });
   } catch (error) {
     console.error("Resend verification error:", error);
-    return NextResponse.json({ error: "Failed to resend" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Failed to resend verification email." },
+      { status: 500 },
+    );
   }
 }

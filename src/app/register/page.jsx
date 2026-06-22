@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { signIn } from "next-auth/react";
+import Link from "next/link";
 import {
   Box,
   TextField,
@@ -14,6 +15,8 @@ import {
   Divider,
   InputAdornment,
   IconButton,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import {
   AccountCircle,
@@ -28,12 +31,14 @@ import {
 import PublicContainer from "../components/Public/PublicContainer";
 import PublicSection from "../components/Public/PublicSection";
 import PublicCard from "../components/Public/PublicCard";
+import DeferredTurnstile from "../components/Public/DeferredTurnstile";
 import usePageTitle from "../hooks/usePageTitle";
 
 export default function RegisterPage() {
   const t = useTranslations("register");
   usePageTitle(t("metaTitle"));
 
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -42,6 +47,9 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [showCaptcha, setShowCaptcha] = useState(false);
 
   const fieldSx = {
     "& .MuiOutlinedInput-root": {
@@ -88,6 +96,17 @@ export default function RegisterPage() {
       return false;
     }
 
+    if (!acceptedTerms) {
+      setError(t("errors.acceptTerms"));
+      return false;
+    }
+
+    if (turnstileSiteKey && !captchaToken) {
+      setShowCaptcha(true);
+      setError(t("errors.captchaRequired"));
+      return false;
+    }
+
     return true;
   };
 
@@ -105,7 +124,13 @@ export default function RegisterPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          acceptedTerms,
+          captchaToken,
+        }),
       });
 
       const data = await res.json();
@@ -121,6 +146,7 @@ export default function RegisterPage() {
         );
       } else {
         setError(data.message || t("errors.registerFailed"));
+        setCaptchaToken("");
       }
     } catch (err) {
       setError(t("errors.generic"));
@@ -244,6 +270,60 @@ export default function RegisterPage() {
                       </InputAdornment>
                     ),
                   }}
+                />
+
+                <FormControlLabel
+                  sx={{
+                    mt: 1,
+                    alignItems: "flex-start",
+                    mr: 0,
+                    ml: 0,
+                    "& .MuiFormControlLabel-label": {
+                      fontSize: { xs: "0.84rem", md: "0.88rem" },
+                      lineHeight: 1.5,
+                      color: "#475569",
+                    },
+                  }}
+                  control={
+                    <Checkbox
+                      checked={acceptedTerms}
+                      onChange={(e) => setAcceptedTerms(e.target.checked)}
+                      sx={{ pt: 0.2 }}
+                    />
+                  }
+                  label={
+                    <span style={{ display: "inline", wordBreak: "break-word" }}>
+                      {t("terms.prefix")}{" "}
+                      <Link
+                        href="/terms-conditions"
+                        style={{
+                          color: "#0284c7",
+                          fontWeight: 700,
+                          textDecoration: "none",
+                        }}
+                      >
+                        {t("terms.termsLink")}
+                      </Link>{" "}
+                      {t("terms.and")}{" "}
+                      <Link
+                        href="/privacy-policy"
+                        style={{
+                          color: "#0284c7",
+                          fontWeight: 700,
+                          textDecoration: "none",
+                        }}
+                      >
+                        {t("terms.privacyLink")}
+                      </Link>
+                      .
+                    </span>
+                  }
+                />
+
+                <DeferredTurnstile
+                  siteKey={turnstileSiteKey}
+                  show={showCaptcha}
+                  onTokenChange={setCaptchaToken}
                 />
 
                 {error && (

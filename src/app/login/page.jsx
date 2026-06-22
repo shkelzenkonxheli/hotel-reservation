@@ -28,11 +28,13 @@ import {
 import PublicContainer from "../components/Public/PublicContainer";
 import PublicSection from "../components/Public/PublicSection";
 import PublicCard from "../components/Public/PublicCard";
+import DeferredTurnstile from "../components/Public/DeferredTurnstile";
 import usePageTitle from "../hooks/usePageTitle";
 
 export default function LoginPage() {
   const t = useTranslations("login");
   usePageTitle(t("metaTitle"));
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
 
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -50,6 +52,8 @@ export default function LoginPage() {
   });
   const [hasLoginSuccessParam, setHasLoginSuccessParam] = useState(false);
   const [showResendPrompt, setShowResendPrompt] = useState(false);
+  const [resendCaptchaToken, setResendCaptchaToken] = useState("");
+  const [showResendCaptcha, setShowResendCaptcha] = useState(false);
 
   const resolvePostLoginDestination = () => {
     if (typeof window === "undefined") return "/";
@@ -146,12 +150,17 @@ export default function LoginPage() {
       setError(t("errors.enterEmailForResend"));
       return;
     }
+    if (turnstileSiteKey && !resendCaptchaToken) {
+      setShowResendCaptcha(true);
+      setError(t("errors.captchaRequired"));
+      return;
+    }
     try {
       setResendLoading(true);
       const res = await fetch("/api/auth/resend-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, captchaToken: resendCaptchaToken }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -164,6 +173,7 @@ export default function LoginPage() {
         message: t("messages.verificationSent"),
         severity: "success",
       });
+      setResendCaptchaToken("");
     } catch (err) {
       setError(t("errors.resendFailed"));
     } finally {
@@ -360,15 +370,22 @@ export default function LoginPage() {
               </Box>
 
               {showResendPrompt && (
-                <Button
-                  fullWidth
-                  variant="text"
-                  sx={{ mt: 1, textTransform: "none", fontWeight: 600 }}
-                  onClick={handleResend}
-                  disabled={resendLoading}
-                >
-                  {resendLoading ? t("buttons.sending") : t("buttons.resend")}
-                </Button>
+                <>
+                  <DeferredTurnstile
+                    siteKey={turnstileSiteKey}
+                    show={showResendCaptcha}
+                    onTokenChange={setResendCaptchaToken}
+                  />
+                  <Button
+                    fullWidth
+                    variant="text"
+                    sx={{ mt: 1, textTransform: "none", fontWeight: 600 }}
+                    onClick={handleResend}
+                    disabled={resendLoading}
+                  >
+                    {resendLoading ? t("buttons.sending") : t("buttons.resend")}
+                  </Button>
+                </>
               )}
 
               <Divider sx={{ my: 2.1, fontSize: "0.9rem" }}>{t("or")}</Divider>

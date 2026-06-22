@@ -5,6 +5,7 @@ import { Resend } from "resend";
 import crypto from "crypto";
 import { rateLimit } from "@/lib/rateLimit";
 import { requireSameOrigin } from "@/lib/security";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 import {
   isStrongPassword,
   isValidEmail,
@@ -30,11 +31,27 @@ export async function POST(req) {
       );
     }
 
-    const { name, email, password } = await req.json();
+    const { name, email, password, acceptedTerms, captchaToken } =
+      await req.json();
 
     if (!name || !email || !password) {
       return NextResponse.json(
         { message: "Missing required fields" },
+        { status: 400 },
+      );
+    }
+
+    if (acceptedTerms !== true) {
+      return NextResponse.json(
+        { message: "You must accept the Terms & Conditions and Privacy Policy." },
+        { status: 400 },
+      );
+    }
+
+    const captchaCheck = await verifyTurnstileToken(req, captchaToken);
+    if (!captchaCheck.ok) {
+      return NextResponse.json(
+        { message: captchaCheck.message },
         { status: 400 },
       );
     }

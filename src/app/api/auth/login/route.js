@@ -25,6 +25,7 @@ export async function POST(req) {
     }
 
     const { email, password } = await req.json();
+    const INVALID_CREDENTIALS = "Invalid email or password";
 
     if (!email || !password) {
       return NextResponse.json(
@@ -39,12 +40,19 @@ export async function POST(req) {
     const normalizedEmail = normalizeEmail(email);
     const user = await prisma.users.findUnique({ where: { email: normalizedEmail } });
     if (!user) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
+      return NextResponse.json({ message: INVALID_CREDENTIALS }, { status: 401 });
+    }
+
+    if (user.email_verified === false) {
+      return NextResponse.json(
+        { message: "Please verify your email before signing in." },
+        { status: 403 },
+      );
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return NextResponse.json({ message: "Invalid password" }, { status: 401 });
+      return NextResponse.json({ message: INVALID_CREDENTIALS }, { status: 401 });
     }
 
     const token = jwt.sign(

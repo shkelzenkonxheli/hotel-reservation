@@ -282,7 +282,7 @@ export default function RoomsPage() {
               {t("title")}
             </h2>
             <div className="flex md:justify-end">
-              <div className="inline-flex flex-wrap items-center gap-2 rounded-full border border-slate-200/80 bg-white/90 p-2 shadow-[0_14px_34px_rgba(15,23,42,0.08)] backdrop-blur">
+              <div className="inline-flex w-full max-w-[430px] items-center gap-1.5 overflow-x-auto rounded-full border border-slate-200/80 bg-white/90 p-1.5 shadow-[0_14px_34px_rgba(15,23,42,0.08)] backdrop-blur md:w-auto md:max-w-none md:gap-2 md:p-2">
               {["all", "apartment", "hotel"].map((category) => {
                 const isActive = roomCategory === category;
 
@@ -291,7 +291,7 @@ export default function RoomsPage() {
                     key={category}
                     type="button"
                     onClick={() => setRoomCategory(category)}
-                    className={`inline-flex min-w-[112px] items-center justify-center rounded-full px-4 py-2.5 text-sm font-semibold transition duration-200 ${
+                    className={`inline-flex min-w-0 shrink-0 flex-1 items-center justify-center whitespace-nowrap rounded-full px-2.5 py-2 text-[0.88rem] font-semibold transition duration-200 md:min-w-[112px] md:flex-none md:px-4 md:py-2.5 md:text-sm ${
                       isActive
                         ? "bg-[#1f6feb] text-white shadow-[0_12px_28px_rgba(31,111,235,0.26)]"
                         : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"

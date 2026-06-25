@@ -1,3 +1,5 @@
+import { HOTEL_INFO } from "@/lib/hotelInfo";
+
 function normalizeLocale(locale) {
   return String(locale || "").toLowerCase().startsWith("en") ? "en" : "sq";
 }
@@ -31,9 +33,9 @@ const COPY = {
     paymentStatus: "Payment status",
     nextStepTitle: "What happens next",
     pendingNextStep:
-      "Please keep this email for your records. Our team can review your booking and payment will be completed directly at the hotel.",
+      "Please keep this email for your records. Our team can review your booking and payment will be completed directly at the hotel. For assistance, contact us at dijaripremium@gmail.com or +382 68 317 993. Address: Mujo Ulcinaku, Ulcinj, Montenegro.",
     confirmedNextStep:
-      "Please keep this email for your records. If you need assistance before arrival, simply reply to this message.",
+      "Please keep this email for your records. For assistance before arrival, contact us at dijaripremium@gmail.com or +382 68 317 993. Address: Mujo Ulcinaku, Ulcinj, Montenegro.",
     stayInfoTitle: "Important stay information",
     stayInfo:
       "Check-in starts from 14:00 and check-out is until 11:00. Early check-in or late check-out depends on availability.",
@@ -65,9 +67,9 @@ const COPY = {
     paymentStatus: "Statusi i pageses",
     nextStepTitle: "Hapi i radhes",
     pendingNextStep:
-      "Ruajeni kete email per evidencen tuaj. Ekipi yne mund ta rishikoje rezervimin dhe pagesa do te kryhet direkt ne hotel.",
+      "Ruajeni kete email per evidencen tuaj. Ekipi yne mund ta rishikoje rezervimin dhe pagesa do te kryhet direkt ne hotel. Per ndihme, na kontaktoni ne dijaripremium@gmail.com ose +382 68 317 993. Adresa: Mujo Ulcinaku, Ulqin, Mali i Zi.",
     confirmedNextStep:
-      "Ruajeni kete email per evidencen tuaj. Nese ju duhet ndihme para arritjes, mjafton te pergjigjeni ne kete email.",
+      "Ruajeni kete email per evidencen tuaj. Nese ju duhet ndihme para arritjes, na kontaktoni ne dijaripremium@gmail.com ose +382 68 317 993. Adresa: Mujo Ulcinaku, Ulqin, Mali i Zi.",
     stayInfoTitle: "Informacion i rendesishem per qendrimin",
     stayInfo:
       "Check-in fillon nga ora 14:00, ndersa check-out eshte deri ne ora 11:00. Hyrja me heret ose dalja me vone varen nga disponueshmeria.",
@@ -132,6 +134,10 @@ export function reservationConfirmationTemplate({
   reservationStatus = "pending",
 }) {
   const copy = COPY[normalizeLocale(locale)];
+  const hotelAddress =
+    normalizeLocale(locale) === "en"
+      ? HOTEL_INFO.address.en
+      : HOTEL_INFO.address.sq;
   const isConfirmed =
     String(reservationStatus || "").toLowerCase() === "confirmed";
   const statusTone = isConfirmed
@@ -194,7 +200,15 @@ export function reservationConfirmationTemplate({
               ${copy.nextStepTitle}
             </div>
             <div style="font-size:14px;line-height:1.8;color:#475569;">
-              ${isConfirmed ? copy.confirmedNextStep : copy.pendingNextStep}
+              ${(isConfirmed ? copy.confirmedNextStep : copy.pendingNextStep)
+                .replace("dijaripremium@gmail.com", HOTEL_INFO.email)
+                .replace("+382 68 317 993", HOTEL_INFO.phone)
+                .replace(
+                  normalizeLocale(locale) === "en"
+                    ? "Mujo Ulcinaku, Ulcinj, Montenegro"
+                    : "Mujo Ulcinaku, Ulqin, Mali i Zi",
+                  hotelAddress,
+                )}
             </div>
           </div>
 

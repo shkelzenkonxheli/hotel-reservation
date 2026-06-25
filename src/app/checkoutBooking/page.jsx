@@ -21,7 +21,9 @@ import {
   useMediaQuery,
   Checkbox,
   FormControlLabel,
+  IconButton,
 } from "@mui/material";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { useSession } from "next-auth/react";
 import PublicContainer from "../components/Public/PublicContainer";
 import PublicSection from "../components/Public/PublicSection";
@@ -59,7 +61,6 @@ export default function CheckoutBooking() {
   const [address, setAddress] = useState("");
   const [guests, setGuests] = useState(2);
   const [totalPrice, setTotalPrice] = useState(0);
-  const [expandedRoom, setExpandedRoom] = useState(null);
   const [stayStartDate, setStayStartDate] = useState("");
   const [stayEndDate, setStayEndDate] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -337,12 +338,6 @@ export default function CheckoutBooking() {
             ))}
           </div>
         ) : null}
-        <button
-          className="text-slate-700 text-sm mt-2 underline underline-offset-4"
-          onClick={() => setExpandedRoom(room)}
-        >
-          {t("viewDetails")}
-        </button>
       </div>
 
       <Divider sx={{ my: 2 }} />
@@ -599,7 +594,23 @@ export default function CheckoutBooking() {
                     fullWidth
                     maxWidth="sm"
                   >
-                    <DialogTitle>{t("mobile.bookingSummary")}</DialogTitle>
+                    <DialogTitle
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        pr: 1,
+                      }}
+                    >
+                      {t("mobile.bookingSummary")}
+                      <IconButton
+                        aria-label={t("close")}
+                        onClick={() => setOpenDetails(false)}
+                        size="small"
+                      >
+                        <CloseRoundedIcon fontSize="small" />
+                      </IconButton>
+                    </DialogTitle>
                     <DialogContent
                       sx={{ maxHeight: "70vh", overflowY: "auto", pb: 4 }}
                     >
@@ -618,34 +629,6 @@ export default function CheckoutBooking() {
           </div>
         </PublicContainer>
       </PublicSection>
-
-      {expandedRoom && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-          <div className="public-card p-6 max-w-lg w-full relative">
-            <button
-              className="absolute top-3 right-3 text-slate-500"
-              onClick={() => setExpandedRoom(null)}
-            >
-              {t("close")}
-            </button>
-            <h2 className="text-xl font-semibold mb-4">{expandedRoom.name}</h2>
-            <p className="text-slate-600 text-sm">{expandedRoom.description}</p>
-            {Array.isArray(expandedRoom.amenities) &&
-            expandedRoom.amenities.length > 0 ? (
-              <div className="mt-4 flex flex-wrap gap-2">
-                {expandedRoom.amenities.map((amenity) => (
-                  <span
-                    key={amenity}
-                    className="text-xs px-2.5 py-1 rounded-full border border-slate-200 text-slate-700 bg-slate-50"
-                  >
-                    {amenity}
-                  </span>
-                ))}
-              </div>
-            ) : null}
-          </div>
-        </div>
-      )}
 
       <Snackbar
         open={toast.open}

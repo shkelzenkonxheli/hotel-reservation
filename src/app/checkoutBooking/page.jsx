@@ -11,6 +11,7 @@ import {
   TextField,
   Button,
   Divider,
+  MenuItem,
   CircularProgress,
   Dialog,
   DialogTitle,
@@ -81,7 +82,7 @@ export default function CheckoutBooking() {
     return date.toLocaleDateString(locale, {
       day: "2-digit",
       month: "2-digit",
-      year: "numeric",
+      year: "2-digit",
     });
   };
 
@@ -470,12 +471,19 @@ export default function CheckoutBooking() {
         />
         <TextField
           label={t("form.guests")}
-          type="number"
-          inputProps={{ min: 1, max: maxGuests }}
+          select
           value={guests}
           onChange={(e) => setGuests(Number(e.target.value))}
           helperText={`${t("form.guestsHelper")} (${includedGuests}-${maxGuests})`}
-        />
+        >
+          {Array.from({ length: maxGuests }, (_, index) => index + 1).map(
+            (guestCount) => (
+              <MenuItem key={guestCount} value={guestCount}>
+                {guestCount}
+              </MenuItem>
+            ),
+          )}
+        </TextField>
 
       </Box>
 

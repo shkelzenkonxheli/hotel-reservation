@@ -23,7 +23,7 @@
     },
     "form": {
       "guestInformation": "Te dhenat e mysafirit",
-      "requiredFields": "Fushat e detyrueshme",
+      "requiredFields": "Te gjitha fushat jane te detyrueshme",
       "fullName": "Emri i plote",
       "fullNameHelper": "Shkruaj emrin e rezervimit",
       "phone": "Telefoni",
@@ -200,6 +200,7 @@
     "title": "Llojet e dhomave",
     "subtitle": "Zbuloni llojet kryesore te dhomave tona, me komoditet, hapesire dhe atmosfere te pershtatur per nje qendrim te qete ne Ulqin.",
     "night": "nate",
+    "capacity": "Max {count}",
     "selectDates": "Zgjidh datat",
     "labels": {
       "poolView": "Pamje nga pishina",
@@ -221,6 +222,12 @@
       "loginFirst": "Duhet te kyqesh fillimisht",
       "notAvailable": "Dhoma nuk eshte e lire per datat e zgjedhura.",
       "loadFailed": "Ngarkimi i dhomave deshtoi. Provoni perseri."
+    },
+    "loginPrompt": {
+      "title": "Vazhdo me hyrje",
+      "description": "Per te vazhduar me kete rezervim, duhet fillimisht te hyni ne llogarine tuaj. Pas hyrjes do te dergoheni direkt te checkout.",
+      "cancel": "Jo tani",
+      "confirm": "Vazhdo me login"
     },
     "showAllAmenities": "Shfaq te gjitha",
     "showLessAmenities": "Shfaq me pak",

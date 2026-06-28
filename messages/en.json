@@ -23,7 +23,7 @@
     },
     "form": {
       "guestInformation": "Guest information",
-      "requiredFields": "Required fields",
+      "requiredFields": "All fields are required",
       "fullName": "Full Name",
       "fullNameHelper": "Enter the name on the booking",
       "phone": "Phone",
@@ -200,6 +200,7 @@
     "title": "Room types",
     "subtitle": "Explore the main room types available at the hotel, each designed with the right balance of comfort, space, and atmosphere for a calm stay in Ulqin.",
     "night": "night",
+    "capacity": "Max {count}",
     "selectDates": "Select dates",
     "labels": {
       "poolView": "Pool view",
@@ -221,6 +222,12 @@
       "loginFirst": "You need to login first",
       "notAvailable": "Room is not available for the selected dates.",
       "loadFailed": "Failed to load rooms. Please try again."
+    },
+    "loginPrompt": {
+      "title": "Continue with login",
+      "description": "To continue with this reservation, you need to sign in first. After login, you will be sent directly to checkout.",
+      "cancel": "Not now",
+      "confirm": "Continue to login"
     },
     "showAllAmenities": "Show all",
     "showLessAmenities": "Show less",

@@ -87,7 +87,7 @@ export default function ReservationCard({
               sx={{ display: "block", mt: 0.35 }}
               noWrap
             >
-              {reservation.users?.email}
+              {reservation.guest_email || reservation.users?.email || "-"}
             </Typography>
           </Box>
 

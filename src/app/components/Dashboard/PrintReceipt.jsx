@@ -108,7 +108,10 @@ export default function PrintReceipt({ reservation, onClose }) {
             </Typography>
 
             <Row label={t("fields.guestName")} value={reservation.full_name} />
-            <Row label={t("fields.email")} value={reservation.users?.email || "-"} />
+            <Row
+              label={t("fields.email")}
+              value={reservation.guest_email || reservation.users?.email || "-"}
+            />
             <Row label={t("fields.phone")} value={reservation.phone} />
             <Row label={t("fields.room")} value={reservation.rooms?.name || "-"} />
             <Row

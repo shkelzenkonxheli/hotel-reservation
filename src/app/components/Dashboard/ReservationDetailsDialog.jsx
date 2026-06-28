@@ -44,7 +44,7 @@ export default function ReservationDetailsDialog({
                 <b>{t("fields.name")}:</b> {reservation.full_name || "-"}
               </Typography>
               <Typography variant="body2">
-                <b>{t("fields.email")}:</b> {reservation.users?.email || "-"}
+                <b>{t("fields.email")}:</b> {reservation.guest_email || reservation.users?.email || "-"}
               </Typography>
               <Typography variant="body2">
                 <b>{t("fields.phone")}:</b> {reservation.phone || "-"}

@@ -368,6 +368,7 @@ export default function ReservationsTab() {
       list = list.filter(
         (r) =>
           r.full_name?.toLowerCase().includes(q) ||
+          r.guest_email?.toLowerCase().includes(q) ||
           r.users?.email?.toLowerCase().includes(q),
       );
     }

@@ -43,6 +43,14 @@ function formatLocalDateInput(date = new Date()) {
   return `${y}-${m}-${day}`;
 }
 
+function getTypeLabel(type = "") {
+  return String(type || "")
+    .split("-")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 export default function RoomsTab() {
   const t = useTranslations("dashboard.rooms");
   const [rooms, setRooms] = useState([]);

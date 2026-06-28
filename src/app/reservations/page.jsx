@@ -50,6 +50,17 @@ function isCompleted(endDate) {
   return end < today;
 }
 
+function canCancelReservation(reservation) {
+  const status = String(reservation?.status || "").toLowerCase();
+  if (status === "cancelled") return false;
+
+  const start = new Date(reservation?.start_date);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  return start > today;
+}
+
 function getStatusTone(tab) {
   if (tab === "completed") {
     return { bg: "#e8edff", color: "#4f46e5" };
@@ -491,24 +502,25 @@ export default function ReservationsPage({ embedded = false }) {
                             {t("buttons.viewDetails")}
                           </Button>
 
-                          <Button
-                            variant="outlined"
-                            onClick={() => {
-                              setCancelTarget(r);
-                              setCancelReason("");
-                            }}
-                            disabled={!!r.cancelled_at}
-                            sx={{
-                              borderRadius: 999,
-                              textTransform: "none",
-                              fontWeight: 800,
-                              px: 2.75,
-                              borderColor: "#cbd5e1",
-                              color: "#334155",
-                            }}
-                          >
-                            {t("buttons.cancel")}
-                          </Button>
+                          {canCancelReservation(r) ? (
+                            <Button
+                              variant="outlined"
+                              onClick={() => {
+                                setCancelTarget(r);
+                                setCancelReason("");
+                              }}
+                              sx={{
+                                borderRadius: 999,
+                                textTransform: "none",
+                                fontWeight: 800,
+                                px: 2.75,
+                                borderColor: "#cbd5e1",
+                                color: "#334155",
+                              }}
+                            >
+                              {t("buttons.cancel")}
+                            </Button>
+                          ) : null}
 
                           <Button
                             color="error"

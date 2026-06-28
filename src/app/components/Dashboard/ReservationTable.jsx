@@ -119,7 +119,14 @@ export default function ReservationTable({
                   </IconButton>
                 </td>
                 <td className="px-4 py-3 font-medium text-gray-800 whitespace-nowrap align-middle">
-                  <div className="w-full text-left">{r.full_name || "-"}</div>
+                  <div className="flex w-full flex-col text-left">
+                    <span className="text-sm font-semibold text-slate-800">
+                      {r.full_name || "-"}
+                    </span>
+                    <span className="text-xs text-slate-500">
+                      {r.guest_email || r.users?.email || "-"}
+                    </span>
+                  </div>
                 </td>
 
                 <td className="px-3 py-3 align-middle">

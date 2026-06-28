@@ -47,6 +47,10 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim());
 }
 
+function normalizeEmail(email) {
+  return String(email || "").trim().toLowerCase();
+}
+
 function getAdminNotificationEmail() {
   return (
     process.env.RESERVATION_ADMIN_EMAIL ||
@@ -133,9 +137,7 @@ export async function POST(request) {
       locale,
     } = await request.json();
 
-    const normalizedGuestEmail = String(email || "")
-      .trim()
-      .toLowerCase();
+    const normalizedGuestEmail = normalizeEmail(email);
 
     if (!type || !startDate || !endDate || !fullname || !phone || !normalizedGuestEmail) {
       return NextResponse.json(
@@ -411,6 +413,9 @@ export async function GET(request) {
     const session = await getServerSession(authOptions);
     const role = session?.user?.role?.toLowerCase();
 
+    const sessionUserId = Number(session?.user?.id);
+    const sessionUserEmail = normalizeEmail(session?.user?.email);
+
     if (searchParams.get("latest") === "true") {
       if (!session?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -418,7 +423,10 @@ export async function GET(request) {
 
       const latest = await prisma.reservations.findFirst({
         where: {
-          user_id: Number(session.user.id),
+          OR: [
+            { user_id: sessionUserId },
+            ...(sessionUserEmail ? [{ guest_email: sessionUserEmail }] : []),
+          ],
           client_hidden: false,
         },
         orderBy: { created_at: "desc" },
@@ -456,10 +464,23 @@ export async function GET(request) {
       }
 
       if (userRole === "client") {
-        where.user_id =
-          role === "admin" || role === "worker"
-            ? Number(userId)
-            : Number(session.user.id);
+        if (role === "admin" || role === "worker") {
+          const targetUser = await prisma.users.findUnique({
+            where: { id: Number(userId) },
+            select: { email: true },
+          });
+          const targetEmail = normalizeEmail(targetUser?.email);
+
+          where.OR = [
+            { user_id: Number(userId) },
+            ...(targetEmail ? [{ guest_email: targetEmail }] : []),
+          ];
+        } else {
+          where.OR = [
+            { user_id: sessionUserId },
+            ...(sessionUserEmail ? [{ guest_email: sessionUserEmail }] : []),
+          ];
+        }
         where.client_hidden = false;
       }
       if (role === "admin" || role === "worker") {

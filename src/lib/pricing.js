@@ -22,7 +22,10 @@ export function clampGuests(roomLike = {}, guests) {
 }
 
 export function calculateNightlyRate(roomLike = {}, guests) {
-  const basePrice = Math.max(0, toNumber(roomLike.price, 0));
+  const basePrice = Math.max(
+    0,
+    toNumber(roomLike.effective_price ?? roomLike.price, 0),
+  );
   const normalizedGuests = clampGuests(roomLike, guests);
   const { includedGuests, extraGuestPrice } = getRoomCapacityConfig(roomLike);
   const extraGuests = Math.max(0, normalizedGuests - includedGuests);

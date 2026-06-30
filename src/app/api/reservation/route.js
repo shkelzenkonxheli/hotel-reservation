@@ -11,6 +11,7 @@ import {
   calculateReservationTotal,
   clampGuests,
 } from "@/lib/pricing";
+import { findApplicableSpecialRate } from "@/lib/specialRates";
 
 function blocksRoom(status) {
   const s = String(status || "").toLowerCase();
@@ -164,7 +165,7 @@ export async function POST(request) {
       );
     }
 
-    // s’lejojmë start në të kaluarën (date-only)
+    // Do not allow a past check-in date.
     // Today's date at UTC midnight (date-only).
     const today = parseDateOnlyToUTC(new Date().toISOString().slice(0, 10));
     if (start < today) {
@@ -210,10 +211,18 @@ export async function POST(request) {
       );
     }
 
-    const normalizedGuests = guests ? clampGuests(availableRoom, guests) : null;
+    const specialRate = await findApplicableSpecialRate({
+      roomType: availableRoom.type,
+      startDate,
+      endDate,
+    });
+    const pricingRoom = specialRate
+      ? { ...availableRoom, effective_price: specialRate.promo_price }
+      : availableRoom;
+    const normalizedGuests = guests ? clampGuests(pricingRoom, guests) : null;
     const computedTotal = calculateReservationTotal(
-      availableRoom,
-      normalizedGuests || availableRoom.included_guests,
+      pricingRoom,
+      normalizedGuests || pricingRoom.included_guests,
       startDate,
       endDate,
     );
@@ -283,11 +292,17 @@ export async function POST(request) {
         address: address || null,
         guests: normalizedGuests,
         total_price: total,
+        base_nightly_rate: Number(availableRoom.price),
+        applied_nightly_rate: Number(
+          specialRate?.promo_price ?? availableRoom.price,
+        ),
+        special_rate_label: specialRate?.label || null,
+        special_rate_id: specialRate?.id || null,
 
-        payment_method: payMethod, // ✅ (pasi ta shtosh në DB)
-        payment_status: payStatus, // ✅ ekziston
-        amount_paid: amountPaid, // ✅ ekziston
-        paid_at: payStatus === "PAID" ? new Date() : null, // ✅ ekziston
+        payment_method: payMethod,
+        payment_status: payStatus,
+        amount_paid: amountPaid,
+        paid_at: payStatus === "PAID" ? new Date() : null,
       },
     });
     // Create a padded invoice number like INV-2026-000123.
@@ -341,6 +356,7 @@ export async function POST(request) {
             reservationCode: reservation.reservation_code,
             reservationStatus,
             source: getReservationSource(session),
+            specialRateLabel: specialRate?.label || null,
           }),
           }),
           "Admin reservation email",
@@ -370,6 +386,7 @@ export async function POST(request) {
               paymentMethod: payMethod,
               paymentStatus: payStatus,
               reservationStatus,
+              specialRateLabel: specialRate?.label || null,
             }),
             }),
             "Guest reservation confirmation email",
@@ -396,7 +413,7 @@ export async function POST(request) {
   }
 }
 
-// Kontrollo disponueshmërinë
+// Check availability
 // Handle GET requests for this route.
 export async function GET(request) {
   try {
@@ -493,7 +510,7 @@ export async function GET(request) {
         orderBy: { id: "desc" },
       });
 
-      console.log("📦 Found reservations:", reservations.length);
+      console.log("Found reservations:", reservations.length);
 
       // Ensure numeric totals for client-side calculations.
       const payload = reservations.map((r) => ({
@@ -595,7 +612,7 @@ export async function GET(request) {
 
     return NextResponse.json([]);
   } catch (error) {
-    console.error("❌ GET error:", error);
+    console.error("GET /reservation error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

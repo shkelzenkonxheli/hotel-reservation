@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -140,7 +140,7 @@ export default function RoomsPage() {
       }
     }
     fetchRooms();
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -209,17 +209,32 @@ export default function RoomsPage() {
       showToast(t("alerts.minimumNight"));
       return;
     }
-    const res = await fetch(
-      `/api/reservation?room_type=${selectedRoom.type}&start_date=${startDate}&end_date=${endDate}`,
-    );
-    const data = await res.json();
+    const [availabilityRes, pricingRes] = await Promise.all([
+      fetch(
+        `/api/reservation?room_type=${selectedRoom.type}&start_date=${startDate}&end_date=${endDate}`,
+      ),
+      fetch(
+        `/api/rooms-type?start_date=${startDate}&end_date=${endDate}`,
+      ),
+    ]);
+    const data = await availabilityRes.json();
+    const pricingData = await pricingRes.json();
 
     if (!data.available) {
       showToast(t("alerts.notAvailable"));
       return;
     }
 
-    const bookingDraft = { room: selectedRoom, startDate, endDate };
+    const refreshedRoom =
+      (Array.isArray(pricingData)
+        ? pricingData.find((room) => room.type === selectedRoom.type)
+        : null) || selectedRoom;
+
+    if (selectedRoom.has_discount && !refreshedRoom.has_discount) {
+      showToast(t("alerts.discountNotAvailableForDates"), "info");
+    }
+
+    const bookingDraft = { room: refreshedRoom, startDate, endDate };
     setBooking(bookingDraft);
 
     if (!session?.user) {
@@ -458,9 +473,20 @@ export default function RoomsPage() {
                       <div className="mt-6 flex items-end justify-between gap-4 border-t border-slate-200/80 pt-5">
                         <div>
                           <div>
-                            <span className="text-[1.85rem] font-semibold leading-none text-slate-900 md:text-[2.2rem]">
-                              €{Number(room.price || 0).toFixed(0)}
-                            </span>
+                            {room.has_discount ? (
+                              <div className="flex flex-col gap-1.5">
+                                <span className="text-sm font-medium text-slate-400 line-through">
+                                  €{Number(room.original_price || room.price || 0).toFixed(0)}
+                                </span>
+                                <span className="text-[1.85rem] font-semibold leading-none text-[#1f6feb] md:text-[2.2rem]">
+                                  €{Number(room.effective_price || room.price || 0).toFixed(0)}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-[1.85rem] font-semibold leading-none text-slate-900 md:text-[2.2rem]">
+                                €{Number(room.price || 0).toFixed(0)}
+                              </span>
+                            )}
                             <span className="ml-2 text-sm text-slate-500">
                               / {t("night")}
                             </span>

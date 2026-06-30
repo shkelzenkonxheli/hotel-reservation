@@ -16,6 +16,7 @@ import {
   calculateReservationTotal,
   clampGuests,
 } from "@/lib/pricing";
+import { findApplicableSpecialRate } from "@/lib/specialRates";
 
 // Convert YYYY-MM-DD to a UTC midnight Date for day-precision comparisons.
 function parseDateOnlyToUTC(dateStr) {
@@ -215,7 +216,7 @@ export async function PATCH(req, context) {
         action: "PAYMENT_UPDATE",
         entity: "reservation",
         entity_id: updated.id,
-        description: `Reservation #${updated.id} payment → ${nextPaymentStatus}${body.status ? `, status → ${body.status}` : ""}`,
+        description: `Reservation #${updated.id} payment -> ${nextPaymentStatus}${body.status ? `, status -> ${body.status}` : ""}`,
         performed_by: performedBy,
       });
 
@@ -269,7 +270,7 @@ export async function PATCH(req, context) {
         action: "STATUS_CHANGE",
         entity: "reservation",
         entity_id: updated.id,
-        description: `Reservation #${updated.id} status → ${body.status}`,
+        description: `Reservation #${updated.id} status -> ${body.status}`,
         performed_by: performedBy,
       });
 
@@ -386,10 +387,22 @@ export async function PATCH(req, context) {
       newRoomId = fallback.id;
     }
 
-    const pricingRoom =
+    const baseRoom =
       availableRooms.find((room) => room.id === Number(newRoomId)) ||
       rooms.find((room) => room.id === Number(newRoomId));
-    const normalizedGuests = pricingRoom ? clampGuests(pricingRoom, guests) : Number(guests);
+    const specialRate = baseRoom
+      ? await findApplicableSpecialRate({
+          roomType: baseRoom.type,
+          startDate,
+          endDate,
+        })
+      : null;
+    const pricingRoom = specialRate
+      ? { ...baseRoom, effective_price: specialRate.promo_price }
+      : baseRoom;
+    const normalizedGuests = pricingRoom
+      ? clampGuests(pricingRoom, guests)
+      : Number(guests);
     const computedTotal = pricingRoom
       ? calculateReservationTotal(pricingRoom, normalizedGuests, startDate, endDate)
       : parseFloat(total_price);
@@ -407,6 +420,12 @@ export async function PATCH(req, context) {
         start_date: start,
         end_date: end,
         total_price: computedTotal,
+        base_nightly_rate: baseRoom ? Number(baseRoom.price) : null,
+        applied_nightly_rate: pricingRoom
+          ? Number(pricingRoom.effective_price ?? pricingRoom.price)
+          : null,
+        special_rate_label: specialRate?.label || null,
+        special_rate_id: specialRate?.id || null,
       },
       include: {
         users: { select: { name: true, email: true } },
@@ -423,7 +442,7 @@ export async function PATCH(req, context) {
 
     return NextResponse.json(updated);
   } catch (error) {
-    console.error("❌ Error updating reservation:", error);
+    console.error("Error updating reservation:", error);
     if (isOverlapError(error)) {
       return NextResponse.json(
         { error: "No rooms available for the selected dates" },
@@ -503,7 +522,7 @@ export async function DELETE(req, { params }) {
       );
     }
 
-    // ✅ ADMIN HIDE (JO DELETE)
+    // Admin hide only, do not delete.
     await prisma.reservations.update({
       where: { id: reservationId },
       data: {
@@ -524,7 +543,7 @@ export async function DELETE(req, { params }) {
       message: "Reservation archived successfully",
     });
   } catch (error) {
-    console.error("❌ Error archiving reservation:", error);
+    console.error("Error archiving reservation:", error);
     return NextResponse.json(
       { error: "Failed to archive reservation" },
       { status: 500 },

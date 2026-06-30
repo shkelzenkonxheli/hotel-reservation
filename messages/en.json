@@ -19,7 +19,11 @@
       "priceBreakdown": "Price breakdown",
       "total": "Total",
       "secureNote": "Secure checkout. Your details are protected.",
-      "guestPricing": "{included} included, +EUR {price} per extra guest, up to {max} guests."
+      "guestPricing": "{included} included, +EUR {price} per extra guest, up to {max} guests.",
+      "currentRate": "Current price",
+      "originalRate": "Standard price",
+      "discountedRate": "Discounted price",
+      "savings": "You save EUR {amount} on this stay."
     },
     "form": {
       "guestInformation": "Guest information",
@@ -221,6 +225,7 @@
       "minimumNight": "Minimum one night",
       "loginFirst": "You need to login first",
       "notAvailable": "Room is not available for the selected dates.",
+      "discountNotAvailableForDates": "This special offer does not apply to the selected dates. The booking will continue with the standard rate.",
       "loadFailed": "Failed to load rooms. Please try again."
     },
     "loginPrompt": {
@@ -401,6 +406,7 @@
       "reservations": "Reservations",
       "payments": "Payments & Invoices",
       "reports": "Reports",
+      "specialRates": "Special Rates",
       "expenses": "Expenses",
       "users": "Users",
       "manageRooms": "Manage Rooms",
@@ -1033,6 +1039,67 @@
         "year": "Year",
         "generated": "Generated",
         "collectionRate": "Collection Rate"
+      }
+    },
+    "specialRates": {
+      "title": "Special rates",
+      "subtitle": "Manage limited-time room prices by room type and date range.",
+      "helper": "The promo price overrides the standard nightly price for the selected room type during this period.",
+      "deleteConfirm": "Delete special rate \"{label}\"?",
+      "actions": {
+        "add": "Add rate",
+        "edit": "Edit",
+        "delete": "Delete",
+        "cancel": "Cancel",
+        "save": "Save",
+        "saving": "Saving..."
+      },
+      "sections": {
+        "list": "Active and scheduled rates"
+      },
+      "fields": {
+        "search": "Search label or room type",
+        "showInactive": "Show inactive",
+        "roomType": "Room type",
+        "label": "Label",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "promoPrice": "Promo price (EUR)",
+        "basePrice": "Standard price",
+        "period": "Period",
+        "active": "Active"
+      },
+      "table": {
+        "label": "Label",
+        "roomType": "Room type",
+        "period": "Period",
+        "basePrice": "Standard",
+        "promoPrice": "Promo",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "dialog": {
+        "addTitle": "Add special rate",
+        "editTitle": "Edit special rate"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "messages": {
+        "loadFailed": "Failed to load special rates.",
+        "created": "Special rate created successfully.",
+        "updated": "Special rate updated successfully.",
+        "deleted": "Special rate deleted successfully.",
+        "deleteFailed": "Failed to delete special rate."
+      },
+      "errors": {
+        "required": "Please fill in all required fields.",
+        "generic": "Something went wrong."
+      },
+      "empty": {
+        "title": "No special rates yet",
+        "subtitle": "Add your first limited-time room price."
       }
     },
     "expenses": {

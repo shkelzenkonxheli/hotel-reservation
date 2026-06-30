@@ -4,6 +4,7 @@ export const DASHBOARD_TABS = [
   { key: "reservations", labelKey: "reservations" },
   { key: "payments", labelKey: "payments" },
   { key: "reports", labelKey: "reports" },
+  { key: "specialRates", labelKey: "specialRates" },
   { key: "expenses", labelKey: "expenses" },
   { key: "users", labelKey: "users" },
   { key: "manageRooms", labelKey: "manageRooms" },

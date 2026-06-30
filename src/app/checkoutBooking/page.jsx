@@ -61,10 +61,10 @@ export default function CheckoutBooking() {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [guests, setGuests] = useState(2);
-  const [totalPrice, setTotalPrice] = useState(0);
   const [stayStartDate, setStayStartDate] = useState("");
   const [stayEndDate, setStayEndDate] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [pricingRoom, setPricingRoom] = useState(null);
   const [availability, setAvailability] = useState({
     loading: false,
     available: true,
@@ -105,28 +105,59 @@ export default function CheckoutBooking() {
     if (!booking) return;
     setStayStartDate(booking.startDate || "");
     setStayEndDate(booking.endDate || "");
+    setPricingRoom(booking.room || null);
   }, [booking]);
 
-  /* ---------------- PRICE CALCULATION ---------------- */
+  const startDate = stayStartDate || booking?.startDate || "";
+  const endDate = stayEndDate || booking?.endDate || "";
+
+  useEffect(() => {
+    if (!booking?.room?.type || !startDate || !endDate) return;
+
+    let active = true;
+
+    async function loadPricingRoom() {
+      try {
+        const params = new URLSearchParams({
+          start_date: startDate,
+          end_date: endDate,
+        });
+
+        const res = await fetch(`/api/rooms-type?${params.toString()}`);
+        const data = await res.json();
+
+        if (!active || !res.ok || !Array.isArray(data)) return;
+
+        const matchedRoom = data.find((item) => item.type === booking.room.type);
+        if (matchedRoom) {
+          setPricingRoom((prev) => ({
+            ...(prev || booking.room),
+            ...matchedRoom,
+          }));
+        }
+      } catch (error) {
+        console.error("Failed to refresh checkout room pricing:", error);
+      }
+    }
+
+    loadPricingRoom();
+
+    return () => {
+      active = false;
+    };
+  }, [booking, startDate, endDate]);
+
+  /* ---------------- GUEST NORMALIZATION ---------------- */
   useEffect(() => {
     if (!booking) return;
 
-    const { room } = booking;
-    const startDate = stayStartDate || booking.startDate;
-    const endDate = stayEndDate || booking.endDate;
-
-    const nights =
-      (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24);
-
-    if (nights <= 0) {
-      setTotalPrice(0);
-      return;
-    }
-
+    const room = pricingRoom || booking.room;
     const normalizedGuests = clampGuests(room, guests);
-    if (normalizedGuests !== guests) setGuests(normalizedGuests);
-    setTotalPrice(calculateReservationTotal(room, normalizedGuests, startDate, endDate));
-  }, [booking, guests, stayStartDate, stayEndDate]);
+
+    if (normalizedGuests !== guests) {
+      setGuests(normalizedGuests);
+    }
+  }, [booking, guests, pricingRoom]);
 
   useEffect(() => {
     if (!booking || !stayStartDate || !stayEndDate) return;
@@ -143,9 +174,6 @@ export default function CheckoutBooking() {
       endDate: stayEndDate,
     });
   }, [booking, setBooking, stayStartDate, stayEndDate]);
-
-  const startDate = stayStartDate || booking?.startDate || "";
-  const endDate = stayEndDate || booking?.endDate || "";
 
   useEffect(() => {
     if (!booking) return;
@@ -226,15 +254,30 @@ export default function CheckoutBooking() {
     );
   }
 
-  const { room } = booking;
+  const room = pricingRoom || booking.room;
 
   const nights = Math.ceil(
     (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24),
   );
 
   const adjustedNightlyRate = calculateNightlyRate(room, guests);
-  const totalFormatted = totalPrice.toFixed(2);
   const { includedGuests, maxGuests, extraGuestPrice } = getRoomCapacityConfig(room);
+  const originalNightlyRate = calculateNightlyRate(
+    {
+      ...room,
+      effective_price: room.original_price ?? room.price,
+    },
+    guests,
+  );
+  const hasDiscount =
+    Boolean(room?.has_discount) &&
+    Number(originalNightlyRate) > Number(adjustedNightlyRate);
+  const finalStayTotal = adjustedNightlyRate * nights;
+  const originalStayTotal = originalNightlyRate * nights;
+  const totalFormatted = finalStayTotal.toFixed(2);
+  const savingsTotal = hasDiscount
+    ? originalStayTotal - finalStayTotal
+    : 0;
 
   /* ---------------- SUBMIT ---------------- */
   const handleBookClick = async () => {
@@ -277,7 +320,7 @@ export default function CheckoutBooking() {
           phone,
           address,
           guests,
-          total_price: totalPrice,
+          total_price: finalStayTotal,
           payment_method: "cash",
           payment_status: "UNPAID",
           locale,
@@ -368,12 +411,22 @@ export default function CheckoutBooking() {
         <Typography variant="subtitle2" fontWeight={700}>
           {t("summary.priceBreakdown")}
         </Typography>
+        {hasDiscount ? (
+          <div className="flex items-center justify-between text-sm text-slate-500">
+            <span>{t("summary.originalRate")}</span>
+            <span className="line-through">EUR {originalStayTotal.toFixed(2)}</span>
+          </div>
+        ) : null}
         <div className="flex items-center justify-between text-sm text-slate-600">
           <span>
-            EUR {adjustedNightlyRate.toFixed(2)} x {nights} {t("summary.nightsLower")}
+            {(hasDiscount
+              ? room.special_rate?.label || t("summary.discountedRate")
+              : t("summary.currentRate"))}{" "}
+            - EUR{" "}
+            {adjustedNightlyRate.toFixed(2)} x {nights} {t("summary.nightsLower")}
           </span>
-          <span className="font-semibold text-slate-900">
-            EUR {(adjustedNightlyRate * nights).toFixed(2)}
+          <span className="font-semibold text-[#1f6feb]">
+            EUR {finalStayTotal.toFixed(2)}
           </span>
         </div>
         {extraGuestPrice > 0 && maxGuests > includedGuests ? (
@@ -382,6 +435,13 @@ export default function CheckoutBooking() {
               included: includedGuests,
               price: Number(extraGuestPrice).toFixed(2),
               max: maxGuests,
+            })}
+          </Typography>
+        ) : null}
+        {hasDiscount ? (
+          <Typography variant="caption" sx={{ color: "#1d4ed8", fontWeight: 700, display: "block", mt: 0.25 }}>
+            {t("summary.savings", {
+              amount: savingsTotal.toFixed(2),
             })}
           </Typography>
         ) : null}

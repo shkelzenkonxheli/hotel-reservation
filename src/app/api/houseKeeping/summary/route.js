@@ -2,66 +2,77 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireRole } from "@/lib/authz";
 
-// Handle GET requests for this route.
+function normalizeUTC(date) {
+  const d = new Date(date);
+  return new Date(
+    Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()),
+  );
+}
+
+function blocksRoom(status) {
+  const normalized = String(status || "").toLowerCase();
+  return normalized !== "cancelled" && normalized !== "completed";
+}
+
 export async function GET() {
   try {
     const { error } = await requireRole(["admin", "worker"]);
     if (error) return error;
 
-    const today = new Date();
-    // Strip time to compare dates at day precision.
-    const todayOnly = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate(),
-    );
+    const todayOnly = normalizeUTC(new Date());
 
     const rooms = await prisma.rooms.findMany({
-      include: { reservations: true },
+      include: {
+        reservations: {
+          select: {
+            start_date: true,
+            end_date: true,
+            status: true,
+            cancelled_at: true,
+          },
+        },
+      },
     });
 
-    // Accumulators for daily housekeeping metrics.
     let checkout_today = 0;
     let checkin_today = 0;
     let out_of_order = 0;
 
     for (const room of rooms) {
-      // Out of order count
       if (room.status === "out_of_order") {
         out_of_order++;
         continue;
       }
 
-      // Check if checkout is today
-      for (const res of room.reservations) {
-        if (res.cancelled_at) continue; // ✅ mos i llogarit të anuluarat
+      let roomHasCheckinToday = false;
+      let roomHasCheckoutToday = false;
 
-        const start = new Date(res.start_date);
-        const end = new Date(res.end_date);
+      for (const reservation of room.reservations) {
+        if (reservation.cancelled_at) continue;
+        if (!blocksRoom(reservation.status)) continue;
 
-        // Convert reservation dates to date-only for same-day checks.
-        const startDay = new Date(
-          start.getFullYear(),
-          start.getMonth(),
-          start.getDate(),
-        );
-        const endDay = new Date(
-          end.getFullYear(),
-          end.getMonth(),
-          end.getDate(),
-        );
+        const startDay = normalizeUTC(reservation.start_date);
+        const endDay = normalizeUTC(reservation.end_date);
 
-        // A checkout is counted if the reservation ends today.
-        if (endDay.getTime() === todayOnly.getTime()) {
-          checkout_today++;
-          break;
-        }
-
-        // A check-in is counted if the reservation starts today.
         if (startDay.getTime() === todayOnly.getTime()) {
-          checkin_today++;
+          roomHasCheckinToday = true;
+        }
+
+        if (endDay.getTime() === todayOnly.getTime()) {
+          roomHasCheckoutToday = true;
+        }
+
+        if (roomHasCheckinToday && roomHasCheckoutToday) {
           break;
         }
+      }
+
+      if (roomHasCheckinToday) {
+        checkin_today++;
+      }
+
+      if (roomHasCheckoutToday) {
+        checkout_today++;
       }
     }
 

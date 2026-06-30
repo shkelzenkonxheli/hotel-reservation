@@ -118,14 +118,14 @@ export default function Header() {
   const openAlerts = async (e) => {
     setAlertsAnchor(e.currentTarget);
 
-    if (!summary) {
-      try {
-        const res = await fetch("/api/houseKeeping/summary");
-        const data = await res.json();
-        setSummary(data);
-      } catch (err) {
-        console.error("Failed to load summary", err);
-      }
+    try {
+      const res = await fetch("/api/houseKeeping/summary", {
+        cache: "no-store",
+      });
+      const data = await res.json();
+      setSummary(data);
+    } catch (err) {
+      console.error("Failed to load summary", err);
     }
 
     if (notifications.length === 0 || hasNewNotifications) {

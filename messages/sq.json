@@ -19,7 +19,11 @@
       "priceBreakdown": "Detajet e cmimit",
       "total": "Totali",
       "secureNote": "Checkout i sigurt. Te dhenat tuaja jane te mbrojtura.",
-      "guestPricing": "{included} te perfshire, +EUR {price} per cdo mysafir shtese, deri ne {max} mysafire."
+      "guestPricing": "{included} te perfshire, +EUR {price} per cdo mysafir shtese, deri ne {max} mysafire.",
+      "currentRate": "Cmimi aktual",
+      "originalRate": "Cmimi standard",
+      "discountedRate": "Cmimi me zbritje",
+      "savings": "Kursen EUR {amount} per kete qendrim."
     },
     "form": {
       "guestInformation": "Te dhenat e mysafirit",
@@ -221,6 +225,7 @@
       "minimumNight": "Minimumi nje nate",
       "loginFirst": "Duhet te kyqesh fillimisht",
       "notAvailable": "Dhoma nuk eshte e lire per datat e zgjedhura.",
+      "discountNotAvailableForDates": "Oferta speciale nuk aplikohet per datat e zgjedhura. Rezervimi do te vazhdoje me cmimin standard.",
       "loadFailed": "Ngarkimi i dhomave deshtoi. Provoni perseri."
     },
     "loginPrompt": {
@@ -401,6 +406,7 @@
       "reservations": "Rezervimet",
       "payments": "Pagesat & Faturat",
       "reports": "Raportet",
+      "specialRates": "Oferta speciale",
       "expenses": "Shpenzimet",
       "users": "Përdoruesit",
       "manageRooms": "Menaxho Dhomat",
@@ -1033,6 +1039,67 @@
         "year": "Viti",
         "generated": "Gjeneruar",
         "collectionRate": "Norma e arketimit"
+      }
+    },
+    "specialRates": {
+      "title": "Oferta speciale",
+      "subtitle": "Menaxho cmimet e perkohshme te dhomave sipas llojit dhe periudhes.",
+      "helper": "Cmimi promo zevendeson cmimin standard per nate per llojin e zgjedhur te dhomes gjate kesaj periudhe.",
+      "deleteConfirm": "Ta fshij oferten speciale \"{label}\"?",
+      "actions": {
+        "add": "Shto oferte",
+        "edit": "Ndrysho",
+        "delete": "Fshij",
+        "cancel": "Anulo",
+        "save": "Ruaj",
+        "saving": "Duke ruajtur..."
+      },
+      "sections": {
+        "list": "Ofertat aktive dhe te planifikuara"
+      },
+      "fields": {
+        "search": "Kerko sipas emrit ose llojit te dhomes",
+        "showInactive": "Shfaq joaktive",
+        "roomType": "Lloji i dhomes",
+        "label": "Emri i ofertes",
+        "startDate": "Data e fillimit",
+        "endDate": "Data e perfundimit",
+        "promoPrice": "Cmimi promo (EUR)",
+        "basePrice": "Cmimi standard",
+        "period": "Periudha",
+        "active": "Aktive"
+      },
+      "table": {
+        "label": "Emri",
+        "roomType": "Lloji i dhomes",
+        "period": "Periudha",
+        "basePrice": "Standard",
+        "promoPrice": "Promo",
+        "status": "Statusi",
+        "actions": "Veprimet"
+      },
+      "dialog": {
+        "addTitle": "Shto oferte speciale",
+        "editTitle": "Ndrysho oferten speciale"
+      },
+      "status": {
+        "active": "Aktive",
+        "inactive": "Joaktive"
+      },
+      "messages": {
+        "loadFailed": "Ngarkimi i ofertave speciale deshtoi.",
+        "created": "Oferta speciale u krijua me sukses.",
+        "updated": "Oferta speciale u perditesua me sukses.",
+        "deleted": "Oferta speciale u fshi me sukses.",
+        "deleteFailed": "Fshirja e ofertes speciale deshtoi."
+      },
+      "errors": {
+        "required": "Ju lutem plotesoni te gjitha fushat e detyrueshme.",
+        "generic": "Ndodhi nje gabim."
+      },
+      "empty": {
+        "title": "Ende nuk ka oferta speciale",
+        "subtitle": "Shto oferten e pare me cmim te perkohshem."
       }
     },
     "expenses": {

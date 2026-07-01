@@ -425,8 +425,8 @@ export default function RoomsPage() {
                       }`}
                     >
                       <div>
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <div>
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0 flex-1">
                             {roomLabelKey ? (
                               <span className="inline-flex rounded-full bg-[#e8f1ff] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#1f6feb]">
                                 {t(`labels.${roomLabelKey}`)}
@@ -437,7 +437,7 @@ export default function RoomsPage() {
                             </h3>
                           </div>
                           {room.max_guests ? (
-                            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#bfdbfe] bg-[#eff6ff] px-3.5 py-1.5 text-xs font-semibold text-[#1d4ed8]">
+                            <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-[#bfdbfe] bg-[#eff6ff] px-3.5 py-1.5 text-xs font-semibold text-[#1d4ed8]">
                               <GroupOutlinedIcon sx={{ fontSize: 15 }} />
                               {capacityLabel(room.max_guests)}
                             </span>

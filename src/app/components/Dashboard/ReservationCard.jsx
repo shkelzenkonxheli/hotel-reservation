@@ -159,7 +159,7 @@ export default function ReservationCard({
         <Box
           mt={1.35}
           display="grid"
-          gridTemplateColumns="repeat(2, minmax(0, 1fr))"
+          gridTemplateColumns="repeat(3, minmax(0, 1fr))"
           gap={1}
         >
           <Box
@@ -192,6 +192,22 @@ export default function ReservationCard({
             </Typography>
             <Typography fontWeight={600} fontSize="0.9rem" color="#9a3412" noWrap>
               {new Date(reservation.end_date).toLocaleDateString()}
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              minWidth: 0,
+              px: 1.15,
+              py: 0.95,
+              borderRadius: 2,
+              backgroundColor: "#eff6ff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Typography fontWeight={700} fontSize="0.82rem" color="#1e3a8a" noWrap>
+              €{Number(reservation.total_price || 0).toFixed(2)}
             </Typography>
           </Box>
         </Box>

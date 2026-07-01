@@ -33,6 +33,7 @@ import {
   MoneyOffCsredOutlined,
   PrintOutlined,
   DeleteOutline,
+  DownloadRounded,
 } from "@mui/icons-material";
 import ReservationFilters from "./ReservationFilters";
 import ReservationTabs from "./ReservationTabs";
@@ -44,6 +45,42 @@ import ReservationReasonDialog from "./ReservationReasonDialog";
 import ReservationForm from "./ReservationForm";
 import PrintReceipt from "./PrintReceipt";
 import PageHeader from "./ui/PageHeader";
+
+function escapeCsvValue(value) {
+  const normalized =
+    value === null || value === undefined ? "" : String(value).replace(/\r?\n/g, " ");
+  return `"${normalized.replace(/"/g, '""')}"`;
+}
+
+const CSV_SEPARATOR = ";";
+
+function formatIsoDate(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+}
+
+function formatIsoDateTime(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  const datePart = new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+  const timePart = new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+  return `${datePart} ${timePart}`;
+}
 
 export default function ReservationsTab() {
   const t = useTranslations("dashboard.reservations");
@@ -58,6 +95,7 @@ export default function ReservationsTab() {
     type: null,
     reservation: null,
   });
+  const [exportAnchorEl, setExportAnchorEl] = useState(null);
   const [deleteDialog, setDeleteDialog] = useState({ open: false, id: null });
   const [reasonTarget, setReasonTarget] = useState(null);
   const [actionDialog, setActionDialog] = useState({
@@ -156,6 +194,24 @@ export default function ReservationsTab() {
   const notify = (message, severity = "success") => {
     setFeedback({ open: true, message, severity });
   };
+  const exportCopy =
+    confirmLocale === "en"
+      ? {
+          label: "Export",
+          all: "Export all CSV",
+          filtered: "Export filtered CSV",
+          successAll: "All reservations exported.",
+          successFiltered: "Filtered reservations exported.",
+          empty: "There are no reservations to export.",
+        }
+      : {
+          label: "Export",
+          all: "Eksporto te gjitha CSV",
+          filtered: "Eksporto te filtruarat CSV",
+          successAll: "U eksportuan te gjitha rezervimet.",
+          successFiltered: "U eksportuan rezervimet e filtruara.",
+          empty: "Nuk ka rezervime per eksport.",
+        };
 
   const openDetails = (r) => {
     setDetailsReservation(r);
@@ -270,6 +326,132 @@ export default function ReservationsTab() {
       setLoading(false);
     }
   }
+
+  const buildCsvRows = (items) => {
+    const headers = [
+      "id",
+      "reservation_code",
+      "guest_name",
+      "guest_email",
+      "user_email",
+      "phone",
+      "address",
+      "room_type",
+      "room_name",
+      "room_number",
+      "check_in",
+      "check_out",
+      "guests",
+      "status",
+      "payment_status",
+      "payment_method",
+      "total_price",
+      "amount_paid",
+      "invoice_number",
+      "special_rate_label",
+      "base_nightly_rate",
+      "applied_nightly_rate",
+      "locale",
+      "created_at",
+      "paid_at",
+      "cancelled_at",
+      "cancel_reason",
+      "user_id",
+      "room_id",
+    ];
+
+    const rows = items.map((reservation) => [
+      reservation.id,
+      reservation.reservation_code,
+      reservation.full_name,
+      reservation.guest_email,
+      reservation.users?.email,
+      reservation.phone,
+      reservation.address,
+      reservation.rooms?.type,
+      reservation.rooms?.name,
+      reservation.rooms?.room_number,
+      formatIsoDate(reservation.start_date),
+      formatIsoDate(reservation.end_date),
+      reservation.guests,
+      reservation.status,
+      reservation.payment_status,
+      reservation.payment_method,
+      reservation.total_price,
+      reservation.amount_paid ? Number(reservation.amount_paid) : 0,
+      reservation.invoice_number,
+      reservation.special_rate_label,
+      reservation.base_nightly_rate ? Number(reservation.base_nightly_rate) : "",
+      reservation.applied_nightly_rate ? Number(reservation.applied_nightly_rate) : "",
+      reservation.guest_locale,
+      formatIsoDateTime(reservation.created_at),
+      formatIsoDateTime(reservation.paid_at),
+      formatIsoDateTime(reservation.cancelled_at),
+      reservation.cancel_reason,
+      reservation.user_id,
+      reservation.room_id,
+    ]);
+
+    return [
+      `sep=${CSV_SEPARATOR}`,
+      headers.map(escapeCsvValue).join(CSV_SEPARATOR),
+      ...rows.map((row) => row.map(escapeCsvValue).join(CSV_SEPARATOR)),
+    ].join("\n");
+  };
+
+  const downloadCsv = (filename, csvContent) => {
+    const blob = new Blob([`\uFEFF${csvContent}`], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const exportReservations = async (mode) => {
+    try {
+      if (mode === "filtered") {
+        if (displayList.length === 0) {
+          notify(exportCopy.empty, "warning");
+          return;
+        }
+
+        downloadCsv(
+          `reservations-filtered-${new Date().toISOString().slice(0, 10)}.csv`,
+          buildCsvRows(displayList),
+        );
+        notify(exportCopy.successFiltered);
+        return;
+      }
+
+      const res = await fetch("/api/reservation?list=true");
+      const data = await res.json();
+
+      if (!res.ok) {
+        notify(data?.error || t("messages.loadFailed"), "error");
+        return;
+      }
+
+      if (!Array.isArray(data) || data.length === 0) {
+        notify(exportCopy.empty, "warning");
+        return;
+      }
+
+      downloadCsv(
+        `reservations-all-${new Date().toISOString().slice(0, 10)}.csv`,
+        buildCsvRows(data),
+      );
+      notify(exportCopy.successAll);
+    } catch (error) {
+      console.error("Failed to export reservations:", error);
+      notify(t("messages.loadNetworkError"), "error");
+    }
+  };
 
   async function handleStatusChange(id, newStatus) {
     try {
@@ -720,7 +902,33 @@ export default function ReservationsTab() {
         reservation={editData}
       />
 
-      <ReservationTabs activeTab={activeTab} onChange={setActiveTab} />
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: { xs: "stretch", md: "center" },
+          justifyContent: "space-between",
+          gap: 1.5,
+          flexDirection: { xs: "column", md: "row" },
+          mb: 2,
+        }}
+      >
+        <ReservationTabs activeTab={activeTab} onChange={setActiveTab} />
+
+        <Button
+          variant="outlined"
+          onClick={(event) => setExportAnchorEl(event.currentTarget)}
+          startIcon={<DownloadRounded fontSize="small" />}
+          sx={{
+            borderRadius: 2,
+            fontWeight: 700,
+            minHeight: 40,
+            whiteSpace: "nowrap",
+            alignSelf: { xs: "flex-end", md: "center" },
+          }}
+        >
+          {exportCopy.label}
+        </Button>
+      </Box>
 
       {selectedIds.length > 0 ? (
         <Box
@@ -820,6 +1028,31 @@ export default function ReservationsTab() {
           />
         </Box>
       ) : null}
+
+      <Menu
+        anchorEl={exportAnchorEl}
+        open={Boolean(exportAnchorEl)}
+        onClose={() => setExportAnchorEl(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <MenuItem
+          onClick={() => {
+            setExportAnchorEl(null);
+            exportReservations("filtered");
+          }}
+        >
+          {exportCopy.filtered}
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setExportAnchorEl(null);
+            exportReservations("all");
+          }}
+        >
+          {exportCopy.all}
+        </MenuItem>
+      </Menu>
 
       <Menu
         anchorEl={anchorEl}

@@ -643,9 +643,46 @@ export default function CheckoutBooking() {
 
                   <Divider sx={{ my: 2 }} />
 
-                  <Typography fontWeight="bold" color="success.main">
-                    {t("summary.total")}: EUR {totalFormatted}
-                  </Typography>
+                  <div className="space-y-2">
+                    {hasDiscount ? (
+                      <div className="flex items-center justify-between text-sm text-slate-500">
+                        <span>{t("summary.originalRate")}</span>
+                        <span className="line-through">
+                          EUR {originalStayTotal.toFixed(2)}
+                        </span>
+                      </div>
+                    ) : null}
+
+                    <div className="flex items-center justify-between text-sm text-slate-600">
+                      <span>
+                        {hasDiscount
+                          ? room.special_rate?.label || t("summary.discountedRate")
+                          : t("summary.currentRate")}
+                      </span>
+                      <span className="font-semibold text-[#1f6feb]">
+                        EUR {finalStayTotal.toFixed(2)}
+                      </span>
+                    </div>
+
+                    {hasDiscount ? (
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: "#1d4ed8",
+                          fontWeight: 700,
+                          display: "block",
+                        }}
+                      >
+                        {t("summary.savings", {
+                          amount: savingsTotal.toFixed(2),
+                        })}
+                      </Typography>
+                    ) : null}
+
+                    <Typography fontWeight="bold" color="success.main">
+                      {t("summary.total")}: EUR {totalFormatted}
+                    </Typography>
+                  </div>
 
                   <Button
                     fullWidth

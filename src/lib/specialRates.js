@@ -16,24 +16,21 @@ export function normalizeDateOnly(value) {
 export async function findApplicableSpecialRate({
   roomType,
   startDate,
-  endDate,
 }) {
   const normalizedStart = normalizeDateOnly(startDate);
-  const normalizedEnd = normalizeDateOnly(endDate);
 
-  if (!roomType || !normalizedStart || !normalizedEnd) {
+  if (!roomType || !normalizedStart) {
     return null;
   }
 
   const start = parseDateOnlyToUTC(normalizedStart);
-  const end = parseDateOnlyToUTC(normalizedEnd);
 
   return prisma.special_rates.findFirst({
     where: {
       room_type: roomType,
       active: true,
       start_date: { lte: start },
-      end_date: { gte: end },
+      end_date: { gte: start },
     },
     orderBy: [{ promo_price: "asc" }, { created_at: "desc" }],
   });
@@ -43,7 +40,6 @@ export async function enrichRoomTypeWithSpecialRate(roomTypeLike, startDate, end
   const specialRate = await findApplicableSpecialRate({
     roomType: roomTypeLike?.type,
     startDate,
-    endDate,
   });
 
   if (!specialRate) {

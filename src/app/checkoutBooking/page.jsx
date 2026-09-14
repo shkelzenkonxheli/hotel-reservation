@@ -751,7 +751,7 @@ export default function CheckoutBooking() {
           background: "rgba(251,248,243,0.97)",
           borderTop: "1px solid var(--public-border)",
           backdropFilter: "blur(6px)",
-          boxShadow: "0 -8px 24px rgba(11,29,40,0.08)",
+          boxShadow: "0 -8px 24px rgba(11, 36, 38,0.08)",
         }}
       >
         <div className="min-w-0">

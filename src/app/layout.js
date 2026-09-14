@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono, Cormorant_Garamond } from "next/font/google";
+import { Work_Sans, Geist_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import Header from "./components/Header";
 import ConditionalFooter from "./components/ConditionalFooter";
@@ -7,7 +7,7 @@ import { cookies } from "next/headers";
 import { defaultLocale } from "@/i18n/config";
 import Providers from "./providers";
 
-const geistSans = Geist({
+const geistSans = Work_Sans({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
@@ -17,9 +17,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const displayFont = Cormorant_Garamond({
+const displayFont = Instrument_Serif({
   variable: "--font-display-serif",
-  weight: ["400", "500", "600", "700"],
+  weight: ["400"],
+  style: ["normal", "italic"],
   subsets: ["latin"],
 });
 
@@ -52,7 +53,7 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: "#fbf8f3",
+  themeColor: "#f6f2ea",
 };
 
 export default async function RootLayout({ children }) {

@@ -163,19 +163,19 @@ export default function Home() {
             className="h-full w-full object-cover object-center"
             style={{ filter: "brightness(0.6) saturate(1.05)" }}
           />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,29,40,0.5)_0%,rgba(11,29,40,0.32)_45%,rgba(11,29,40,0.88)_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,36,38,0.55)_0%,rgba(11,36,38,0.3)_45%,rgba(11,36,38,0.92)_100%)]" />
         </div>
 
-        <PublicContainer className="relative flex min-h-[78vh] flex-col justify-end pb-28 pt-32 md:min-h-[92vh] md:pb-32 md:pt-40">
+        <PublicContainer className="relative flex min-h-[82vh] flex-col justify-end pb-28 pt-32 md:min-h-[94vh] md:pb-32 md:pt-40">
           <div className="fade-up max-w-3xl text-white">
             <div className="flex items-center gap-4">
-              <span className="h-px w-14 bg-[var(--brass)]" />
-              <p className="text-[11px] font-semibold uppercase tracking-[0.42em] text-[#d9bd8e]">
+              <span className="h-px w-14 bg-[var(--sea)]" />
+              <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-[var(--sea)]">
                 {t("hero.eyebrow")}
               </p>
             </div>
 
-            <h1 className="display mt-6 text-[2.6rem] leading-[1.05] md:text-[5rem]">
+            <h1 className="display-xl mt-7">
               Dijari Premium
             </h1>
 
@@ -184,7 +184,7 @@ export default function Home() {
             </p>
 
             <div className="mt-5 flex items-center gap-2 text-sm text-white/70">
-              <PlaceOutlinedIcon fontSize="small" className="text-[var(--brass)]" />
+              <PlaceOutlinedIcon fontSize="small" className="text-[var(--sea)]" />
               <span>{t("location.address")}</span>
             </div>
 
@@ -194,7 +194,7 @@ export default function Home() {
               </Link>
               <a
                 href="#discover"
-                className="btn btn-outline btn-lg border-white/40 text-white hover:border-[var(--brass)] hover:text-[#e6cfa6]"
+                className="btn btn-outline btn-lg border-white/40 text-white hover:border-[var(--sea)] hover:text-[var(--sea)]"
               >
                 {t("story.eyebrow")}
               </a>
@@ -309,7 +309,7 @@ export default function Home() {
                       }`}
                     />
                   ))}
-                  <div className="absolute inset-x-0 bottom-0 h-32 bg-[linear-gradient(180deg,transparent,rgba(11,29,40,0.6))]" />
+                  <div className="absolute inset-x-0 bottom-0 h-32 bg-[linear-gradient(180deg,transparent,rgba(11, 36, 38,0.6))]" />
                 </div>
 
                 <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
@@ -459,7 +459,7 @@ export default function Home() {
       <PublicSection className="bg-[var(--ink)]">
         <PublicContainer>
           <div className="sec-head center">
-            <p className="eyebrow text-[#d9bd8e]">{t("gallery.eyebrow")}</p>
+            <p className="eyebrow text-[var(--sea)]">{t("gallery.eyebrow")}</p>
             <h2 className="sec-title display text-[2.1rem] text-white md:text-[2.8rem]">
               {t("gallery.title")}
             </h2>
@@ -621,11 +621,11 @@ export default function Home() {
               className="absolute inset-0 h-full w-full object-cover"
               style={{ filter: "brightness(0.45)" }}
             />
-            <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(11,29,40,0.78)_0%,rgba(11,29,40,0.35)_100%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(11, 36, 38,0.78)_0%,rgba(11, 36, 38,0.35)_100%)]" />
 
             <div className="relative z-10 flex min-h-[360px] flex-col items-center justify-center px-6 py-16 text-center text-white">
               <VerifiedOutlinedIcon className="text-[var(--brass)]" fontSize="large" />
-              <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.42em] text-[#d9bd8e]">
+              <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.38em] text-[var(--sea)]">
                 {t("cta.eyebrow")}
               </p>
               <h2 className="display mt-5 max-w-3xl text-[2.1rem] md:text-[3.2rem]">

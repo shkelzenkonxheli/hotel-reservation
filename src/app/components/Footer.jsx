@@ -17,9 +17,16 @@ export default function Footer() {
               <img
                 src="/hotel-images/Logo-round.svg"
                 alt="Dijari Premium"
-                style={{ width: 40, height: 40, borderRadius: "50%" }}
+                style={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: "50%",
+                  background: "#fff",
+                  padding: 4,
+                  boxShadow: "0 8px 22px -12px rgba(0,0,0,.9)",
+                }}
               />
-              <span className="display" style={{ fontSize: "1.25rem", color: "#fff" }}>
+              <span className="display" style={{ fontSize: "1.45rem", color: "#fff" }}>
                 Dijari Premium
               </span>
             </Link>

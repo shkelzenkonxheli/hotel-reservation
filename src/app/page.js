@@ -155,8 +155,8 @@ export default function Home() {
   return (
     <div className="public-page min-h-screen bg-[var(--sand)]">
       {/* ============ HERO ============ */}
-      <section className="relative isolate overflow-hidden">
-        <div className="absolute inset-0">
+      <section className="relative isolate">
+        <div className="absolute inset-0 overflow-hidden">
           <img
             src="/hotel-images/hotelbg1.jpg"
             alt="Dijari Premium"
@@ -203,10 +203,10 @@ export default function Home() {
         </PublicContainer>
 
         {/* ============ AVAILABILITY WIDGET ============ */}
-        <PublicContainer className="relative z-10">
+        <PublicContainer className="relative z-10 -mt-12 pb-14 md:-mt-16 md:pb-16">
           <form
             onSubmit={handleSearchSubmit}
-            className="booking-bar -mt-16 mb-[-56px] grid gap-4 p-6 md:grid-cols-[1fr_1fr_0.8fr_auto] md:items-end md:p-7"
+            className="booking-bar grid gap-4 p-6 md:grid-cols-[1fr_1fr_0.8fr_auto] md:items-end md:p-7"
           >
             <div className="field">
               <label className="field-label" htmlFor="home-checkin">

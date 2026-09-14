@@ -583,7 +583,7 @@ body {
 
 /* ---------- Header / nav ---------- */
 .nav-shell {
-  position: sticky; top: 0; z-index: 1100;
+  position: sticky; top: 0; z-index: 1100; color: var(--ink);
   transition: background .35s var(--ease-lux), box-shadow .35s var(--ease-lux), border-color .35s var(--ease-lux);
   border-bottom: 1px solid transparent;
 }
@@ -594,7 +594,7 @@ body {
 }
 .nav-link {
   position: relative; font-size: .9rem; font-weight: 600; letter-spacing: .01em;
-  padding: 8px 2px; color: inherit; text-decoration: none; opacity: .85;
+  padding: 8px 2px; color: var(--ink); text-decoration: none; opacity: .92;
 }
 .nav-link::after {
   content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;

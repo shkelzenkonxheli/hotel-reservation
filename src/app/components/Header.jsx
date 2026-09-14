@@ -158,7 +158,9 @@ export default function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [isPublicShell, isHome]);
 
-  const transparentActive = isPublicShell && isHome && !scrolled;
+  // Header sits above (not over) the hero, so a transparent bar would render
+  // white text on the page background. Keep it solid and legible everywhere.
+  const transparentActive = false;
 
   const publicNavLinks = [
     { key: "home", labelKey: "navHome", href: "/", icon: HomeOutlinedIcon },
@@ -371,7 +373,15 @@ export default function Header() {
           <img
             src="/hotel-images/Logo-round.svg"
             alt="Dijari Premium"
-            style={{ width: 42, height: 42, borderRadius: "50%" }}
+            style={{
+              width: 46,
+              height: 46,
+              borderRadius: "50%",
+              background: "#fff",
+              padding: 3,
+              border: "1px solid var(--public-border)",
+              boxShadow: "0 6px 18px -10px rgba(11,36,38,.6)",
+            }}
           />
           <span
             className="display"

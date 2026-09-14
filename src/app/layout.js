@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import Header from "./components/Header";
 import { getMessages } from "../i18n/getMessages";
@@ -13,6 +13,12 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const displayFont = Cormorant_Garamond({
+  variable: "--font-display-serif",
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
 });
 
@@ -45,7 +51,7 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: "#f8fafc",
+  themeColor: "#fbf8f3",
 };
 
 export default async function RootLayout({ children }) {
@@ -59,7 +65,7 @@ export default async function RootLayout({ children }) {
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 text-gray-900`}
+        className={`${geistSans.variable} ${geistMono.variable} ${displayFont.variable} antialiased`}
       >
         <Providers locale={locale} messages={messages}>
           <Header />

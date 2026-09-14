@@ -90,11 +90,11 @@ export default function ContactPage() {
     <div className="public-page min-h-screen">
       <PublicSection className="pt-10">
         <PublicContainer>
-          <div className="max-w-3xl">
-            <h1 className="text-3xl md:text-4xl font-semibold mt-3">
+          <div className="max-w-3xl"><p className="eyebrow">Dijari Premium</p>
+            <h1 className="display mt-3 text-[2.4rem] text-[var(--ink)] md:text-[3.2rem]">
               {t("title")}
             </h1>
-            <p className="text-sm md:text-base text-slate-500 mt-2">
+            <p className="mt-4 max-w-xl text-sm leading-8 text-[var(--public-muted)] md:text-base">
               {t("subtitle")}
             </p>
           </div>
@@ -174,7 +174,7 @@ export default function ContactPage() {
                     <b>{t("details.phone")}:</b>{" "}
                     <a
                       href="tel:+38268317993"
-                      className="text-[#1f6feb] hover:underline"
+                      className="text-[#b08447] hover:underline"
                     >
                       +382 68 317 993
                     </a>
@@ -185,7 +185,7 @@ export default function ContactPage() {
                       href="https://www.bing.com/maps/default.aspx?v=2&pc=FACEBK&mid=8100&where1=Mujo%20Ul%C3%A7inaku%2C%20Ulcinj%2C%20Montenegro&FORM=FBKPL1&mkt=en-US&fbclid=IwZXh0bgNhZW0CMTAAYnJpZBExcGV1MERDQ2plbmw1bFNFNnNydGMGYXBwX2lkEDIyMjAzOTE3ODgyMDA4OTIAAR7GVdvq4ITTNRVGRMUGeXkSymUr7PXCBQAQOmWJLoiaEooemHNBM3GURXJRCg_aem_lBIgrXbzKxHyjDgMor39Pg"
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[#1f6feb] hover:underline"
+                      className="text-[#b08447] hover:underline"
                     >
                       Mujo Ulcinaku, Ulqin, Mali i Zi
                     </a>

@@ -1,47 +1,193 @@
 @import "tailwindcss";
 
+/* =========================================================
+   DIJARI PREMIUM — DESIGN SYSTEM
+   Paletë: bregdet luksoz (ink i thellë, rërë e ngrohtë, bronz)
+   ========================================================= */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --admin-bg: #f8fafc;
+  --background: #fbf8f3;
+  --foreground: #10212c;
+
+  /* Brand */
+  --ink: #0b1d28;
+  --ink-soft: #1c3442;
+  --sand: #fbf8f3;
+  --sand-deep: #f2ebe0;
+  --brass: #b08447;
+  --brass-deep: #8c6633;
+  --brass-soft: rgba(176, 132, 71, 0.12);
+  --sea: #2a6b7c;
+
+  /* Admin (pa ndryshim funksional) */
+  --admin-bg: #f7f6f3;
   --admin-surface: #ffffff;
-  --admin-border: #e2e8f0;
-  --admin-text: #0f172a;
-  --admin-muted: #64748b;
-  --admin-accent: #0ea5e9;
-  --admin-accent-strong: #0284c7;
-  --admin-radius: 12px;
-  --admin-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
-  --admin-shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
-  --public-bg: #f8fafc;
+  --admin-border: #e7e2d9;
+  --admin-text: #10212c;
+  --admin-muted: #6b7c86;
+  --admin-accent: var(--brass);
+  --admin-accent-strong: var(--brass-deep);
+  --admin-radius: 14px;
+  --admin-shadow-sm: 0 1px 2px rgba(11, 29, 40, 0.06);
+  --admin-shadow-md: 0 10px 28px rgba(11, 29, 40, 0.08);
+
+  /* Public */
+  --public-bg: var(--sand);
   --public-surface: #ffffff;
-  --public-border: #e2e8f0;
-  --public-text: #0f172a;
-  --public-muted: #64748b;
-  --public-accent: #0ea5e9;
-  --public-radius: 16px;
-  --public-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  --public-border: #e9e2d6;
+  --public-text: var(--ink);
+  --public-muted: #6b7c86;
+  --public-accent: var(--brass);
+  --public-radius: 22px;
+  --public-shadow: 0 18px 50px rgba(11, 29, 40, 0.08);
+  --public-shadow-lg: 0 30px 80px rgba(11, 29, 40, 0.14);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-ink: var(--ink);
+  --color-sand: var(--sand);
+  --color-brass: var(--brass);
+  --color-sea: var(--sea);
   --font-sans: var(--font-geist-sans);
+  --font-display: var(--font-display-serif), Georgia, serif;
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
+
+/* ---------- Tipografia ---------- */
+.display {
+  font-family: var(--font-display-serif), Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.05;
+}
+.eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--brass);
+}
+.rule {
+  width: 56px;
+  height: 1px;
+  background: var(--brass);
+  opacity: 0.65;
+}
+
+/* ---------- Public layout ---------- */
+.public-page {
+  background: var(--public-bg);
+  color: var(--public-text);
+}
+.public-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.public-section {
+  padding: 84px 0;
+}
+.public-card {
+  background: var(--public-surface);
+  border: 1px solid var(--public-border);
+  border-radius: var(--public-radius);
+  box-shadow: var(--public-shadow);
+}
+.public-card-flat {
+  background: var(--public-surface);
+  border: 1px solid var(--public-border);
+  border-radius: var(--public-radius);
+  box-shadow: none;
+}
+.public-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 26px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+  transition: all 0.25s ease;
+}
+.public-button.primary {
+  background: var(--brass);
+  color: #fff;
+  box-shadow: 0 14px 30px rgba(176, 132, 71, 0.28);
+}
+.public-button.primary:hover {
+  background: var(--brass-deep);
+  transform: translateY(-1px);
+}
+.public-button.dark {
+  background: var(--ink);
+  color: #fff;
+}
+.public-button.dark:hover {
+  background: var(--ink-soft);
+}
+.public-button.ghost {
+  border: 1px solid var(--public-border);
+  color: var(--public-text);
+  background: transparent;
+}
+.public-button.ghost:hover {
+  border-color: var(--brass);
+  color: var(--brass-deep);
+}
+.public-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  background: var(--brass-soft);
+  color: var(--brass-deep);
+}
+
+/* Efekte */
+.hover-lift {
+  transition:
+    transform 0.4s ease,
+    box-shadow 0.4s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--public-shadow-lg);
+}
+.img-zoom {
+  transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.img-zoom:hover {
+  transform: scale(1.05);
+}
+.fade-up {
+  animation: fadeUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- Admin ---------- */
 .admin-page {
   display: flex;
   flex-direction: column;
@@ -74,14 +220,14 @@ body {
   color: var(--admin-muted);
   font-weight: 700;
   border-bottom: 1px solid var(--admin-border);
-  background: #f1f5f9;
+  background: #f4f1ea;
 }
 .admin-table tbody td {
   padding: 12px 16px;
   border-bottom: 1px solid var(--admin-border);
 }
 .admin-table tbody tr:hover {
-  background: #f8fafc;
+  background: #faf8f4;
 }
 .admin-badge {
   display: inline-flex;
@@ -113,55 +259,6 @@ body {
   color: var(--admin-muted);
   padding: 32px;
 }
-.public-page {
-  background: var(--public-bg);
-  color: var(--public-text);
-}
-.public-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-}
-.public-section {
-  padding: 64px 0;
-}
-.public-card {
-  background: var(--public-surface);
-  border: 1px solid var(--public-border);
-  border-radius: var(--public-radius);
-  box-shadow: var(--public-shadow);
-}
-.public-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 20px;
-  border-radius: 12px;
-  font-weight: 700;
-  transition: all 0.2s ease;
-}
-.public-button.primary {
-  background: var(--public-accent);
-  color: white;
-}
-.public-button.primary:hover {
-  background: #0284c7;
-}
-.public-button.ghost {
-  border: 1px solid var(--public-border);
-  color: var(--public-text);
-}
-.public-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-  background: rgba(14, 165, 233, 0.12);
-  color: #0369a1;
-}
 
 @media (max-width: 1024px) {
   .public-container {
@@ -183,115 +280,100 @@ body {
     min-width: 720px;
   }
   .public-container {
-    padding: 0 14px;
+    padding: 0 18px;
   }
   .public-section {
-    padding: 42px 0;
+    padding: 52px 0;
   }
   .public-button {
-    min-height: 44px;
+    min-height: 46px;
   }
 }
+
+/* ---------- Kalendari (pa ndryshim logjike) ---------- */
 .booked-day {
-  background-color: #ef4444 !important; /* red */
+  background-color: #ef4444 !important;
   color: white !important;
   border-radius: 20px !important;
 }
-
 .available-day {
-  background-color: #86efac !important; /* light green */
-  color: #065f46 !important;
+  background-color: #cfe6d8 !important;
+  color: #14532d !important;
   border-radius: 20px !important;
 }
 .checkout-day {
-  background-color: #818cf8 !important; /* indigo */
+  background-color: #c7a06a !important;
   color: white !important;
   border-radius: 20px !important;
-  border: 1px solid #4f46e5 !important;
+  border: 1px solid var(--brass-deep) !important;
 }
-
 .disabled-day {
-  background-color: #e5e7eb !important;
-  color: #9ca3af !important;
+  background-color: #ece7de !important;
+  color: #a9a094 !important;
   border-radius: 20px !important;
 }
 .selected-start,
 .selected-end {
-  background-color: #2563eb !important; /* Blue */
+  background-color: var(--brass) !important;
   color: white !important;
   border-radius: 20px !important;
 }
-
 .selected-range {
-  background-color: #93c5fd !important; /* Light blue */
-  color: #1e3a8a !important;
+  background-color: rgba(176, 132, 71, 0.22) !important;
+  color: var(--ink) !important;
   border-radius: 20px !important;
 }
-.start-day {
-  background-color: #2563eb !important; /* blue */
-  color: white !important;
-  border-radius: 20px;
-}
-
+.start-day,
 .end-day {
-  background-color: #2563eb !important;
+  background-color: var(--brass) !important;
   color: white !important;
   border-radius: 20px;
 }
-
 .range-day {
-  background-color: #bfdbfe !important; /* light blue */
-  color: #1e3a8a !important;
+  background-color: rgba(176, 132, 71, 0.18) !important;
+  color: var(--ink) !important;
   border-radius: 20px;
 }
+.react-calendar__tile.disabled-day {
+  opacity: 0.35;
+}
+.react-calendar__tile.booked-day {
+  background: rgba(244, 67, 54, 0.22) !important;
+  color: #b71c1c !important;
+  pointer-events: none;
+}
+.react-calendar__tile.start-day,
+.react-calendar__tile.end-day {
+  background: var(--brass) !important;
+  color: #fff !important;
+  font-weight: 700;
+}
+.react-calendar__tile.range-day {
+  background: rgba(176, 132, 71, 0.16) !important;
+}
+.react-calendar__tile.available-day:hover {
+  background: rgba(11, 29, 40, 0.06) !important;
+}
+
 @media print {
   body * {
     visibility: hidden !important;
   }
-
   .receipt-print,
   .receipt-print * {
     visibility: visible !important;
   }
-
   .receipt-print {
     position: fixed;
     left: 50%;
     top: 0;
     transform: translateX(-50%);
     width: 100%;
-    max-width: 480px; /* 👈 KEY */
+    max-width: 480px;
     padding: 32px;
     background: white;
   }
-
   .no-print {
     display: none !important;
   }
-}
-
-/* Calendar tile styles */
-.react-calendar__tile.disabled-day {
-  opacity: 0.35;
-}
-
-.react-calendar__tile.booked-day {
-  background: rgba(244, 67, 54, 0.22) !important;
-  color: #b71c1c !important;
-  pointer-events: none;
-}
-
-.react-calendar__tile.start-day,
-.react-calendar__tile.end-day {
-  background: rgba(25, 118, 210, 0.25) !important;
-  color: #0d47a1 !important;
-  font-weight: 700;
-}
-
-.react-calendar__tile.range-day {
-  background: rgba(25, 118, 210, 0.12) !important;
-}
-
-.react-calendar__tile.available-day:hover {
-  background: rgba(0, 0, 0, 0.06) !important;
 }

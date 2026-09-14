@@ -56,10 +56,10 @@ export default function ResetPasswordPage() {
       height: { xs: 48, md: 50 },
       borderRadius: 2,
       backgroundColor: "#ffffff",
-      "& fieldset": { borderColor: "#dbe3ed" },
-      "&:hover fieldset": { borderColor: "#b9c7d8" },
+      "& fieldset": { borderColor: "#e9e2d6" },
+      "&:hover fieldset": { borderColor: "#cdbb9b" },
       "&.Mui-focused fieldset": {
-        borderColor: "#0ea5e9",
+        borderColor: "#b08447",
         borderWidth: 2,
       },
     },
@@ -219,8 +219,8 @@ export default function ResetPasswordPage() {
                     fontWeight: 700,
                     textTransform: "none",
                     fontSize: "0.96rem",
-                    backgroundColor: "#0284c7",
-                    "&:hover": { backgroundColor: "#0369a1" },
+                    backgroundColor: "#8c6633",
+                    "&:hover": { backgroundColor: "#75552b" },
                   }}
                 >
                   {loading ? (
@@ -236,7 +236,7 @@ export default function ResetPasswordPage() {
                 align="center"
                 mt={3}
                 color="text.secondary"
-                sx={{ cursor: "pointer", fontWeight: 700, color: "#0284c7" }}
+                sx={{ cursor: "pointer", fontWeight: 700, color: "#8c6633" }}
                 onClick={() => router.push("/login")}
               >
                 {t("backToLogin")}

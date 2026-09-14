@@ -186,10 +186,10 @@ export default function LoginPage() {
       height: { xs: 48, md: 50 },
       borderRadius: 2,
       backgroundColor: "#ffffff",
-      "& fieldset": { borderColor: "#dbe3ed" },
-      "&:hover fieldset": { borderColor: "#b9c7d8" },
+      "& fieldset": { borderColor: "#e9e2d6" },
+      "&:hover fieldset": { borderColor: "#cdbb9b" },
       "&.Mui-focused fieldset": {
-        borderColor: "#0ea5e9",
+        borderColor: "#b08447",
         borderWidth: 2,
       },
     },
@@ -214,7 +214,7 @@ export default function LoginPage() {
       className="public-page min-h-screen"
       sx={{
         backgroundImage:
-          "linear-gradient(135deg, rgba(15,23,42,0.62), rgba(15,23,42,0.42)), url('/hotel-images/hotelbg1.jpg')",
+          "linear-gradient(135deg, rgba(11,29,40,0.78), rgba(11,29,40,0.45)), url('/hotel-images/hotelbg1.jpg')",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
@@ -235,7 +235,7 @@ export default function LoginPage() {
               style={{
                 backgroundColor: "#ffffff",
                 borderRadius: 24,
-                boxShadow: "0 18px 44px rgba(15,23,42,0.13)",
+                boxShadow: "0 30px 80px rgba(11,29,40,0.28)",
               }}
             >
               <Typography
@@ -243,9 +243,10 @@ export default function LoginPage() {
                 align="center"
                 fontWeight={800}
                 sx={{
-                  color: "#0f172a",
-                  fontSize: { xs: "1.65rem", md: "1.9rem" },
-                  letterSpacing: "-0.03em",
+                  color: "#0b1d28",
+                  fontFamily: "var(--font-display-serif), Georgia, serif",
+                  fontSize: { xs: "2.1rem", md: "2.5rem" },
+                  letterSpacing: "-0.01em",
                   mt: 0.25,
                 }}
                 gutterBottom
@@ -333,9 +334,9 @@ export default function LoginPage() {
                     textTransform: "none",
                     borderRadius: 3,
                     fontWeight: 700,
-                    backgroundColor: "#0284c7",
-                    "&:hover": { backgroundColor: "#0369a1" },
-                    "&:active": { backgroundColor: "#075985" },
+                    backgroundColor: "#8c6633",
+                    "&:hover": { backgroundColor: "#75552b" },
+                    "&:active": { backgroundColor: "#5f451f" },
                   }}
                   type="submit"
                   disabled={loading}
@@ -360,7 +361,7 @@ export default function LoginPage() {
                       cursor: "pointer",
                       fontSize: "0.92rem",
                       fontWeight: 600,
-                      color: "#0284c7",
+                      color: "#8c6633",
                       textAlign: "center",
                     }}
                   >
@@ -400,10 +401,10 @@ export default function LoginPage() {
                   fontWeight: 700,
                   borderRadius: 3,
                   fontSize: "0.96rem",
-                  borderColor: "#d1dbe7",
+                  borderColor: "#e9e2d6",
                   "&:hover": {
-                    borderColor: "#b9c7d8",
-                    backgroundColor: "#f8fafc",
+                    borderColor: "#cdbb9b",
+                    backgroundColor: "#faf7f1",
                   },
                 }}
                 onClick={() =>
@@ -428,7 +429,7 @@ export default function LoginPage() {
                   sx={{
                     cursor: "pointer",
                     fontWeight: 700,
-                    color: "#0ea5e9",
+                    color: "#b08447",
                     fontSize: "0.94rem",
                   }}
                   onClick={() => router.push("/register")}

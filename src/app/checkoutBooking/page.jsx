@@ -425,7 +425,7 @@ export default function CheckoutBooking() {
             - EUR{" "}
             {adjustedNightlyRate.toFixed(2)} x {nights} {t("summary.nightsLower")}
           </span>
-          <span className="font-semibold text-[#1f6feb]">
+          <span className="font-semibold text-[#b08447]">
             EUR {finalStayTotal.toFixed(2)}
           </span>
         </div>
@@ -439,7 +439,7 @@ export default function CheckoutBooking() {
           </Typography>
         ) : null}
         {hasDiscount ? (
-          <Typography variant="caption" sx={{ color: "#1d4ed8", fontWeight: 700, display: "block", mt: 0.25 }}>
+          <Typography variant="caption" sx={{ color: "#8c6633", fontWeight: 700, display: "block", mt: 0.25 }}>
             {t("summary.savings", {
               amount: savingsTotal.toFixed(2),
             })}
@@ -555,7 +555,7 @@ export default function CheckoutBooking() {
           px: 0.5,
           py: 1.25,
           borderRadius: 2,
-          backgroundColor: "#f8fafc",
+          backgroundColor: "#faf7f1",
           border: "1px solid #e2e8f0",
         }}
       >
@@ -574,7 +574,7 @@ export default function CheckoutBooking() {
               <Link
                 href="/terms-conditions"
                 target="_blank"
-                className="font-semibold text-[#1f6feb] underline underline-offset-4"
+                className="font-semibold text-[#b08447] underline underline-offset-4"
               >
                 {t("form.termsLink")}
               </Link>{" "}
@@ -582,7 +582,7 @@ export default function CheckoutBooking() {
               <Link
                 href="/privacy-policy"
                 target="_blank"
-                className="font-semibold text-[#1f6feb] underline underline-offset-4"
+                className="font-semibold text-[#b08447] underline underline-offset-4"
               >
                 {t("form.privacyLink")}
               </Link>
@@ -659,7 +659,7 @@ export default function CheckoutBooking() {
                           ? room.special_rate?.label || t("summary.discountedRate")
                           : t("summary.currentRate")}
                       </span>
-                      <span className="font-semibold text-[#1f6feb]">
+                      <span className="font-semibold text-[#b08447]">
                         EUR {finalStayTotal.toFixed(2)}
                       </span>
                     </div>
@@ -668,7 +668,7 @@ export default function CheckoutBooking() {
                       <Typography
                         variant="caption"
                         sx={{
-                          color: "#1d4ed8",
+                          color: "#8c6633",
                           fontWeight: 700,
                           display: "block",
                         }}

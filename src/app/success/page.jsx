@@ -189,9 +189,9 @@ export default function SuccessPage() {
           variant="contained"
           size="large"
           sx={{
-            background: "linear-gradient(90deg, #2563eb, #1d4ed8)",
+            background: "linear-gradient(90deg, #2563eb, #8c6633)",
             "&:hover": {
-              background: "linear-gradient(90deg, #1d4ed8, #1e40af)",
+              background: "linear-gradient(90deg, #8c6633, #1e40af)",
             },
             borderRadius: "10px",
             px: 4,

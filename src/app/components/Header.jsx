@@ -149,11 +149,11 @@ export default function Header() {
     ? "rgba(248, 250, 252, 0.92)"
     : isLoggedIn
       ? "linear-gradient(90deg, #eef6ff 0%, #f8fbff 100%)"
-      : "#f8fafc";
+      : "#faf7f1";
   const navBorder = isPublicShell
     ? "rgba(226,232,240,0.95)"
     : isLoggedIn
-      ? "#bfdbfe"
+      ? "#e2cda9"
       : "#e2e8f0";
 
   return (
@@ -570,7 +570,7 @@ export default function Header() {
                     component={Link}
                     href="/rooms"
                     sx={{
-                      backgroundColor: "#1f6feb",
+                      backgroundColor: "#b08447",
                       color: "#ffffff",
                       textTransform: "none",
                       fontWeight: 700,
@@ -579,7 +579,7 @@ export default function Header() {
                       minHeight: 34,
                       px: 1.8,
                       "&:hover": {
-                        backgroundColor: "#195fd0",
+                        backgroundColor: "#8c6633",
                       },
                     }}
                   >

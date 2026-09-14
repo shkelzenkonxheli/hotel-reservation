@@ -56,10 +56,10 @@ export default function RegisterPage() {
       height: { xs: 48, md: 50 },
       borderRadius: 2,
       backgroundColor: "#ffffff",
-      "& fieldset": { borderColor: "#dbe3ed" },
-      "&:hover fieldset": { borderColor: "#b9c7d8" },
+      "& fieldset": { borderColor: "#e9e2d6" },
+      "&:hover fieldset": { borderColor: "#cdbb9b" },
       "&.Mui-focused fieldset": {
-        borderColor: "#0ea5e9",
+        borderColor: "#b08447",
         borderWidth: 2,
       },
     },
@@ -160,7 +160,7 @@ export default function RegisterPage() {
       className="public-page min-h-screen"
       sx={{
         backgroundImage:
-          "linear-gradient(135deg, rgba(15,23,42,0.62), rgba(15,23,42,0.42)), url('/hotel-images/hotelbg1.jpg')",
+          "linear-gradient(135deg, rgba(11,29,40,0.78), rgba(11,29,40,0.45)), url('/hotel-images/hotelbg1.jpg')",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
@@ -181,7 +181,7 @@ export default function RegisterPage() {
               style={{
                 backgroundColor: "#ffffff",
                 borderRadius: 24,
-                boxShadow: "0 18px 44px rgba(15,23,42,0.13)",
+                boxShadow: "0 30px 80px rgba(11,29,40,0.28)",
               }}
             >
               <Typography
@@ -189,9 +189,10 @@ export default function RegisterPage() {
                 fontWeight={800}
                 align="center"
                 sx={{
-                  color: "#0f172a",
-                  fontSize: { xs: "1.65rem", md: "1.9rem" },
-                  letterSpacing: "-0.03em",
+                  color: "#0b1d28",
+                  fontFamily: "var(--font-display-serif), Georgia, serif",
+                  fontSize: { xs: "2.1rem", md: "2.5rem" },
+                  letterSpacing: "-0.01em",
                 }}
                 gutterBottom
               >
@@ -297,7 +298,7 @@ export default function RegisterPage() {
                       <Link
                         href="/terms-conditions"
                         style={{
-                          color: "#0284c7",
+                          color: "#8c6633",
                           fontWeight: 700,
                           textDecoration: "none",
                         }}
@@ -308,7 +309,7 @@ export default function RegisterPage() {
                       <Link
                         href="/privacy-policy"
                         style={{
-                          color: "#0284c7",
+                          color: "#8c6633",
                           fontWeight: 700,
                           textDecoration: "none",
                         }}
@@ -358,8 +359,8 @@ export default function RegisterPage() {
                     fontWeight: 700,
                     textTransform: "none",
                     fontSize: "0.96rem",
-                    backgroundColor: "#0284c7",
-                    "&:hover": { backgroundColor: "#0369a1" },
+                    backgroundColor: "#8c6633",
+                    "&:hover": { backgroundColor: "#75552b" },
                   }}
                 >
                   {loading ? (
@@ -379,7 +380,7 @@ export default function RegisterPage() {
                 {t("haveAccount")}{" "}
                 <Typography
                   component="span"
-                  sx={{ cursor: "pointer", color: "#0ea5e9", fontWeight: 700 }}
+                  sx={{ cursor: "pointer", color: "#b08447", fontWeight: 700 }}
                   onClick={() => router.push("/login")}
                 >
                   {t("buttons.login")}
@@ -397,10 +398,10 @@ export default function RegisterPage() {
                   textTransform: "none",
                   borderRadius: 3,
                   fontWeight: 700,
-                  borderColor: "#d1dbe7",
+                  borderColor: "#e9e2d6",
                   "&:hover": {
-                    borderColor: "#b9c7d8",
-                    backgroundColor: "#f8fafc",
+                    borderColor: "#cdbb9b",
+                    backgroundColor: "#faf7f1",
                   },
                 }}
                 onClick={() =>

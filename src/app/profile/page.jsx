@@ -211,7 +211,7 @@ export default function ProfilePage() {
                       bgcolor: "rgba(0,0,0,0.04)",
                     },
                     "& .Mui-selected": {
-                      bgcolor: "#0ea5e9",
+                      bgcolor: "#b08447",
                       color: "white !important",
                     },
                   }}

@@ -68,7 +68,7 @@ function getStatusTone(tab) {
   if (tab === "cancelled") {
     return { bg: "#ffe4e6", color: "#e11d48" };
   }
-  return { bg: "#e0f2fe", color: "#0369a1" };
+  return { bg: "#e0f2fe", color: "#75552b" };
 }
 
 function ReservationInfoItem({ icon, label, value }) {
@@ -377,7 +377,7 @@ export default function ReservationsPage({ embedded = false }) {
                       overflow: "hidden",
                       flexShrink: 0,
                       border: "1px solid #e8eef5",
-                      backgroundColor: "#f8fafc",
+                      backgroundColor: "#faf7f1",
                     }}
                   >
                     <img

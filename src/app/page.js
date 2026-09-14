@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import PublicContainer from "./components/Public/PublicContainer";
@@ -9,19 +8,11 @@ import PublicSection from "./components/Public/PublicSection";
 import PublicCard from "./components/Public/PublicCard";
 import usePageTitle from "./hooks/usePageTitle";
 
-function getToday() {
-  return new Date().toISOString().split("T")[0];
-}
-
 export default function Home() {
   const t = useTranslations("home");
   const headerT = useTranslations("header");
-  const router = useRouter();
   usePageTitle(t("metaTitle"));
 
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
-  const [guests, setGuests] = useState("2");
   const [activeRoomSlide, setActiveRoomSlide] = useState(0);
 
   const suiteCards = [
@@ -31,7 +22,6 @@ export default function Home() {
       price: t("curation.cards.0.price"),
       badge: t("curation.cards.0.badge"),
       image: "/hotel-images/seaview.JPG",
-      layout: "large",
     },
     {
       title: t("curation.cards.1.title"),
@@ -39,7 +29,6 @@ export default function Home() {
       price: t("curation.cards.1.price"),
       badge: t("curation.cards.1.badge"),
       image: "/hotel-images/breakfastpool.png",
-      layout: "small",
     },
     {
       title: t("curation.cards.2.title"),
@@ -47,7 +36,6 @@ export default function Home() {
       price: t("curation.cards.2.price"),
       badge: t("curation.cards.2.badge"),
       image: "/hotel-images/pool1.JPG",
-      layout: "small",
     },
   ];
 
@@ -76,127 +64,111 @@ export default function Home() {
   ];
 
   const roomShowcase = [
-    {
-      name: "Sea Horizon Suite",
-      image: "/hotel-images/hotel-room5.jpg",
-    },
-    {
-      name: "Poolside Deluxe Room",
-      image: "/hotel-images/hotel-room8.jpg",
-    },
-    {
-      name: "Terrace Comfort Room",
-      image: "/hotel-images/seaview1.JPG",
-    },
+    { name: "Sea Horizon Suite", image: "/hotel-images/hotel-room5.jpg" },
+    { name: "Poolside Deluxe Room", image: "/hotel-images/hotel-room8.jpg" },
+    { name: "Terrace Comfort Room", image: "/hotel-images/seaview1.JPG" },
   ];
 
   useEffect(() => {
     const intervalId = setInterval(() => {
       setActiveRoomSlide((current) => (current + 1) % roomShowcase.length);
-    }, 4000);
-
+    }, 5000);
     return () => clearInterval(intervalId);
   }, [roomShowcase.length]);
 
-  const handleAvailability = () => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem(
-        "homeSearchDraft",
-        JSON.stringify({
-          startDate: checkIn,
-          endDate: checkOut,
-          guests,
-        }),
-      );
-    }
-
-    router.push("/rooms");
-  };
-
   return (
-    <div className="public-page min-h-screen bg-[#f4f7fb]">
+    <div className="public-page min-h-screen">
+      {/* ============ HERO ============ */}
       <section className="relative isolate overflow-hidden">
         <div className="absolute inset-0">
           <img
             src="/hotel-images/hotelbg1.jpg"
             alt="Dijari Premium"
             className="h-full w-full object-cover object-center"
-            style={{
-              filter: "brightness(0.78) contrast(1.14) saturate(1.08)",
-              transform: "scale(1.015)",
-            }}
+            style={{ filter: "brightness(0.62) saturate(1.05)" }}
           />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,18,34,0.20)_0%,rgba(8,18,34,0.38)_44%,rgba(8,18,34,0.56)_100%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(132,174,243,0.16),transparent_38%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,29,40,0.45)_0%,rgba(11,29,40,0.30)_45%,rgba(11,29,40,0.82)_100%)]" />
         </div>
 
-        <PublicContainer className="relative flex min-h-[70vh] flex-col justify-center py-16 md:min-h-[80vh] md:py-20">
-          <div className="mx-auto max-w-2xl text-center text-white">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.45em] text-white/72 md:text-xs">
-              {t("hero.eyebrow")}
-            </p>
-            <h1 className="mt-4 text-[2rem] font-semibold leading-[1.08] md:text-[3.15rem]">
+        <PublicContainer className="relative flex min-h-[82vh] flex-col justify-end pb-14 pt-28 md:min-h-[92vh] md:pb-20">
+          <div className="fade-up max-w-3xl text-white">
+            <div className="flex items-center gap-4">
+              <span className="h-px w-14 bg-[var(--brass)]" />
+              <p className="text-[11px] font-semibold uppercase tracking-[0.42em] text-[#d9bd8e]">
+                {t("hero.eyebrow")}
+              </p>
+            </div>
+
+            <h1 className="display mt-6 text-[3rem] leading-[1.02] md:text-[5.2rem]">
               {t("hero.title")}
             </h1>
-            <div className="mt-7">
-              <Link
-                href="/rooms"
-                className="inline-flex items-center justify-center rounded-full bg-[#1f6feb] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#195fd0]"
-              >
+
+            <div className="mt-9 flex flex-wrap items-center gap-3">
+              <Link href="/rooms" className="public-button primary">
                 {headerT("bookNow")}
               </Link>
+              <a
+                href="#discover"
+                className="public-button ghost border-white/40 text-white hover:border-[var(--brass)] hover:text-[#e6cfa6]"
+              >
+                {t("story.eyebrow")}
+              </a>
             </div>
           </div>
-
         </PublicContainer>
       </section>
 
-      <PublicSection id="discover" className="scroll-mt-24 !pb-12 !pt-16">
+      {/* ============ STORY ============ */}
+      <PublicSection id="discover" className="scroll-mt-24">
         <PublicContainer>
-          <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <div className="grid gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
             <div className="max-w-xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-[#4b74a8]">
-                {t("story.eyebrow")}
-              </p>
-              <h2 className="mt-4 text-3xl font-semibold leading-tight text-slate-900 md:text-[2.6rem]">
+              <p className="eyebrow">{t("story.eyebrow")}</p>
+              <h2 className="display mt-5 text-[2.4rem] text-[var(--ink)] md:text-[3.4rem]">
                 {t("story.title")}
               </h2>
-              <p className="mt-6 text-base leading-8 text-slate-600">
+              <div className="rule mt-6" />
+              <p className="mt-7 text-[15px] leading-9 text-[var(--public-muted)] md:text-base">
                 {t("story.body.0")}
               </p>
-              <p className="mt-4 text-base leading-8 text-slate-600">
+              <p className="mt-4 text-[15px] leading-9 text-[var(--public-muted)] md:text-base">
                 {t("story.body.1")}
               </p>
 
-              <div className="mt-6 flex flex-wrap gap-3">
+              <div className="mt-8 grid gap-px overflow-hidden rounded-2xl border border-[var(--public-border)] bg-[var(--public-border)] sm:grid-cols-3">
                 {highlights.map((item) => (
-                  <span
+                  <div
                     key={item}
-                    className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm"
+                    className="bg-white px-5 py-6 text-center text-sm font-medium text-[var(--ink)]"
                   >
                     {item}
-                  </span>
+                  </div>
                 ))}
               </div>
             </div>
 
-            <div className="relative mx-auto w-full max-w-[560px]">
-              <div className="relative overflow-hidden rounded-[32px] shadow-[0_28px_70px_rgba(15,23,42,0.12)]">
-                <div className="relative h-[320px] overflow-hidden rounded-[32px] md:h-[470px]">
+            <div className="relative mx-auto w-full max-w-[620px]">
+              <div className="relative overflow-hidden rounded-[28px] shadow-[var(--public-shadow-lg)]">
+                <div className="relative h-[360px] md:h-[520px]">
                   {roomShowcase.map((room, index) => (
                     <img
                       key={room.name}
                       src={room.image}
                       alt={room.name}
-                      className={`absolute inset-0 h-full w-full object-cover transition-all duration-700 ${
+                      className={`absolute inset-0 h-full w-full object-cover transition-all duration-[1200ms] ${
                         index === activeRoomSlide
-                          ? "opacity-100 scale-100"
-                          : "opacity-0 scale-[1.02]"
+                          ? "scale-100 opacity-100"
+                          : "scale-[1.04] opacity-0"
                       }`}
                     />
                   ))}
+                  <div className="absolute inset-x-0 bottom-0 h-32 bg-[linear-gradient(180deg,transparent,rgba(11,29,40,0.6))]" />
                 </div>
-                <div className="absolute bottom-5 right-5 flex rounded-full bg-white/82 px-3 py-2 shadow-[0_10px_30px_rgba(15,23,42,0.14)] backdrop-blur-sm">
+
+                <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
+                  <p className="display text-2xl text-white">
+                    {roomShowcase[activeRoomSlide].name}
+                  </p>
                   <div className="flex gap-2">
                     {roomShowcase.map((room, index) => (
                       <button
@@ -204,92 +176,105 @@ export default function Home() {
                         type="button"
                         aria-label={`Show ${room.name}`}
                         onClick={() => setActiveRoomSlide(index)}
-                        className={`h-2.5 rounded-full transition-all ${
+                        className={`h-[3px] rounded-full transition-all duration-500 ${
                           index === activeRoomSlide
-                            ? "w-7 bg-[#1f6feb]"
-                            : "w-2.5 bg-slate-300"
+                            ? "w-10 bg-[var(--brass)]"
+                            : "w-5 bg-white/50"
                         }`}
                       />
                     ))}
                   </div>
                 </div>
               </div>
+              <div className="absolute -bottom-6 -left-6 -z-10 hidden h-40 w-40 rounded-[28px] border border-[var(--brass)] opacity-40 lg:block" />
             </div>
           </div>
         </PublicContainer>
       </PublicSection>
 
-      <PublicSection id="amenities" className="scroll-mt-24 !py-12">
+      {/* ============ CURATION ============ */}
+      <PublicSection id="amenities" className="scroll-mt-24 !pt-0">
         <PublicContainer>
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-[#4b74a8]">
-                {t("curation.eyebrow")}
-              </p>
-              <h2 className="mt-3 text-3xl font-semibold text-slate-900 md:text-[2.35rem]">
-                {t("curation.title")}
-              </h2>
-            </div>
+          <div className="max-w-2xl">
+            <p className="eyebrow">{t("curation.eyebrow")}</p>
+            <h2 className="display mt-5 text-[2.2rem] text-[var(--ink)] md:text-[3rem]">
+              {t("curation.title")}
+            </h2>
+            <div className="rule mt-6" />
           </div>
 
-          <div className="mt-8 grid gap-5 lg:grid-cols-[1.55fr_1fr]">
-            <PublicCard className="group relative overflow-hidden rounded-[30px] border-0 bg-slate-900 p-0">
-              <img
-                src={suiteCards[0].image}
-                alt={suiteCards[0].title}
-                className="h-[420px] w-full object-cover transition duration-500 group-hover:scale-[1.03]"
-              />
-            </PublicCard>
-
-            <div className="grid gap-5">
-              {suiteCards.slice(1).map((card) => (
-                <PublicCard
-                  key={card.title}
-                  className="group relative overflow-hidden rounded-[28px] border-0 bg-slate-900 p-0"
+          <div className="mt-12 grid gap-6 lg:grid-cols-3">
+            {suiteCards.map((card, index) => (
+              <article
+                key={card.title}
+                className={`hover-lift group relative overflow-hidden rounded-[26px] bg-[var(--ink)] ${
+                  index === 0 ? "lg:col-span-2" : ""
+                }`}
+              >
+                <div
+                  className={`overflow-hidden ${index === 0 ? "h-[420px]" : "h-[420px] lg:h-[420px]"}`}
                 >
                   <img
                     src={card.image}
                     alt={card.title}
-                    className="h-[200px] w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                    className="img-zoom h-full w-full object-cover"
                   />
-                </PublicCard>
-              ))}
-            </div>
+                </div>
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_35%,rgba(11,29,40,0.86)_100%)]" />
+                <div className="absolute inset-x-0 bottom-0 p-7">
+                  {card.badge ? (
+                    <span className="inline-flex rounded-full border border-[var(--brass)]/60 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-[#e6cfa6]">
+                      {card.badge}
+                    </span>
+                  ) : null}
+                  <h3 className="display mt-4 text-[1.9rem] text-white">
+                    {card.title}
+                  </h3>
+                  <p className="mt-2 max-w-md text-sm leading-7 text-white/70">
+                    {card.description}
+                  </p>
+                  {card.price ? (
+                    <p className="mt-3 text-sm font-semibold tracking-wide text-[#e6cfa6]">
+                      {card.price}
+                    </p>
+                  ) : null}
+                </div>
+              </article>
+            ))}
           </div>
         </PublicContainer>
       </PublicSection>
 
-      <PublicSection className="!py-12">
+      {/* ============ TESTIMONIALS ============ */}
+      <PublicSection className="bg-[var(--sand-deep)]">
         <PublicContainer>
-          <div className="text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-[#4b74a8]">
-              {t("testimonials.eyebrow")}
-            </p>
-            <h2 className="mt-3 text-3xl font-semibold text-slate-900 md:text-[2.2rem]">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="eyebrow">{t("testimonials.eyebrow")}</p>
+            <h2 className="display mt-5 text-[2.1rem] text-[var(--ink)] md:text-[2.8rem]">
               {t("testimonials.title")}
             </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-500 md:text-base">
+            <p className="mt-4 text-sm leading-8 text-[var(--public-muted)] md:text-base">
               {t("testimonials.subtitle")}
             </p>
           </div>
 
-          <div className="mt-8 grid gap-5 md:grid-cols-3">
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
             {testimonials.map((item) => (
               <PublicCard
                 key={item.name}
-                className="rounded-[24px] bg-white p-6 shadow-[0_16px_40px_rgba(15,23,42,0.06)]"
+                className="public-card-flat hover-lift flex flex-col justify-between p-8"
               >
-                <div className="flex gap-1 text-[#1f6feb]">
-                  {Array.from({ length: 5 }).map((_, index) => (
-                    <span key={index}>★</span>
-                  ))}
+                <div>
+                  <p className="display text-5xl leading-none text-[var(--brass)]">
+                    &ldquo;
+                  </p>
+                  <p className="-mt-3 text-[15px] leading-8 text-[var(--ink-soft)]">
+                    {item.quote}
+                  </p>
                 </div>
-                <p className="mt-4 text-sm leading-7 text-slate-600">
-                  “{item.quote}”
-                </p>
 
-                <div className="mt-6 flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-700">
+                <div className="mt-8 flex items-center gap-3 border-t border-[var(--public-border)] pt-5">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--brass-soft)] text-sm font-semibold text-[var(--brass-deep)]">
                     {item.name
                       .split(" ")
                       .map((part) => part[0])
@@ -297,8 +282,12 @@ export default function Home() {
                       .slice(0, 2)}
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-900">{item.name}</p>
-                    <p className="text-sm text-slate-500">{item.role}</p>
+                    <p className="font-semibold text-[var(--ink)]">
+                      {item.name}
+                    </p>
+                    <p className="text-sm text-[var(--public-muted)]">
+                      {item.role}
+                    </p>
                   </div>
                 </div>
               </PublicCard>
@@ -307,51 +296,64 @@ export default function Home() {
         </PublicContainer>
       </PublicSection>
 
-      <PublicSection id="offers" className="scroll-mt-24 !pb-14 !pt-12">
+      {/* ============ CTA ============ */}
+      <PublicSection id="offers" className="scroll-mt-24">
         <PublicContainer>
-          <div className="relative overflow-hidden rounded-[34px]">
+          <div className="relative overflow-hidden rounded-[30px]">
             <img
               src="/hotel-images/seaview1.JPG"
               alt={t("cta.imageAlt")}
               className="absolute inset-0 h-full w-full object-cover"
-              style={{ filter: "brightness(0.5) contrast(1.05)" }}
+              style={{ filter: "brightness(0.45)" }}
             />
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,24,46,0.2)_0%,rgba(10,24,46,0.74)_100%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(11,29,40,0.78)_0%,rgba(11,29,40,0.35)_100%)]" />
 
-            <div className="relative z-10 flex min-h-[300px] flex-col items-center justify-center px-6 py-14 text-center text-white md:min-h-[340px]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-white/72">
+            <div className="relative z-10 flex min-h-[380px] flex-col items-center justify-center px-6 py-16 text-center text-white">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.42em] text-[#d9bd8e]">
                 {t("cta.eyebrow")}
               </p>
-              <h2 className="mt-4 max-w-3xl text-3xl font-semibold leading-tight md:text-5xl">
+              <h2 className="display mt-5 max-w-3xl text-[2.3rem] md:text-[3.4rem]">
                 {t("cta.title")}
               </h2>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-white/82 md:text-base">
+              <p className="mt-5 max-w-2xl text-sm leading-8 text-white/75 md:text-base">
                 {t("cta.subtitle")}
               </p>
+              <Link href="/rooms" className="public-button primary mt-9">
+                {headerT("bookNow")}
+              </Link>
             </div>
           </div>
         </PublicContainer>
       </PublicSection>
 
-      <footer className="border-t border-slate-200/80 bg-[#f4f7fb] py-5">
+      {/* ============ FOOTER ============ */}
+      <footer className="border-t border-[var(--public-border)] bg-[var(--ink)] py-12 text-white">
         <PublicContainer>
-          <div className="flex flex-col items-center justify-center text-center">
-            <p className="text-base font-semibold text-slate-900">
-              Dijari Premium
-            </p>
-            <p className="mt-1 text-sm text-slate-500">{t("footer.rights")}</p>
-            <Link
-              href="/privacy-policy"
-              className="mt-2 text-sm font-medium text-[#1f6feb] transition hover:text-[#195fd0]"
-            >
-              {t("footer.links.privacy")}
-            </Link>
-            <Link
-              href="/terms-conditions"
-              className="mt-1 text-sm font-medium text-[#1f6feb] transition hover:text-[#195fd0]"
-            >
-              {t("footer.links.terms")}
-            </Link>
+          <div className="flex flex-col items-center gap-4 text-center md:flex-row md:justify-between md:text-left">
+            <div>
+              <p className="display text-2xl">Dijari Premium</p>
+              <p className="mt-1 text-sm text-white/55">{t("footer.rights")}</p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
+              <Link
+                href="/rooms"
+                className="text-white/70 transition hover:text-[#e6cfa6]"
+              >
+                {headerT("bookNow")}
+              </Link>
+              <Link
+                href="/privacy-policy"
+                className="text-white/70 transition hover:text-[#e6cfa6]"
+              >
+                {t("footer.links.privacy")}
+              </Link>
+              <Link
+                href="/terms-conditions"
+                className="text-white/70 transition hover:text-[#e6cfa6]"
+              >
+                {t("footer.links.terms")}
+              </Link>
+            </div>
           </div>
         </PublicContainer>
       </footer>

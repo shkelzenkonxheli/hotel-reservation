@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { Suspense, useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useBooking } from "@/context/BookingContext";
@@ -14,11 +14,17 @@ import {
   Snackbar,
   Typography,
 } from "@mui/material";
-import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import "react-calendar/dist/Calendar.css";
 import PublicContainer from "../components/Public/PublicContainer";
 import PublicSection from "../components/Public/PublicSection";
-import PublicCard from "../components/Public/PublicCard";
+import RoomsHero from "../components/Rooms/RoomsHero";
+import RoomsFilterBar from "../components/Rooms/RoomsFilterBar";
+import RoomCard from "../components/Rooms/RoomCard";
+import RoomCardSkeleton from "../components/Rooms/RoomCardSkeleton";
+import RoomsEmptyState from "../components/Rooms/RoomsEmptyState";
+import RoomDetailsDialog from "../components/Rooms/RoomDetailsDialog";
+import AmenitiesDialog from "../components/Rooms/AmenitiesDialog";
+import RoomsSearchParamsBridge from "../components/Rooms/RoomsSearchParamsBridge";
 import { useSession } from "next-auth/react";
 import usePageTitle from "../hooks/usePageTitle";
 
@@ -72,6 +78,7 @@ export default function RoomsPage() {
 
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [guests, setGuests] = useState("");
 
   const { data: session } = useSession();
 
@@ -114,6 +121,26 @@ export default function RoomsPage() {
         ? t("filters.hotel")
         : "Dhoma hoteli",
   };
+  const datesLabel =
+    typeof t.has === "function" && t.has("dates.label")
+      ? t("dates.label")
+      : "Dates";
+  const datesPlaceholder =
+    typeof t.has === "function" && t.has("dates.placeholder")
+      ? t("dates.placeholder")
+      : "Add dates";
+  const guestsLabel =
+    typeof t.has === "function" && t.has("dates.guestsLabel")
+      ? t("dates.guestsLabel")
+      : "Guests";
+  const emptyTitle =
+    typeof t.has === "function" && t.has("empty.title")
+      ? t("empty.title")
+      : "No rooms match your filters";
+  const emptySubtitle =
+    typeof t.has === "function" && t.has("empty.subtitle")
+      ? t("empty.subtitle")
+      : "Try a different room type.";
   const capacityLabel =
     typeof t.has === "function" && t.has("capacity")
       ? (count) => t("capacity", { count })
@@ -158,6 +185,12 @@ export default function RoomsPage() {
       localStorage.removeItem("homeSearchDraft");
     }
   }, []);
+
+  const handleSearchParams = ({ checkIn, checkOut, guests: guestsParam }) => {
+    if (checkIn) setStartDate(checkIn);
+    if (checkOut) setEndDate(checkOut);
+    if (guestsParam) setGuests(guestsParam);
+  };
 
   useEffect(() => {
     if (!selectedRoom) return;
@@ -256,11 +289,6 @@ export default function RoomsPage() {
     );
   };
 
-  const getFirstLine = (text) => {
-    if (!text) return "";
-    return text.split("\n")[0];
-  };
-
   const openGallery = (room, index = 0) => {
     setGalleryRoom(room);
     setGalleryIndex(index);
@@ -303,208 +331,71 @@ export default function RoomsPage() {
   });
 
   return (
-    <div className="public-page min-h-screen">
-      <PublicSection className="!pt-4 !pb-0">
-        <PublicContainer>
-          <div className="mb-3 flex flex-col gap-4 md:mt-3 md:flex-row md:items-center md:justify-between">
-            <h2 className="display text-[2.3rem] leading-tight text-[var(--ink)] md:text-[3.2rem]">
-              {t("title")}
-            </h2>
-            <div className="flex md:justify-end">
-              <div className="inline-flex w-full max-w-[430px] items-center gap-1.5 overflow-x-auto rounded-full border border-slate-200/80 bg-white/90 p-1.5 shadow-[0_14px_34px_rgba(15,23,42,0.08)] backdrop-blur md:w-auto md:max-w-none md:gap-2 md:p-2">
-              {["all", "apartment", "hotel"].map((category) => {
-                const isActive = roomCategory === category;
+    <div className="public-page min-h-screen bg-[var(--sand)]">
+      <Suspense fallback={null}>
+        <RoomsSearchParamsBridge onParams={handleSearchParams} />
+      </Suspense>
 
-                return (
-                  <button
-                    key={category}
-                    type="button"
-                    onClick={() => setRoomCategory(category)}
-                    className={`inline-flex min-w-0 shrink-0 flex-1 items-center justify-center whitespace-nowrap rounded-full px-2.5 py-2 text-[0.88rem] font-semibold transition duration-200 md:min-w-[112px] md:flex-none md:px-4 md:py-2.5 md:text-sm ${
-                      isActive
-                        ? "bg-[#b08447] text-white shadow-[0_12px_28px_rgba(176,132,71,0.28)]"
-                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                    }`}
-                  >
-                    {roomFilterLabels[category]}
-                  </button>
-                );
-              })}
-              </div>
-            </div>
-          </div>
+      <PublicSection className="!pb-0">
+        <PublicContainer>
+          <RoomsHero t={t} />
         </PublicContainer>
       </PublicSection>
 
-      <PublicSection className="!pt-0 pb-16">
+      <PublicSection className="!pt-6">
+        <PublicContainer>
+          <RoomsFilterBar
+            roomCategory={roomCategory}
+            setRoomCategory={setRoomCategory}
+            roomFilterLabels={roomFilterLabels}
+            startDate={startDate}
+            endDate={endDate}
+            guests={guests}
+            datesLabel={datesLabel}
+            guestsLabel={guestsLabel}
+            datesPlaceholder={datesPlaceholder}
+          />
+        </PublicContainer>
+      </PublicSection>
+
+      <PublicSection className="!pt-6 pb-16 md:pb-24">
         <PublicContainer>
           {loadingRooms ? (
             <div className="space-y-8">
               {[...Array(3)].map((_, i) => (
-                <PublicCard
-                  key={i}
-                  className="overflow-hidden rounded-[30px] border border-slate-200/80 bg-white p-0 animate-pulse"
-                >
-                  <div className="grid lg:grid-cols-[1.1fr_0.9fr]">
-                    <div className="h-[300px] bg-slate-200 md:h-[360px]" />
-                    <div className="p-6 md:p-8">
-                      <div className="h-3 w-24 rounded-full bg-slate-100" />
-                      <div className="mt-5 h-8 w-2/3 rounded bg-slate-200" />
-                      <div className="mt-4 h-3 w-full rounded bg-slate-100" />
-                      <div className="mt-2 h-3 w-5/6 rounded bg-slate-100" />
-                      <div className="mt-6 flex gap-2">
-                        <div className="h-8 w-24 rounded-full bg-slate-100" />
-                        <div className="h-8 w-20 rounded-full bg-slate-100" />
-                      </div>
-                      <div className="mt-8 flex items-center justify-between">
-                        <div className="h-8 w-28 rounded bg-slate-200" />
-                        <div className="h-11 w-32 rounded-full bg-slate-200" />
-                      </div>
-                    </div>
-                  </div>
-                </PublicCard>
+                <RoomCardSkeleton key={i} />
               ))}
             </div>
+          ) : visibleRoomTypes.length === 0 ? (
+            <RoomsEmptyState
+              title={emptyTitle}
+              subtitle={emptySubtitle}
+              actionLabel={roomFilterLabels.all}
+              onAction={
+                roomCategory !== "all" ? () => setRoomCategory("all") : undefined
+              }
+            />
           ) : (
             <div className="space-y-8">
               {visibleRoomTypes.map((room, index) => {
-                const reverse = index % 2 === 1;
-                const previewImages = Array.isArray(room.images)
-                  ? room.images.slice(1, 3)
-                  : [];
                 const roomLabelKey = getRoomLabelKey(room.type);
                 const amenities = getFeatureChips(room.amenities);
-                const visibleAmenities = amenities.slice(0, 4);
 
                 return (
-                <PublicCard
-                  key={room.type}
-                  className="hover-lift overflow-hidden rounded-[26px] border border-[var(--public-border)] bg-white p-0"
-                >
-                  <div className="grid lg:grid-cols-[1.05fr_0.95fr] lg:items-stretch">
-                    <div
-                      className={`relative min-h-[320px] overflow-hidden bg-slate-100 md:min-h-[420px] ${
-                        reverse ? "lg:order-2" : ""
-                      }`}
-                    >
-                      <button
-                        type="button"
-                        className="absolute inset-0 h-full w-full cursor-pointer"
-                        onClick={() => openGallery(room, 0)}
-                      >
-                        <img
-                          src={room.images?.[0]}
-                          alt={room.name}
-                          className="h-full w-full object-cover transition duration-500 hover:scale-[1.03]"
-                        />
-                      </button>
-
-                      {previewImages.length > 0 ? (
-                        <div className="absolute bottom-4 left-4 right-4 hidden gap-3 md:grid md:grid-cols-2">
-                          {previewImages.map((image, imageIndex) => (
-                            <button
-                              key={`${room.type}-${imageIndex + 1}`}
-                              type="button"
-                              className="overflow-hidden rounded-2xl border border-white/55 bg-white/20 backdrop-blur-sm"
-                              onClick={() => openGallery(room, imageIndex + 1)}
-                            >
-                              <img
-                                src={image}
-                                alt={`${room.name} preview ${imageIndex + 2}`}
-                                className="h-24 w-full object-cover"
-                              />
-                            </button>
-                          ))}
-                        </div>
-                      ) : null}
-                    </div>
-
-                    <div
-                      className={`flex flex-col justify-between p-6 md:p-8 lg:p-10 ${
-                        reverse ? "lg:order-1" : ""
-                      }`}
-                    >
-                      <div>
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0 flex-1">
-                            {roomLabelKey ? (
-                              <span className="inline-flex rounded-full bg-[#f5ecdd] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#b08447]">
-                                {t(`labels.${roomLabelKey}`)}
-                              </span>
-                            ) : null}
-                            <h3 className="display mt-4 text-[2rem] leading-tight text-[var(--ink)] md:text-[2.5rem]">
-                              {room.name}
-                            </h3>
-                          </div>
-                          {room.max_guests ? (
-                            <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-[#e2cda9] bg-[#faf4e9] px-3.5 py-1.5 text-xs font-semibold text-[#8c6633]">
-                              <GroupOutlinedIcon sx={{ fontSize: 15 }} />
-                              {capacityLabel(room.max_guests)}
-                            </span>
-                          ) : null}
-                        </div>
-                        <p className="mt-4 max-w-xl text-[15px] leading-8 text-slate-600 md:text-base">
-                          {room.description || getFirstLine(room.description)}
-                        </p>
-
-                        <div className="mt-5">
-                          <div className="flex flex-wrap gap-2.5">
-                            {visibleAmenities.map((amenity) => (
-                              <span
-                                key={amenity}
-                                className="rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-medium text-slate-600"
-                              >
-                                {amenity}
-                              </span>
-                            ))}
-                          </div>
-                          {amenities.length > 4 ? (
-                            <button
-                              type="button"
-                              className="mt-2 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-[#b08447] transition hover:border-[#e2cda9] hover:bg-[#faf4e9]"
-                              onClick={() => setAmenitiesRoom(room)}
-                            >
-                              {showAllAmenitiesLabel}
-                            </button>
-                          ) : null}
-                        </div>
-                      </div>
-
-                      <div className="mt-6 flex items-end justify-between gap-4 border-t border-slate-200/80 pt-5">
-                        <div>
-                          <div>
-                            {room.has_discount ? (
-                              <div className="flex flex-col gap-1.5">
-                                <span className="text-sm font-medium text-slate-400 line-through">
-                                  €{Number(room.original_price || room.price || 0).toFixed(0)}
-                                </span>
-                                <span className="text-[1.85rem] font-semibold leading-none text-[#b08447] md:text-[2.2rem]">
-                                  €{Number(room.effective_price || room.price || 0).toFixed(0)}
-                                </span>
-                              </div>
-                            ) : (
-                              <span className="text-[1.85rem] font-semibold leading-none text-slate-900 md:text-[2.2rem]">
-                                €{Number(room.price || 0).toFixed(0)}
-                              </span>
-                            )}
-                            <span className="ml-2 text-sm text-slate-500">
-                              / {t("night")}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="shrink-0">
-                          <button
-                            className="public-button primary min-w-[132px] sm:min-w-[160px]"
-                            onClick={() => handleBookClick(room)}
-                          >
-                            {t("buttons.bookNow")}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </PublicCard>
+                  <RoomCard
+                    key={room.type}
+                    room={room}
+                    reverse={index % 2 === 1}
+                    roomLabel={roomLabelKey ? t(`labels.${roomLabelKey}`) : ""}
+                    amenities={amenities}
+                    capacityLabel={capacityLabel}
+                    showAllAmenitiesLabel={showAllAmenitiesLabel}
+                    t={t}
+                    onOpenGallery={openGallery}
+                    onShowAmenities={setAmenitiesRoom}
+                    onViewDetails={setExpandedRoom}
+                    onBook={handleBookClick}
+                  />
                 );
               })}
             </div>
@@ -613,71 +504,22 @@ export default function RoomsPage() {
         </DialogActions>
       </Dialog>
 
-      {expandedRoom && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-3">
-          <div className="public-card p-5 md:p-6 max-w-lg w-full relative">
-            <button
-              className="absolute top-3 right-3 text-slate-500 cursor-pointer "
-              onClick={() => setExpandedRoom(null)}
-            >
-              {t("buttons.close")}
-            </button>
+      <RoomDetailsDialog
+        room={expandedRoom}
+        t={t}
+        capacityLabel={capacityLabel}
+        onClose={() => setExpandedRoom(null)}
+        onBook={(room) => {
+          setExpandedRoom(null);
+          handleBookClick(room);
+        }}
+      />
 
-            <h2 className="text-xl font-semibold mb-4">{expandedRoom.name}</h2>
-
-            <p className="text-slate-600 text-sm">{expandedRoom.description}</p>
-
-            {Array.isArray(expandedRoom.amenities) &&
-            expandedRoom.amenities.length > 0 ? (
-              <div className="mt-4 flex flex-wrap gap-2">
-                {expandedRoom.amenities.map((amenity) => (
-                  <span
-                    key={amenity}
-                    className="text-xs px-2.5 py-1 rounded-full border border-slate-200 text-slate-700 bg-slate-50"
-                  >
-                    {amenity}
-                  </span>
-                ))}
-              </div>
-            ) : null}
-          </div>
-        </div>
-      )}
-
-      {amenitiesRoom && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3"
-          onClick={() => setAmenitiesRoom(null)}
-        >
-          <div
-            className="public-card relative max-h-[82vh] w-full max-w-lg overflow-y-auto p-5 pr-12 md:p-6 md:pr-14"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              type="button"
-              className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-700 transition hover:bg-slate-200 md:right-4 md:top-4"
-              onClick={() => setAmenitiesRoom(null)}
-              aria-label={t("buttons.close")}
-            >
-              X
-            </button>
-            <h2 className="text-xl font-semibold mb-4">{amenitiesRoom.name}</h2>
-            <div className="flex flex-wrap gap-2.5">
-              {(Array.isArray(amenitiesRoom.amenities)
-                ? amenitiesRoom.amenities
-                : []
-              ).map((amenity) => (
-                <span
-                  key={amenity}
-                  className="rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-medium text-slate-600"
-                >
-                  {amenity}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      <AmenitiesDialog
+        room={amenitiesRoom}
+        t={t}
+        onClose={() => setAmenitiesRoom(null)}
+      />
 
       {galleryRoom && (
         <div

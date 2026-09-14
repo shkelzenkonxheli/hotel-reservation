@@ -5,17 +5,7 @@ import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import {
-  Typography,
-  Box,
-  Divider,
-  Avatar,
-  Chip,
-  Button,
-  TextField,
-  Snackbar,
-  Alert,
-} from "@mui/material";
+import { Avatar, Button, TextField, Snackbar, Alert } from "@mui/material";
 import { useState } from "react";
 import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
@@ -177,206 +167,165 @@ export default function ProfilePage() {
   }, [status, session, router]);
 
   if (status === "loading") {
-    return (
-      <Typography sx={{ mt: 4, textAlign: "center" }}>{t("loading")}</Typography>
-    );
+    return <p className="text-center mt-10 text-slate-500">{t("loading")}</p>;
   }
 
   if (!session) return null;
 
   const user = session.user;
   const displayName = form.name || user.name || user.email?.split("@")?.[0] || "User";
+  const roleLabel =
+    user.role === "admin" ? t("roles.admin") : user.role === "worker" ? t("roles.worker") : t("roles.guest");
 
   return (
-    <Box className="public-page min-h-screen">
+    <div className="public-page min-h-screen">
       <PublicSection>
         <PublicContainer>
-          <PublicCard className="p-4 md:p-6">
-            <TabContext value={value}>
-              <Box sx={{ mb: 2 }}>
-                <TabList
-                  onChange={handleChangeTab}
-                  variant="scrollable"
-                  scrollButtons="auto"
-                  allowScrollButtonsMobile
+          <div className="max-w-3xl mx-auto">
+            <PublicCard className="p-6 md:p-8 mb-6">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
+                <Avatar
                   sx={{
-                    "& .MuiTabs-indicator": { display: "none" },
-                    "& .MuiTab-root": {
-                      textTransform: "none",
-                      fontWeight: 700,
-                      borderRadius: 999,
-                      minHeight: 40,
-                      px: 2,
-                      mr: 1,
-                      bgcolor: "rgba(0,0,0,0.04)",
-                    },
-                    "& .Mui-selected": {
-                      bgcolor: "#b08447",
-                      color: "white !important",
-                    },
+                    width: 96,
+                    height: 96,
+                    fontSize: 34,
+                    bgcolor: "var(--brass)",
+                    border: "3px solid var(--sand-deep)",
                   }}
-                >
-                  <Tab label={t("tabs.profile")} value="1" />
-                  <Tab label={t("tabs.reservations")} value="2" />
-                </TabList>
-              </Box>
+                  src={avatarUrl || undefined}
+                />
+                <div className="flex-1 min-w-0">
+                  <h1 className="display text-2xl">{displayName}</h1>
+                  <p className="text-sm text-slate-500 mt-1 break-all">{user.email}</p>
+                  <span className="badge badge-brass mt-2 inline-block">{roleLabel}</span>
+                </div>
+                <label className="btn btn-outline btn-sm cursor-pointer flex-shrink-0">
+                  {uploadingAvatar ? t("buttons.uploading") : t("buttons.changePhoto")}
+                  <input
+                    hidden
+                    type="file"
+                    accept="image/*"
+                    disabled={uploadingAvatar}
+                    onChange={handleAvatarChange}
+                  />
+                </label>
+              </div>
+            </PublicCard>
 
-              <TabPanel value="1" sx={{ p: 0 }}>
-                <Box sx={{ maxWidth: 700, mx: "auto" }}>
-                  <Box sx={{ textAlign: "center", mb: 3 }}>
-                    <Avatar
-                      sx={{
-                        width: 90,
-                        height: 90,
-                        mx: "auto",
-                        fontSize: 32,
-                        bgcolor: "primary.main",
-                      }}
-                      src={avatarUrl || undefined}
-                    />
-
-                    <Typography variant="h5" mt={1} fontWeight={700}>
-                      {displayName}
-                    </Typography>
-
-                    <Typography variant="body2" color="text.secondary">
-                      {user.email}
-                    </Typography>
-
-                    <Chip
-                      label={
-                        user.role === "admin"
-                          ? t("roles.admin")
-                          : user.role === "worker"
-                            ? t("roles.worker")
-                            : t("roles.guest")
-                      }
-                      color="primary"
-                      size="small"
-                      sx={{ mt: 1 }}
-                    />
-                  </Box>
-
-                  <Divider sx={{ mb: 3 }} />
-
-                  <Box
-                    sx={{ display: "flex", justifyContent: "center", mb: 3 }}
-                  >
-                    <Button
-                      variant="outlined"
-                      component="label"
-                      disabled={uploadingAvatar}
-                      sx={{ textTransform: "none", borderRadius: 2 }}
-                    >
-                      {uploadingAvatar ? t("buttons.uploading") : t("buttons.changePhoto")}
-                      <input
-                        hidden
-                        type="file"
-                        accept="image/*"
-                        onChange={handleAvatarChange}
-                      />
-                    </Button>
-                  </Box>
-
-                  <Box
-                    sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-                  >
-                    <TextField
-                      label={t("fields.fullName")}
-                      name="name"
-                      value={form.name}
-                      onChange={handleInput}
-                      fullWidth
-                    />
-
-                    <TextField
-                      label={t("fields.email")}
-                      name="email"
-                      value={form.email}
-                      fullWidth
-                      disabled
-                    />
-
-                    <TextField
-                      label={t("fields.phone")}
-                      name="phone"
-                      value={form.phone}
-                      onChange={handleInput}
-                      fullWidth
-                    />
-
-                    <TextField
-                      label={t("fields.address")}
-                      name="address"
-                      value={form.address}
-                      onChange={handleInput}
-                      fullWidth
-                    />
-                  </Box>
-
-                  <Box
+            <PublicCard className="p-4 md:p-6">
+              <TabContext value={value}>
+                <div className="mb-5">
+                  <TabList
+                    onChange={handleChangeTab}
+                    variant="scrollable"
+                    scrollButtons="auto"
+                    allowScrollButtonsMobile
                     sx={{
-                      display: "flex",
-                      flexDirection: { xs: "column", sm: "row" },
-                      gap: 1.2,
-                      mt: 3,
+                      minHeight: 0,
+                      "& .MuiTabs-indicator": { display: "none" },
+                      "& .MuiTab-root": {
+                        textTransform: "none",
+                        fontWeight: 700,
+                        borderRadius: 999,
+                        minHeight: 48,
+                        px: 2.4,
+                        mr: 1,
+                        bgcolor: "var(--sand-deep)",
+                        color: "var(--ink-soft)",
+                      },
+                      "& .Mui-selected": {
+                        bgcolor: "var(--brass)",
+                        color: "white !important",
+                      },
                     }}
                   >
-                    <Button
-                      variant="contained"
-                      onClick={handleSave}
-                      disabled={!hasChanged || saving}
-                      sx={{
-                        borderRadius: 2,
-                        textTransform: "none",
-                        width: { xs: "100%", sm: "auto" },
-                      }}
-                    >
-                      {saving ? t("buttons.saving") : t("buttons.saveChanges")}
-                    </Button>
+                    <Tab label={t("tabs.profile")} value="1" />
+                    <Tab label={t("tabs.reservations")} value="2" />
+                  </TabList>
+                </div>
 
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      onClick={handleCancel}
-                      disabled={!hasChanged}
-                      sx={{
-                        borderRadius: 2,
-                        textTransform: "none",
-                        width: { xs: "100%", sm: "auto" },
-                      }}
-                    >
-                      {t("buttons.cancel")}
-                    </Button>
-                  </Box>
-                </Box>
+                <TabPanel value="1" sx={{ p: 0 }}>
+                  <div className="max-w-xl mx-auto">
+                    <p className="eyebrow">{t("sections.account")}</p>
+                    <div className="flex flex-col gap-4 mt-3">
+                      <TextField
+                        label={t("fields.fullName")}
+                        name="name"
+                        value={form.name}
+                        onChange={handleInput}
+                        fullWidth
+                      />
+                      <TextField
+                        label={t("fields.email")}
+                        name="email"
+                        value={form.email}
+                        fullWidth
+                        disabled
+                      />
+                      <TextField
+                        label={t("fields.phone")}
+                        name="phone"
+                        value={form.phone}
+                        onChange={handleInput}
+                        fullWidth
+                      />
+                      <TextField
+                        label={t("fields.address")}
+                        name="address"
+                        value={form.address}
+                        onChange={handleInput}
+                        fullWidth
+                      />
+                    </div>
 
-                <Snackbar
-                  open={feedback.open}
-                  autoHideDuration={4000}
-                  onClose={() => setFeedback({ ...feedback, open: false })}
-                  anchorOrigin={{ vertical: "top", horizontal: "right" }}
-                >
-                  <Alert
-                    severity={feedback.severity}
-                    variant="filled"
+                    <div className="flex flex-col sm:flex-row gap-3 mt-6">
+                      <button
+                        type="button"
+                        onClick={handleSave}
+                        disabled={!hasChanged || saving}
+                        className="btn btn-primary sm:w-auto w-full"
+                      >
+                        {saving ? t("buttons.saving") : t("buttons.saveChanges")}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleCancel}
+                        disabled={!hasChanged}
+                        className="btn btn-outline sm:w-auto w-full"
+                      >
+                        {t("buttons.cancel")}
+                      </button>
+                    </div>
+                  </div>
+
+                  <Snackbar
+                    open={feedback.open}
+                    autoHideDuration={4000}
                     onClose={() => setFeedback({ ...feedback, open: false })}
-                    sx={{ fontWeight: 600 }}
+                    anchorOrigin={{ vertical: "top", horizontal: "right" }}
                   >
-                    {feedback.message}
-                  </Alert>
-                </Snackbar>
-              </TabPanel>
+                    <Alert
+                      severity={feedback.severity}
+                      variant="filled"
+                      onClose={() => setFeedback({ ...feedback, open: false })}
+                      sx={{ fontWeight: 600 }}
+                    >
+                      {feedback.message}
+                    </Alert>
+                  </Snackbar>
+                </TabPanel>
 
-              <TabPanel value="2" sx={{ p: 0 }}>
-                <Box sx={{ maxWidth: "100%", mx: "auto" }}>
-                  <ReservationsPage embedded />
-                </Box>
-              </TabPanel>
-            </TabContext>
-          </PublicCard>
+                <TabPanel value="2" sx={{ p: 0 }}>
+                  <div className="max-w-full mx-auto">
+                    <ReservationsPage embedded />
+                  </div>
+                </TabPanel>
+              </TabContext>
+            </PublicCard>
+          </div>
         </PublicContainer>
       </PublicSection>
-    </Box>
+    </div>
   );
 }

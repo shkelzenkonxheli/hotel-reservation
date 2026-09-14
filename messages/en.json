@@ -70,6 +70,12 @@
       "available": "The room is available for these dates.",
       "unavailable": "There is no availability for these dates. Please change the dates.",
       "checkFailed": "Availability check failed. Please try again."
+    },
+    "steps": {
+      "dates": "Dates",
+      "room": "Room",
+      "details": "Details",
+      "confirm": "Confirm"
     }
   },
   "success": {
@@ -89,7 +95,11 @@
     "pendingStatus": "Waiting for confirmation",
     "noReservation": "No recent reservation found.",
     "backHome": "Back to Home",
-    "stayRules": "Check-in starts from 14:00, while check-out is until 11:00."
+    "stayRules": "Check-in starts from 14:00, while check-out is until 11:00.",
+    "actions": {
+      "viewReservations": "View my reservations",
+      "bookAgain": "Book another stay"
+    }
   },
   "login": {
     "metaTitle": "Login | Dijari Premium",
@@ -240,6 +250,24 @@
       "all": "All",
       "apartment": "Apartments",
       "hotel": "Hotel rooms"
+    },
+    "empty": {
+      "title": "No rooms match your filters",
+      "subtitle": "Try a different room type or clear your filters to see all available rooms."
+    },
+    "dates": {
+      "label": "Dates",
+      "placeholder": "Add dates",
+      "guestsLabel": "Guests"
+    },
+    "gallery": {
+      "thumbAlt": "Room photo"
+    },
+    "details": {
+      "importantInfo": "Good to know",
+      "importantInfoText": "Final availability and price are confirmed on the next step after choosing your dates.",
+      "amenitiesTitle": "Amenities",
+      "priceFrom": "From"
     }
   },
   "contact": {
@@ -314,6 +342,10 @@
       "photoFailed": "Failed to change your photo",
       "profileUpdated": "Successfully updated profile",
       "profileUpdateFailed": "Failed to update profile"
+    },
+    "sections": {
+      "account": "Account details",
+      "photo": "Profile photo"
     }
   },
   "reservations": {
@@ -370,6 +402,15 @@
       "date": "Date",
       "guests": "Guests",
       "total": "Total price"
+    },
+    "emptyState": {
+      "title": "No bookings yet",
+      "subtitle": "When you book a stay, it will show up here.",
+      "cta": "Browse rooms"
+    },
+    "sections": {
+      "upcoming": "Upcoming stays",
+      "past": "Past & cancelled"
     }
   },
   "header": {
@@ -1389,6 +1430,62 @@
       "cardEyebrow": "Near the coast",
       "cardTitle": "Close to the promenade, beaches, and city rhythm",
       "cardBody": "The location makes arrivals, daily outings, and moving through Ulqin simpler while keeping the stay itself calm and organized."
+    },
+    "benefits": {
+      "eyebrow": "Why stay with us",
+      "title": "Thoughtful details that make every stay effortless",
+      "items": [
+        {
+          "title": "Steps from the sea",
+          "body": "A coastal location in Ulqin with beaches, promenade and the old town within easy reach."
+        },
+        {
+          "title": "Direct booking",
+          "body": "Reserve your room in a few steps and receive instant confirmation by email."
+        },
+        {
+          "title": "Calm poolside days",
+          "body": "An outdoor pool and shaded terrace for slow mornings and quiet afternoons."
+        },
+        {
+          "title": "Attentive hosting",
+          "body": "A small team on site, ready to help with arrivals, stays and local recommendations."
+        }
+      ]
+    },
+    "facilities": {
+      "eyebrow": "Facilities",
+      "title": "Everything you need on the property",
+      "items": [
+        {
+          "label": "Outdoor pool"
+        },
+        {
+          "label": "Free Wi-Fi"
+        },
+        {
+          "label": "Air conditioning"
+        },
+        {
+          "label": "Private parking"
+        },
+        {
+          "label": "Breakfast"
+        },
+        {
+          "label": "Sea view rooms"
+        },
+        {
+          "label": "Balcony or terrace"
+        },
+        {
+          "label": "24/7 reception"
+        }
+      ]
+    },
+    "gallery": {
+      "eyebrow": "Gallery",
+      "title": "A closer look at the property"
     }
   },
   "privacy": {
@@ -1497,6 +1594,24 @@
         "body": "For questions about reservations or these terms, contact us at: dijaripremium@gmail.com."
       }
     }
+  },
+  "footer": {
+    "description": "A boutique retreat in Ulqin with calm rooms, pool views, and easy access to the sea.",
+    "navTitle": "Explore",
+    "contactTitle": "Contact",
+    "legalTitle": "Legal",
+    "bookTitle": "Ready for your stay?",
+    "bookSubtitle": "Check available dates and reserve your room in a few steps.",
+    "nav": {
+      "home": "Home",
+      "rooms": "Rooms",
+      "contact": "Contact",
+      "reservations": "My Reservations"
+    },
+    "legal": {
+      "terms": "Terms & Conditions",
+      "privacy": "Privacy Policy"
+    },
+    "rights": "All rights reserved."
   }
 }
-

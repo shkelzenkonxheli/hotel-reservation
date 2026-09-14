@@ -2,21 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import {
-  Box,
-  Typography,
-  Button,
-  Card,
-  CardContent,
-  CircularProgress,
-  Alert,
-  Snackbar,
-  Stack,
-} from "@mui/material";
+import { Box, CircularProgress, Alert, Snackbar } from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
+import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import usePageTitle from "../hooks/usePageTitle";
+import PublicContainer from "../components/Public/PublicContainer";
+import PublicSection from "../components/Public/PublicSection";
+import PublicCard from "../components/Public/PublicCard";
 
 export default function SuccessPage() {
   const t = useTranslations("success");
@@ -85,122 +81,130 @@ export default function SuccessPage() {
 
   if (loading) {
     return (
-      <Box className="flex justify-center items-center min-h-screen bg-gray-50">
+      <Box className="flex justify-center items-center min-h-screen">
         <CircularProgress />
       </Box>
     );
   }
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #ecfdf5 0%, #f0f9ff 100%)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        py: 6,
-        px: 3,
-      }}
-    >
-      <Card
-        elevation={6}
-        sx={{
-          maxWidth: 550,
-          borderRadius: "20px",
-          textAlign: "center",
-          p: 4,
-          backgroundColor: "white",
-        }}
-      >
-        <CheckCircleOutlineIcon
-          sx={{ color: "#16a34a", fontSize: 80, mb: 2 }}
-        />
-        <Typography variant="h4" fontWeight="bold" gutterBottom>
-          {t("title")}
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-          {t("subtitle")}
-        </Typography>
+    <div className="public-page min-h-screen">
+      <PublicSection className="pt-14 md:pt-20">
+        <PublicContainer>
+          <div className="mx-auto max-w-xl text-center reveal">
+            <div
+              className="mx-auto flex items-center justify-center rounded-full"
+              style={{
+                width: 88,
+                height: 88,
+                background: "var(--brass-soft)",
+                color: "var(--brass-deep)",
+              }}
+            >
+              <CheckCircleOutlineIcon sx={{ fontSize: 52 }} />
+            </div>
 
-        <Alert
-          severity="info"
-          sx={{
-            mb: 3,
-            textAlign: "left",
-            borderRadius: "14px",
-            alignItems: "flex-start",
-          }}
-        >
-          <Stack spacing={0.75}>
-            <Typography variant="body2" fontWeight={700}>
-              {t("pendingNoticeTitle")}
-            </Typography>
-            <Typography variant="body2">{t("pendingNoticeBody")}</Typography>
-            <Typography variant="body2">{t("emailHint")}</Typography>
-            <Typography variant="body2">{t("stayRules")}</Typography>
-          </Stack>
-        </Alert>
+            <span className="eyebrow mt-5 inline-block">{t("metaTitle")}</span>
+            <h1 className="display text-3xl md:text-4xl mt-2">{t("title")}</h1>
+            <p className="text-sm md:text-base text-slate-500 mt-3">
+              {t("subtitle")}
+            </p>
+          </div>
 
-        {reservation ? (
-          <CardContent
-            sx={{
-              textAlign: "left",
-              backgroundColor: "#f9fafb",
-              borderRadius: "12px",
-              p: 3,
-              mb: 3,
-            }}
-          >
-            <Typography variant="subtitle1" fontWeight="bold">
-              {t("bookingDetails")}
-            </Typography>
-            <Typography variant="body2">
-              <strong>{t("room")}:</strong> {reservation.rooms?.name}
-            </Typography>
-            <Typography variant="body2">
-              <strong>{t("checkIn")}:</strong>{" "}
-              {new Date(reservation.start_date).toLocaleDateString(locale)}
-            </Typography>
-            <Typography variant="body2">
-              <strong>{t("checkOut")}:</strong>{" "}
-              {new Date(reservation.end_date).toLocaleDateString(locale)}
-            </Typography>
-            <Typography variant="body2">
-              <strong>{t("guests")}:</strong> {reservation.guests}
-            </Typography>
-            <Typography variant="body2" sx={{ mt: 1 }}>
-              <strong>{t("total")}:</strong>{" "}
-              <span style={{ color: "#16a34a", fontWeight: 600 }}>
-                EUR {reservation.total_price}
-              </span>
-            </Typography>
-            <Typography variant="body2" sx={{ mt: 1 }}>
-              <strong>{t("status")}:</strong> {t("pendingStatus")}
-            </Typography>
-          </CardContent>
-        ) : (
-          <Typography variant="body2" color="text.secondary">
-            {t("noReservation")}
-          </Typography>
-        )}
+          <div className="mx-auto max-w-xl mt-8 space-y-5">
+            <PublicCard className="p-5 md:p-6">
+              <div className="flex items-start gap-3">
+                <span className="badge badge-warning">{t("pendingStatus")}</span>
+              </div>
+              <p className="mt-3 font-semibold text-slate-800">
+                {t("pendingNoticeTitle")}
+              </p>
+              <p className="mt-1.5 text-sm text-slate-600">
+                {t("pendingNoticeBody")}
+              </p>
+              <div className="divider-soft my-4" />
+              <p className="text-sm text-slate-600">{t("emailHint")}</p>
+              <p className="mt-2 text-sm text-slate-600">{t("stayRules")}</p>
+            </PublicCard>
 
-        <Button
-          variant="contained"
-          size="large"
-          sx={{
-            background: "linear-gradient(90deg, #2563eb, #8c6633)",
-            "&:hover": {
-              background: "linear-gradient(90deg, #8c6633, #1e40af)",
-            },
-            borderRadius: "10px",
-            px: 4,
-            py: 1.5,
-          }}
-          onClick={() => router.push("/")}
-      >
-        {t("backHome")}
-      </Button>
+            {reservation ? (
+              <PublicCard className="p-5 md:p-6">
+                <p className="eyebrow">{t("bookingDetails")}</p>
+                <h3 className="display text-xl mt-1">
+                  {reservation.rooms?.name}
+                </h3>
+
+                <div className="mt-4 grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <CalendarMonthOutlinedIcon fontSize="small" />
+                    <div>
+                      <div className="text-[11px] uppercase tracking-wide text-slate-400">
+                        {t("checkIn")}
+                      </div>
+                      <div className="font-semibold text-slate-900">
+                        {new Date(reservation.start_date).toLocaleDateString(locale)}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <CalendarMonthOutlinedIcon fontSize="small" />
+                    <div>
+                      <div className="text-[11px] uppercase tracking-wide text-slate-400">
+                        {t("checkOut")}
+                      </div>
+                      <div className="font-semibold text-slate-900">
+                        {new Date(reservation.end_date).toLocaleDateString(locale)}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <GroupOutlinedIcon fontSize="small" />
+                    <div>
+                      <div className="text-[11px] uppercase tracking-wide text-slate-400">
+                        {t("guests")}
+                      </div>
+                      <div className="font-semibold text-slate-900">
+                        {reservation.guests}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <div>
+                      <div className="text-[11px] uppercase tracking-wide text-slate-400">
+                        {t("status")}
+                      </div>
+                      <div className="font-semibold text-slate-900">
+                        {t("pendingStatus")}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  className="mt-4 rounded-xl px-4 py-3 flex items-center justify-between"
+                  style={{ background: "var(--sand-deep)" }}
+                >
+                  <span className="font-semibold text-slate-800">{t("total")}</span>
+                  <span className="price-value">EUR {reservation.total_price}</span>
+                </div>
+              </PublicCard>
+            ) : (
+              <PublicCard className="p-6 text-center text-sm text-slate-500">
+                {t("noReservation")}
+              </PublicCard>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link href="/reservations" className="btn btn-outline btn-block">
+                {t("actions.viewReservations")}
+              </Link>
+              <Link href="/" className="btn btn-primary btn-block">
+                {t("backHome")}
+              </Link>
+            </div>
+          </div>
+        </PublicContainer>
+      </PublicSection>
 
       <Snackbar
         open={toast.open}
@@ -217,7 +221,6 @@ export default function SuccessPage() {
           {toast.message}
         </Alert>
       </Snackbar>
-    </Card>
-  </Box>
+    </div>
   );
 }

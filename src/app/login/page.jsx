@@ -25,14 +25,33 @@ import {
   CheckCircleOutline,
   ErrorOutline,
 } from "@mui/icons-material";
-import PublicContainer from "../components/Public/PublicContainer";
-import PublicSection from "../components/Public/PublicSection";
-import PublicCard from "../components/Public/PublicCard";
+import Image from "next/image";
+import Link from "next/link";
 import DeferredTurnstile from "../components/Public/DeferredTurnstile";
 import usePageTitle from "../hooks/usePageTitle";
 
+const fieldSx = {
+  "& .MuiOutlinedInput-root": {
+    height: 52,
+    borderRadius: "12px",
+    backgroundColor: "#ffffff",
+    "& fieldset": { borderColor: "var(--public-border)" },
+    "&:hover fieldset": { borderColor: "var(--brass-soft)" },
+    "&.Mui-focused fieldset": { borderColor: "var(--brass)", borderWidth: 2 },
+  },
+};
+
+const feedbackCardSx = {
+  mt: 1.5,
+  borderRadius: 2.5,
+  alignItems: "flex-start",
+  "& .MuiAlert-icon": { mt: "2px", fontSize: 22 },
+  "& .MuiAlert-message": { width: "100%", py: 0.25 },
+};
+
 export default function LoginPage() {
   const t = useTranslations("login");
+  const th = useTranslations("home");
   usePageTitle(t("metaTitle"));
   const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
 
@@ -108,12 +127,7 @@ export default function LoginPage() {
 
   if (status === "loading") {
     return (
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        minHeight="100vh"
-      >
+      <Box display="flex" alignItems="center" justifyContent="center" minHeight="100vh">
         <CircularProgress />
       </Box>
     );
@@ -181,95 +195,60 @@ export default function LoginPage() {
     }
   };
 
-  const fieldSx = {
-    "& .MuiOutlinedInput-root": {
-      height: { xs: 48, md: 50 },
-      borderRadius: 2,
-      backgroundColor: "#ffffff",
-      "& fieldset": { borderColor: "#e9e2d6" },
-      "&:hover fieldset": { borderColor: "#cdbb9b" },
-      "&.Mui-focused fieldset": {
-        borderColor: "#b08447",
-        borderWidth: 2,
-      },
-    },
-  };
-
-  const feedbackCardSx = {
-    mt: 1.5,
-    borderRadius: 2.5,
-    alignItems: "flex-start",
-    "& .MuiAlert-icon": {
-      mt: "2px",
-      fontSize: 22,
-    },
-    "& .MuiAlert-message": {
-      width: "100%",
-      py: 0.25,
-    },
-  };
-
   return (
-    <Box
-      className="public-page min-h-screen"
-      sx={{
-        backgroundImage:
-          "linear-gradient(135deg, rgba(11,29,40,0.78), rgba(11,29,40,0.45)), url('/hotel-images/hotelbg1.jpg')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-      }}
-    >
-      <PublicSection className="py-0">
-        <PublicContainer>
-          <Box
-            sx={{
-              minHeight: { xs: "calc(100vh - 72px)", md: "calc(100vh - 84px)" },
-              display: "grid",
-              placeItems: "center",
-              py: { xs: 3, md: 5 },
-            }}
-          >
-            <PublicCard
-              className="w-full max-w-[420px] p-5 md:p-6"
-              style={{
-                backgroundColor: "#ffffff",
-                borderRadius: 24,
-                boxShadow: "0 30px 80px rgba(11,29,40,0.28)",
-              }}
-            >
-              <Typography
-                variant="h4"
-                align="center"
-                fontWeight={800}
-                sx={{
-                  color: "#0b1d28",
-                  fontFamily: "var(--font-display-serif), Georgia, serif",
-                  fontSize: { xs: "2.1rem", md: "2.5rem" },
-                  letterSpacing: "-0.01em",
-                  mt: 0.25,
-                }}
-                gutterBottom
-              >
-                {t("title")}
-              </Typography>
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                align="center"
-                mb={2.5}
-                sx={{ maxWidth: 260, mx: "auto", lineHeight: 1.6, fontSize: "0.92rem" }}
-              >
-                {t("subtitle")}
-              </Typography>
+    <div className="public-page min-h-screen bg-[var(--sand)]">
+      <div className="flex min-h-screen flex-col lg:flex-row">
+        {/* Brand / imagery panel */}
+        <div className="relative h-[38vh] w-full overflow-hidden lg:h-auto lg:w-1/2">
+          <Image
+            src="/hotel-images/hotelbg1.jpg"
+            alt={th("story.imageAlt")}
+            fill
+            priority
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[var(--ink)] via-[var(--ink)]/55 to-[var(--ink)]/20 lg:bg-gradient-to-tr" />
+          <div className="relative z-10 flex h-full flex-col justify-between p-6 sm:p-10 lg:p-14">
+            <div className="flex items-center gap-3">
+              <Image src="/hotel-images/Logo.png" alt="Dijari Premium" width={40} height={40} className="rounded-full" />
+              <span className="font-semibold tracking-[0.2em] text-white/90 uppercase text-xs">
+                Dijari Premium
+              </span>
+            </div>
+            <div className="hidden lg:block max-w-md">
+              <p className="eyebrow text-white/70">{th("hero.eyebrow")}</p>
+              <h2 className="display mt-4 text-3xl leading-tight text-white xl:text-4xl">
+                {th("hero.title")}
+              </h2>
+              <ul className="mt-8 space-y-3">
+                {th.raw("story.highlights").map((h) => (
+                  <li key={h} className="flex items-center gap-3 text-sm text-white/85">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[var(--brass)]" />
+                    {h}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="lg:hidden" />
+          </div>
+        </div>
+
+        {/* Form panel */}
+        <div className="flex flex-1 items-center justify-center px-4 py-10 sm:px-8 lg:py-16">
+          <div className="w-full max-w-[440px]">
+            <div className="surface-raised rounded-3xl p-6 sm:p-9">
+              <p className="eyebrow">{t("metaTitle").split("|")[0].trim()}</p>
+              <h1 className="display mt-2 text-3xl text-[var(--ink)] sm:text-4xl">{t("title")}</h1>
+              <p className="mt-3 text-sm leading-6 text-[var(--public-muted)]">{t("subtitle")}</p>
 
               {showResendPrompt && !error && (
-                <Alert severity="info" sx={{ mb: 2.25, borderRadius: 2.5, alignItems: "flex-start" }}>
+                <Alert severity="info" sx={{ mt: 3, borderRadius: 2.5, alignItems: "flex-start" }}>
                   {t("registeredHint")}
                 </Alert>
               )}
 
-              <Box component="form" onSubmit={handleLoginCredentials}>
+              <Box component="form" onSubmit={handleLoginCredentials} sx={{ mt: 3 }}>
                 <TextField
                   label={t("fields.email")}
                   fullWidth
@@ -304,9 +283,7 @@ export default function LoginPage() {
                     ),
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowPassword(!showPassword)}
-                        >
+                        <IconButton onClick={() => setShowPassword(!showPassword)} sx={{ p: 1.2 }}>
                           {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
                       </InputAdornment>
@@ -315,11 +292,7 @@ export default function LoginPage() {
                 />
 
                 {error && (
-                  <Alert
-                    severity="error"
-                    icon={<ErrorOutline />}
-                    sx={feedbackCardSx}
-                  >
+                  <Alert severity="error" icon={<ErrorOutline />} sx={feedbackCardSx}>
                     {error}
                   </Alert>
                 )}
@@ -327,47 +300,31 @@ export default function LoginPage() {
                 <Button
                   fullWidth
                   variant="contained"
+                  disableElevation
                   sx={{
                     mt: 2.5,
-                    py: 1.15,
+                    py: 1.35,
                     fontSize: "0.96rem",
                     textTransform: "none",
                     borderRadius: 3,
                     fontWeight: 700,
-                    backgroundColor: "#8c6633",
-                    "&:hover": { backgroundColor: "#75552b" },
-                    "&:active": { backgroundColor: "#5f451f" },
+                    backgroundColor: "var(--ink)",
+                    "&:hover": { backgroundColor: "#132734" },
                   }}
                   type="submit"
                   disabled={loading}
                 >
-                  {loading ? (
-                    <CircularProgress size={26} color="inherit" />
-                  ) : (
-                    t("buttons.login")
-                  )}
+                  {loading ? <CircularProgress size={26} color="inherit" /> : t("buttons.login")}
                 </Button>
 
-                <Box display="flex" justifyContent="center" mt={1.75}>
-                  <Typography
-                    component="button"
-                    type="button"
-                    onClick={() => router.push("/forgot-password")}
-                    sx={{
-                      border: "none",
-                      background: "transparent",
-                      p: 0,
-                      m: 0,
-                      cursor: "pointer",
-                      fontSize: "0.92rem",
-                      fontWeight: 600,
-                      color: "#8c6633",
-                      textAlign: "center",
-                    }}
+                <div className="mt-4 flex justify-center">
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm font-semibold text-[var(--brass-deep)] hover:underline"
                   >
                     {t("forgotPassword")}
-                  </Typography>
-                </Box>
+                  </Link>
+                </div>
               </Box>
 
               {showResendPrompt && (
@@ -389,58 +346,38 @@ export default function LoginPage() {
                 </>
               )}
 
-              <Divider sx={{ my: 2.1, fontSize: "0.9rem" }}>{t("or")}</Divider>
+              <Divider sx={{ my: 3, fontSize: "0.85rem", color: "var(--public-muted)" }}>{t("or")}</Divider>
 
               <Button
                 fullWidth
                 variant="outlined"
                 startIcon={<Google />}
                 sx={{
-                  py: 0.9,
+                  py: 1.15,
                   textTransform: "none",
                   fontWeight: 700,
                   borderRadius: 3,
                   fontSize: "0.96rem",
-                  borderColor: "#e9e2d6",
-                  "&:hover": {
-                    borderColor: "#cdbb9b",
-                    backgroundColor: "#faf7f1",
-                  },
+                  borderColor: "var(--public-border)",
+                  color: "var(--ink)",
+                  "&:hover": { borderColor: "var(--brass-soft)", backgroundColor: "var(--sand)" },
                 }}
-                onClick={() =>
-                  signIn("google", {
-                    callbackUrl: "/login?login=success",
-                  })
-                }
+                onClick={() => signIn("google", { callbackUrl: "/login?login=success" })}
               >
                 {t("buttons.google")}
               </Button>
 
-              <Typography
-                variant="body2"
-                align="center"
-                mt={2.2}
-                color="text.secondary"
-                sx={{ fontSize: "0.94rem" }}
-              >
+              <p className="mt-6 text-center text-sm text-[var(--public-muted)]">
                 {t("noAccount")}{" "}
-                <Typography
-                  component="span"
-                  sx={{
-                    cursor: "pointer",
-                    fontWeight: 700,
-                    color: "#b08447",
-                    fontSize: "0.94rem",
-                  }}
-                  onClick={() => router.push("/register")}
-                >
+                <Link href="/register" className="font-bold text-[var(--brass-deep)] hover:underline">
                   {t("buttons.register")}
-                </Typography>
-              </Typography>
-            </PublicCard>
-          </Box>
-        </PublicContainer>
-      </PublicSection>
+                </Link>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <Snackbar
         open={feedback.open}
         autoHideDuration={4000}
@@ -466,6 +403,6 @@ export default function LoginPage() {
           {feedback.message}
         </Alert>
       </Snackbar>
-    </Box>
+    </div>
   );
 }

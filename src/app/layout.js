@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import Header from "./components/Header";
+import ConditionalFooter from "./components/ConditionalFooter";
 import { getMessages } from "../i18n/getMessages";
 import { cookies } from "next/headers";
 import { defaultLocale } from "@/i18n/config";
@@ -70,6 +71,7 @@ export default async function RootLayout({ children }) {
         <Providers locale={locale} messages={messages}>
           <Header />
           {children}
+          <ConditionalFooter />
         </Providers>
       </body>
     </html>

@@ -70,6 +70,12 @@
       "available": "Dhoma eshte e lire per keto data.",
       "unavailable": "Nuk ka disponueshmeri per keto data. Ju lutem ndryshoni datat.",
       "checkFailed": "Kontrolli i disponueshmerise deshtoi. Provoni perseri."
+    },
+    "steps": {
+      "dates": "Datat",
+      "room": "Dhoma",
+      "details": "Detajet",
+      "confirm": "Konfirmo"
     }
   },
   "success": {
@@ -89,7 +95,11 @@
     "pendingStatus": "Ne pritje te konfirmimit",
     "noReservation": "Nuk u gjet rezervim i fundit.",
     "backHome": "Kthehu ne Home",
-    "stayRules": "Check-in fillon nga ora 14:00, ndersa check-out eshte deri ne ora 11:00."
+    "stayRules": "Check-in fillon nga ora 14:00, ndersa check-out eshte deri ne ora 11:00.",
+    "actions": {
+      "viewReservations": "Shiko rezervimet e mia",
+      "bookAgain": "Rezervo një qëndrim tjetër"
+    }
   },
   "login": {
     "metaTitle": "Hyrja | Dijari Premium",
@@ -240,6 +250,24 @@
       "all": "Te gjitha",
       "apartment": "Apartmente",
       "hotel": "Dhoma hoteli"
+    },
+    "empty": {
+      "title": "Asnje dhome nuk perputhet me filtrat",
+      "subtitle": "Provoni nje lloj tjeter dhome ose pastroni filtrat per te pare te gjitha dhomat."
+    },
+    "dates": {
+      "label": "Datat",
+      "placeholder": "Shto datat",
+      "guestsLabel": "Mysafire"
+    },
+    "gallery": {
+      "thumbAlt": "Foto e dhomes"
+    },
+    "details": {
+      "importantInfo": "Mire per ta ditur",
+      "importantInfoText": "Disponueshmeria dhe cmimi final konfirmohen ne hapin tjeter pasi zgjidhni datat.",
+      "amenitiesTitle": "Komoditete",
+      "priceFrom": "Nga"
     }
   },
   "contact": {
@@ -314,6 +342,10 @@
       "photoFailed": "Ndryshimi i fotos deshtoi",
       "profileUpdated": "Profili u perditesua me sukses",
       "profileUpdateFailed": "Perditesimi i profilit deshtoi"
+    },
+    "sections": {
+      "account": "Detajet e llogarisë",
+      "photo": "Foto profili"
     }
   },
   "reservations": {
@@ -370,6 +402,15 @@
       "date": "Data",
       "guests": "Mysafire",
       "total": "Cmimi total"
+    },
+    "emptyState": {
+      "title": "Ende pa rezervime",
+      "subtitle": "Kur të bëni një rezervim, ai do të shfaqet këtu.",
+      "cta": "Shfleto dhomat"
+    },
+    "sections": {
+      "upcoming": "Qëndrime të ardhshme",
+      "past": "Të kaluara & anuluara"
     }
   },
   "header": {
@@ -1389,6 +1430,62 @@
       "cardEyebrow": "Prane bregdetit",
       "cardTitle": "Afer shetitores, plazheve dhe ritmit te qytetit",
       "cardBody": "Lokacioni e ben me te lehte te organizosh mberritjen, daljet ditore dhe levizjen neper Ulqin pa humbur qetesine e qendrimit."
+    },
+    "benefits": {
+      "eyebrow": "Pse të qëndroni te ne",
+      "title": "Detaje të menduara që e bëjnë çdo qëndrim të lehtë",
+      "items": [
+        {
+          "title": "Pak hapa nga deti",
+          "body": "Vendndodhje bregdetare në Ulqin, me plazhet, shëtitoren dhe qytetin e vjetër fare pranë."
+        },
+        {
+          "title": "Rezervim direkt",
+          "body": "Rezervoni dhomën me pak hapa dhe merrni konfirmim të menjëhershëm me email."
+        },
+        {
+          "title": "Ditë të qeta te pishina",
+          "body": "Pishinë e jashtme dhe terrasë me hije për mëngjese të ngadalta dhe pasdite të qeta."
+        },
+        {
+          "title": "Mikpritje e kujdesshme",
+          "body": "Një ekip i vogël në vend, gati t'ju ndihmojë me ardhjen, qëndrimin dhe rekomandimet lokale."
+        }
+      ]
+    },
+    "facilities": {
+      "eyebrow": "Lehtësirat",
+      "title": "Gjithçka që ju nevojitet brenda objektit",
+      "items": [
+        {
+          "label": "Pishinë e jashtme"
+        },
+        {
+          "label": "Wi-Fi falas"
+        },
+        {
+          "label": "Ajër i kondicionuar"
+        },
+        {
+          "label": "Parking privat"
+        },
+        {
+          "label": "Mëngjes"
+        },
+        {
+          "label": "Dhoma me pamje nga deti"
+        },
+        {
+          "label": "Ballkon ose terrasë"
+        },
+        {
+          "label": "Recepsion 24/7"
+        }
+      ]
+    },
+    "gallery": {
+      "eyebrow": "Galeria",
+      "title": "Një vështrim më nga afër i objektit"
     }
   },
   "privacy": {
@@ -1497,5 +1594,24 @@
         "body": "Per pyetje lidhur me rezervimet ose keto kushte, na kontaktoni ne: dijaripremium@gmail.com."
       }
     }
+  },
+  "footer": {
+    "description": "Nje strehe boutique ne Ulqin me dhoma te qeta, pamje nga pishina dhe qasje te lehte ne det.",
+    "navTitle": "Eksploro",
+    "contactTitle": "Kontakti",
+    "legalTitle": "Ligjore",
+    "bookTitle": "Gati per qendrimin tuaj?",
+    "bookSubtitle": "Kontrolloni datat e disponueshme dhe rezervoni dhomen tuaj ne pak hapa.",
+    "nav": {
+      "home": "Kryefaqja",
+      "rooms": "Dhomat",
+      "contact": "Kontakti",
+      "reservations": "Rezervimet e Mia"
+    },
+    "legal": {
+      "terms": "Kushtet e perdorimit",
+      "privacy": "Privatesia"
+    },
+    "rights": "Te gjitha te drejtat e rezervuara."
   }
 }

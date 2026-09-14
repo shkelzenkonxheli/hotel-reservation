@@ -3,26 +3,31 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
+import Image from "next/image";
 import {
   Box,
   TextField,
   Button,
-  Typography,
   Alert,
   Snackbar,
   CircularProgress,
   InputAdornment,
   IconButton,
 } from "@mui/material";
-import {
-  LockOutlined,
-  Visibility,
-  VisibilityOff,
-} from "@mui/icons-material";
-import PublicContainer from "../components/Public/PublicContainer";
-import PublicSection from "../components/Public/PublicSection";
-import PublicCard from "../components/Public/PublicCard";
+import { LockOutlined, Visibility, VisibilityOff } from "@mui/icons-material";
 import usePageTitle from "../hooks/usePageTitle";
+
+const fieldSx = {
+  "& .MuiOutlinedInput-root": {
+    height: 52,
+    borderRadius: "12px",
+    backgroundColor: "#ffffff",
+    "& fieldset": { borderColor: "var(--public-border)" },
+    "&:hover fieldset": { borderColor: "var(--brass-soft)" },
+    "&.Mui-focused fieldset": { borderColor: "var(--brass)", borderWidth: 2 },
+  },
+};
 
 export default function ResetPasswordPage() {
   const t = useTranslations("resetPassword");
@@ -50,20 +55,6 @@ export default function ResetPasswordPage() {
     const params = new URLSearchParams(window.location.search);
     setToken(params.get("token") || "");
   }, []);
-
-  const fieldSx = {
-    "& .MuiOutlinedInput-root": {
-      height: { xs: 48, md: 50 },
-      borderRadius: 2,
-      backgroundColor: "#ffffff",
-      "& fieldset": { borderColor: "#e9e2d6" },
-      "&:hover fieldset": { borderColor: "#cdbb9b" },
-      "&.Mui-focused fieldset": {
-        borderColor: "#b08447",
-        borderWidth: 2,
-      },
-    },
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -103,148 +94,99 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <Box
-      className="public-page min-h-screen"
-      sx={{
-        backgroundImage:
-          "linear-gradient(135deg, rgba(15,23,42,0.62), rgba(15,23,42,0.42)), url('/hotel-images/hotelbg1.jpg')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-      }}
-    >
-      <PublicSection className="py-0">
-        <PublicContainer>
-          <Box
-            sx={{
-              minHeight: { xs: "calc(100vh - 72px)", md: "calc(100vh - 84px)" },
-              display: "grid",
-              placeItems: "center",
-              py: { xs: 3, md: 5 },
-            }}
-          >
-            <PublicCard
-              className="w-full max-w-[420px] p-5 md:p-6"
-              style={{
-                backgroundColor: "#ffffff",
-                borderRadius: 24,
-                boxShadow: "0 18px 44px rgba(15,23,42,0.13)",
+    <div className="public-page min-h-screen bg-[var(--sand)] flex items-center justify-center px-4 py-14">
+      <div className="w-full max-w-[440px]">
+        <div className="mb-6 flex flex-col items-center text-center">
+          <Image src="/hotel-images/Logo.png" alt="Dijari Premium" width={52} height={52} className="rounded-full" />
+          <span className="mt-3 text-xs font-semibold uppercase tracking-[0.25em] text-[var(--brass-deep)]">
+            Dijari Premium
+          </span>
+        </div>
+        <div className="surface-raised rounded-3xl p-6 sm:p-9">
+          <h1 className="display text-center text-3xl text-[var(--ink)] sm:text-[2.1rem]">{t("title")}</h1>
+          <p className="mx-auto mt-3 max-w-[280px] text-center text-sm leading-6 text-[var(--public-muted)]">
+            {t("subtitle")}
+          </p>
+
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+            <TextField
+              label={t("fields.password")}
+              type={showPassword ? "text" : "password"}
+              fullWidth
+              required
+              margin="normal"
+              sx={fieldSx}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              helperText={t("passwordHint")}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockOutlined />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowPassword((prev) => !prev)} sx={{ p: 1.2 }}>
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <TextField
+              label={t("fields.confirmPassword")}
+              type={showConfirmPassword ? "text" : "password"}
+              fullWidth
+              required
+              margin="normal"
+              sx={fieldSx}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockOutlined />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowConfirmPassword((prev) => !prev)} sx={{ p: 1.2 }}>
+                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <Button
+              type="submit"
+              variant="contained"
+              disableElevation
+              fullWidth
+              disabled={loading}
+              sx={{
+                mt: 2.5,
+                py: 1.35,
+                borderRadius: 3,
+                fontWeight: 700,
+                textTransform: "none",
+                fontSize: "0.96rem",
+                backgroundColor: "var(--ink)",
+                "&:hover": { backgroundColor: "#132734" },
               }}
             >
-              <Typography
-                variant="h4"
-                align="center"
-                fontWeight={800}
-                sx={{
-                  color: "#0f172a",
-                  fontSize: { xs: "1.65rem", md: "1.9rem" },
-                  letterSpacing: "-0.03em",
-                }}
-                gutterBottom
-              >
-                {t("title")}
-              </Typography>
-              <Typography
-                variant="body2"
-                align="center"
-                color="text.secondary"
-                mb={2.5}
-                sx={{ maxWidth: 260, mx: "auto", lineHeight: 1.6, fontSize: "0.92rem" }}
-              >
-                {t("subtitle")}
-              </Typography>
-
-              <Box component="form" onSubmit={handleSubmit}>
-                <TextField
-                  label={t("fields.password")}
-                  type={showPassword ? "text" : "password"}
-                  fullWidth
-                  required
-                  margin="normal"
-                  sx={fieldSx}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  helperText={t("passwordHint")}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LockOutlined />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton onClick={() => setShowPassword((prev) => !prev)}>
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-                <TextField
-                  label={t("fields.confirmPassword")}
-                  type={showConfirmPassword ? "text" : "password"}
-                  fullWidth
-                  required
-                  margin="normal"
-                  sx={fieldSx}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LockOutlined />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowConfirmPassword((prev) => !prev)}
-                        >
-                          {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                <Button
-                  type="submit"
-                  variant="contained"
-                  fullWidth
-                  disabled={loading}
-                  sx={{
-                    mt: 2.5,
-                    py: 1.15,
-                    borderRadius: 3,
-                    fontWeight: 700,
-                    textTransform: "none",
-                    fontSize: "0.96rem",
-                    backgroundColor: "#8c6633",
-                    "&:hover": { backgroundColor: "#75552b" },
-                  }}
-                >
-                  {loading ? (
-                    <CircularProgress size={26} color="inherit" />
-                  ) : (
-                    t("buttons.save")
-                  )}
-                </Button>
-              </Box>
-
-              <Typography
-                variant="body2"
-                align="center"
-                mt={3}
-                color="text.secondary"
-                sx={{ cursor: "pointer", fontWeight: 700, color: "#8c6633" }}
-                onClick={() => router.push("/login")}
-              >
-                {t("backToLogin")}
-              </Typography>
-            </PublicCard>
+              {loading ? <CircularProgress size={26} color="inherit" /> : t("buttons.save")}
+            </Button>
           </Box>
-        </PublicContainer>
-      </PublicSection>
+
+          <p className="mt-6 text-center">
+            <Link href="/login" className="text-sm font-bold text-[var(--brass-deep)] hover:underline">
+              {t("backToLogin")}
+            </Link>
+          </p>
+        </div>
+      </div>
 
       <Snackbar
         open={feedback.open}
@@ -261,6 +203,6 @@ export default function ResetPasswordPage() {
           {feedback.message}
         </Alert>
       </Snackbar>
-    </Box>
+    </div>
   );
 }

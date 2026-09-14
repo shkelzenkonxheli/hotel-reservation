@@ -353,9 +353,40 @@ export default function CheckoutBooking() {
     return text.split("\n")[0];
   };
 
+  const canConfirm =
+    !loading && !availability.loading && availability.available && acceptedTerms;
+
+  const inputSx = {
+    "& .MuiOutlinedInput-root": { borderRadius: "12px" },
+  };
+
+  const renderSteps = () => (
+    <div className="steps mb-2" role="list" aria-label={t("title")}>
+      <div className="step done">
+        <span className="step-dot" />
+        {t("steps.dates")}
+      </div>
+      <span className="step-sep" />
+      <div className="step done">
+        <span className="step-dot" />
+        {t("steps.room")}
+      </div>
+      <span className="step-sep" />
+      <div className="step active">
+        <span className="step-dot" />
+        {t("steps.details")}
+      </div>
+      <span className="step-sep" />
+      <div className="step">
+        <span className="step-dot" />
+        {t("steps.confirm")}
+      </div>
+    </div>
+  );
+
   const renderSummaryCard = () => (
     <PublicCard className="p-5 md:p-6">
-      <div className="aspect-[4/3] w-full overflow-hidden rounded-2xl">
+      <div className="media aspect-[4/3] w-full overflow-hidden rounded-2xl">
         <img
           src={room.images?.[0] || "/placeholder.jpg"}
           alt={room.name}
@@ -364,7 +395,7 @@ export default function CheckoutBooking() {
       </div>
 
       <div className="mt-4">
-        <Typography variant="h6" fontWeight={800}>
+        <Typography variant="h6" fontWeight={800} className="display">
           {room.name}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
@@ -373,10 +404,7 @@ export default function CheckoutBooking() {
         {Array.isArray(room.amenities) && room.amenities.length > 0 ? (
           <div className="mt-2 flex flex-wrap gap-2">
             {room.amenities.map((amenity) => (
-              <span
-                key={amenity}
-                className="text-xs px-2.5 py-1 rounded-full border border-slate-200 text-slate-700 bg-slate-50"
-              >
+              <span key={amenity} className="amenity">
                 {amenity}
               </span>
             ))}
@@ -384,7 +412,7 @@ export default function CheckoutBooking() {
         ) : null}
       </div>
 
-      <Divider sx={{ my: 2 }} />
+      <div className="divider-soft my-4" />
 
       <div className="space-y-2">
         <div className="flex items-center justify-between text-sm text-slate-600">
@@ -405,7 +433,7 @@ export default function CheckoutBooking() {
         </div>
       </div>
 
-      <Divider sx={{ my: 2 }} />
+      <div className="divider-soft my-4" />
 
       <div className="space-y-2">
         <Typography variant="subtitle2" fontWeight={700}>
@@ -414,7 +442,7 @@ export default function CheckoutBooking() {
         {hasDiscount ? (
           <div className="flex items-center justify-between text-sm text-slate-500">
             <span>{t("summary.originalRate")}</span>
-            <span className="line-through">EUR {originalStayTotal.toFixed(2)}</span>
+            <span className="price-old">EUR {originalStayTotal.toFixed(2)}</span>
           </div>
         ) : null}
         <div className="flex items-center justify-between text-sm text-slate-600">
@@ -425,7 +453,7 @@ export default function CheckoutBooking() {
             - EUR{" "}
             {adjustedNightlyRate.toFixed(2)} x {nights} {t("summary.nightsLower")}
           </span>
-          <span className="font-semibold text-[#b08447]">
+          <span className="font-semibold" style={{ color: "var(--brass-deep)" }}>
             EUR {finalStayTotal.toFixed(2)}
           </span>
         </div>
@@ -439,22 +467,20 @@ export default function CheckoutBooking() {
           </Typography>
         ) : null}
         {hasDiscount ? (
-          <Typography variant="caption" sx={{ color: "#8c6633", fontWeight: 700, display: "block", mt: 0.25 }}>
-            {t("summary.savings", {
-              amount: savingsTotal.toFixed(2),
-            })}
-          </Typography>
+          <span className="badge badge-brass" style={{ display: "inline-block", marginTop: 4 }}>
+            {t("summary.savings", { amount: savingsTotal.toFixed(2) })}
+          </span>
         ) : null}
       </div>
 
-      <div className="mt-4 rounded-xl bg-slate-50 px-4 py-3">
+      <div className="mt-4 rounded-xl px-4 py-3" style={{ background: "var(--sand-deep)" }}>
         <div className="flex items-center justify-between">
           <Typography variant="subtitle1" fontWeight={800}>
             {t("summary.total")}
           </Typography>
-          <Typography variant="h6" fontWeight={900} color="success.main">
+          <span className="price-value" style={{ fontSize: "1.35rem" }}>
             EUR {totalFormatted}
-          </Typography>
+          </span>
         </div>
       </div>
 
@@ -464,8 +490,8 @@ export default function CheckoutBooking() {
 
   const renderUserForm = () => (
     <PublicCard className="p-5 md:p-6">
-      <div className="flex items-center justify-between mb-2">
-        <Typography variant="h6" fontWeight={800}>
+      <div className="flex items-center justify-between mb-1">
+        <Typography variant="h6" fontWeight={800} className="display">
           {t("form.guestInformation")}
         </Typography>
         <span className="text-xs text-slate-500">
@@ -473,7 +499,7 @@ export default function CheckoutBooking() {
         </span>
       </div>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}>
         <Alert severity="info" sx={{ borderRadius: 2 }}>
           {t("form.changeDatesHint")}
         </Alert>
@@ -491,6 +517,7 @@ export default function CheckoutBooking() {
             onChange={(e) => setStayStartDate(e.target.value)}
             InputLabelProps={{ shrink: true }}
             inputProps={{ min: new Date().toISOString().split("T")[0] }}
+            sx={inputSx}
           />
           <TextField
             label={t("summary.checkOut")}
@@ -501,6 +528,7 @@ export default function CheckoutBooking() {
             inputProps={{
               min: startDate || new Date().toISOString().split("T")[0],
             }}
+            sx={inputSx}
           />
         </Box>
         {(availability.loading || availability.message) && (
@@ -511,23 +539,29 @@ export default function CheckoutBooking() {
             {availability.message}
           </Alert>
         )}
+
+        <div className="rule" />
+
         <TextField
           label={t("form.fullName")}
           value={fullname}
           onChange={(e) => setFullname(e.target.value)}
           helperText={t("form.fullNameHelper")}
+          sx={inputSx}
         />
         <TextField
           label={t("form.phone")}
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           helperText={t("form.phoneHelper")}
+          sx={inputSx}
         />
         <TextField
           label={t("form.address")}
           value={address}
           onChange={(e) => setAddress(e.target.value)}
           helperText={t("form.addressHelper")}
+          sx={inputSx}
         />
         <TextField
           label={t("form.guests")}
@@ -535,6 +569,7 @@ export default function CheckoutBooking() {
           value={guests}
           onChange={(e) => setGuests(Number(e.target.value))}
           helperText={`${t("form.guestsHelper")} (${includedGuests}-${maxGuests})`}
+          sx={inputSx}
         >
           {Array.from({ length: maxGuests }, (_, index) => index + 1).map(
             (guestCount) => (
@@ -544,21 +579,11 @@ export default function CheckoutBooking() {
             ),
           )}
         </TextField>
-
       </Box>
 
-      <Divider sx={{ my: 3 }} />
+      <div className="divider-soft my-6" />
 
-      <Box
-        sx={{
-          mb: 2.25,
-          px: 0.5,
-          py: 1.25,
-          borderRadius: 2,
-          backgroundColor: "#faf7f1",
-          border: "1px solid #e2e8f0",
-        }}
-      >
+      <div className="mb-5 rounded-2xl px-4 py-3" style={{ background: "var(--sand-deep)", border: "1px solid var(--public-border)" }}>
         <FormControlLabel
           sx={{ alignItems: "flex-start", m: 0 }}
           control={
@@ -574,7 +599,8 @@ export default function CheckoutBooking() {
               <Link
                 href="/terms-conditions"
                 target="_blank"
-                className="font-semibold text-[#b08447] underline underline-offset-4"
+                className="font-semibold underline underline-offset-4"
+                style={{ color: "var(--brass-deep)" }}
               >
                 {t("form.termsLink")}
               </Link>{" "}
@@ -582,7 +608,8 @@ export default function CheckoutBooking() {
               <Link
                 href="/privacy-policy"
                 target="_blank"
-                className="font-semibold text-[#b08447] underline underline-offset-4"
+                className="font-semibold underline underline-offset-4"
+                style={{ color: "var(--brass-deep)" }}
               >
                 {t("form.privacyLink")}
               </Link>
@@ -590,37 +617,27 @@ export default function CheckoutBooking() {
             </Typography>
           }
         />
-      </Box>
+      </div>
 
-      <Button
+      <button
+        type="button"
         onClick={handleBookClick}
-        variant="contained"
-        size="large"
-        fullWidth
-        disabled={
-          loading ||
-          availability.loading ||
-          !availability.available ||
-          !acceptedTerms
-        }
-        sx={{ textTransform: "none", borderRadius: 2, fontWeight: 700 }}
+        disabled={!canConfirm}
+        className="btn btn-primary btn-lg btn-block hidden md:inline-flex"
       >
-        {loading ? (
-          <CircularProgress size={24} color="inherit" />
-        ) : (
-          t("confirmCash")
-        )}
-      </Button>
+        {loading ? <CircularProgress size={22} color="inherit" /> : t("confirmCash")}
+      </button>
     </PublicCard>
   );
 
   /* ---------------- RENDER ---------------- */
   return (
-    <div className="public-page min-h-screen">
+    <div className="public-page min-h-screen pb-28 md:pb-0">
       <PublicSection className="pt-10">
         <PublicContainer>
           <div className="max-w-3xl">
-            <h2 className="text-3xl md:text-4xl font-semibold mt-3">
+            <span className="eyebrow">{t("metaTitle")}</span>
+            <h2 className="display text-3xl md:text-4xl mt-2">
               {t("title")}
             </h2>
             <p className="text-sm md:text-base text-slate-500 mt-2">
@@ -628,7 +645,9 @@ export default function CheckoutBooking() {
             </p>
           </div>
 
-          <div className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_0.8fr] items-start">
+          {renderSteps()}
+
+          <div className="mt-6 grid gap-6 lg:grid-cols-[1.2fr_0.8fr] items-start">
             <div className="space-y-6">
               {isMobile ? (
                 <PublicCard className="p-4">
@@ -641,13 +660,13 @@ export default function CheckoutBooking() {
                     {t("summary.nightsLower")})
                   </Typography>
 
-                  <Divider sx={{ my: 2 }} />
+                  <div className="divider-soft my-3" />
 
                   <div className="space-y-2">
                     {hasDiscount ? (
                       <div className="flex items-center justify-between text-sm text-slate-500">
                         <span>{t("summary.originalRate")}</span>
-                        <span className="line-through">
+                        <span className="price-old">
                           EUR {originalStayTotal.toFixed(2)}
                         </span>
                       </div>
@@ -659,39 +678,29 @@ export default function CheckoutBooking() {
                           ? room.special_rate?.label || t("summary.discountedRate")
                           : t("summary.currentRate")}
                       </span>
-                      <span className="font-semibold text-[#b08447]">
+                      <span className="font-semibold" style={{ color: "var(--brass-deep)" }}>
                         EUR {finalStayTotal.toFixed(2)}
                       </span>
                     </div>
 
                     {hasDiscount ? (
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          color: "#8c6633",
-                          fontWeight: 700,
-                          display: "block",
-                        }}
-                      >
-                        {t("summary.savings", {
-                          amount: savingsTotal.toFixed(2),
-                        })}
-                      </Typography>
+                      <span className="badge badge-brass">
+                        {t("summary.savings", { amount: savingsTotal.toFixed(2) })}
+                      </span>
                     ) : null}
 
-                    <Typography fontWeight="bold" color="success.main">
+                    <Typography fontWeight="bold" sx={{ color: "var(--brass-deep)" }}>
                       {t("summary.total")}: EUR {totalFormatted}
                     </Typography>
                   </div>
 
-                  <Button
-                    fullWidth
-                    sx={{ mt: 2, textTransform: "none", borderRadius: 2 }}
-                    variant="outlined"
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-block mt-3"
                     onClick={() => setOpenDetails(true)}
                   >
                     {t("mobile.viewSummary")}
-                  </Button>
+                  </button>
 
                   <Dialog
                     open={openDetails}
@@ -734,6 +743,35 @@ export default function CheckoutBooking() {
           </div>
         </PublicContainer>
       </PublicSection>
+
+      {/* Mobile fixed bottom action bar */}
+      <div
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between gap-3 px-4 py-3"
+        style={{
+          background: "rgba(251,248,243,0.97)",
+          borderTop: "1px solid var(--public-border)",
+          backdropFilter: "blur(6px)",
+          boxShadow: "0 -8px 24px rgba(11,29,40,0.08)",
+        }}
+      >
+        <div className="min-w-0">
+          <div className="text-[11px] uppercase tracking-wide text-slate-500">
+            {t("summary.total")}
+          </div>
+          <div className="price-value" style={{ fontSize: "1.15rem" }}>
+            EUR {totalFormatted}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={handleBookClick}
+          disabled={!canConfirm}
+          className="btn btn-primary btn-lg"
+          style={{ flexShrink: 0 }}
+        >
+          {loading ? <CircularProgress size={20} color="inherit" /> : t("confirmCash")}
+        </button>
+      </div>
 
       <Snackbar
         open={toast.open}

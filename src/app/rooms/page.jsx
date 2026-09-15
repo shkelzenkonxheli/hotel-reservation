@@ -336,13 +336,13 @@ export default function RoomsPage() {
         <RoomsSearchParamsBridge onParams={handleSearchParams} />
       </Suspense>
 
-      <PublicSection className="!pb-0">
+      <PublicSection className="!py-8 md:!py-10">
         <PublicContainer>
           <RoomsHero t={t} />
         </PublicContainer>
       </PublicSection>
 
-      <PublicSection className="!pt-6">
+      <PublicSection className="!py-0">
         <PublicContainer>
           <RoomsFilterBar
             roomCategory={roomCategory}
@@ -358,7 +358,7 @@ export default function RoomsPage() {
         </PublicContainer>
       </PublicSection>
 
-      <PublicSection className="!pt-6 pb-16 md:pb-24">
+      <PublicSection className="!pb-16 !pt-8 md:!pb-24 md:!pt-10">
         <PublicContainer>
           {loadingRooms ? (
             <div className="space-y-8">

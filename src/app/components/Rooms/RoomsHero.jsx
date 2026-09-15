@@ -5,7 +5,7 @@ export default function RoomsHero({ t }) {
       : "Dijari Premium";
 
   return (
-    <div className="stack-6 text-center">
+    <div className="stack-6 -my-8 text-center md:-my-10">
       <span className="eyebrow">{eyebrow}</span>
       <h1 className="display text-[2.3rem] leading-tight text-[var(--ink)] md:text-[3.4rem]">
         {t("title")}

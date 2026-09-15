@@ -148,7 +148,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,36,38,0.55)_0%,rgba(11,36,38,0.3)_45%,rgba(11,36,38,0.92)_100%)]" />
         </div>
 
-        <PublicContainer className="relative flex min-h-[82vh] flex-col justify-end pb-28 pt-32 md:min-h-[94vh] md:pb-32 md:pt-40">
+        <PublicContainer className="relative flex min-h-[68vh] flex-col justify-end pb-14 pt-20 md:min-h-[82vh] md:pb-24 md:pt-28">
           <div className="fade-up max-w-3xl text-white">
             <div className="flex items-center gap-4">
               <span className="h-px w-14 bg-[var(--sea)]" />
@@ -174,12 +174,6 @@ export default function Home() {
               <Link href="/rooms" className="btn btn-primary btn-lg">
                 {headerT("bookNow")}
               </Link>
-              <a
-                href="#discover"
-                className="btn btn-outline btn-lg border-white/40 text-white hover:border-[var(--sea)] hover:text-[var(--sea)]"
-              >
-                {t("story.eyebrow")}
-              </a>
             </div>
           </div>
         </PublicContainer>

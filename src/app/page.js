@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import PublicContainer from "./components/Public/PublicContainer";
 import PublicSection from "./components/Public/PublicSection";
@@ -44,16 +43,8 @@ export default function Home() {
   const t = useTranslations("home");
   const headerT = useTranslations("header");
   usePageTitle(t("metaTitle"));
-  const router = useRouter();
-
   const [activeRoomSlide, setActiveRoomSlide] = useState(0);
   const [activeGallerySlide, setActiveGallerySlide] = useState(0);
-
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
-  const [guests, setGuests] = useState(2);
-
-  const todayISO = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
   const suiteCards = [
     {
@@ -143,15 +134,6 @@ export default function Home() {
     return () => clearInterval(intervalId);
   }, [galleryImages.length]);
 
-  const handleSearchSubmit = (event) => {
-    event.preventDefault();
-    const params = new URLSearchParams();
-    if (checkIn) params.set("checkIn", checkIn);
-    if (checkOut) params.set("checkOut", checkOut);
-    params.set("guests", String(guests || 1));
-    router.push(`/rooms?${params.toString()}`);
-  };
-
   return (
     <div className="public-page min-h-screen bg-[var(--sand)]">
       {/* ============ HERO ============ */}
@@ -202,68 +184,7 @@ export default function Home() {
           </div>
         </PublicContainer>
 
-        {/* ============ AVAILABILITY WIDGET ============ */}
-        <PublicContainer className="relative z-10 -mt-12 pb-14 md:-mt-16 md:pb-16">
-          <form
-            onSubmit={handleSearchSubmit}
-            className="booking-bar grid gap-4 p-6 md:grid-cols-[1fr_1fr_0.8fr_auto] md:items-end md:p-7"
-          >
-            <div className="field">
-              <label className="field-label" htmlFor="home-checkin">
-                {t("hero.search.checkIn")}
-              </label>
-              <input
-                id="home-checkin"
-                type="date"
-                className="input"
-                min={todayISO}
-                value={checkIn}
-                onChange={(e) => setCheckIn(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="field">
-              <label className="field-label" htmlFor="home-checkout">
-                {t("hero.search.checkOut")}
-              </label>
-              <input
-                id="home-checkout"
-                type="date"
-                className="input"
-                min={checkIn || todayISO}
-                value={checkOut}
-                onChange={(e) => setCheckOut(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="field">
-              <label className="field-label" htmlFor="home-guests">
-                {t("hero.search.guests")}
-              </label>
-              <select
-                id="home-guests"
-                className="select"
-                value={guests}
-                onChange={(e) => setGuests(Number(e.target.value))}
-              >
-                {[1, 2, 3, 4, 5, 6].map((count) => (
-                  <option key={count} value={count}>
-                    {t("hero.search.guestOption", { count })}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <button type="submit" className="btn btn-primary btn-lg btn-block md:w-auto">
-              {t("hero.search.button")}
-            </button>
-          </form>
-        </PublicContainer>
       </section>
-
-      <div className="h-16 md:h-14" aria-hidden="true" />
 
       {/* ============ STORY ============ */}
       <PublicSection id="discover" className="scroll-mt-24 pt-24 md:pt-28">

@@ -10,7 +10,7 @@ export default function Footer() {
 
   return (
     <footer className="site-footer">
-      <div className="u-wide public-section" style={{ paddingBottom: 28 }}>
+      <div className="u-wide public-section" style={{ paddingTop: 88, paddingBottom: 28 }}>
         <div className="grid gap-10 md:grid-cols-[1.3fr_0.9fr_0.9fr_1fr]">
           <div>
             <Link href="/" className="flex items-center gap-2.5 mb-4">

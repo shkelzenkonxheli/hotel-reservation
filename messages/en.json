@@ -268,6 +268,13 @@
       "importantInfoText": "Final availability and price are confirmed on the next step after choosing your dates.",
       "amenitiesTitle": "Amenities",
       "priceFrom": "From"
+    },
+    "sections": {
+      "apartmentsTitle": "Our Apartments",
+      "apartmentsEyebrow": "Full space for families & groups",
+      "hotelRoomsTitle": "Hotel Rooms",
+      "hotelRoomsEyebrow": "Quiet elegance for a restful stay",
+      "count": "{count} options"
     }
   },
   "contact": {

@@ -483,13 +483,32 @@
         "primaryKpis": "Primary KPIs",
         "operationalSnapshot": "Operational Snapshot",
         "todaySnapshot": "Today Snapshot",
-        "occupancyHealth": "Occupancy Health"
+        "occupancyHealth": "Occupancy Health",
+        "analytics": "Analytics & trends"
       },
       "snapshot": {
         "checkIns": "Check-ins",
         "upcoming": "Upcoming",
         "revenue": "Revenue",
         "currentOccupancy": "Current occupancy"
+      },
+      "charts": {
+        "revenueBookings": "Revenue & bookings — last 6 months",
+        "sixMonthSummary": "{revenue} · {bookings} bookings in the last 6 months",
+        "statusDistribution": "Reservations by status",
+        "noData": "No reservation data yet"
+      },
+      "legend": {
+        "revenue": "Revenue",
+        "bookings": "Bookings"
+      },
+      "status": {
+        "pending": "Pending",
+        "confirmed": "Confirmed",
+        "checkedIn": "In house",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "noShow": "No-show"
       }
     },
     "rooms": {

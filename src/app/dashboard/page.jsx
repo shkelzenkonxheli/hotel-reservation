@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Suspense, useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
@@ -161,13 +161,63 @@ function DashboardContent() {
       aria-label="Admin sidebar navigation"
       sx={{
         height: "100%",
-        bgcolor: "#0f172a",
-        color: "#e2e8f0",
+        background:
+          "linear-gradient(180deg, #0b2426 0%, #0e3032 55%, #0b2426 100%)",
+        color: "rgba(246,242,234,0.86)",
         display: "flex",
         flexDirection: "column",
+        overflowY: "auto",
       }}
     >
-      <List sx={{ px: 1, py: 1 }}>
+      <Box sx={{ px: 2.5, pt: 3, pb: 2 }}>
+        <Typography
+          sx={{
+            fontSize: 10.5,
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            color: "#8fb9ae",
+            fontWeight: 600,
+          }}
+        >
+          {t("shell.mobileTitle")}
+        </Typography>
+        {user?.name || user?.email ? (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mt: 2 }}>
+            <Box
+              sx={{
+                width: 38,
+                height: 38,
+                borderRadius: "50%",
+                display: "grid",
+                placeItems: "center",
+                bgcolor: "rgba(143,185,174,0.16)",
+                border: "1px solid rgba(143,185,174,0.35)",
+                color: "#f6f2ea",
+                fontFamily: "var(--font-display, serif)",
+                fontSize: 18,
+              }}
+            >
+              {(user?.name || user?.email || "?").charAt(0).toUpperCase()}
+            </Box>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography
+                noWrap
+                sx={{ fontSize: 14, fontWeight: 600, color: "#f6f2ea" }}
+              >
+                {user?.name || user?.email}
+              </Typography>
+              <Typography
+                noWrap
+                sx={{ fontSize: 11.5, color: "rgba(246,242,234,0.55)", textTransform: "capitalize" }}
+              >
+                {user?.role}
+              </Typography>
+            </Box>
+          </Box>
+        ) : null}
+      </Box>
+      <Divider sx={{ borderColor: "rgba(246,242,234,0.08)", mx: 2 }} />
+      <List sx={{ px: 1.5, py: 1.5 }}>
         {visibleTabs.map((tab) => (
           <ListItem key={tab.key} disablePadding>
             <ListItemButton
@@ -177,13 +227,17 @@ function DashboardContent() {
                 setMobileOpen(false);
               }}
               sx={{
-                my: 0.4,
-                borderRadius: 2,
-                gap: 1.5,
-                px: 1.8,
-                "&.Mui-selected": {
-                  bgcolor: "rgba(59,130,246,0.18)",
-                  color: "#e2e8f0",
+                my: 0.3,
+                borderRadius: "10px",
+                gap: 1,
+                px: 1.6,
+                py: 1,
+                color: "rgba(246,242,234,0.72)",
+                transition: "background-color 160ms ease, color 160ms ease",
+                "& .MuiSvgIcon-root": { fontSize: 20, opacity: 0.85 },
+                "&.Mui-selected, &.Mui-selected:hover": {
+                  bgcolor: "rgba(246,242,234,0.10)",
+                  color: "#ffffff",
                   "&::before": {
                     content: '""',
                     position: "absolute",
@@ -192,11 +246,12 @@ function DashboardContent() {
                     bottom: 8,
                     width: 3,
                     borderRadius: 8,
-                    backgroundColor: "#38bdf8",
+                    backgroundColor: "#c9a86a",
                   },
                 },
                 "&:hover": {
-                  bgcolor: "rgba(255,255,255,0.06)",
+                  bgcolor: "rgba(246,242,234,0.06)",
+                  color: "#ffffff",
                 },
               }}
             >
@@ -212,7 +267,8 @@ function DashboardContent() {
                 primary={tab.label}
                 primaryTypographyProps={{
                   fontSize: 14,
-                  fontWeight: activeTab === tab.key ? 700 : 600,
+                  fontWeight: activeTab === tab.key ? 600 : 500,
+                  letterSpacing: "0.01em",
                 }}
               />
             </ListItemButton>
@@ -221,8 +277,8 @@ function DashboardContent() {
       </List>
 
       <Box sx={{ mt: "auto", px: 2, pb: 2 }}>
-        <Divider sx={{ borderColor: "rgba(255,255,255,0.06)", mb: 2 }} />
-        <Typography variant="caption" color="#94a3b8">
+        <Divider sx={{ borderColor: "rgba(246,242,234,0.08)", mb: 2 }} />
+        <Typography variant="caption" sx={{ color: "rgba(246,242,234,0.45)" }}>
           © {t("shell.copyright")}
         </Typography>
       </Box>
@@ -230,16 +286,17 @@ function DashboardContent() {
   );
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+    <Box className="admin-shell" sx={{ display: "flex", minHeight: "100vh" }}>
       <AppBar
         position="fixed"
         elevation={0}
         sx={{
           display: { xs: "flex", md: "none" },
           top: HEADER_HEIGHT,
-          bgcolor: "#f8fafc",
-          color: "#0f172a",
-          borderBottom: "1px solid #e2e8f0",
+          bgcolor: "rgba(251,248,243,0.96)",
+          backdropFilter: "blur(8px)",
+          color: "#0b2426",
+          borderBottom: "1px solid #e7e2d9",
           zIndex: (theme) => theme.zIndex.appBar - 1,
         }}
       >
@@ -250,8 +307,8 @@ function DashboardContent() {
           <IconButton
             onClick={handleDrawerToggle}
             sx={{
-              color: "#0f172a",
-              border: "1px solid #e2e8f0",
+              color: "#0b2426",
+              border: "1px solid #e7e2d9",
               borderRadius: 2,
               width: 36,
               height: 36,
@@ -272,8 +329,9 @@ function DashboardContent() {
           display: { xs: "block", md: "none" },
           "& .MuiDrawer-paper": {
             width: drawerWidth,
-            bgcolor: "#0f172a",
-            color: "#e2e8f0",
+            bgcolor: "#0b2426",
+            color: "#f6f2ea",
+            borderRight: "none",
             top: HEADER_HEIGHT,
             height: `calc(100% - ${HEADER_HEIGHT}px)`,
           },
@@ -290,8 +348,9 @@ function DashboardContent() {
           width: drawerWidth,
           "& .MuiDrawer-paper": {
             width: drawerWidth,
-            bgcolor: "#0f172a",
-            color: "#e2e8f0",
+            bgcolor: "#0b2426",
+            color: "#f6f2ea",
+            borderRight: "none",
             top: HEADER_HEIGHT, // KJO E ZGJIDH: nis poshtÃ« header-it
             height: `calc(100% - ${HEADER_HEIGHT}px)`,
           },
@@ -305,14 +364,36 @@ function DashboardContent() {
         component="main"
         sx={{
           flexGrow: 1,
-          px: { xs: 2, md: 4 },
-          pb: { xs: 2, md: 4 },
+          minWidth: 0,
+          px: { xs: 2, md: 5 },
+          pb: { xs: 3, md: 6 },
           pt: { xs: 10, md: 4 },
           mt: 0,
-          bgcolor: "#f8fafc",
+          bgcolor: "var(--admin-bg)",
           minHeight: `calc(100vh - ${HEADER_HEIGHT}px)`,
         }}
       >
+        <Box
+          sx={{
+            display: { xs: "none", md: "flex" },
+            alignItems: "center",
+            justifyContent: "space-between",
+            pb: 2.5,
+            mb: 3,
+            borderBottom: "1px solid var(--admin-border)",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, fontSize: 13, color: "var(--admin-muted)" }}>
+            <span>{t("shell.mobileTitle")}</span>
+            <span style={{ opacity: 0.5 }}>/</span>
+            <span style={{ color: "var(--admin-text)", fontWeight: 600 }}>
+              {visibleTabs.find((x) => x.key === activeTab)?.label}
+            </span>
+          </Box>
+          <Typography sx={{ fontSize: 13, color: "var(--admin-muted)" }}>
+            {new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+          </Typography>
+        </Box>
         {activeTab === "overview" && <OverviewTab />}
         {activeTab === "rooms" && <RoomsTab />}
         {activeTab === "reservations" && <ReservationsTab />}

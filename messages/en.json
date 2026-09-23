@@ -565,6 +565,24 @@
           "status": "Status",
           "total": "Total"
         }
+      },
+      "empty": "No rooms found for this filter.",
+      "summary": {
+        "liveStatus": "Live status",
+        "booked": "Occupied",
+        "available": "Available",
+        "total": "Total",
+        "totalCapacity": "Total capacity",
+        "occupancy": "Occupancy"
+      },
+      "status": {
+        "booked": "Booked",
+        "available": "Free",
+        "outOfOrder": "Out"
+      },
+      "floor": {
+        "label": "Floor {floor}",
+        "count": "{count} rooms"
       }
     },
     "reservations": {

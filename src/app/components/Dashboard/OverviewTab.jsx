@@ -99,7 +99,6 @@ export default function OverviewTab() {
     },
   ];
   const primaryCards = cards.slice(0, 4);
-  const secondaryCards = cards.slice(4);
 
   return (
     <Box className="admin-page">
@@ -135,12 +134,21 @@ export default function OverviewTab() {
         </Paper>
       ) : null}
 
-      <Box display="grid" gap={3}>
+      <Box display="grid" gap={3.5}>
         <Box>
-          <Typography fontWeight={800} mb={1.2}>
+          <Typography
+            sx={{
+              mb: 1.5,
+              fontSize: 12,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              fontWeight: 700,
+              color: "var(--admin-muted)",
+            }}
+          >
             {t("sections.primaryKpis")}
           </Typography>
-          <Grid container spacing={2.4}>
+          <Grid container spacing={2}>
             {primaryCards.map((card) => (
               <Grid item xs={12} sm={6} lg={3} key={card.title}>
                 <StatCard
@@ -155,101 +163,131 @@ export default function OverviewTab() {
         </Box>
 
         <Box>
-          <Typography fontWeight={800} mb={1.2}>
+          <Typography
+            sx={{
+              mb: 1.5,
+              fontSize: 12,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              fontWeight: 700,
+              color: "var(--admin-muted)",
+            }}
+          >
             {t("sections.operationalSnapshot")}
           </Typography>
-          <Grid container spacing={2.4}>
-            <Grid item xs={12} lg={8}>
-              <Paper
-                className="admin-card"
-                elevation={0}
-                sx={{ borderColor: "#e7edf4", boxShadow: "none" }}
-              >
-                <Box className="admin-card-header">
-                  <Typography fontWeight={800}>{t("sections.todaySnapshot")}</Typography>
-                </Box>
-                <Box className="admin-card-body">
-                  <Box
-                    display="grid"
-                    gridTemplateColumns={{ xs: "1fr", sm: "1fr 1fr 1fr" }}
-                    gap={2}
-                  >
-                    <Box>
-                      <Typography variant="caption" color="text.secondary">
-                        {t("snapshot.checkIns")}
-                      </Typography>
-                      <Typography variant="h6" fontWeight={800}>
-                        {stats?.todayCheckins ?? 0}
-                      </Typography>
+          <Paper
+            className="admin-card"
+            elevation={0}
+            sx={{ overflow: "hidden", boxShadow: "none" }}
+          >
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "repeat(2, minmax(0, 1fr))",
+                  lg: "repeat(4, minmax(0, 1fr))",
+                },
+              }}
+            >
+              {[
+                {
+                  label: t("snapshot.checkIns"),
+                  value: stats?.todayCheckins ?? 0,
+                  icon: <Login />,
+                  tone: "#0e7490",
+                },
+                {
+                  label: t("snapshot.upcoming"),
+                  value: stats?.upcomingReservations ?? 0,
+                  icon: <EventAvailable />,
+                  tone: "#6d5b8c",
+                },
+                {
+                  label: t("snapshot.revenue"),
+                  value: currency.format(Number(stats?.revenueToday || 0)),
+                  icon: <Euro />,
+                  tone: "#39735c",
+                },
+                {
+                  label: t("snapshot.currentOccupancy"),
+                  value: `${occupancy}%`,
+                  icon: <Hotel />,
+                  tone: "#a76d2a",
+                  progress: occupancy,
+                },
+              ].map((item, index) => (
+                <Box
+                  key={item.label}
+                  sx={{
+                    p: { xs: 2.25, md: 2.75 },
+                    minHeight: 148,
+                    borderRight: {
+                      lg: index < 3 ? "1px solid var(--admin-border)" : "none",
+                    },
+                    borderBottom: {
+                      xs: index < 3 ? "1px solid var(--admin-border)" : "none",
+                      sm: index < 2 ? "1px solid var(--admin-border)" : "none",
+                      lg: "none",
+                    },
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, mb: 2 }}>
+                    <Box
+                      sx={{
+                        width: 34,
+                        height: 34,
+                        borderRadius: "8px",
+                        display: "grid",
+                        placeItems: "center",
+                        bgcolor: `${item.tone}12`,
+                        color: item.tone,
+                        "& .MuiSvgIcon-root": { fontSize: 19 },
+                      }}
+                    >
+                      {item.icon}
                     </Box>
-                    <Box>
-                      <Typography variant="caption" color="text.secondary">
-                        {t("snapshot.upcoming")}
-                      </Typography>
-                      <Typography variant="h6" fontWeight={800}>
-                        {stats?.upcomingReservations ?? 0}
-                      </Typography>
-                    </Box>
-                    <Box>
-                      <Typography variant="caption" color="text.secondary">
-                        {t("snapshot.revenue")}
-                      </Typography>
-                      <Typography variant="h6" fontWeight={800}>
-                        {currency.format(Number(stats?.revenueToday || 0))}
-                      </Typography>
-                    </Box>
+                    <Typography
+                      sx={{
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: "var(--admin-muted)",
+                      }}
+                    >
+                      {item.label}
+                    </Typography>
                   </Box>
-                </Box>
-              </Paper>
-            </Grid>
-
-            <Grid item xs={12} lg={4}>
-              <Paper
-                className="admin-card"
-                elevation={0}
-                sx={{ borderColor: "#e7edf4", boxShadow: "none" }}
-              >
-                <Box className="admin-card-header">
-                  <Typography fontWeight={800}>{t("sections.occupancyHealth")}</Typography>
-                </Box>
-                <Box className="admin-card-body">
-                  <Typography variant="caption" color="text.secondary">
-                    {t("snapshot.currentOccupancy")}
-                  </Typography>
-                  <Typography variant="h5" fontWeight={900} sx={{ mb: 1.2 }}>
-                    {occupancy}%
-                  </Typography>
-                  <LinearProgress
-                    variant="determinate"
-                    value={occupancy}
+                  <Typography
                     sx={{
-                      height: 8,
-                      borderRadius: 999,
-                      bgcolor: "rgba(15,23,42,0.08)",
-                      "& .MuiLinearProgress-bar": {
-                        borderRadius: 999,
-                        background:
-                          "linear-gradient(90deg, #06b6d4 0%, #0284c7 100%)",
-                      },
+                      fontFamily: "var(--font-display, 'Instrument Serif', serif)",
+                      fontSize: 32,
+                      lineHeight: 1.1,
+                      color: "var(--admin-text)",
                     }}
-                  />
+                  >
+                    {item.value}
+                  </Typography>
+                  {item.progress !== undefined ? (
+                    <LinearProgress
+                      variant="determinate"
+                      value={item.progress}
+                      sx={{
+                        mt: 2,
+                        height: 5,
+                        borderRadius: 999,
+                        bgcolor: "var(--admin-bg)",
+                        "& .MuiLinearProgress-bar": {
+                          borderRadius: 999,
+                          bgcolor: item.tone,
+                        },
+                      }}
+                    />
+                  ) : null}
                 </Box>
-              </Paper>
-            </Grid>
-
-            {secondaryCards.map((card) => (
-              <Grid item xs={12} md={4} key={card.title}>
-                <StatCard
-                  title={card.title}
-                  value={card.value}
-                  icon={card.icon}
-                  tone={card.tone}
-                />
-              </Grid>
-            ))}
-          </Grid>
+              ))}
+            </Box>
+          </Paper>
         </Box>
-
       </Box>
     </Box>
   );

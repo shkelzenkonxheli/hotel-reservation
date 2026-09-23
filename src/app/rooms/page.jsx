@@ -330,6 +330,39 @@ export default function RoomsPage() {
     return getRoomCategory(room.type) === roomCategory;
   });
 
+  const sectionLabel = (key, fallback) =>
+    typeof t.has === "function" && t.has(`sections.${key}`)
+      ? t(`sections.${key}`)
+      : fallback;
+  const countLabelFor = (count) =>
+    typeof t.has === "function" && t.has("sections.count")
+      ? t("sections.count", { count })
+      : `${count}`;
+  const roomSections = [
+    {
+      key: "apartment",
+      title: sectionLabel("apartmentsTitle", "Apartamentet"),
+      eyebrow: sectionLabel("apartmentsEyebrow", "Per familje e grupe"),
+    },
+    {
+      key: "hotel",
+      title: sectionLabel("hotelRoomsTitle", "Dhoma e hotelit"),
+      eyebrow: sectionLabel("hotelRoomsEyebrow", "Per cifte e qendrim te qete"),
+    },
+  ]
+    .map((meta) => ({
+      ...meta,
+      rooms: visibleRoomTypes.filter(
+        (room) => getRoomCategory(room.type) === meta.key,
+      ),
+      countLabel: countLabelFor(
+        visibleRoomTypes.filter(
+          (room) => getRoomCategory(room.type) === meta.key,
+        ).length,
+      ),
+    }))
+    .filter((section) => section.rooms.length > 0);
+
   return (
     <div className="public-page min-h-screen bg-[var(--sand)]">
       <Suspense fallback={null}>
@@ -361,8 +394,8 @@ export default function RoomsPage() {
       <PublicSection className="!pb-16 !pt-8 md:!pb-24 md:!pt-10">
         <PublicContainer>
           {loadingRooms ? (
-            <div className="space-y-8">
-              {[...Array(3)].map((_, i) => (
+            <div className="grid gap-6 md:grid-cols-2 md:gap-8">
+              {[...Array(4)].map((_, i) => (
                 <RoomCardSkeleton key={i} />
               ))}
             </div>
@@ -376,28 +409,47 @@ export default function RoomsPage() {
               }
             />
           ) : (
-            <div className="space-y-8">
-              {visibleRoomTypes.map((room, index) => {
-                const roomLabelKey = getRoomLabelKey(room.type);
-                const amenities = getFeatureChips(room.amenities);
+            <div className="space-y-12 md:space-y-16">
+              {roomSections.map((section) => (
+                <section key={section.key}>
+                  <div className="mb-6 flex items-end gap-5 md:mb-8 md:gap-7">
+                    <div className="shrink-0">
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--public-muted)]">
+                        {section.eyebrow}
+                      </span>
+                      <h2 className="display mt-2 text-[1.7rem] leading-tight text-[var(--ink)] md:text-[2.1rem]">
+                        {section.title}
+                      </h2>
+                    </div>
+                    <div className="divider-soft mb-2 hidden flex-1 md:block" />
+                    <span className="badge badge-ink mb-1 hidden shrink-0 sm:inline-flex">
+                      {section.countLabel}
+                    </span>
+                  </div>
+                  <div className="grid gap-6 md:grid-cols-2 md:gap-8">
+                    {section.rooms.map((room) => {
+                      const roomLabelKey = getRoomLabelKey(room.type);
+                      const amenities = getFeatureChips(room.amenities);
 
-                return (
-                  <RoomCard
-                    key={room.type}
-                    room={room}
-                    reverse={index % 2 === 1}
-                    roomLabel={roomLabelKey ? t(`labels.${roomLabelKey}`) : ""}
-                    amenities={amenities}
-                    capacityLabel={capacityLabel}
-                    showAllAmenitiesLabel={showAllAmenitiesLabel}
-                    t={t}
-                    onOpenGallery={openGallery}
-                    onShowAmenities={setAmenitiesRoom}
-                    onViewDetails={setExpandedRoom}
-                    onBook={handleBookClick}
-                  />
-                );
-              })}
+                      return (
+                        <RoomCard
+                          key={room.type}
+                          room={room}
+                          roomLabel={roomLabelKey ? t(`labels.${roomLabelKey}`) : ""}
+                          amenities={amenities}
+                          capacityLabel={capacityLabel}
+                          showAllAmenitiesLabel={showAllAmenitiesLabel}
+                          t={t}
+                          onOpenGallery={openGallery}
+                          onShowAmenities={setAmenitiesRoom}
+                          onViewDetails={setExpandedRoom}
+                          onBook={handleBookClick}
+                        />
+                      );
+                    })}
+                  </div>
+                </section>
+              ))}
             </div>
           )}
         </PublicContainer>
@@ -589,3 +641,4 @@ export default function RoomsPage() {
     </div>
   );
 }
+

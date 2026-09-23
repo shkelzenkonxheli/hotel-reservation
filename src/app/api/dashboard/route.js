@@ -104,7 +104,7 @@ export async function GET() {
 
     // Single lightweight read: only the fields needed for aggregation.
     const recentReservations = await prisma.reservations.findMany({
-      where: { start_date: { gte: monthBuckets[0].key + "-01" } },
+      where: { start_date: { gte: new Date(monthBuckets[0].key + "-01T00:00:00.000Z") } },
       select: {
         start_date: true,
         total_price: true,

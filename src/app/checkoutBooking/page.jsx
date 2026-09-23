@@ -28,7 +28,6 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { useSession } from "next-auth/react";
 import PublicContainer from "../components/Public/PublicContainer";
 import PublicSection from "../components/Public/PublicSection";
-import PublicCard from "../components/Public/PublicCard";
 import usePageTitle from "../hooks/usePageTitle";
 import {
   calculateNightlyRate,
@@ -385,7 +384,7 @@ export default function CheckoutBooking() {
   );
 
   const renderSummaryCard = () => (
-    <PublicCard className="p-5 md:p-6">
+    <div>
       <div className="media aspect-[4/3] w-full overflow-hidden rounded-2xl">
         <img
           src={room.images?.[0] || "/placeholder.jpg"}
@@ -485,11 +484,11 @@ export default function CheckoutBooking() {
       </div>
 
       <p className="mt-4 text-xs text-slate-500">{t("summary.secureNote")}</p>
-    </PublicCard>
+    </div>
   );
 
   const renderUserForm = () => (
-    <PublicCard className="p-5 md:p-6">
+    <div>
       <div className="flex items-center justify-between mb-1">
         <Typography variant="h6" fontWeight={800} className="display">
           {t("form.guestInformation")}
@@ -627,7 +626,7 @@ export default function CheckoutBooking() {
       >
         {loading ? <CircularProgress size={22} color="inherit" /> : t("confirmCash")}
       </button>
-    </PublicCard>
+    </div>
   );
 
   /* ---------------- RENDER ---------------- */
@@ -650,7 +649,7 @@ export default function CheckoutBooking() {
           <div className="mt-6 grid gap-6 lg:grid-cols-[1.2fr_0.8fr] items-start">
             <div className="space-y-6">
               {isMobile ? (
-                <PublicCard className="p-4">
+                <div className="px-1">
                   <Typography variant="h6" fontWeight="bold">
                     {room.name}
                   </Typography>
@@ -731,7 +730,7 @@ export default function CheckoutBooking() {
                       {renderSummaryCard()}
                     </DialogContent>
                   </Dialog>
-                </PublicCard>
+                </div>
               ) : null}
 
               {renderUserForm()}

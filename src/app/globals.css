@@ -776,8 +776,8 @@ body {
   margin: 0 0 6px;
   color: var(--admin-muted);
   font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.18em;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 .rooms-main-title {
@@ -807,13 +807,14 @@ body {
   margin-bottom: 2px;
   color: rgba(255, 255, 255, 0.62);
   font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.16em;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 .rooms-occupancy-chip strong {
   font-size: 1.25rem;
   line-height: 1;
+  font-weight: 500;
 }
 .rooms-stats-grid {
   display: grid;
@@ -849,14 +850,15 @@ body {
 .rooms-stat-card p {
   color: rgba(255, 255, 255, 0.78);
   font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.18em;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 .rooms-stat-card strong {
   color: #fff;
   font-size: 2rem;
   line-height: 1;
+  font-weight: 500;
 }
 .rooms-stat-card.booked {
   background: #bc3f42;
@@ -895,14 +897,14 @@ body {
 .rooms-status-control > span {
   color: var(--admin-muted);
   font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
 }
 .rooms-date-field .MuiOutlinedInput-root {
   min-width: 174px;
   border-radius: 14px;
-  font-weight: 700;
+  font-weight: 500;
 }
 .rooms-filter-buttons {
   display: flex;
@@ -918,7 +920,7 @@ body {
   color: var(--admin-text);
   padding: 0 18px;
   font-size: 0.82rem;
-  font-weight: 800;
+  font-weight: 600;
 }
 .rooms-filter-chip.MuiButton-root:hover {
   border-color: rgba(20, 82, 79, 0.35);
@@ -964,7 +966,7 @@ body {
   padding: 0 12px;
   border-radius: 999px;
   font-size: 0.76rem;
-  font-weight: 800;
+  font-weight: 600;
   white-space: nowrap;
 }
 .rooms-count-pill.booked {
@@ -998,8 +1000,8 @@ body {
 .room-floor-heading h3 {
   color: var(--admin-muted);
   font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.22em;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 .room-floor-heading span {
@@ -1010,7 +1012,7 @@ body {
 .room-floor-heading p {
   color: var(--admin-muted);
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 500;
 }
 .room-rack-grid {
   display: grid;
@@ -1044,12 +1046,12 @@ body {
 .room-rack-number {
   color: var(--admin-text);
   font-size: 1.12rem;
-  font-weight: 900;
+  font-weight: 600;
   line-height: 1;
 }
 .room-rack-status {
   font-size: 9px;
-  font-weight: 900;
+  font-weight: 600;
   letter-spacing: 0.02em;
   line-height: 1;
   text-transform: uppercase;

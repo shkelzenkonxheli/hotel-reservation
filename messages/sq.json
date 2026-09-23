@@ -268,6 +268,13 @@
       "importantInfoText": "Disponueshmeria dhe cmimi final konfirmohen ne hapin tjeter pasi zgjidhni datat.",
       "amenitiesTitle": "Komoditete",
       "priceFrom": "Nga"
+    },
+    "sections": {
+      "apartmentsTitle": "Apartamentet tona",
+      "apartmentsEyebrow": "Hapesire e plote per familje e grupe",
+      "hotelRoomsTitle": "Dhomat e hotelit",
+      "hotelRoomsEyebrow": "Elegance e qete per nje pushim relaksues",
+      "count": "{count} opsione"
     }
   },
   "contact": {

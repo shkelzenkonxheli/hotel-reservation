@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Box, Typography, Grid, Paper, LinearProgress, Chip } from "@mui/material";
 import {
   People,
@@ -11,11 +11,45 @@ import {
   EventAvailable,
   Hotel,
 } from "@mui/icons-material";
+import {
+  ResponsiveContainer,
+  ComposedChart,
+  Area,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Legend,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 import PageHeader from "./ui/PageHeader";
 import StatCard from "./ui/StatCard";
 
+const STATUS_COLORS = {
+  pending: "#a76d2a",
+  confirmed: "#0e7490",
+  checked_in: "#2563eb",
+  completed: "#39735c",
+  cancelled: "#b91c1c",
+  no_show: "#6d5b8c",
+};
+const FALLBACK_COLORS = ["#0e7490", "#a76d2a", "#39735c", "#6d5b8c", "#b91c1c", "#2563eb"];
+
+const CHART_TICK = { fontSize: 11, fill: "var(--admin-muted)" };
+const TOOLTIP_STYLE = {
+  borderRadius: 12,
+  border: "1px solid var(--admin-border)",
+  boxShadow: "0 10px 30px rgba(15, 23, 42, 0.10)",
+  fontSize: 12,
+  padding: "10px 14px",
+};
+
 export default function OverviewTab() {
   const t = useTranslations("dashboard.overview");
+  const locale = useLocale();
   const [stats, setStats] = useState(null);
   const [loadError, setLoadError] = useState("");
 
@@ -53,6 +87,34 @@ export default function OverviewTab() {
   });
 
   const occupancy = Math.max(0, Math.min(100, Number(stats?.occupancyPercent || 0)));
+
+  // Monthly buckets -> chart data with localized month labels.
+  const monthly = (stats?.monthly || []).map((m) => ({
+    ...m,
+    label: new Date(`${m.key}-01T00:00:00Z`).toLocaleDateString(
+      locale === "sq" ? "sq-AL" : "en-GB",
+      { month: "short", timeZone: "UTC" },
+    ),
+  }));
+  const sixMonthRevenue = monthly.reduce((sum, m) => sum + Number(m.revenue || 0), 0);
+  const sixMonthBookings = monthly.reduce((sum, m) => sum + Number(m.bookings || 0), 0);
+
+  // Status breakdown -> donut data with translated labels.
+  const statusName = (s) => {
+    const keys = {
+      pending: t("status.pending"),
+      confirmed: t("status.confirmed"),
+      checked_in: t("status.checkedIn"),
+      completed: t("status.completed"),
+      cancelled: t("status.cancelled"),
+      no_show: t("status.noShow"),
+    };
+    return keys[s] || String(s).replace(/_/g, " ");
+  };
+  const pieData = (stats?.statusBreakdown || []).map((s) => ({
+    ...s,
+    name: statusName(s.status),
+  }));
 
   const cards = [
     {
@@ -287,6 +349,174 @@ export default function OverviewTab() {
               ))}
             </Box>
           </Paper>
+        </Box>
+
+        <Box>
+          <Typography
+            sx={{
+              mb: 1.5,
+              fontSize: 12,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              fontWeight: 700,
+              color: "var(--admin-muted)",
+            }}
+          >
+            {t("sections.analytics")}
+          </Typography>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", lg: "2fr 1fr" },
+              gap: 2,
+            }}
+          >
+            <Paper
+              className="admin-card"
+              elevation={0}
+              sx={{ p: { xs: 2, md: 3 }, boxShadow: "none" }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "baseline",
+                  justifyContent: "space-between",
+                  gap: 2,
+                  flexWrap: "wrap",
+                  mb: 2.5,
+                }}
+              >
+                <Typography
+                  sx={{ fontSize: 15, fontWeight: 700, color: "var(--admin-text)" }}
+                >
+                  {t("charts.revenueBookings")}
+                </Typography>
+                <Typography sx={{ fontSize: 12, color: "var(--admin-muted)" }}>
+                  {t("charts.sixMonthSummary", {
+                    revenue: currency.format(sixMonthRevenue),
+                    bookings: sixMonthBookings,
+                  })}
+                </Typography>
+              </Box>
+              <ResponsiveContainer width="100%" height={300}>
+                <ComposedChart data={monthly} margin={{ top: 6, right: 6, left: 0, bottom: 0 }}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="var(--admin-border)"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="label"
+                    tickLine={false}
+                    axisLine={{ stroke: "var(--admin-border)" }}
+                    tick={CHART_TICK}
+                  />
+                  <YAxis
+                    yAxisId="revenue"
+                    tickLine={false}
+                    axisLine={false}
+                    width={56}
+                    tick={CHART_TICK}
+                    tickFormatter={(v) =>
+                      v >= 1000 ? `€${Math.round(v / 1000)}k` : `€${v}`
+                    }
+                  />
+                  <YAxis
+                    yAxisId="bookings"
+                    orientation="right"
+                    tickLine={false}
+                    axisLine={false}
+                    width={32}
+                    tick={CHART_TICK}
+                    allowDecimals={false}
+                  />
+                  <Tooltip
+                    contentStyle={TOOLTIP_STYLE}
+                    formatter={(value, name) =>
+                      name === t("legend.revenue")
+                        ? [currency.format(Number(value)), name]
+                        : [value, name]
+                    }
+                  />
+                  <Legend
+                    wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
+                    iconType="circle"
+                    iconSize={9}
+                  />
+                  <Area
+                    yAxisId="revenue"
+                    type="monotone"
+                    dataKey="revenue"
+                    name={t("legend.revenue")}
+                    stroke="#0e7490"
+                    fill="#0e7490"
+                    fillOpacity={0.12}
+                    strokeWidth={2.5}
+                    activeDot={{ r: 4, strokeWidth: 2, stroke: "#fff" }}
+                  />
+                  <Bar
+                    yAxisId="bookings"
+                    dataKey="bookings"
+                    name={t("legend.bookings")}
+                    fill="#a76d2a"
+                    fillOpacity={0.85}
+                    barSize={18}
+                    radius={[4, 4, 0, 0]}
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </Paper>
+
+            <Paper
+              className="admin-card"
+              elevation={0}
+              sx={{ p: { xs: 2, md: 3 }, boxShadow: "none" }}
+            >
+              <Typography
+                sx={{ fontSize: 15, fontWeight: 700, color: "var(--admin-text)", mb: 2.5 }}
+              >
+                {t("charts.statusDistribution")}
+              </Typography>
+              {pieData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      dataKey="count"
+                      nameKey="name"
+                      innerRadius={62}
+                      outerRadius={92}
+                      paddingAngle={3}
+                      stroke="none"
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell
+                          key={entry.status}
+                          fill={
+                            STATUS_COLORS[entry.status] ||
+                            FALLBACK_COLORS[index % FALLBACK_COLORS.length]
+                          }
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={TOOLTIP_STYLE}
+                      formatter={(value, name) => [value, name]}
+                    />
+                    <Legend
+                      wrapperStyle={{ fontSize: 12 }}
+                      iconType="circle"
+                      iconSize={9}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <Typography sx={{ fontSize: 13, color: "var(--admin-muted)", py: 8, textAlign: "center" }}>
+                  {t("charts.noData")}
+                </Typography>
+              )}
+            </Paper>
+          </Box>
         </Box>
       </Box>
     </Box>

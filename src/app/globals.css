@@ -748,3 +748,373 @@ body {
   .admin-shell .admin-card-body { padding: 16px; }
   .admin-shell .admin-page { gap: 16px; }
 }
+
+
+/* ---------- Admin rooms rack redesign ---------- */
+.rooms-admin-page {
+  gap: 22px;
+}
+.rooms-command-card,
+.rooms-collection {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 22px;
+  box-shadow: 0 24px 60px -42px rgba(11, 36, 38, 0.55);
+}
+.rooms-command-card {
+  padding: 24px;
+}
+.rooms-command-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 22px;
+}
+.rooms-kicker,
+.rooms-collection-kicker {
+  margin: 0 0 6px;
+  color: var(--admin-muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.rooms-main-title {
+  margin: 0;
+  color: var(--admin-text);
+  font-family: var(--font-display, 'Instrument Serif', serif);
+  font-size: clamp(2rem, 3vw, 2.85rem);
+  line-height: 0.98;
+  font-weight: 400;
+}
+.rooms-main-subtitle {
+  margin-top: 10px;
+  color: var(--admin-muted);
+  font-size: 0.95rem;
+}
+.rooms-occupancy-chip {
+  min-width: 108px;
+  border-radius: 16px;
+  background: #10212c;
+  color: #fff;
+  padding: 11px 14px;
+  text-align: right;
+  box-shadow: 0 18px 32px -24px rgba(16, 33, 44, 0.85);
+}
+.rooms-occupancy-chip span {
+  display: block;
+  margin-bottom: 2px;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.rooms-occupancy-chip strong {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+.rooms-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.rooms-stat-card {
+  min-height: 108px;
+  border-radius: 20px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  position: relative;
+}
+.rooms-stat-card::after {
+  content: "";
+  position: absolute;
+  inset: auto -18px -26px auto;
+  width: 94px;
+  height: 94px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+}
+.rooms-stat-card p,
+.rooms-stat-card strong {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+}
+.rooms-stat-card p {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.rooms-stat-card strong {
+  color: #fff;
+  font-size: 2rem;
+  line-height: 1;
+}
+.rooms-stat-card.booked {
+  background: #bc3f42;
+  box-shadow: 0 18px 34px -28px rgba(188, 63, 66, 0.85);
+}
+.rooms-stat-card.available {
+  background: var(--brass);
+  box-shadow: 0 18px 34px -28px rgba(20, 82, 79, 0.85);
+}
+.rooms-stat-card.total {
+  min-height: auto;
+  grid-column: 1 / -1;
+  flex-direction: row;
+  align-items: center;
+  background: #10212c;
+  padding: 15px 20px;
+}
+.rooms-stat-card.total strong {
+  font-size: 1.35rem;
+}
+.rooms-filter-panel {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 14px;
+  padding-top: 18px;
+  border-top: 1px solid var(--admin-border);
+}
+.rooms-date-control,
+.rooms-status-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.rooms-date-control label,
+.rooms-status-control > span {
+  color: var(--admin-muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.rooms-date-field .MuiOutlinedInput-root {
+  min-width: 174px;
+  border-radius: 14px;
+  font-weight: 700;
+}
+.rooms-filter-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.rooms-filter-chip.MuiButton-root {
+  min-height: 40px;
+  border: 1px solid var(--admin-border);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--admin-text);
+  padding: 0 18px;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+.rooms-filter-chip.MuiButton-root:hover {
+  border-color: rgba(20, 82, 79, 0.35);
+  background: rgba(20, 82, 79, 0.06);
+}
+.rooms-filter-chip.MuiButton-root.active {
+  border-color: #10212c;
+  background: #10212c;
+  color: #fff;
+}
+.rooms-map-stack {
+  display: grid;
+  gap: 22px;
+}
+.rooms-collection {
+  padding: 24px 24px 26px;
+}
+.rooms-collection-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.rooms-collection-head h2 {
+  margin: 0;
+  color: var(--admin-text);
+  font-family: var(--font-display, 'Instrument Serif', serif);
+  font-size: clamp(1.65rem, 2.2vw, 2.25rem);
+  font-weight: 400;
+  line-height: 1.05;
+}
+.rooms-collection-pills {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.rooms-count-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.rooms-count-pill.booked {
+  background: rgba(188, 63, 66, 0.12);
+  color: #9d2529;
+}
+.rooms-count-pill.available {
+  background: rgba(20, 82, 79, 0.12);
+  color: var(--brass-deep);
+}
+.rooms-count-pill.neutral {
+  background: rgba(16, 33, 44, 0.08);
+  color: var(--admin-text);
+}
+.rooms-floor-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+.room-floor-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.room-floor-heading h3,
+.room-floor-heading p {
+  margin: 0;
+  white-space: nowrap;
+}
+.room-floor-heading h3 {
+  color: var(--admin-muted);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.room-floor-heading span {
+  height: 1px;
+  flex: 1;
+  background: var(--admin-border);
+}
+.room-floor-heading p {
+  color: var(--admin-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.room-rack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
+  gap: 12px;
+}
+.room-rack-tile {
+  aspect-ratio: 1 / 1;
+  border: 2px solid transparent;
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+.room-rack-tile:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 26px -22px rgba(16, 33, 44, 0.75);
+}
+.room-rack-tile:focus-visible {
+  outline: 3px solid rgba(20, 82, 79, 0.24);
+  outline-offset: 2px;
+}
+.room-rack-number {
+  color: var(--admin-text);
+  font-size: 1.12rem;
+  font-weight: 900;
+  line-height: 1;
+}
+.room-rack-status {
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.room-rack-tile.available {
+  background: rgba(20, 82, 79, 0.08);
+  border-color: rgba(20, 82, 79, 0.13);
+}
+.room-rack-tile.available .room-rack-status {
+  color: var(--brass);
+}
+.room-rack-tile.booked {
+  background: rgba(188, 63, 66, 0.08);
+  border-color: rgba(188, 63, 66, 0.14);
+}
+.room-rack-tile.booked .room-rack-status {
+  color: #bc3f42;
+}
+.room-rack-tile.out-of-order {
+  background: #eeebe5;
+  border-color: #ded7ca;
+  opacity: 0.78;
+}
+.room-rack-tile.out-of-order .room-rack-status {
+  color: #7a6e61;
+}
+@media (min-width: 1180px) {
+  .rooms-map-stack {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+@media (max-width: 900px) {
+  .rooms-command-card,
+  .rooms-collection {
+    border-radius: 18px;
+    padding: 18px;
+  }
+  .rooms-command-head,
+  .rooms-collection-head,
+  .rooms-filter-panel {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .rooms-occupancy-chip {
+    width: 100%;
+    text-align: left;
+  }
+  .rooms-date-control,
+  .rooms-status-control {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .rooms-date-field .MuiOutlinedInput-root {
+    min-width: 100%;
+  }
+  .rooms-filter-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .rooms-filter-chip.MuiButton-root {
+    padding: 0 10px;
+  }
+  .room-rack-grid {
+    grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+    gap: 10px;
+  }
+}

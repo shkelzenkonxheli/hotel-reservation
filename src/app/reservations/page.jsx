@@ -278,7 +278,7 @@ export default function ReservationsPage({ embedded = false }) {
         {embedded ? (
           <ReservationSkeleton />
         ) : (
-          <PublicSection className="pt-2 md:pt-4">
+          <PublicSection className="!pt-4 md:!pt-6 !pb-12 md:!pb-16">
             <PublicContainer>
               <ReservationSkeleton />
             </PublicContainer>
@@ -556,7 +556,7 @@ export default function ReservationsPage({ embedded = false }) {
     <div>{content}</div>
   ) : (
     <div className="public-page min-h-screen">
-      <PublicSection className="pt-2 md:pt-4">
+      <PublicSection className="!pt-4 md:!pt-6 !pb-12 md:!pb-16">
         <PublicContainer>{content}</PublicContainer>
       </PublicSection>
     </div>

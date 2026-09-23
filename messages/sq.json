@@ -483,13 +483,32 @@
         "primaryKpis": "KPI kryesore",
         "operationalSnapshot": "Pamja operative",
         "todaySnapshot": "Gjendja e sotme",
-        "occupancyHealth": "Gjendja e okupimit"
+        "occupancyHealth": "Gjendja e okupimit",
+        "analytics": "Analiza dhe trendet"
       },
       "snapshot": {
         "checkIns": "Check-in",
         "upcoming": "Në ardhje",
         "revenue": "Të ardhura",
         "currentOccupancy": "Okupimi aktual"
+      },
+      "charts": {
+        "revenueBookings": "Të ardhurat & rezervimet — 6 mujoret e fundit",
+        "sixMonthSummary": "{revenue} · {bookings} rezervime në 6 mujoret e fundit",
+        "statusDistribution": "Rezervimet sipas statusit",
+        "noData": "Nuk ka të dhëna rezervimesh"
+      },
+      "legend": {
+        "revenue": "Të ardhurat",
+        "bookings": "Rezervime"
+      },
+      "status": {
+        "pending": "Në pritje",
+        "confirmed": "Konfirmuar",
+        "checkedIn": "Aktual",
+        "completed": "Përfunduar",
+        "cancelled": "Anuluar",
+        "noShow": "Nuk erdhi"
       }
     },
     "rooms": {

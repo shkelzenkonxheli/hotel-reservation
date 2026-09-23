@@ -632,7 +632,7 @@ export default function CheckoutBooking() {
   /* ---------------- RENDER ---------------- */
   return (
     <div className="public-page min-h-screen pb-28 md:pb-0">
-      <PublicSection className="pt-10">
+      <PublicSection className="!pt-6 md:!pt-8">
         <PublicContainer>
           <div className="max-w-3xl">
             <span className="eyebrow">{t("metaTitle")}</span>

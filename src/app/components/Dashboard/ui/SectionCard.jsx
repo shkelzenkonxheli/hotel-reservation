@@ -5,7 +5,16 @@ export default function SectionCard({ title, action, children }) {
     <Paper className="admin-card" elevation={0}>
       {title ? (
         <Box className="admin-card-header">
-          <Typography fontWeight={800}>{title}</Typography>
+          <Typography
+            sx={{
+              fontFamily: "var(--font-display, 'Instrument Serif', serif)",
+              fontSize: 21,
+              fontWeight: 400,
+              color: "var(--admin-text)",
+            }}
+          >
+            {title}
+          </Typography>
           {action ? <Box>{action}</Box> : null}
         </Box>
       ) : null}

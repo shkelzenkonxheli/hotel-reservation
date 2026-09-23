@@ -565,6 +565,24 @@
           "status": "Statusi",
           "total": "Totali"
         }
+      },
+      "empty": "Nuk u gjet asnjë dhomë për këtë filtër.",
+      "summary": {
+        "liveStatus": "Statusi live",
+        "booked": "Të zëna",
+        "available": "Të lira",
+        "total": "Gjithsej",
+        "totalCapacity": "Kapaciteti total",
+        "occupancy": "Okupimi"
+      },
+      "status": {
+        "booked": "Zënë",
+        "available": "Lirë",
+        "outOfOrder": "Jashtë"
+      },
+      "floor": {
+        "label": "Kati {floor}",
+        "count": "{count} dhoma"
       }
     },
     "reservations": {

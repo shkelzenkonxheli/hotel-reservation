@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
@@ -7,7 +7,6 @@ import {
   Grid,
   Typography,
   CircularProgress,
-  Paper,
   Button,
   Dialog,
   DialogTitle,
@@ -16,14 +15,12 @@ import {
   Divider,
   Chip,
   TextField,
-  MenuItem,
   Tooltip,
   Snackbar,
   Alert,
 } from "@mui/material";
 import {
   Close,
-  MeetingRoom,
   PersonOutline,
   LocalPhoneOutlined,
   CalendarMonthOutlined,
@@ -31,9 +28,7 @@ import {
 } from "@mui/icons-material";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import PageHeader from "./ui/PageHeader";
-import SectionCard from "./ui/SectionCard";
-import StatusBadge from "./ui/StatusBadge";
+import EmptyState from "./ui/EmptyState";
 
 function formatLocalDateInput(date = new Date()) {
   const d = new Date(date);
@@ -115,24 +110,12 @@ export default function RoomsTab() {
   });
 
   const apartments = filteredRooms.filter((r) =>
-    r.type.toLowerCase().includes("apartment"),
+    String(r.type || "").toLowerCase().includes("apartment"),
   );
   const hotelRooms = filteredRooms.filter((r) =>
-    r.type.toLowerCase().includes("hotel"),
+    String(r.type || "").toLowerCase().includes("hotel"),
   );
 
-  const getColor = (status) => {
-    switch (status) {
-      case "booked":
-        return "#ef4444"; // red
-      case "available":
-        return "#22c55e"; // green
-      case "out_of_order":
-        return "#94a3b8"; // slate
-      default:
-        return "#9ca3af"; // gray
-    }
-  };
   const countByStatus = (list) => {
     const booked = list.filter((r) => r.current_status === "booked").length;
     const available = list.filter(
@@ -147,8 +130,143 @@ export default function RoomsTab() {
 
   const apartmentsCount = countByStatus(apartments);
   const hotelRoomsCount = countByStatus(hotelRooms);
-  const totalCount = countByStatus(filteredRooms);
+  const totalCount = countByStatus(rooms);
   const isStatusToggleDisabled = Boolean(selectedRoom?.reservation);
+  const occupancyRate = totalCount.total
+    ? Math.round((totalCount.booked / totalCount.total) * 100)
+    : 0;
+
+  const getStatusClass = (status) => {
+    if (status === "booked") return "booked";
+    if (status === "out_of_order") return "out-of-order";
+    return "available";
+  };
+
+  const getStatusLabel = (status) => {
+    if (status === "booked") return t("status.booked");
+    if (status === "out_of_order") return t("status.outOfOrder");
+    return t("status.available");
+  };
+
+  const getFloorKey = (roomNumber) => {
+    const digits = String(roomNumber || "").replace(/\D/g, "");
+    const numericValue = Number.parseInt(digits || "0", 10);
+
+    if (!numericValue || numericValue < 100) return "01";
+    if (digits.length >= 4 && digits.startsWith("0")) {
+      return digits.slice(0, 2);
+    }
+
+    return String(Math.floor(numericValue / 100)).padStart(2, "0");
+  };
+
+  const groupRoomsByFloor = (list) => {
+    const groups = list.reduce((acc, room) => {
+      const floor = getFloorKey(room.room_number);
+      if (!acc[floor]) acc[floor] = [];
+      acc[floor].push(room);
+      return acc;
+    }, {});
+
+    return Object.entries(groups)
+      .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
+      .map(([floor, items]) => ({
+        floor,
+        rooms: items.sort((a, b) =>
+          String(a.room_number || "").localeCompare(
+            String(b.room_number || ""),
+            undefined,
+            { numeric: true },
+          ),
+        ),
+      }));
+  };
+
+  const renderFilterButton = (value, label) => (
+    <Button
+      key={value}
+      type="button"
+      onClick={() => setFilter(value)}
+      className={`rooms-filter-chip ${filter === value ? "active" : ""}`}
+      disableElevation
+    >
+      {label}
+    </Button>
+  );
+
+  const renderCountPill = (label, count, tone) => (
+    <span className={`rooms-count-pill ${tone}`}>
+      {label}: {count}
+    </span>
+  );
+
+  const renderRoomTile = (room) => (
+    <Tooltip
+      key={room.id}
+      title={`${getTypeLabel(room.type)} | ${getStatusLabel(room.current_status)}`}
+      arrow
+    >
+      <button
+        type="button"
+        className={`room-rack-tile ${getStatusClass(room.current_status)}`}
+        onClick={() => {
+          setSelectedRoom({
+            room,
+            reservation: room.active_reservation,
+          });
+          setShowCalendar(false);
+        }}
+      >
+        <span className="room-rack-number">{room.room_number}</span>
+        <span className="room-rack-status">
+          {getStatusLabel(room.current_status)}
+        </span>
+      </button>
+    </Tooltip>
+  );
+
+  const renderFloorGroup = ({ floor, rooms: floorRooms }) => (
+    <Box key={floor} className="room-floor-group">
+      <Box className="room-floor-heading">
+        <Typography component="h3">
+          {t("floor.label", { floor })}
+        </Typography>
+        <span />
+        <Typography component="p">
+          {t("floor.count", { count: floorRooms.length })}
+        </Typography>
+      </Box>
+      <Box className="room-rack-grid">
+        {floorRooms.map((room) => renderRoomTile(room))}
+      </Box>
+    </Box>
+  );
+
+  const renderRoomCollection = (title, list, counts) => (
+    <Box className="rooms-collection">
+      <Box className="rooms-collection-head">
+        <Box>
+          <Typography className="rooms-collection-kicker">
+            {t("summary.liveStatus")}
+          </Typography>
+          <Typography component="h2">{title}</Typography>
+        </Box>
+        <Box className="rooms-collection-pills">
+          {renderCountPill(t("summary.booked"), counts.booked, "booked")}
+          {renderCountPill(t("summary.available"), counts.available, "available")}
+          {renderCountPill(t("summary.total"), counts.total, "neutral")}
+        </Box>
+      </Box>
+
+      {list.length === 0 ? (
+        <EmptyState title={t("empty")} />
+      ) : (
+        <Box className="rooms-floor-stack">
+          {groupRoomsByFloor(list).map((group) => renderFloorGroup(group))}
+        </Box>
+      )}
+    </Box>
+  );
 
   // Ngjyros ditÃ«t e rezervuara nÃ« calendar
   function tileClassName({ date, view }) {
@@ -225,236 +343,69 @@ export default function RoomsTab() {
     );
 
   return (
-    <Box className="admin-page">
-      <PageHeader
-        title={t("title")}
-        subtitle={t("subtitle")}
-        actions={
-          <Box className="flex items-center gap-2 flex-wrap">
-            <StatusBadge
-              label={t("badges.booked", { count: totalCount.booked })}
-              tone="danger"
-            />
-            <StatusBadge
-              label={t("badges.available", { count: totalCount.available })}
-              tone="success"
-            />
-            <StatusBadge
-              label={t("badges.total", { count: totalCount.total })}
-              tone="neutral"
-            />
-          </Box>
-        }
-      />
-
-      {/* Filters */}
-      <SectionCard>
-        <Box
-          display="flex"
-          flexDirection={{ xs: "column", sm: "row" }}
-          alignItems={{ sm: "center" }}
-          justifyContent="space-between"
-          gap={2}
-        >
-          {/* Date picker */}
-          <Box
-            display="flex"
-            alignItems={{ xs: "stretch", sm: "center" }}
-            flexDirection={{ xs: "column", sm: "row" }}
-            gap={1.2}
-            width={{ xs: "100%", sm: "auto" }}
-          >
-            <Typography fontWeight="600" color="text.secondary">
-              {t("filters.date")}
+    <Box className="admin-page rooms-admin-page">
+      <Box className="rooms-command-card">
+        <Box className="rooms-command-head">
+          <Box>
+            <Typography className="rooms-kicker">
+              {t("summary.liveStatus")}
             </Typography>
+            <Typography component="h1" className="rooms-main-title">
+              {t("title")}
+            </Typography>
+            <Typography className="rooms-main-subtitle">
+              {t("subtitle")}
+            </Typography>
+          </Box>
+          <Box className="rooms-occupancy-chip">
+            <span>{t("summary.occupancy")}</span>
+            <strong>{occupancyRate}%</strong>
+          </Box>
+        </Box>
 
+        <Box className="rooms-stats-grid">
+          <Box className="rooms-stat-card booked">
+            <Typography component="p">{t("summary.booked")}</Typography>
+            <Typography component="strong">{totalCount.booked}</Typography>
+          </Box>
+          <Box className="rooms-stat-card available">
+            <Typography component="p">{t("summary.available")}</Typography>
+            <Typography component="strong">{totalCount.available}</Typography>
+          </Box>
+          <Box className="rooms-stat-card total">
+            <Typography component="p">{t("summary.totalCapacity")}</Typography>
+            <Typography component="strong">{totalCount.total}</Typography>
+          </Box>
+        </Box>
+
+        <Box className="rooms-filter-panel">
+          <Box className="rooms-date-control">
+            <Typography component="label">{t("filters.date")}</Typography>
             <TextField
               type="date"
               size="small"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
               InputLabelProps={{ shrink: true }}
-              sx={{
-                minWidth: { xs: "100%", sm: 160 },
-                bgcolor: "white",
-                borderRadius: 2,
-              }}
+              className="rooms-date-field"
             />
           </Box>
 
-          {/* Status filter */}
-          <Box display="flex" alignItems="center" gap={2} flexWrap="wrap">
-            <Typography fontWeight="600" color="text.secondary">
-              {t("filters.status")}
-            </Typography>
-
-            <Chip
-              label={t("filters.all")}
-              clickable
-              onClick={() => setFilter("all")}
-              color={filter === "all" ? "primary" : "default"}
-              variant={filter === "all" ? "filled" : "outlined"}
-            />
-
-            <Chip
-              label={t("filters.available")}
-              clickable
-              onClick={() => setFilter("available")}
-              sx={{
-                bgcolor: filter === "available" ? "#dcfce7" : "transparent",
-                color: "#166534",
-                borderColor: "#22c55e",
-              }}
-              variant={filter === "available" ? "filled" : "outlined"}
-            />
-
-            <Chip
-              label={t("filters.booked")}
-              clickable
-              onClick={() => setFilter("booked")}
-              sx={{
-                bgcolor: filter === "booked" ? "#fee2e2" : "transparent",
-                color: "#b91c1c",
-                borderColor: "#ef4444",
-              }}
-              variant={filter === "booked" ? "filled" : "outlined"}
-            />
-
+          <Box className="rooms-status-control">
+            <Typography component="span">{t("filters.status")}</Typography>
+            <Box className="rooms-filter-buttons">
+              {renderFilterButton("all", t("filters.all"))}
+              {renderFilterButton("available", t("filters.available"))}
+              {renderFilterButton("booked", t("filters.booked"))}
+            </Box>
           </Box>
         </Box>
-      </SectionCard>
+      </Box>
 
-      <Grid container spacing={3}>
-        {/* ðŸ¢ Apartments */}
-        <Grid item xs={12} md={6}>
-          <SectionCard
-            title={t("sections.apartments")}
-            action={
-              <Box
-                display="flex"
-                gap={1}
-                flexWrap="wrap"
-                justifyContent="flex-end"
-              >
-                <StatusBadge
-                  label={t("badges.booked", { count: apartmentsCount.booked })}
-                  tone="danger"
-                />
-                <StatusBadge
-                  label={t("badges.available", {
-                    count: apartmentsCount.available,
-                  })}
-                  tone="success"
-                />
-                <StatusBadge
-                  label={t("badges.total", { count: apartmentsCount.total })}
-                  tone="neutral"
-                />
-              </Box>
-            }
-          >
-            <Grid container spacing={2}>
-              {apartments.map((room) => (
-                <Grid item xs={6} sm={4} md={3} key={room.id}>
-                  <Tooltip
-                    title={`${room.type} | ${room.current_status}`}
-                    arrow
-                  >
-                    <Paper
-                      elevation={3}
-                      sx={{
-                        bgcolor: getColor(room.current_status),
-                        color: "white",
-                        textAlign: "center",
-                        p: 2,
-                        fontWeight: "bold",
-                        borderRadius: 2,
-                        cursor: "pointer",
-                        "&:hover": { transform: "scale(1.05)" },
-                      }}
-                      onClick={() => {
-                        setSelectedRoom({
-                          room,
-                          reservation: room.active_reservation,
-                        });
-                        setShowCalendar(false); // fillimisht i fshehur
-                      }}
-                    >
-                      <MeetingRoom sx={{ fontSize: 24 }} />
-                      <Typography>{room.room_number}</Typography>
-                    </Paper>
-                  </Tooltip>
-                </Grid>
-              ))}
-            </Grid>
-          </SectionCard>
-        </Grid>
-
-        {/* ðŸ¨ Hotel Rooms */}
-        <Grid item xs={12} md={6}>
-          <SectionCard
-            title={t("sections.hotelRooms")}
-            action={
-              <Box
-                display="flex"
-                gap={1}
-                flexWrap="wrap"
-                justifyContent="flex-end"
-              >
-                <StatusBadge
-                  label={t("badges.booked", { count: hotelRoomsCount.booked })}
-                  tone="danger"
-                />
-                <StatusBadge
-                  label={t("badges.available", {
-                    count: hotelRoomsCount.available,
-                  })}
-                  tone="success"
-                />
-                <StatusBadge
-                  label={t("badges.total", { count: hotelRoomsCount.total })}
-                  tone="neutral"
-                />
-              </Box>
-            }
-          >
-            <Grid container spacing={2}>
-              {hotelRooms.map((room) => (
-                <Grid item xs={6} sm={4} md={3} key={room.id}>
-                  <Tooltip
-                    title={`${room.type} | ${room.current_status}`}
-                    arrow
-                  >
-                    <Paper
-                      elevation={3}
-                      sx={{
-                        bgcolor: getColor(room.current_status),
-                        color: "white",
-                        textAlign: "center",
-                        p: 2,
-                        fontWeight: "bold",
-                        borderRadius: 2,
-                        cursor: "pointer",
-                        "&:hover": { transform: "scale(1.05)" },
-                      }}
-                      onClick={() => {
-                        setSelectedRoom({
-                          room,
-                          reservation: room.active_reservation,
-                        });
-                        setShowCalendar(false);
-                      }}
-                    >
-                      <MeetingRoom sx={{ fontSize: 24 }} />
-                      <Typography>{room.room_number}</Typography>
-                    </Paper>
-                  </Tooltip>
-                </Grid>
-              ))}
-            </Grid>
-          </SectionCard>
-        </Grid>
-      </Grid>
+      <Box className="rooms-map-stack">
+        {renderRoomCollection(t("sections.apartments"), apartments, apartmentsCount)}
+        {renderRoomCollection(t("sections.hotelRooms"), hotelRooms, hotelRoomsCount)}
+      </Box>
 
       {/* Room Details Dialog */}
       {selectedRoom && (

@@ -8,6 +8,10 @@ function utcDateOnly(d = new Date()) {
   );
 }
 
+function monthKey(d) {
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
 // Handle GET requests for this route.
 export async function GET() {
   try {
@@ -26,8 +30,6 @@ export async function GET() {
 
     const totalEarningsResult = await prisma.reservations.aggregate({
       _sum: { total_price: true },
-      // Nëse don me i numëru vetëm jo-cancelled, aktivizo:
-      // where: { cancelled_at: null },
     });
 
     // Normalize aggregate result to a number (Prisma can return null).
@@ -50,14 +52,11 @@ export async function GET() {
     });
 
     // ================= REVENUE TODAY (exclude cancelled) =================
-    // NOTE: Kjo llogarit revenue për rezervimet që FILLON sot.
-    // Nëse don revenue vetëm për pagesa "confirmed", shto: status: "confirmed"
     const revenueTodayResult = await prisma.reservations.aggregate({
       _sum: { total_price: true },
       where: {
         cancelled_at: null,
         start_date: { gte: today, lt: tomorrow },
-        // status: "confirmed",
       },
     });
 
@@ -86,8 +85,49 @@ export async function GET() {
     const occupancyPercent =
       totalRooms > 0 ? Math.round((occupiedRoomsToday / totalRooms) * 100) : 0;
 
-    // (opsionale) debug - hiqe kur të jesh ok
-    // console.log({ today, tomorrow, totalUsers, totalReservation, todayCheckins, upcomingReservations, revenueToday, totalRooms, occupiedRoomsToday, occupancyPercent });
+    // ================= ANALYTICS: LAST 6 MONTHS (READ-ONLY) =================
+    // Buckets for the last 6 months (oldest first), current month included.
+    const monthBuckets = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(
+        Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - i, 1),
+      );
+      monthBuckets.push({
+        key: monthKey(d),
+        revenue: 0,
+        bookings: 0,
+      });
+    }
+    const bucketIndex = Object.fromEntries(
+      monthBuckets.map((m, i) => [m.key, i]),
+    );
+
+    // Single lightweight read: only the fields needed for aggregation.
+    const recentReservations = await prisma.reservations.findMany({
+      where: { start_date: { gte: monthBuckets[0].key + "-01" } },
+      select: {
+        start_date: true,
+        total_price: true,
+        cancelled_at: true,
+      },
+    });
+
+    for (const r of recentReservations) {
+      if (r.cancelled_at) continue; // cancelled never counts
+      const idx = bucketIndex[monthKey(r.start_date)];
+      if (idx === undefined) continue;
+      monthBuckets[idx].bookings += 1;
+      monthBuckets[idx].revenue += Number(r.total_price ?? 0);
+    }
+
+    // ================= ANALYTICS: STATUS BREAKDOWN (ALL TIME) =================
+    const statusGroup = await prisma.reservations.groupBy({
+      by: ["status"],
+      _count: { _all: true },
+    });
+    const statusBreakdown = statusGroup
+      .map((g) => ({ status: g.status || "pending", count: g._count._all }))
+      .sort((a, b) => b.count - a.count);
 
     // ================= RESPONSE =================
     return NextResponse.json({
@@ -98,6 +138,8 @@ export async function GET() {
       upcomingReservations,
       revenueToday,
       occupancyPercent,
+      monthly: monthBuckets,
+      statusBreakdown,
     });
   } catch (error) {
     console.error("❌ Dashboard API Error:", error);

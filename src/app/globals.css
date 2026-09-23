@@ -19,14 +19,14 @@
   --sea: #8fb9ae;
 
   /* Admin (pa ndryshim funksional) */
-  --admin-bg: #f7f6f3;
+  --admin-bg: #f8f5ef;
   --admin-surface: #ffffff;
   --admin-border: #e7e2d9;
   --admin-text: #10212c;
   --admin-muted: #6b7c86;
   --admin-accent: var(--brass);
   --admin-accent-strong: var(--brass-deep);
-  --admin-radius: 14px;
+  --admin-radius: 16px;
   --admin-shadow-sm: 0 1px 2px rgba(11, 36, 38, 0.06);
   --admin-shadow-md: 0 10px 28px rgba(11, 36, 38, 0.08);
 
@@ -629,4 +629,122 @@ body {
   .section-tight { padding: 40px 0; }
   .card-body { padding: 18px; }
   .btn { min-height: 50px; }
+}
+
+
+/* =========================================================
+   ADMIN PANEL v2 — vetëm pamje, pa ndryshim funksional
+   ========================================================= */
+.admin-shell { color: var(--admin-text); }
+.admin-shell .admin-page { gap: 24px; }
+.admin-shell .admin-card {
+  border-color: var(--admin-border);
+  box-shadow: 0 1px 0 rgba(11,36,38,0.03), 0 8px 24px -18px rgba(11,36,38,0.25);
+}
+.admin-shell .admin-card-header { padding: 20px 24px 0; }
+.admin-shell .admin-card-body { padding: 20px 24px 24px; }
+
+/* MUI Paper / Card */
+.admin-shell main .MuiPaper-root:not(.admin-card):not(.MuiMenu-paper):not(.MuiPopover-paper) {
+  border-radius: var(--admin-radius);
+}
+.admin-shell main .MuiPaper-elevation1,
+.admin-shell main .MuiPaper-elevation2,
+.admin-shell main .MuiPaper-elevation3 {
+  box-shadow: 0 1px 0 rgba(11,36,38,0.03), 0 8px 24px -18px rgba(11,36,38,0.25);
+  border: 1px solid var(--admin-border);
+}
+
+/* Buttons */
+.admin-shell .MuiButton-root {
+  text-transform: none;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border-radius: 10px;
+  box-shadow: none;
+}
+.admin-shell .MuiButton-containedPrimary {
+  background: var(--brass);
+}
+.admin-shell .MuiButton-containedPrimary:hover {
+  background: var(--brass-deep);
+  box-shadow: 0 6px 16px -8px rgba(14,58,56,0.6);
+}
+.admin-shell .MuiButton-outlinedPrimary {
+  border-color: rgba(20,82,79,0.35);
+  color: var(--brass);
+}
+.admin-shell .MuiButton-outlinedPrimary:hover {
+  border-color: var(--brass);
+  background: var(--brass-soft);
+}
+.admin-shell .MuiButton-textPrimary { color: var(--brass); }
+
+/* Inputs */
+.admin-shell .MuiOutlinedInput-root {
+  border-radius: 10px;
+  background: #fff;
+}
+.admin-shell .MuiOutlinedInput-notchedOutline { border-color: var(--admin-border); }
+.admin-shell .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline { border-color: #cfc6b5; }
+.admin-shell .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--brass);
+  border-width: 1.5px;
+}
+.admin-shell .MuiInputLabel-root.Mui-focused { color: var(--brass); }
+
+/* Tabs */
+.admin-shell .MuiTabs-indicator { background-color: var(--brass); height: 2px; }
+.admin-shell .MuiTab-root {
+  text-transform: none;
+  font-weight: 500;
+  color: var(--admin-muted);
+  min-height: 44px;
+}
+.admin-shell .MuiTab-root.Mui-selected { color: var(--admin-text); font-weight: 600; }
+
+/* Tables */
+.admin-shell .MuiTableContainer-root { border-radius: var(--admin-radius); }
+.admin-shell .MuiTableHead-root .MuiTableCell-root,
+.admin-shell .admin-table thead th {
+  background: #f4efe6;
+  color: var(--admin-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--admin-border);
+}
+.admin-shell .MuiTableBody-root .MuiTableCell-root {
+  border-bottom: 1px solid #efe9de;
+  font-size: 14px;
+  color: var(--admin-text);
+}
+.admin-shell .MuiTableBody-root .MuiTableRow-root { transition: background-color 140ms ease; }
+.admin-shell .MuiTableBody-root .MuiTableRow-root:hover { background: #fbf8f2; }
+
+/* Chips & badges */
+.admin-shell .MuiChip-root { font-weight: 600; border-radius: 999px; }
+.admin-shell .admin-badge { font-weight: 600; letter-spacing: 0.02em; padding: 4px 11px; }
+.admin-shell .admin-badge.success { background: rgba(20,82,79,0.10); color: #14524f; }
+
+/* Headings inside tabs */
+.admin-shell main .MuiTypography-h4,
+.admin-shell main .MuiTypography-h5 {
+  font-family: var(--font-display, 'Instrument Serif', serif);
+  font-weight: 400 !important;
+  letter-spacing: -0.01em;
+}
+
+/* Dialogs */
+.MuiDialog-paper { border-radius: 18px !important; }
+.MuiDialogTitle-root { font-weight: 600; }
+
+/* Loader */
+.admin-shell .MuiCircularProgress-root { color: var(--brass); }
+
+@media (max-width: 768px) {
+  .admin-shell .admin-card-header { padding: 16px 16px 0; }
+  .admin-shell .admin-card-body { padding: 16px; }
+  .admin-shell .admin-page { gap: 16px; }
 }

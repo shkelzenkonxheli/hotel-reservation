@@ -10,23 +10,13 @@ export default function StatCard({ title, value, icon, tone = "#14524f" }) {
         position: "relative",
         overflow: "hidden",
         transition: "transform 180ms ease, box-shadow 180ms ease",
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          left: 0,
-          top: 0,
-          right: 0,
-          height: 3,
-          background: tone,
-          opacity: 0.85,
-        },
         "&:hover": {
           transform: "translateY(-2px)",
           boxShadow: "var(--admin-shadow-md)",
         },
       }}
     >
-      <Box className="admin-card-body" sx={{ display: "flex", flexDirection: "column", gap: 1.5, minHeight: 116 }}>
+      <Box className="admin-card-body" sx={{ display: "flex", flexDirection: "column", gap: 2, minHeight: 124, p: 2.75 }}>
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
           <Typography
             sx={{
@@ -41,9 +31,9 @@ export default function StatCard({ title, value, icon, tone = "#14524f" }) {
           </Typography>
           <Box
             sx={{
-              width: 36,
-              height: 36,
-              borderRadius: "10px",
+              width: 38,
+              height: 38,
+              borderRadius: "8px",
               display: "grid",
               placeItems: "center",
               background: `${tone}14`,
